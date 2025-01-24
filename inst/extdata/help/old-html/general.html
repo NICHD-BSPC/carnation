@@ -1,0 +1,44 @@
+<h2 id="general-notes"><a id='top'></a> General notes</h2>
+<ul>
+<li>At the top of the page is a drop-down menu with a list of projects the user has access to.
+<ul>
+<li>Within each project, there are analysis subsets or ‘assays’. Upon selecting a project, the assay dropdown menu will be populated.</li>
+</ul></li>
+<li>R objects generated from RNA-Seq analysis are loaded into the app once an assay is selected.
+<ul>
+<li>This is usually the most time-intensive step and scales with the size of the analysis, e.g. the number of comparisons, performed analyses and size of genome annotation.</li>
+<li>Several checks are performed at this stage to make sure the R object has the correct format and then a VST normalization is performed if the normalized data is not already present.</li>
+<li>If the data is present in multiple subsets, a combined data set is created from the individual subsets.</li>
+</ul></li>
+<li>The main view of the app is organized into a sidebar panel, which contains filtering and visualization controls and a main panel which displays plots and tabular data.</li>
+<li>The main panel is divided into tabs to display different parts of the analysis:
+<ul>
+<li><em>DE analysis</em>: interactive tables and visualizations of the differential expression (DE) analysis</li>
+<li><em>Functional enrichment</em>: visualization of gene ontology and KEGG pathway analyses</li>
+<li><em>Gene patterns</em>: visualization of gene pattern analyses</li>
+<li><em>Help</em>: this documentation</li>
+</ul></li>
+<li>The sidebar shows global and page-specific controls that can be used to filter and adjust the plots or table output on the specific tabs</li>
+</ul>
+<h2 id="shared-controls"><a id='shared'></a> Shared controls</h2>
+<ul>
+<li><p><code>Comparison</code></p>
+<p>Dropdown menu used to select results corresponding to a specific comparison. This control is shared by the <code>Table</code>, <code>MA plot</code>, <code>Gene plot</code> and <code>Heatmap</code> tabs.</p>
+<ul>
+<li>Note that the <code>Comparison</code> menu in the <code>Functional enrichment</code> panel is independent of this control.</li>
+</ul></li>
+<li><p><code>FDR threshold</code>, <code>log2FC threshold</code></p>
+<p>Controls used to filter genes, shared by <code>Summary</code>, <code>MA plot</code>, <code>Upset plot</code> and <code>Heatmap</code>.</p>
+<ul>
+<li>Note that changes here are not reflected in the <code>Functional enrichment</code> results as the latter are precomputed using significance thresholds set for a particular analysis.</li>
+</ul></li>
+<li><p><code>Gene scratchpad</code></p>
+<p>General-purpose scratch space to make note of genes of interest from plots or tables.</p>
+<ul>
+<li>This is accessible from most areas of the app. Genes selected here will be shown on the gene plot and labeled on the MA plot &amp; heatmap.</li>
+<li>Additional genes can be added or removed by selecting rows of the interactive DE analysis table.</li>
+<li>Gene names can also be typed into this space with real-time suggestions appearing below, while comma-separated gene names can be copy-pasted here as well.</li>
+<li>The <code>Add top genes</code> button can be used as a quick shortcut to add the top 3 up- and down-regulated genes (based on log2FoldChange) in the selected comparison.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>

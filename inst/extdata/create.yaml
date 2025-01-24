@@ -1,0 +1,42 @@
+# expected keys and test functions
+format:
+  settings:
+    de_analysis:
+      padj: is.character
+      foldchange: is.character
+  counts:
+    key: is.character
+    path: file.exists
+    metadata: file.exists
+    subset: is.logical
+  annotation:
+    id: is.character
+    symbol: is.character
+    id2symbol: file.exists
+  de_analysis:
+    key: is.character
+    counts: is.character
+    description: is.character
+    path: file.exists
+  functional_enrichment:
+    key: is.character
+    res: is.character
+    effect_class: is.character
+    ontology: is.character
+    path: file.exists
+  pattern_analysis:
+    key: is.character
+    path: file.exists
+
+# these keys should be tested at a lower-level
+lower_level:
+  - counts
+  - de_analysis
+  - functional_enrichment
+  - pattern_analysis
+
+# these top-level keys are optional
+optional:
+  - functional_enrichment
+  - pattern_analysis
+

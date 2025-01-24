@@ -1,0 +1,6 @@
+user_group:
+  admin: admin
+data_area:
+  admin:
+  - /data/NICHD-core0/test/mitraak/deleteme/test-carnation
+  - /data/NICHD-core0/shiny-split/carnation/data/

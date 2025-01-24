@@ -1,0 +1,202 @@
+<h1 id="de-analysis"><a id='top'></a> DE analysis</h1>
+<p>This tab contains tables and plots depicting DE analysis results, further organized into subtabs.</p>
+<ul>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#metadata">Metadata</a></li>
+<li><a href="#table">Table</a></li>
+<li><a href="#pca">PCA plot</a></li>
+<li><a href="#ma">MA plot</a></li>
+<li><a href="#gplot">Gene plot</a></li>
+<li><a href="#uplot">Upset plot</a></li>
+<li><a href="#hmap">Heatmap</a></li>
+</ul>
+<h2 id="summary"><a id='summary'></a> Summary</h2>
+<p>Here we summarize the differential expression (DE) analysis:</p>
+<ul>
+<li>The following information is shown for each comparison:
+<ul>
+<li><em>comparison</em>: unique id for the comparison performed.</li>
+<li><em>up</em>, <em>down</em>: number of genes up or downregulated.</li>
+<li><em>total.genes</em>: number of annotated genes that are included in the analysis.</li>
+<li><em>total.nonzero</em>: number of genes that do not have zero counts in all samples.</li>
+<li><em>outliers</em>: number of genes that are flagged as count outliers by DESeq2. Typically, these are genes that have widely varying counts between replicates.</li>
+<li><em>low.counts</em>: number of genes with low counts across all replicates that are filtered by DESeq2 in order to improve the p-value adjustment for multiple testing.</li>
+<li><em>design</em>: linear model used for the analysis with DESeq2.</li>
+</ul></li>
+<li>Genes can be filtered by FDR (<code>FDR threshold</code>) and log2FoldChange (<code>log2FC threshold</code>).</li>
+</ul>
+<h2 id="metadata"><a id='metadata'></a> Metadata</h2>
+<p>Here we show the metadata associated with the data sets being analyzed.</p>
+<ul>
+<li><code>Data groupings</code> shows a list of data subsets used in the analysis. Typically, this is done when divergent groups are present in the data such that inter-group variance overwhelms the DE analysis process.
+<ul>
+<li>In addition to data subsets, the <code>all_samples</code> option shows a combined data set containing all samples. This is also the only option shown when the data has not been subdivided for the analysis.</li>
+</ul></li>
+<li>The user has an option to add custom columns to the metadata. This can be useful to tweak existing labels or to add additional metadata.
+<ul>
+<li>Existing columns in the metadata (<code>From existing</code>) or empty columns can be used as templates for a custom column. Custom columns have the suffix <code>user_col</code> to distinguish them from existing metadata columns.</li>
+<li>App data is immutable and therefore, <em>only</em> custom columns are editable by the user. To edit a value, double click on the cell and enter the desired value. To complete editing, hit Enter while holding down the control key.
+<ul>
+<li><strong>Note</strong>: For multi-page tables, hit Control+Enter before switching pages in order not to lose edits.</li>
+</ul></li>
+<li>For edits to propagate through the app, hit <code>Apply changes</code>. After doing so, the custom column will show up as an option for the PCA plot, Gene plot &amp; heatmap.</li>
+<li>To reject changes and reset to the original metadata hit the <code>Reset</code> button.</li>
+<li><strong>Note</strong>: edits in metadata are only saved during the current session and will be lost on refreshing the app.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="table"><a id='table'></a> Table</h2>
+<ul>
+<li>Here we show an interactive tabular view of DE analysis results. The following columns are shown:
+<ul>
+<li><em>gene</em>: gene ID</li>
+<li><em>symbol</em>: gene symbol or common name.</li>
+<li><em>baseMean</em>: average count across all replicates in all conditions</li>
+<li><em>log2FoldChange</em>: fold-difference observed in the comparison.
+<ul>
+<li>A value of 1 indicates 2-fold upregulation and -1 implies 2-fold downregulation. Empty values indicate that all samples had zero counts.</li>
+<li>Up- or down-regulation is always in <code>treatment</code> relative to <code>control</code>. By convention, the 1st level in a comparison is considered the <code>treatment</code> &amp; the 2nd is considered <code>control</code>. For example, for comparison <code>mutant.vs.wt</code>, <code>mutant</code> samples are treatment and <code>wt</code> are control.</li>
+</ul></li>
+<li><em>pvalue</em>: raw pvalue from Wald or LRT test performed by DESeq2. Empty values indicate that the gene was flagged as an outlier and removed from the analysis.</li>
+<li><em>padj</em>: adjusted p-value or false discovery rate (FDR). Empty values indicate that the gene was removed by independent filtering for having too low counts.</li>
+</ul></li>
+<li>Of the above, the most important columns are <em>padj</em> (which indicates statistical significance) and <em>log2FoldChange</em> (which shows the magnitude of the detected change). <em>padj</em> is a stronger metric as a low <em>padj</em> value always implies statistical significance, but a high <em>log2FoldChange</em> does not.</li>
+<li>Genes can be added to the <code>Gene scratchpad</code> by clicking on the table:
+<ul>
+<li>To select a gene, simply click on the corresponding row and to deselect, click again.</li>
+<li>Genes can be selected in this way from multiple pages of the interactive table.</li>
+</ul></li>
+<li>The table can be filtered by FDR (<code>FDR threshold</code>) and log2FoldChange (<code>log2FC threshold</code>). By default, we set the FDR threshold at <code>0.1</code> and do not filter by LFC. These filters are the same as that shown in the <code>Summary</code> tab and any changes made will be reflected in both.</li>
+<li>Filters can be turned off by unchecking the <code>Only DE genes</code> checkbox.</li>
+<li>The table can be sorted by a column simply by clicking on the column name. By default, the table is sorted by FDR (<code>padj</code>) with the lowest FDR (most significant genes) at the top.
+<ul>
+<li>To sort by multiple columns, click the first column, then click the second column while holding down the Shift key. For example, to sort by FDR (<code>padj</code>) and then by LFC, first click on the column name <code>padj</code>, and then click <code>log2FoldChange</code> while holding down the Shift key.</li>
+</ul></li>
+<li>The table can also be filtered by gene names using the search box at the top right hand corner of the table.</li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="pca-plot"><a id='pca'></a> PCA plot</h2>
+<ul>
+<li>This tab depicts an interactive PCA plot to visualize the variation of samples in the analysis.
+<ul>
+<li>Mousing over the points in the plot will show the sample ID.</li>
+<li>The controls at the top right hand corner can be used to pan, zoom or save a snapshot of the plot.</li>
+<li>A PDF version of the current view can also be downloaded using the <code>Download plot</code> button.</li>
+</ul></li>
+<li>The plot can be colored using all variables available in the experimental metadata including custom columns.
+<ul>
+<li>This control also accepts multiple selections at once. For example, if an experiment has <code>genotype</code> and <code>treatment</code> factors, coloring by both will set different colors for all combinations of the two factors.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="ma-plot"><a id='ma'></a> MA plot</h2>
+<ul>
+<li>This is a plot showing the LFC (<code>log2FoldChange</code>) of genes on the y-axis vs average expression (<code>baseMean</code>) on the x-axis, the latter on a logarithmic scale.</li>
+<li>The plot is interactive and mousing over a point displays the gene name.</li>
+<li>The FDR, LFC thresholds and the y-axis limits can be adjusted using the plotting controls in the sidebar.</li>
+<li>Genes that are statistically significant (<code>DE</code>) based on the FDR and LFC thresholds are colored red. If not, they are colored grey (<code>not DE</code>).</li>
+<li>Genes appearing beyond the y-axis limits are plotted using triangles that are colored red or grey based on statistical significance.</li>
+<li>Gene names entered using the <code>Gene scratchpad</code> search box are labeled on the plot using dark circles.</li>
+<li>A PDF version of the plot can be downloaded using the <code>Download plot</code> button.
+<ul>
+<li>In the downloaded plot, labeled genes will have their names printed directly on the plot and colored red or grey based on statistical significance.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="gene-plot"><a id='gplot'></a> Gene plot</h2>
+<ul>
+<li>Here we extract and plot normalized expression of genes selected using the <code>Gene scratchpad</code> search box.
+<ul>
+<li><strong>Note</strong>: the <code>Gene scratchpad</code> control is collapsed by default, so to make a selection this needs to be uncollapsed and gene names entered.</li>
+<li>Clicking the <code>Add top genes</code> button adds the top 3 up &amp; down-regulated genes from the selected comparison. This is useful as a starting point before specific genes-of-interest have been identified.
+<ul>
+<li><strong>Note</strong>: these are top DE genes based on LFC.</li>
+</ul></li>
+<li>Clicking <code>Reset</code> clears the scratch pad.</li>
+</ul></li>
+<li>There are four main controls:
+<ul>
+<li><code>samples</code>: which data subset should be used for the plot?
+<ul>
+<li>The user can select <code>all_samples</code> or the subset used for the specific comparison. The latter is selected by default.</li>
+</ul></li>
+<li><code>x-axis</code>: which variable should be shown on the x-axis?
+<ul>
+<li>All variables available in the metadata (including custom columns) can be used here. The variable <code>group</code> (if present) is selected by default.</li>
+</ul></li>
+<li><code>facet by</code>: how should the plot be faceted (split)?
+<ul>
+<li>Again, all variables in the metadata can be selected here. In addition, the plot can be faceted by <code>gene</code>.</li>
+<li>By default, this is empty and upto two faceting variables can be specified.</li>
+</ul></li>
+<li><code>color by</code>: how should the samples be colored?
+<ul>
+<li>Again, all variables in the metadata plus <code>gene</code> (default) are options here.</li>
+</ul></li>
+</ul></li>
+<li>Additional options:
+<ul>
+<li><code>x-axis settings</code>: this drag-and-drop control can be used to change the order of x-axis labels or to drop specific levels from the plot.</li>
+<li><code>y-axis settings</code>: this group of settings can be used to control the y-axis via max &amp; min limits and toggling a log-scale display.
+<ul>
+<li>By default, the y-axis limits are set to 5% outside the range of values in the normalized data.</li>
+<li>The <code>Autoscale</code> button can be used to reset the axis to the initial limits.</li>
+</ul></li>
+<li><code>facet settings</code>: this can be used to edit the levels of the selected faceting variable - specific levels can be removed or the order changed. Again, <code>Reset</code> will return the faceting variable to its original state.</li>
+<li><code>More</code>: additional settings available for adjustment:
+<ul>
+<li><code>normalization</code>: this can be <code>library size</code> (default) or <code>vst</code> (variance stabilizing transformation).</li>
+<li><code># of rows</code>: this can be used to change the number of rows the plots are shown on (default: 2). Increase this when plotting larger numbers of genes.</li>
+<li><code>trendline</code> &amp; <code>legend</code>: toggle the trendline &amp; legend in the gene plot.</li>
+</ul></li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="upset-plot"><a id='uplot'></a> Upset plot</h2>
+<ul>
+<li>This plot is used to compare DE genes from different comparisons
+<ul>
+<li>The view is split into two halves, the top half showing the Upset plot and the bottom showing a viewer of genes found in the intersections.</li>
+</ul></li>
+<li><em>Intersection viewer:</em>
+<ul>
+<li>Gene sets associated with each bar in the Upset plot are labeled based on the order in which the corresponding bars appear. For example, the first set is called <code>set01</code>, the second set is <code>set02</code> and so on. The set name also includes the number of genes it contains.</li>
+<li>To view a specific set, select it from the <code>Intersections</code> drop-down menu.</li>
+<li>Upon selection, the <code>comparisons</code> associated with the set are shown on the left, and the genes are shown in an interactive table on the right.</li>
+</ul></li>
+<li>Comparisons can be selected using the <code>Gene sets to compare</code> menu via mouse drag-and-drop. On first load, DE genes from all comparisons are compared.</li>
+<li>The <code>Effect class</code> dropdown can be used to choose a particular set of genes based on direction of change (<code>changed</code>, <code>upregulated</code>, <code>downregulated</code>).</li>
+<li>The <code>FDR threshold</code> and <code>log2FC threshold</code> can be used to filter gene sets before comparison. These controls are shared with the <code>DE results</code> and <code>MA plot</code> tabs and any changes made here are reflected in them as well.</li>
+<li>The display can be further customized in two ways:
+<ul>
+<li>The font size can be adjusted using the <code>Text size</code> input.</li>
+<li>The angle of the labels at the top of the bar chart can also be adjusted (<code>number angle</code>). This is sometimes useful to avoid overlapping text if there are many bars in the plot.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="heatmap"><a id='hmap'></a> Heatmap</h2>
+<ul>
+<li>Here we extract and plot normalized expression data in the form of a heatmap.</li>
+<li>The gene set depicted in the plot can be defined using the <code>Comparison</code>, <code>Effect class</code> &amp; <code>Filters</code> controls.
+<ul>
+<li>If the number of genes is too large, only the top 200 are shown in the plot.</li>
+</ul></li>
+<li>Genes found in the <code>Gene scratchpad</code> are labeled red on the side of the heatmap.</li>
+<li>Heatmap specific options are shown under the <code>Options</code> heading:
+<ul>
+<li><code>data grouping</code>: this can be used to select the data subset to be used for extracting the data (default: <code>all_samples</code>).</li>
+<li><code>cluster rows</code>: should the rows be clustered? If <code>TRUE</code> (default), the rows are clustered and a dendrogram is shown to the right of the heatmap.</li>
+<li><code>cluster columns</code>: should the columns be clustered? If <code>TRUE</code> the columns are clustered and a dendrogram is shown above the plot. By default, this is set to <code>FALSE</code> and column ordering is set via the <code>Column control</code> options.</li>
+<li><code>scale</code>: should the data be scaled? By default, the data are scaled by <code>row</code>.</li>
+<li><code>column labels</code>: how should the columns be labeled? Any column in the metadata (including custom columns) can be used for labeling the columns.</li>
+</ul></li>
+<li>The <code>Column control</code> setting can be used for grouping and editing columns.
+<ul>
+<li>Again, any column in the metadata (including custom columns) can be used to group the columns.</li>
+<li>Upon selecting a grouping variable, the columns are ordered by that variable.</li>
+<li>Specific column levels can be removed using the <code>levels</code> menu.</li>
+<li>The <code>Reset</code> button resets the grouping variable to the initial state.</li>
+</ul></li>
+<li>Additional options include specifying a <code>ranking metric</code> for determining the top 200 genes (see above, default: <code>padj</code>) and the font size for row and column labels.</li>
+</ul>
+<p><a href="#top">Back to top</a></p>

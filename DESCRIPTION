@@ -1,0 +1,61 @@
+Package: carnation
+Title: Shiny App to Explore RNA-Seq Analysis
+Version: 0.1.1
+Authors@R: 
+    person("Apratim", "Mitra", , "apratim.mitra@nih.gov", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0003-3279-0054"))
+Description: Interactive Shiny dashboard app that can be used to
+    explore RNA-Seq analysis results including differential expression (DE),
+    functional enrichment and pattern analysis. Several visualizations
+    are implemented to provide a wide-ranging view of data sets. For
+    DE analysis, we provide PCA plot, MA plot, Upset plot & heatmaps,
+    in addition to a highly customizable gene plot.  Seven different
+    visualizations are available for functional enrichment analysis,
+    and we also support gene pattern analysis. In addition, the app
+    provides a platform to manage multiple projects and user groups
+    that can be run on a central server.
+License: GPL (>= 3)
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Depends:
+    R (>= 4.0)
+Imports:
+    BiocParallel,
+    colorspace,
+    ComplexUpset,
+    dendextend,
+    DESeq2,
+    dplyr,
+    DT,
+    enrichplot,
+    GeneTonic,
+    ggplot2,
+    ggrepel,
+    heatmaply,
+    htmltools,
+    igraph,
+    methods,
+    MatrixGenerics,
+    plotly,
+    reticulate,
+    RColorBrewer,
+    rintrojs,
+    scales,
+    shiny,
+    shinyBS,
+    shinycssloaders,
+    shinythemes,
+    shinyWidgets,
+    sortable,
+    SummarizedExperiment,
+    tools,
+    utils,
+    visNetwork,
+    yaml
+Suggests:
+    knitr,
+    rmarkdown,
+    org.Hs.eg.db,
+    DEGreport
+VignetteBuilder: knitr
