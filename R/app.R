@@ -709,7 +709,8 @@ server <- function(input, output, session){
                            original=original,
                            current=app_object,
                            coldata=coldata.all$curr,
-                           pattern=pattern)
+                           pattern=pattern,
+                           username=username)
 
   observeEvent(save_event(), {
     validate(
