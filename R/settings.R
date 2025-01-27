@@ -762,7 +762,7 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
       modalDialog(
         div(tags$b('No projects found!', style='color: red;')),
         br(),
-        span('To add/edit a data area go to the "Settings" tab or click "Load demo data"'),
+        span('To add/edit a data area go to the "Settings" tab'),
         footer=modalButton('OK'),
         easyClose=TRUE
       ) # modalDialog
