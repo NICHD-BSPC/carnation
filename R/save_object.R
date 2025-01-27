@@ -18,9 +18,10 @@ saveUI <- function(id){
 #' @param current current carnation object
 #' @param coldata reactiveValues object containing object metadata
 #' @param pattern regex pattern for finding carnation data
+#' @param username user name
 #'
 #' @export
-saveServer <- function(id, original, current, coldata, pattern){
+saveServer <- function(id, original, current, coldata, pattern, username){
   moduleServer(
     id,
 
