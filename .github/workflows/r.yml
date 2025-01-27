@@ -1,0 +1,72 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# See https://github.com/r-lib/actions/tree/master/examples#readme for
+# additional example workflows available for the R community.
+
+name: R
+
+on:
+  push:
+    branches: [ "code" ]
+  pull_request:
+    branches: [ "code" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    #strategy:
+    #  matrix:
+    #    r-version: ['4.2.2', '4.3.0']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: git setup
+        # Set up git and export env vars to be used in later steps.
+        #   Note the unconventional mechanism for exporting envs by appending to
+        #   $GITHUB_ENV.
+        id: git-setup
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "WORKDIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: install miniforge
+        run: |
+          wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+          bash Miniforge3.sh -b -p "${HOME}/conda"
+
+      - name: conda env & build
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --add channels conda-forge
+          conda config --set channel_priority strict
+
+          conda env create -p ./env --file requirements.yaml
+          conda activate ./env
+          R CMD build ./
+
+      #- name: Set up R ${{ matrix.r-version }}
+      #  uses: r-lib/actions/setup-r@v2
+      #  with:
+      #    r-version: ${{ matrix.r-version }}
+      #- name: Install dependencies
+      #  run: |
+      #    install.packages(c("remotes", "rcmdcheck"))
+      #    remotes::install_deps(dependencies = TRUE)
+      #  shell: Rscript {0}
+
+      - name: Check
+        run: |
+          #rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
+          R CMD check --as-cran --no-manual carnation_1.0.tar.gz
+
+      - name: load library
+        run: Rscript -e "library(carnation)"

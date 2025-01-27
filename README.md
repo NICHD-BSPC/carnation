@@ -36,19 +36,12 @@ conda create -p env r-devtools
 conda activate ./env
 ```
 
-Next, run `setRepositories()` to set CRAN and Bioconductor repositories. I usually set the first 5 options,
+Next, open R and run `setRepositories()` to set CRAN and Bioconductor repositories. I usually set the first 5 options,
 CRAN, BioC software, BioC annotation, BioC experiment, CRAN (extras) to get dependencies
 from both CRAN and Bioconductor.
 
-Next, from inside the carnation source directory, run `devtools::install` to install carnation. Note: This is
+Then, from inside the carnation source directory, run `devtools::install()` to install carnation. Note: This is
 a time-consuming step, especially if working with a fresh R installation, as a large number of dependencies will be installed.
-
-Then navigate to the carnation source directory, activate the environment and install
-
-```
-bash$ conda activate env/
-bash$ Rscript -e "devtools::install()"
-```
 
 # Getting started
 
