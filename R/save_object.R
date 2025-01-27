@@ -243,6 +243,37 @@ saveServer <- function(id, original, current, coldata, pattern){
 
             saveRDS(obj, destpath, compress=as.logical(input$compress))
 
+            # add data area
+            # get access yaml and add data area
+            y <- read_access_yaml()
+            if(is.null(username)) ug <- config$server$admin_group
+            else ug <- input$user_group
+
+            # check for empty user group
+            if(ug == ''){
+              showNotification(
+                paste0('User group is empty. Using "', config$server$admin_group,
+                       '" by default'),
+                type='warning'
+              )
+              ug <- config$server$admin_group
+            }
+
+            # check for existence of user_group & add if new
+            if(!ug %in% names(y$data_area)){
+              y$data_area <- append(y$data_area,
+                                setNames(as.list(input$dir_new), ug))
+              showModal(
+                modalDialog('Adding data area')
+              )
+            } else {
+              if(!input$dir_new %in% y$data_area[[ug]]){
+                y$data_area[[ug]] <- c(y$data_area[[ug]],
+                                       input$dir_new)
+              }
+            }
+            save_access_yaml(y)
+
             removeModal()
             reload_parent$flag <- TRUE
           }
