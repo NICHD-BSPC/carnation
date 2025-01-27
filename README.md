@@ -14,7 +14,7 @@ Next, activate the environment and install using `R CMD build` and `install.pack
 ```
 conda activate ./env
 R CMD build carnation/
-Rscript -e "install.packages('carnation_0.1.1.tar.gz', repos=NULL)"
+Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
 ```
 
 ## devtools
