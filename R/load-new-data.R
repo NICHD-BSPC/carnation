@@ -989,7 +989,8 @@ loadDataServer <- function(id, username, rds=NULL){
         tags <- tagList(
                   selectizeInput(ns('dir_new'), 'Choose data area to save object',
                                  choices=c('Select or create new'='',
-                                           unname(unlist(da)))),
+                                           unname(unlist(da))),
+                                 options=list(create=TRUE)),
 
                   textInput(ns('proj_new'), 'Project name',
                             value='my-project'),
