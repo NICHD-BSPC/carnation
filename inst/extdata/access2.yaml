@@ -1,8 +1,0 @@
-user_group:
-  mitraak: admin
-data_area:
-  admin:
-  - /data/NICHD-core0/shiny/example
-  - /data/NICHD-core0/test/mitraak/shiny2
-  - /data/NICHD-core0/test/mitraak/shiny2
-  - /data/NICHD-core0/test/mitraak/shiny2
