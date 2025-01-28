@@ -47,7 +47,6 @@ jobs:
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
           conda config --add channels conda-forge
-          conda config --remove channels defaults
           conda config --set channel_priority strict
 
           conda env create -p ./env --file requirements.yaml
