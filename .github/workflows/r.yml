@@ -49,7 +49,11 @@ jobs:
           conda config --add channels conda-forge
           conda config --set channel_priority strict
 
-          conda env create -p ./env --file requirements.yaml
+          cat requirements.yaml | grep -v r-base > test-requirements.yaml
+
+          conda env create -p ./env \
+            r-base=${{ matrix.r-version }} \
+            --file test-requirements.yaml
 
       #- name: Set up R ${{ matrix.r-version }}
       #  uses: r-lib/actions/setup-r@v2
