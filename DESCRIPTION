@@ -4,6 +4,8 @@ Version: 1.0
 Authors@R: 
     person("Apratim", "Mitra", , "apratim.mitra@nih.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3279-0054"))
+Author: Apratim Mitra [aut, cre]
+Maintainer: Apratim Mitra <apratim.mitra@nih.gov>
 Description: Interactive Shiny dashboard app that can be used to
     explore RNA-Seq analysis results including differential expression (DE),
     functional enrichment and pattern analysis. Several visualizations
