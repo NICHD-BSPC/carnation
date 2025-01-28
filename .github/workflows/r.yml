@@ -20,9 +20,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    #strategy:
-    #  matrix:
-    #    r-version: ['4.2.2', '4.3.0']
+    strategy:
+      matrix:
+        r-version: ['4.2.2', '4.3.0']
 
     steps:
       - uses: actions/checkout@v4
