@@ -63,6 +63,7 @@ jobs:
 
       - name: Check, install & load library
         run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
           #rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
           conda activate ./env
           R CMD check --as-cran --no-manual .
