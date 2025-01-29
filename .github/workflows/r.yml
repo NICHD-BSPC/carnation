@@ -52,6 +52,12 @@ jobs:
 
           #cat requirements.yaml | grep -v r-base > test-requirements.yaml
 
+          echo "workdir=$WORKDIR"
+          echo "current=$(pwd)"
+          CURR=$(pwd)
+
+          # make the env in WORKDIR
+          cd $WORKDIR
           conda env create -p ./env \
             --file requirements.yaml
 
@@ -80,10 +86,13 @@ jobs:
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
           #rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
-          conda activate ./env
+          conda activate ${WORKDIR}/env
 
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
+
+          ls -l ../carnation
+          ls -l ../
 
           # build and check in tmp/
           R CMD build --no-manual --no-build-vignettes ../carnation
