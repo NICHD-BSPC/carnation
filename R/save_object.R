@@ -28,6 +28,8 @@ saveServer <- function(id, original, current, coldata, pattern, username){
     function(input, output, session){
         ns <- NS(id)
 
+        config <- get_config()
+
         reload_parent <- reactiveValues(flag=FALSE)
         save_flag <- reactiveValues(l=FALSE)
 
