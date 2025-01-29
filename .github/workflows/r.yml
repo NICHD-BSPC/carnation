@@ -67,10 +67,11 @@ jobs:
       #    remotes::install_deps(dependencies = TRUE)
       #  shell: Rscript {0}
 
-      - name: download env yml
-        uses: actions/download-artifact@v4
+      - name: env yml
+        uses: actions/upload-artifact@v4
         with:
-          name: exported_env.yml
+          name: env yaml
+          path: exported_env.yml
 
       - name: Check, install & load library
         run: |
