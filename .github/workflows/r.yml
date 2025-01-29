@@ -46,12 +46,13 @@ jobs:
       - name: conda env & build
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
+          source "${HOME}/conda/etc/profile.d/mamba.sh"
           conda config --add channels conda-forge
           conda config --set channel_priority strict
 
           cat requirements.yaml | grep -v r-base > test-requirements.yaml
 
-          conda env create -p ./env \
+          mamba env create -p ./env \
             r-base=${{ matrix.r-version }} \
             --file test-requirements.yaml
 
