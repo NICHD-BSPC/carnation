@@ -56,8 +56,8 @@ jobs:
           echo "current=$(pwd)"
           CURR=$(pwd)
 
-          # make the env in WORKDIR
-          cd $WORKDIR
+          # make the env one above WORKDIR
+          cd ..
           conda env create -p ./env \
             --file requirements.yaml
 
@@ -86,7 +86,7 @@ jobs:
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
           #rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
-          conda activate ${WORKDIR}/env
+          conda activate ../env
 
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
