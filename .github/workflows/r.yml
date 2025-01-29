@@ -57,7 +57,11 @@ jobs:
 
           conda env export --no-builds -p ./env | grep -Ev "^name:|^prefix:" > exported_env.yml
 
+          ls -l carnation/env/lib/gcc/x86_64-conda-linux-gnu/14.2.0/
+
           conda activate ./env
+
+          which R
 
           # add tmp/ to .Rbuildignore
           echo "^tmp" >> .Rbuildignore
