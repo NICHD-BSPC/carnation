@@ -83,7 +83,7 @@ jobs:
       - name: env yml
         uses: actions/upload-artifact@v4
         with:
-          name: env yaml R ${{ matrix.version }}
+          name: env yaml R ${{ matrix.r-version }}
           path: exported_env_${{ matrix.r-version }}.yml
 
       - name: Check, install & load library
