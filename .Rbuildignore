@@ -2,3 +2,4 @@
 ^requirements\.yaml$
 ^requirements-pinned\.yaml$
 ^.github
+^env
