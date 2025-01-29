@@ -53,15 +53,22 @@ jobs:
           conda env create -p ../env \
             --file requirements-pinned.yaml
 
+      - name: conda env multiple R versions
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --set channel_priority strict
+
+          # make test reqs without r-base
+          cat requirements.yaml | grep -v r-base > ../test-requirements.yaml
 
           # make the env one above WORKDIR
-          conda env create -p ../env \
-            --file requirements.yaml
+          conda env create -p ../env-r${{ matrix.r-version }} \
+            r-base=${{ matrix.r-version }} \
+            --file ../test-requirements.yaml
 
           # export env yaml & add path to .Rbuildignore
-          conda env export --no-builds -p ../env | grep -Ev "^name:|^prefix:" > exported_env.yml
-          echo "^exported_env\.yml$" >> .Rbuildignore
-
+          conda env export --no-builds -p ../env | grep -Ev "^name:|^prefix:" > exported_env_${{ matrix.r-version }}.yml
+          echo "^exported_env_${{ matrix.r-version }}\.yml$" >> .Rbuildignore
 
       #- name: Set up R ${{ matrix.r-version }}
       #  uses: r-lib/actions/setup-r@v2
@@ -77,7 +84,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: env yaml
-          path: exported_env.yml
+          path: exported_env_${{ matrix.r-version }}.yml
 
       - name: Check, install & load library
         run: |
