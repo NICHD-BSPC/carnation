@@ -37,9 +37,6 @@ dependencies:
   - r-viridislite
   - r-visnetwork
   - r-yaml
-  - libgcc
-  - libgcc-devel_linux-64
-  - libgcc-ng
   - pandoc
   - pdflatex
   - plotly
