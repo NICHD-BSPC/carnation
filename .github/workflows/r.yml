@@ -67,6 +67,11 @@ jobs:
       #    remotes::install_deps(dependencies = TRUE)
       #  shell: Rscript {0}
 
+      - name: download env yml
+        uses: actions/download-artifact@v4
+        with:
+          name: exported_env.yml
+
       - name: Check, install & load library
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
@@ -81,7 +86,4 @@ jobs:
 
           Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
           Rscript -e "library(carnation)"
-      - name: download artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: exported_env.yml
+
