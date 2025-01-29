@@ -71,8 +71,9 @@ jobs:
           #rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
           conda activate ./env
 
-          mkdir -p tmp
-          cd tmp
+          # add tmp/ to .Rbuildignore
+          echo "^tmp" >> .Rbuildignore
+          mkdir -p tmp && cd tmp
           R CMD build ../
           R CMD check --as-cran --no-manual carnation_1.0.tar.gz
 
