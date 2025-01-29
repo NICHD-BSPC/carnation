@@ -1,3 +1,4 @@
 ^LICENSE\.md$
 ^requirements\.yaml$
 ^requirements-pinned\.yaml$
+^.github
