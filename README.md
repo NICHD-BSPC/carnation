@@ -5,8 +5,11 @@
 You can install carnation by creating a new conda environment containing
 all dependencies as listed in the file `requirements.yaml`. This is *recommended*.
 
+**WARNING:** Make sure you build the conda environment *outside* the carnation directory
+or the build step will fail.
+
 ```
-mamba env create -p env --file requirements.yaml
+cd .. && mamba env create -p env --file carnation/requirements.yaml
 ```
 
 Next, activate the environment and install using `R CMD build` and `install.packages`:
@@ -18,6 +21,8 @@ Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
 ```
 
 ## devtools
+
+**WARNING:** devtools installation currently does not work.
 
 You can also install carnation using the `devtools` package. Here, we use `devtools` to figure
 out the dependencies directly, mimicking a direct R installation.
