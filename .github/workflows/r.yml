@@ -57,6 +57,17 @@ jobs:
 
           conda env export --no-builds -p ./env | grep -Ev "^name:|^prefix:" > exported_env.yml
 
+          conda activate ./env
+
+          # add tmp/ to .Rbuildignore
+          echo "^tmp" >> .Rbuildignore
+          mkdir -p tmp && cd tmp
+
+          # build and check in tmp/
+          R CMD build --no-manual --no-build-vignettes ../
+          R CMD check --as-cran --no-manual --no-build-vignettes carnation_1.0.tar.gz
+
+
       #- name: Set up R ${{ matrix.r-version }}
       #  uses: r-lib/actions/setup-r@v2
       #  with:
@@ -70,21 +81,16 @@ jobs:
       - name: env yml
         uses: actions/upload-artifact@v4
         with:
-          name: env yaml
-          path: exported_env.yml
+          name: env yaml and tarball
+          path: |
+            exported_env.yml
+            tmp/carnation_1.0.tar.gz
 
       - name: Check, install & load library
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
           #rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
           conda activate ./env
-
-          # add tmp/ to .Rbuildignore
-          echo "^tmp" >> .Rbuildignore
-          mkdir -p tmp && cd tmp
-          R CMD build --no-manual --no-build-vignettes ../
-          R CMD check --as-cran --no-manual carnation_1.0.tar.gz
-
           Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
           Rscript -e "library(carnation)"
 
