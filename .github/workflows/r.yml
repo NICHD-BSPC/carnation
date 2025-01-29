@@ -20,9 +20,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        r-version: ['4.2.2', '4.3.0']
+    #strategy:
+    #  matrix:
+    #    r-version: ['4.2.2', '4.3.0']
 
     steps:
       - uses: actions/checkout@v4
@@ -46,15 +46,14 @@ jobs:
       - name: conda env & build
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
-          source "${HOME}/conda/etc/profile.d/mamba.sh"
           conda config --add channels conda-forge
           conda config --set channel_priority strict
 
-          cat requirements.yaml | grep -v r-base > test-requirements.yaml
+          #cat requirements.yaml | grep -v r-base > test-requirements.yaml
 
-          mamba env create -p ./env \
+          conda env create -p ./env \
             r-base=${{ matrix.r-version }} \
-            --file test-requirements.yaml
+            --file requirements-pinned.yaml
 
       #- name: Set up R ${{ matrix.r-version }}
       #  uses: r-lib/actions/setup-r@v2
