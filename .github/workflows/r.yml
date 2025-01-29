@@ -47,7 +47,7 @@ jobs:
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
           source "${HOME}/conda/etc/profile.d/mamba.sh"
-          conda config --add channels conda-forge
+          #conda config --add channels conda-forge
           conda config --set channel_priority strict
 
           #cat requirements.yaml | grep -v r-base > test-requirements.yaml
