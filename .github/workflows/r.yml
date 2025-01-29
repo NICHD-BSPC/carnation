@@ -90,9 +90,11 @@ jobs:
           Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
           Rscript -e "library(carnation)"
 
+          mv carnation_1.0.tar.gz $WORKDIR
+
       - name: env tarball
         uses: actions/upload-artifact@v4
         with:
-          name: env yaml
-          path: ../tmp/carnation_1.0.tar.gz
+          name: carnation bundle
+          path: carnation_1.0.tar.gz
 
