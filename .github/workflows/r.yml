@@ -57,12 +57,11 @@ jobs:
           CURR=$(pwd)
 
           # make the env one above WORKDIR
-          cd ..
-          conda env create -p ./env \
+          conda env create -p ../env \
             --file requirements.yaml
 
           # export env yaml & add path to .Rbuildignore
-          conda env export --no-builds -p ./env | grep -Ev "^name:|^prefix:" > exported_env.yml
+          conda env export --no-builds -p ../env | grep -Ev "^name:|^prefix:" > exported_env.yml
           echo "^exported_env\.yml$" >> .Rbuildignore
 
 
