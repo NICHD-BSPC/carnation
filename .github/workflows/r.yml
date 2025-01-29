@@ -47,15 +47,8 @@ jobs:
       - name: conda env & build
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
-          #source "${HOME}/conda/etc/profile.d/mamba.sh"
-          #conda config --add channels conda-forge
           conda config --set channel_priority strict
 
-          #cat requirements.yaml | grep -v r-base > test-requirements.yaml
-
-          echo "workdir=$WORKDIR"
-          echo "current=$(pwd)"
-          CURR=$(pwd)
 
           # make the env one above WORKDIR
           conda env create -p ../env \
@@ -85,14 +78,10 @@ jobs:
       - name: Check, install & load library
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
-          #rcmdcheck::rcmdcheck(args = "--no-manual", error_on = "error")
           conda activate ../env
 
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
-
-          ls -l ../carnation
-          ls -l ../
 
           # build and check in tmp/
           R CMD build ../carnation
