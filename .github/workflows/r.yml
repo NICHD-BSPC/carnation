@@ -44,14 +44,14 @@ jobs:
           bash Miniforge3.sh -b -p "${HOME}/conda"
           echo "^Miniforge3\.sh$" >> .Rbuildignore
 
-      - name: conda env pinned
-        run: |
-          source "${HOME}/conda/etc/profile.d/conda.sh"
-          conda config --set channel_priority strict
+          #- name: conda env pinned
+          #  run: |
+          #    source "${HOME}/conda/etc/profile.d/conda.sh"
+          #    conda config --set channel_priority strict
 
-          # make env one above WORKDIR
-          conda env create -p ../env \
-            --file requirements-pinned.yaml
+          #    # make env one above WORKDIR
+          #    conda env create -p ../env \
+          #      --file requirements-pinned.yaml
 
       - name: conda env multiple R versions
         run: |
@@ -67,7 +67,7 @@ jobs:
             --file ../test-requirements.yaml
 
           # export env yaml & add path to .Rbuildignore
-          conda env export --no-builds -p ../env | grep -Ev "^name:|^prefix:" > exported_env_${{ matrix.r-version }}.yml
+          conda env export --no-builds -p ../env-r${{ matrix.r-version }} | grep -Ev "^name:|^prefix:" > exported_env_${{ matrix.r-version }}.yml
           echo "^exported_env_${{ matrix.r-version }}\.yml$" >> .Rbuildignore
 
       #- name: Set up R ${{ matrix.r-version }}
@@ -89,7 +89,7 @@ jobs:
       - name: Check, install & load library
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
-          conda activate ../env
+          conda activate ../env-r${{ matrix.r-version }}
 
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
