@@ -3,13 +3,13 @@
 ## conda/mamba (recommended)
 
 You can install carnation by creating a new conda environment containing
-all dependencies as listed in the file `requirements.yaml`. This is *recommended*.
+all dependencies as listed in the file `requirements-pinned.yaml`. This is *recommended*.
 
 **WARNING:** Make sure you build the conda environment *outside* the carnation directory
 or the build step will fail.
 
 ```
-cd .. && mamba env create -p env --file carnation/requirements.yaml
+cd .. && mamba env create -p env --file carnation/requirements-pinned.yaml
 ```
 
 Next, activate the environment and install using `R CMD build` and `install.packages`:
