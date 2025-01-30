@@ -44,18 +44,20 @@ jobs:
           bash Miniforge3.sh -b -p "${HOME}/conda"
           echo "^Miniforge3\.sh$" >> .Rbuildignore
 
-          #- name: conda env pinned
-          #  run: |
-          #    source "${HOME}/conda/etc/profile.d/conda.sh"
-          #    conda config --set channel_priority strict
+      - name: conda env pinned
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --add channels conda-forge
+          conda config --set channel_priority strict
 
-          #    # make env one above WORKDIR
-          #    conda env create -p ../env \
-          #      --file requirements-pinned.yaml
+          # make env one above WORKDIR
+          conda env create -p ../env \
+            --file requirements-pinned.yaml
 
       - name: conda env multiple R versions
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --add channels conda-forge
           conda config --set channel_priority strict
 
           # make test reqs without r-base
