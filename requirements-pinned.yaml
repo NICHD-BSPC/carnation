@@ -350,7 +350,7 @@ dependencies:
   - r-tzdb=0.4.0
   - r-utf8=1.2.4
   - r-vctrs=0.6.5
-  - r-vegan=2.6_8
+  - r-vegan=2.6_10
   - r-viridis=0.6.5
   - r-viridislite=0.4.2
   - r-visnetwork=2.1.2
