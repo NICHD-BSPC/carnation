@@ -103,7 +103,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          setRepositories(c(1,2,3,4,5))
+          setRepositories(ind=c(1,2,3,4,5))
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
         shell: Rscript {0}
