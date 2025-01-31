@@ -51,11 +51,13 @@ jobs:
           r-version: '4.4.2'
 
       - name: Install dependencies
-        run: |
-          setRepositories(ind=c(1,2,3,4,5))
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = NA)
-        shell: Rscript {0}
+        uses: r-lib/actions/setup-r-dependencies@v2
+        extra-packages: local::.
+        #run: |
+        #  setRepositories(ind=c(1,2,3,4,5))
+        #  install.packages(c("remotes", "rcmdcheck"))
+        #  remotes::install_deps(dependencies = NA)
+        #shell: Rscript {0}
 
 
       - name: conda env pinned
