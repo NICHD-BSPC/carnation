@@ -25,13 +25,16 @@ library(carnation)
 First load some libraries that we will need for this tutorial.
 
 ```{r message=FALSE}
-library(airway)
 library(DESeq2)
-library(org.Hs.eg.db)
-library(clusterProfiler)
-library(DEGreport)
 library(dplyr)
 library(GeneTonic)
+
+# install optional packages if not present
+setRepositories(c(1,2,3,4,5))
+pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'clusterProfiler', 'DEGreport')
+for(pkg in pkgs_to_check){
+  if(!requireNamespace(pkg, quietly=TRUE)) install.packages(pkg)
+}
 ```
 
 We will be using the 'airway' dataset. First, we load this dataset.
