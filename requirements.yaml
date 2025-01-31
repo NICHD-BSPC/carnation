@@ -3,14 +3,10 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
-  - bioconductor-airway
-  - bioconductor-clusterprofiler
-  - bioconductor-degreport
   - bioconductor-deseq2
   - bioconductor-enrichplot
   - bioconductor-genetonic
   - bioconductor-matrixgenerics
-  - bioconductor-org.hs.eg.db
   - bioconductor-summarizedexperiment
   - r-base>=4.0
   - r-colorspace
