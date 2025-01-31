@@ -98,6 +98,9 @@ jobs:
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
 
+          mkdir -p $(dirname $WORKDIR}/build-tmp
+          export TMPDIR=$(dirname $WORKDIR)/build-tmp
+
           # build and check in tmp/
           R CMD build ../carnation
           R CMD check --as-cran --no-manual --no-build-vignettes carnation_1.0.tar.gz
