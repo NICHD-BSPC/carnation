@@ -30,9 +30,9 @@ library(dplyr)
 library(GeneTonic)
 
 # install optional packages if not present
-setRepositories(c(1,2,3,4,5))
 pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'clusterProfiler', 'DEGreport')
 for(pkg in pkgs_to_check){
+  setRepositories(c(1,2,3,4,5))
   if(!requireNamespace(pkg, quietly=TRUE)) install.packages(pkg)
 }
 ```
