@@ -52,7 +52,8 @@ jobs:
 
       - name: Install dependencies
         uses: r-lib/actions/setup-r-dependencies@v2
-        extra-packages: local::.
+          extra-packages: local::.
+
         #run: |
         #  setRepositories(ind=c(1,2,3,4,5))
         #  install.packages(c("remotes", "rcmdcheck"))
