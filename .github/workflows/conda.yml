@@ -1,0 +1,97 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# See https://github.com/r-lib/actions/tree/master/examples#readme for
+# additional example workflows available for the R community.
+
+name: R
+
+on:
+  push:
+    branches: [ "code" ]
+  pull_request:
+    branches: [ "code" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: git setup
+        # Set up git and export env vars to be used in later steps.
+        #   Note the unconventional mechanism for exporting envs by appending to
+        #   $GITHUB_ENV.
+        id: git-setup
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "WORKDIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: install miniforge
+        run: |
+          wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+          bash Miniforge3.sh -b -p "${HOME}/conda"
+          echo "^Miniforge3\.sh$" >> .Rbuildignore
+
+      - name: conda env pinned
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --add channels conda-forge
+          conda config --set channel_priority strict
+
+          # make env one above WORKDIR
+          conda env create -p ../env --file requirements-pinned.yaml
+
+      - name: conda env unpinned
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --add channels conda-forge
+          conda config --set channel_priority strict
+
+          # make the env one above WORKDIR
+          conda env create -p ../env-unpinned --file requirements.yaml
+
+          # export env yaml & add path to .Rbuildignore
+          conda env export --no-builds -p ../env-unpinned | grep -Ev "^name:|^prefix:" > exported_env.yml
+          echo "^exported_env\.yml$" >> .Rbuildignore
+
+      - name: env yml
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-yaml
+          path: exported_env.yml
+
+      - name: Check, install & load library
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda activate ../env
+
+          # create tmp dir for build and check
+          cd .. && mkdir tmp && cd tmp
+
+          mkdir -p $(dirname $WORKDIR)/build-tmp
+          export TMPDIR=$(dirname $WORKDIR)/build-tmp
+
+          # build and check in tmp/
+          R CMD build ../carnation
+          R CMD check --as-cran --no-manual --no-build-vignettes carnation_1.0.tar.gz
+
+          Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
+          Rscript -e "library(carnation)"
+
+          mv carnation_1.0.tar.gz $WORKDIR
+
+      - name: env tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: carnation-bundle
+          path: carnation_1.0.tar.gz
+
