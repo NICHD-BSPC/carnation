@@ -51,8 +51,22 @@ jobs:
           r-version: '4.4.2'
 
       - name: Install dependencies
-        uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          cache: true
-          extra-packages: local::.
+        run: |
+          setRepositories(ind=c(1,2,3,4,5))
+          install.packages(c("remotes", "rcmdcheck"))
+          remotes::install_deps(dependencies = NA)
+        shell: Rscript {0}
+
+      # uses: r-lib/actions/setup-r-dependencies@v2
+      # with:
+      #   cache: true
+      #   extra-packages: local::.
+
+      - name: R CMD check
+        run:
+          rcmdcheck::rcmdcheck(args="--as-cran --no-manual", error_on="error")
+        shell: Rscript {0}
+
+
+
 
