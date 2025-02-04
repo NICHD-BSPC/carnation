@@ -42,7 +42,7 @@ jobs:
           echo "^Miniforge3\.sh$" >> .Rbuildignore
 
       - name: install additional ubuntu pkgs
-        run: sudo apt-get update -y && sudo apt-get install -y libcurl4-openssl-dev libpng-dev libfontconfig1-dev
+        run: sudo apt-get update -y && sudo apt-get install -y libcurl4-openssl-dev libpng-dev libfontconfig1-dev haskell-platform
 
       - name: Setup R for direct install
         uses: r-lib/actions/setup-r@v2
