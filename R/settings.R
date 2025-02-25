@@ -125,12 +125,12 @@ settingsUI <- function(id, panel, username){
 #' Server code for settings module
 #'
 #' @param id Input id
-#' @param username user name
+#' @param details user name & app location
 #' @param depth project name depth
 #' @param end_offset project name end offset
 #' @param assay_fun function to parse assay names from file path
 #'
-settingsServer <- function(id, username, depth, end_offset, assay_fun){
+settingsServer <- function(id, details, depth, end_offset, assay_fun){
   moduleServer(
     id,
 
