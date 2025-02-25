@@ -10,7 +10,7 @@
 settingsUI <- function(id, panel, username){
   ns <- NS(id)
 
-  if(!is.null(username)){
+  if(!is.null(username())){
     user_settings <- tagList(
                        conditionalPanel(paste0('input["', ns('access'), '"] == "User list"'),
                          div(tags$b('Edit user list'),
@@ -147,6 +147,9 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
     staging_dir <- config$server$staging_dir
 
     access_yaml <- reactiveValues(l=NULL)
+    username <- reactive({
+      details()$username
+    })
 
     # check if access yaml is present
     p <- tryCatch(
@@ -156,10 +159,10 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
 
     if(!all(names(p) %in% c('user_group', 'data_area'))){
       if(grepl('Access yaml not found', p$message)){
-        if(!is.null(username)){
+        if(!is.null(username())){
           user_inputs <- tagList(
                            textInput(ns('user_name'), label='User name',
-                                     value=username),
+                                     value=username()),
                            textInput(ns('user_group'), label='User group',
                                      value=config$server$admin_group)
                           )
@@ -192,7 +195,7 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
     }
 
     observeEvent(input$create_access_do, {
-      if(is.null(username)){
+      if(is.null(username())){
         # check that user name is not empty
         create_access_yaml(config$server$default_user,
                            admin_group,
@@ -214,10 +217,10 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
     reload_parent <- reactiveValues(flag=FALSE)
 
     observeEvent(access_yaml$l, {
-      if(is.null(username)){
+      if(is.null(username())){
         lst <- access_yaml$l
       } else {
-        lst <- check_user_access(access_yaml$l, username,
+        lst <- check_user_access(access_yaml$l, username(),
                                  admin=admin_group)
       }
 
@@ -367,10 +370,10 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
       }
 
       validate(
-        need(u != 'Choose one' & u != '' & u != username, 'Waiting for data')
+        need(u != 'Choose one' & u != '' & u != username(), 'Waiting for data')
       )
 
-      if(u == username){
+      if(u == username()){
         showNotification('Cannot remove current user')
       } else {
           df[[ u ]] <- NULL
@@ -692,8 +695,9 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
     # save access changes
     observeEvent(input$save_access, {
         # check if user is admin
-        if(is.null(username)) username <- config$server$default_user
-        is_admin <- admin_group %in% user_access$orig$user_group[[ username ]]
+        if(is.null(username())) u <- config$server$default_user
+        else u <- username()
+        is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
 
         if(is_admin){
             showModal(
@@ -775,13 +779,13 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
         need(!is.null(access_yaml$l), '')
       )
 
-      if(is.null(username)){
+      if(is.null(username())){
         d <- check_user_access(access_yaml$l,
                                config$server$default_user,
                                admin=admin_group)
       } else {
         d <- check_user_access(access_yaml$l,
-                               username,
+                               username(),
                                admin=admin_group)
       }
 
@@ -850,8 +854,9 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
         names(alist[[p]]) <- assays[idx]
       }
 
-      if(is.null(username)) username <- config$server$default_user
-      is_admin <- admin_group %in% user_access$orig$user_group[[ username ]]
+      if(is.null(username())) u <- config$server$default_user
+      else u <- username()
+      is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
 
       # if not admin, filter out 'dev' datasets
       # else, fix project & assay labels

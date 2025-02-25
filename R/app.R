@@ -626,7 +626,8 @@ server <- function(input, output, session){
     }
   })
 
-  reload_new <- loadDataServer('load_new_data', username=username)
+  reload_new <- loadDataServer('load_new_data',
+                               username=reactive({ user_details$username }))
 
   observeEvent(reload_new(), {
     flag <- reload_new()
@@ -634,7 +635,9 @@ server <- function(input, output, session){
     if(flag) session$reload()
   })
 
-  reload_edit <- loadDataServer('edit_obj', username=username, rds=original)
+  reload_edit <- loadDataServer('edit_obj',
+                                username=reactive({ user_details$username }),
+                                rds=original)
 
   observeEvent(reload_edit(), {
     flag <- reload_edit()
@@ -710,7 +713,7 @@ server <- function(input, output, session){
                            current=app_object,
                            coldata=coldata.all$curr,
                            pattern=pattern,
-                           username=username)
+                           username=reactive({ user_details$username }))
 
   observeEvent(save_event(), {
     validate(
