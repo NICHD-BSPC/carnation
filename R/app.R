@@ -280,7 +280,7 @@ ui <- fluidPage(
       ########################## Settings ######################################
 
       conditionalPanel(condition = "input.mode == 'Settings'",
-        settingsUI('settings', panel='sidebar', username=username)
+        uiOutput('settings_sidebar')
       ) # conditionalPanel
 
         ), # tagList
@@ -550,7 +550,7 @@ ui <- fluidPage(
         ), # tabPanel pattern_analysis
 
         tabPanel('Settings',
-          settingsUI('settings', panel='main', username=username)
+          uiOutput('settings_main')
         ) # tabPanel settings
 
       ), # tabsetPanel mode
@@ -686,6 +686,14 @@ server <- function(input, output, session){
     if(!l$is_admin){
       hideTab(inputId = 'mode', target='Settings')
     }
+  })
+
+  output$settings_main <- renderUI({
+    settingsUI('settings', panel='main', username=reactive({ user_details$username }))
+  })
+
+  output$settings_sidebar <- renderUI({
+    settingsUI('settings', panel='sidebar', username=reactive({ user_details$username }))
   })
 
   ############### Metadata #################
