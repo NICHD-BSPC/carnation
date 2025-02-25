@@ -2,12 +2,15 @@
 #'
 #' Interactive shiny dashboard for exploring RNA-Seq analysis.
 #'
-#' @param username user name. When NULL (default), carnation runs in single-user mode.
 #' @param config list of config options. If NULL, uses internal config.
+#' @param credentials path to encrypted sqlite db with user credentials.
+#' @param passphrase passphrase for credentials db.
+#' @param enable_admin if TRUE, admin view is shown. Note, this is only available
+#'        if credentials have sqlite backend.
 #' @param ... parameters passed to shinyApp() call
 #'
 #' @export
-run_carnation <- function(username=NULL, config=NULL, ...){
+run_carnation <- function(config=NULL, credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
 
   # read config yaml
   if(is.null(config)) config <- get_config()
@@ -19,8 +22,18 @@ run_carnation <- function(username=NULL, config=NULL, ...){
   # reset to previous options on exit
   on.exit(options(oopt))
 
+  if(!is.null(credentials)){
+    if(!file.exists(credentials)){
+      stop(
+        paste0('Credentials specified, but file not found: "',
+               credentials, '"')
+      )
+    }
+  }
+
 ui <- fluidPage(
   theme=shinytheme('united'),
+
   introjsUI(),
 
   # custom CSS styles
@@ -557,6 +570,38 @@ ui <- fluidPage(
 
 ) # ui
 
+# add custom login page, shown only if credentials are specified
+if(!is.null(credentials)){
+  ui <- secure_app(
+          ui,
+
+          # customize login page
+          tags_top =
+            tags$div(
+              HTML(
+                paste0(
+                'ca',
+                span('rna', style='color: #e95420;'), # primary color from united theme
+                'tion'
+                )
+              ),
+              align='center',
+              style='font-family: Helvetica; font-size: 40px;'
+
+
+          ),
+          # add information on bottom ?
+          tags_bottom = tags$div(
+            tags$p(
+              "For any question, please  contact carnation authors",
+            )
+          ),
+
+          enable_admin=enable_admin,
+          theme=shinytheme('united')
+        )
+}
+
 server <- function(input, output, session){
 
   oopt <- options(spinner.type = 4)
@@ -577,7 +622,27 @@ server <- function(input, output, session){
   # list to hold original object and file path
   original <- reactiveValues(obj=NULL, path=NULL)
 
-  ### Intro ###
+  #################### authentication ####################
+
+  ## check_credentials directly on sqlite db
+  res_auth <- secure_server(
+    check_credentials = check_credentials(
+        db=credentials,
+        passphrase=passphrase
+    )
+  )
+
+  user_details <- reactiveValues(username=NULL, admin=FALSE)
+
+  observeEvent(res_auth, {
+
+    req(res_auth$user)
+
+    user_details$username <- res_auth$user
+    user_details$admin <- res_auth$user_info
+  })
+
+
   #################### Intro ####################
 
   observeEvent(input$intro, {
