@@ -55,7 +55,7 @@ ui <- fluidPage(
       column(2,
         introBox(
           saveUI('save_object'),
-          data.step=6,
+          data.step=7,
           data.intro='Use this button at any point to save the modified object'
         ), # introBox
         offset=-1
@@ -111,7 +111,7 @@ ui <- fluidPage(
         tooltip = tooltipOptions(title = "Global settings")
 
       ), # dropdownButton
-      data.step=5,
+      data.step=3,
       data.intro='Click this button to access global settings'
       ), # introBox
 
@@ -292,7 +292,7 @@ ui <- fluidPage(
 
       ), # dropdownButton
 
-      data.step=6,
+      data.step=4,
       data.intro='Here you will find specific controls to adjust plots or tables'
       ), # introBox
 
@@ -375,11 +375,11 @@ ui <- fluidPage(
         tooltip = tooltipOptions(title = "Gene scratchpad")
 
       ), # dropdownButton
-      data.step=7,
+      data.step=6,
       data.intro='Keep track of your favorite genes or quickly select top genes with the "Gene scratchpad" here'
       ), # introBox
 
-      data.step=4,
+      data.step=2,
       data.intro='You can use controls shown in this area to filter data or adjust plots and tables.'
     ) # introBox
     ) # fluidRow
@@ -423,11 +423,7 @@ ui <- fluidPage(
             tabPanel('Summary',
               fluidRow(
                 column(1, align='left',
-                  introBox(
-                    helpButtonUI('de_summary_help'),
-                    data.step=5,
-                    data.intro='If you need more help, you can use these buttons to get more details about plots or controls.'
-                  ) # introBox
+                  helpButtonUI('de_summary_help')
                 ) # column
               ), # fluidRow
 
@@ -554,8 +550,8 @@ ui <- fluidPage(
         ) # tabPanel settings
 
       ), # tabsetPanel mode
-      data.step=3,
-      data.intro='Once the data is loaded, use these tabs to navigate analysis results'
+      data.step=1,
+      data.intro='Choose project and analysis and click "Go".\n\nOnce the data is loaded, use tabs to explore and navigate'
     ) # introBox
   ) # mainPanel
 
@@ -582,29 +578,16 @@ server <- function(input, output, session){
   original <- reactiveValues(obj=NULL, path=NULL)
 
   ### Intro ###
+  #################### Intro ####################
+
   observeEvent(input$intro, {
 
     introjs(session,
             options = list("nextLabel"="Next",
-                           "prevLabel"="Back")#,
-                           #"skipLabel"="Skip")
-            #events = list("oncomplete"=I("{ Shiny.setInputValue('intro_done', '1'); }")
-                         #)
+                           "prevLabel"="Back")
             )
 
   }) # observeEvent
-
-  observeEvent(input$intro_done, {
-    showModal(
-      modalDialog(
-        "Good luck!",
-        easyClose=TRUE
-      )
-    )
-
-    Sys.sleep(3)
-    removeModal()
-  })
 
   ########### Load data #####################
 
