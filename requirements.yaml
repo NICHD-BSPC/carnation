@@ -26,6 +26,7 @@ dependencies:
   - r-shiny
   - r-shinybs
   - r-shinycssloaders
+  - r-shinymanager
   - r-shinythemes
   - r-shinywidgets
   - r-sortable
