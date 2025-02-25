@@ -819,10 +819,12 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
                               full.names = TRUE)))
 
       if(is.null(l) | length(l) == 0){
-
-        showModal(
-          no_projects_modal()
-        ) # showModal
+        # don't show modal if in admin panel
+        if(details()$where != 'admin'){
+          showModal(
+            no_projects_modal()
+          ) # showModal
+        }
 
         ll <- list(assay_list=NULL,
                    reload_parent=reload_parent$flag,
