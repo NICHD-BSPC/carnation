@@ -653,7 +653,7 @@ server <- function(input, output, session){
   assay.list <- reactiveValues(l=NULL)
 
   settings <- settingsServer('settings',
-                             username=username,
+                             details=reactive({ list(username=user_details$username, where=input$shinymanager_where) }),
                              depth=2,
                              end_offset=0,
                              assay_fun=function(x)
