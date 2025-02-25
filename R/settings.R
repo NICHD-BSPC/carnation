@@ -790,24 +790,20 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
       }
 
       if(is.null(d)){
-        if(is.null(username)){
-          showModal(
-            modalDialog(
-              div(tags$b('No projects found!', style='color: red;')),
-              br(),
-              span('Please check data areas and refresh app'),
-              footer=modalButton('OK')
-            )
-          )
+        if(is.null(username())){
+          no_projects_modal()
         } else {
-          showModal(
-            modalDialog(
-              div(tags$b('No access permissions!', style='color: red;')),
-              br(),
-              span('Please contact site administrators to enable access'),
-              footer=modalButton('OK')
+          # don't show this in admin view
+          if(details()$where != 'admin'){
+            showModal(
+              modalDialog(
+                div(tags$b('No access permissions!', style='color: red;')),
+                br(),
+                span('Please contact site administrators to enable access'),
+                footer=modalButton('OK')
+              )
             )
-          )
+          }
         }
       }
 
