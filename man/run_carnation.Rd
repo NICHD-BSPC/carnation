@@ -4,12 +4,23 @@
 \alias{run_carnation}
 \title{Carnation}
 \usage{
-run_carnation(username = NULL, config = NULL, ...)
+run_carnation(
+  config = NULL,
+  credentials = NULL,
+  passphrase = NULL,
+  enable_admin = TRUE,
+  ...
+)
 }
 \arguments{
-\item{username}{user name. When NULL (default), carnation runs in single-user mode.}
-
 \item{config}{list of config options. If NULL, uses internal config.}
+
+\item{credentials}{path to encrypted sqlite db with user credentials.}
+
+\item{passphrase}{passphrase for credentials db.}
+
+\item{enable_admin}{if TRUE, admin view is shown. Note, this is only available
+if credentials have sqlite backend.}
 
 \item{...}{parameters passed to shinyApp() call}
 }
