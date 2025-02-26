@@ -45,6 +45,7 @@ Imports:
     shiny,
     shinyBS,
     shinycssloaders,
+    shinymanager,
     shinythemes,
     shinyWidgets,
     sortable,
