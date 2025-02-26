@@ -594,10 +594,14 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         df_unique <- unique(df[, setdiff(colnames(df), 'symbol')])
         rownames(df_unique) <- df_unique$set
         df_unique <- df_unique[, setdiff(colnames(df_unique), 'set')]
-        set_mapping <- apply(df_unique, 1, function(x){
-                         n <- colnames(df_unique)[x == 1]
-                         n
-            })
+        if(nrow(df_unique) == 1){
+          set_mapping <- setNames(list(colnames(df_unique)), rownames(df_unique))
+        } else {
+          set_mapping <- apply(df_unique, 1, function(x){
+                           n <- colnames(df_unique)[x == 1]
+                           n
+              })
+        }
         upset_table$set_mapping <- set_mapping
 
         # get columns with degree & comparisons & add to df
