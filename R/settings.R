@@ -151,48 +151,50 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
       details()$username
     })
 
-    # check if access yaml is present
-    p <- tryCatch(
-           read_access_yaml(),
-           error=function(e){ e }
-         ) # tryCatch
+    observe({
+      # check if access yaml is present
+      p <- tryCatch(
+             read_access_yaml(),
+             error=function(e){ e }
+           ) # tryCatch
 
-    if(!all(names(p) %in% c('user_group', 'data_area'))){
-      if(grepl('Access yaml not found', p$message)){
-        if(!is.null(username())){
-          user_inputs <- tagList(
-                           textInput(ns('user_name'), label='User name',
-                                     value=username()),
-                           textInput(ns('user_group'), label='User group',
-                                     value=config$server$admin_group)
-                          )
+      if(!all(names(p) %in% c('user_group', 'data_area'))){
+        if(grepl('Access yaml not found', p$message)){
+          if(!is.null(username())){
+            user_inputs <- tagList(
+                             textInput(ns('user_name'), label='User name',
+                                       value=username()),
+                             textInput(ns('user_group'), label='User group',
+                                       value=admin_group)
+                            )
+          } else {
+            user_inputs <- tagList()
+          }
+
+          showModal(
+            modalDialog(
+              tags$b('Access settings not configured', style='color: red;'),
+              br(), br(),
+              span('Please enter details below before first run'),
+              br(),
+              tagList(
+                user_inputs,
+                textInput(ns('data_area'), label='Data area',
+                          value=NULL,
+                          placeholder='Folder where data is stored')
+              ),
+              footer=tagList(
+                       actionButton(ns('create_access_do'), 'OK')
+                     )
+            ) # modalDialog
+          ) # showModal
         } else {
-          user_inputs <- tagList()
+          stop('Error loading access yaml: ', p$message)
         }
-
-        showModal(
-          modalDialog(
-            tags$b('Access settings not configured', style='color: red;'),
-            br(), br(),
-            span('Please enter details below before first run'),
-            br(),
-            tagList(
-              user_inputs,
-              textInput(ns('data_area'), label='Data area',
-                        value=NULL,
-                        placeholder='Folder where data is stored')
-            ),
-            footer=tagList(
-                     actionButton(ns('create_access_do'), 'OK')
-                   )
-          ) # modalDialog
-        ) # showModal
       } else {
-        stop('Error loading access yaml: ', p$message)
+        access_yaml$l <- p
       }
-    } else {
-      access_yaml$l <- p
-    }
+    }) # observe
 
     observeEvent(input$create_access_do, {
       if(is.null(username())){
