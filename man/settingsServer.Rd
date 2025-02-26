@@ -4,7 +4,7 @@
 \alias{settingsServer}
 \title{Settings module server}
 \usage{
-settingsServer(id, details, depth, end_offset, assay_fun, where)
+settingsServer(id, details, depth, end_offset, assay_fun)
 }
 \arguments{
 \item{id}{Input id}
@@ -16,8 +16,6 @@ settingsServer(id, details, depth, end_offset, assay_fun, where)
 \item{end_offset}{project name end offset}
 
 \item{assay_fun}{function to parse assay names from file path}
-
-\item{where}{value stored in input$shinymanager_where}
 }
 \description{
 Server code for settings module
