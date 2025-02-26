@@ -197,13 +197,46 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
     }) # observe
 
     observeEvent(input$create_access_do, {
+      if(is.null(input$data_area)){
+        showNotification(
+          'Data area cannot be empty!', type='warning'
+        )
+
+        req(input$data_area)
+      } else if(!dir.exists(input$data_area)){
+        showNotification(
+          'Data area does not exist on disk!', type='warning'
+        )
+
+        validate(
+          need(dir.exists(input$data_area), '')
+        )
+      }
+
       if(is.null(username())){
-        # check that user name is not empty
+        # check that user name/group is not empty
         create_access_yaml(config$server$default_user,
                            admin_group,
                            input$data_area)
       } else {
         # check that user name is not empty
+        if(is.null(input$user_name)){
+          showNotification(
+            'User name cannot be empty!', type='warning'
+          )
+
+          req(input$user_name)
+        }
+
+        # check that user name is not empty
+        if(is.null(input$user_group)){
+          showNotification(
+            'User group cannot be empty!', type='warning'
+          )
+
+          req(input$user_group)
+        }
+
         create_access_yaml(input$user_name,
                            input$user_group,
                            input$data_area)
@@ -688,6 +721,19 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
               )
             )
         } else {
+            # check that data areas exist
+            check_exists <- unlist(lapply(input$edit_grp_areas, dir.exists))
+            if(any(!check_exists)){
+              showNotification(
+                paste('Error: Data areas must exist on disk! Following folders not found:',
+                      paste(input$edit_grp_areas[!check_exists], collapse=', ')),
+                type='error'
+              )
+            }
+            validate(
+              need(!any(!check_exists), '')
+            )
+
             user_access$areas[[ input$edit_grp_name ]] <- input$edit_grp_areas
             removeModal()
         }
