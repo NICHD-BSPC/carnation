@@ -82,7 +82,7 @@ jobs:
           cd .. && mkdir tmp && cd tmp
 
           # use devtools::check to check, build, install
-          Rscript -e "devtools::check('carnation_${VERSION}.tar.gz', manual=FALSE, vignettes=FALSE, check_dir='.')"
+          Rscript -e "devtools::check('../carnation', manual=FALSE, vignettes=FALSE, check_dir='.')"
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
 
