@@ -2,7 +2,6 @@
 #'
 #' Interactive shiny dashboard for exploring RNA-Seq analysis.
 #'
-#' @param config list of config options. If NULL, uses internal config.
 #' @param credentials path to encrypted sqlite db with user credentials.
 #' @param passphrase passphrase for credentials db.
 #' @param enable_admin if TRUE, admin view is shown. Note, this is only available
@@ -10,10 +9,10 @@
 #' @param ... parameters passed to shinyApp() call
 #'
 #' @export
-run_carnation <- function(config=NULL, credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
+run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
 
   # read config yaml
-  if(is.null(config)) config <- get_config()
+  config <- get_config()
 
   # set some options
   oopt <- options(spinner.type = 4)

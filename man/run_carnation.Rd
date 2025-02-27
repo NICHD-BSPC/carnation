@@ -4,17 +4,9 @@
 \alias{run_carnation}
 \title{Carnation}
 \usage{
-run_carnation(
-  config = NULL,
-  credentials = NULL,
-  passphrase = NULL,
-  enable_admin = TRUE,
-  ...
-)
+run_carnation(credentials = NULL, passphrase = NULL, enable_admin = TRUE, ...)
 }
 \arguments{
-\item{config}{list of config options. If NULL, uses internal config.}
-
 \item{credentials}{path to encrypted sqlite db with user credentials.}
 
 \item{passphrase}{passphrase for credentials db.}
