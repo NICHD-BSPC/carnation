@@ -882,7 +882,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         inter_sizes <- table(gdf$set)
         if(min(inter_sizes) < min_size){
           validate(
-            need(min_inter_size >= min_size,
+            need(min(inter_sizes) >= min_size,
                  paste0('No intersections left after filtering!\n\n',
                         'Please adjust "Min intersection size" in settings menu to at least ', min(inter_sizes))
             )
