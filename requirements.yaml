@@ -12,6 +12,7 @@ dependencies:
   - r-colorspace
   - r-complexupset
   - r-dendextend
+  - r-devtools
   - r-dplyr
   - r-dt
   - r-ggplot2
