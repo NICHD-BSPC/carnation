@@ -12,9 +12,10 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    - opened
-    - reopened
-    - synchronize
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: read
