@@ -12,7 +12,9 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    - opened
+    - reopened
+    - synchronize
 
 permissions:
   contents: read
