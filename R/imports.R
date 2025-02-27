@@ -28,6 +28,7 @@
 #' @rawNamespace import(shiny, except = c(dataTableOutput, renderDataTable))
 #' @importFrom shinyBS bsCollapse bsCollapsePanel updateCollapse
 #' @importFrom shinycssloaders withSpinner
+#' @importFrom shinymanager secure_app secure_server create_db check_credentials
 #' @importFrom shinythemes shinytheme
 #' @importFrom shinyWidgets dropdownButton tooltipOptions
 #' @importFrom sortable bucket_list add_rank_list

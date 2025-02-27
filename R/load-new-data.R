@@ -830,7 +830,7 @@ loadDataServer <- function(id, username, rds=NULL){
         )
 
         showModal(
-          obj_dir_modal(username)
+          obj_dir_modal(username())
         )
       })
 
@@ -863,7 +863,7 @@ loadDataServer <- function(id, username, rds=NULL){
 
           Sys.sleep(3)
           showModal(
-            obj_dir_modal(username)
+            obj_dir_modal(username())
           )
         } else {
           msg <- tryCatch(
@@ -932,7 +932,7 @@ loadDataServer <- function(id, username, rds=NULL){
             # add data area
             # get access yaml and add data area
             y <- read_access_yaml()
-            if(is.null(username)) ug <- config$server$admin_group
+            if(is.null(username())) ug <- config$server$admin_group
             else ug <- input$user_group
 
             # check for empty user group

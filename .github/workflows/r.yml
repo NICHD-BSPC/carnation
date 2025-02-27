@@ -10,9 +10,12 @@ name: R
 
 on:
   push:
-    branches: [ "code" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "code" ]
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: read

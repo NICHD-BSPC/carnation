@@ -4,12 +4,12 @@
 \alias{settingsServer}
 \title{Settings module server}
 \usage{
-settingsServer(id, username, depth, end_offset, assay_fun)
+settingsServer(id, details, depth, end_offset, assay_fun)
 }
 \arguments{
 \item{id}{Input id}
 
-\item{username}{user name}
+\item{details}{user name & app location}
 
 \item{depth}{project name depth}
 

@@ -693,6 +693,9 @@ enrichServer <- function(id, obj, upset_table,
       }) # observeEvent
 
       observeEvent(c(input$comp_fun, input$geneset, input$pathway, flags$data_loaded), {
+        validate(
+          need(!is.null(app_object()$enrich), '')
+        )
         df <- app_object()$enrich[[input$comp_fun]][[input$geneset]][[input$pathway]]
 
         # get genetonic df

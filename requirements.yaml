@@ -12,6 +12,7 @@ dependencies:
   - r-colorspace
   - r-complexupset
   - r-dendextend
+  - r-devtools
   - r-dplyr
   - r-dt
   - r-ggplot2
@@ -26,6 +27,7 @@ dependencies:
   - r-shiny
   - r-shinybs
   - r-shinycssloaders
+  - r-shinymanager
   - r-shinythemes
   - r-shinywidgets
   - r-sortable
