@@ -2,3 +2,5 @@
 ^requirements\.yaml$
 ^requirements-pinned\.yaml$
 ^.github
+^Dockerfile
+^Singularity
