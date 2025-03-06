@@ -1,8 +1,28 @@
 #' Get path to access yaml file
 #'
+#' This function checks for an environment variable 'CARNATION_ACCESS_YAML'
+#' to specify directory to save access yaml. If env variable does not exist
+#' uses home directory as save location.
+#'
 #' @return path to access yaml
+#'
 get_access_path <- function(){
-  path <- file.path(path.expand('~'), '.carnation-access.yaml')
+  if(Sys.getenv('CARNATION_ACCESS_YAML') != ''){
+    path <- Sys.getenv('CARNATION_ACCESS_YAML')
+    if(!dir.exists(path)){
+      stop(
+        paste('Environment variable "CARNATION_ACCESS_YAML" exists,'
+              'but specified location does not exist on disk:', path)
+      )
+    }
+  } else {
+    path <- path.expand('~')
+    message(
+      paste('Environment variable "CARNATION_ACCESS_YAML" not found.',
+            'Using default location to save access yaml:', path)
+    )
+  }
+  file.path(path, '.carnation-access.yaml')
 }
 
 #' Create access yaml
