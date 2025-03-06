@@ -10,9 +10,12 @@ name: conda
 
 on:
   push:
-    branches: [ "code" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "code" ]
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 permissions:
   contents: read
@@ -34,6 +37,7 @@ jobs:
           git config --global user.name "GitHub Action"
           echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
           echo "WORKDIR=$(pwd)" >> $GITHUB_ENV
+          echo "VERSION=$( cat DESCRIPTION | grep Version | awk '{print $2}')" >> $GITHUB_ENV
 
       - name: install miniforge
         run: |
@@ -77,21 +81,14 @@ jobs:
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
 
-          mkdir -p $(dirname $WORKDIR)/build-tmp
-          export TMPDIR=$(dirname $WORKDIR)/build-tmp
+          # use devtools::check to check, build, install
+          Rscript -e "devtools::check('../carnation', manual=FALSE, vignettes=FALSE, check_dir='.')"
 
-          # build and check in tmp/
-          R CMD build ../carnation
-          R CMD check --as-cran --no-manual --no-build-vignettes carnation_1.0.tar.gz
-
-          Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
-          Rscript -e "library(carnation)"
-
-          mv carnation_1.0.tar.gz $WORKDIR
+          mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
 
       - name: env tarball
         uses: actions/upload-artifact@v4
         with:
           name: carnation-bundle
-          path: carnation_1.0.tar.gz
+          path: carnation.tar.gz
 

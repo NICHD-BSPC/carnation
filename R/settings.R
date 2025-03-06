@@ -10,7 +10,7 @@
 settingsUI <- function(id, panel, username){
   ns <- NS(id)
 
-  if(!is.null(username)){
+  if(!is.null(username())){
     user_settings <- tagList(
                        conditionalPanel(paste0('input["', ns('access'), '"] == "User list"'),
                          div(tags$b('Edit user list'),
@@ -125,12 +125,12 @@ settingsUI <- function(id, panel, username){
 #' Server code for settings module
 #'
 #' @param id Input id
-#' @param username user name
+#' @param details user name & app location
 #' @param depth project name depth
 #' @param end_offset project name end offset
 #' @param assay_fun function to parse assay names from file path
 #'
-settingsServer <- function(id, username, depth, end_offset, assay_fun){
+settingsServer <- function(id, details, depth, end_offset, assay_fun){
   moduleServer(
     id,
 
@@ -147,58 +147,96 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
     staging_dir <- config$server$staging_dir
 
     access_yaml <- reactiveValues(l=NULL)
+    username <- reactive({
+      details()$username
+    })
 
-    # check if access yaml is present
-    p <- tryCatch(
-           read_access_yaml(),
-           error=function(e){ e }
-         ) # tryCatch
+    observe({
+      # check if access yaml is present
+      p <- tryCatch(
+             read_access_yaml(),
+             error=function(e){ e }
+           ) # tryCatch
 
-    if(!all(names(p) %in% c('user_group', 'data_area'))){
-      if(grepl('Access yaml not found', p$message)){
-        if(!is.null(username)){
-          user_inputs <- tagList(
-                           textInput(ns('user_name'), label='User name',
-                                     value=username),
-                           textInput(ns('user_group'), label='User group',
-                                     value=config$server$admin_group)
-                          )
+      if(!all(names(p) %in% c('user_group', 'data_area'))){
+        if(grepl('Access yaml not found', p$message)){
+          if(!is.null(username())){
+            user_inputs <- tagList(
+                             textInput(ns('user_name'), label='User name',
+                                       value=username()),
+                             textInput(ns('user_group'), label='User group',
+                                       value=admin_group)
+                            )
+          } else {
+            user_inputs <- tagList()
+          }
+
+          showModal(
+            modalDialog(
+              tags$b('Access settings not configured', style='color: red;'),
+              br(), br(),
+              span('Please enter details below before first run'),
+              br(),
+              tagList(
+                user_inputs,
+                textInput(ns('data_area'), label='Data area',
+                          value=NULL,
+                          placeholder='Folder where data is stored')
+              ),
+              footer=tagList(
+                       actionButton(ns('create_access_do'), 'OK')
+                     )
+            ) # modalDialog
+          ) # showModal
         } else {
-          user_inputs <- tagList()
+          stop('Error loading access yaml: ', p$message)
         }
-
-        showModal(
-          modalDialog(
-            tags$b('Access settings not configured', style='color: red;'),
-            br(), br(),
-            span('Please enter details below before first run'),
-            br(),
-            tagList(
-              user_inputs,
-              textInput(ns('data_area'), label='Data area',
-                        value=NULL,
-                        placeholder='Folder where data is stored')
-            ),
-            footer=tagList(
-                     actionButton(ns('create_access_do'), 'OK')
-                   )
-          ) # modalDialog
-        ) # showModal
       } else {
-        stop('Error loading access yaml: ', p$message)
+        access_yaml$l <- p
       }
-    } else {
-      access_yaml$l <- p
-    }
+    }) # observe
 
     observeEvent(input$create_access_do, {
-      if(is.null(username)){
-        # check that user name is not empty
+      if(is.null(input$data_area)){
+        showNotification(
+          'Data area cannot be empty!', type='warning'
+        )
+
+        req(input$data_area)
+      } else if(!dir.exists(input$data_area)){
+        showNotification(
+          'Data area does not exist on disk!', type='warning'
+        )
+
+        validate(
+          need(dir.exists(input$data_area), '')
+        )
+      }
+
+      if(is.null(username())){
+        # check that user name/group is not empty
         create_access_yaml(config$server$default_user,
                            admin_group,
                            input$data_area)
       } else {
         # check that user name is not empty
+        if(is.null(input$user_name)){
+          showNotification(
+            'User name cannot be empty!', type='warning'
+          )
+
+          req(input$user_name)
+        }
+
+        # check that user name is not empty
+        if(is.null(input$user_group)){
+          showNotification(
+            'User group cannot be empty!', type='warning'
+          )
+
+          req(input$user_group)
+        }
+
         create_access_yaml(input$user_name,
                            input$user_group,
                            input$data_area)
@@ -214,10 +252,10 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
     reload_parent <- reactiveValues(flag=FALSE)
 
     observeEvent(access_yaml$l, {
-      if(is.null(username)){
+      if(is.null(username())){
         lst <- access_yaml$l
       } else {
-        lst <- check_user_access(access_yaml$l, username,
+        lst <- check_user_access(access_yaml$l, username(),
                                  admin=admin_group)
       }
 
@@ -367,10 +405,10 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
       }
 
       validate(
-        need(u != 'Choose one' & u != '' & u != username, 'Waiting for data')
+        need(u != 'Choose one' & u != '' & u != username(), 'Waiting for data')
       )
 
-      if(u == username){
+      if(u == username()){
         showNotification('Cannot remove current user')
       } else {
           df[[ u ]] <- NULL
@@ -683,6 +721,19 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
               )
             )
         } else {
+            # check that data areas exist
+            check_exists <- unlist(lapply(input$edit_grp_areas, dir.exists))
+            if(any(!check_exists)){
+              showNotification(
+                paste('Error: Data areas must exist on disk! Following folders not found:',
+                      paste(input$edit_grp_areas[!check_exists], collapse=', ')),
+                type='error'
+              )
+            }
+            validate(
+              need(!any(!check_exists), '')
+            )
+
             user_access$areas[[ input$edit_grp_name ]] <- input$edit_grp_areas
             removeModal()
         }
@@ -692,8 +743,9 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
     # save access changes
     observeEvent(input$save_access, {
         # check if user is admin
-        if(is.null(username)) username <- config$server$default_user
-        is_admin <- admin_group %in% user_access$orig$user_group[[ username ]]
+        if(is.null(username())) u <- config$server$default_user
+        else u <- username()
+        is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
 
         if(is_admin){
             showModal(
@@ -775,35 +827,40 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
         need(!is.null(access_yaml$l), '')
       )
 
-      if(is.null(username)){
+      if(is.null(username())) u <- config$server$default_user
+      else u <- username()
+      is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
+
+      if(is.null(u)){
         d <- check_user_access(access_yaml$l,
                                config$server$default_user,
                                admin=admin_group)
       } else {
         d <- check_user_access(access_yaml$l,
-                               username,
+                               u,
                                admin=admin_group)
       }
 
       if(is.null(d)){
-        if(is.null(username)){
-          showModal(
-            modalDialog(
-              div(tags$b('No projects found!', style='color: red;')),
-              br(),
-              span('Please check data areas and refresh app'),
-              footer=modalButton('OK')
-            )
-          )
+        # single-user mode
+        if(is.null(u)){
+          no_projects_modal()
         } else {
-          showModal(
-            modalDialog(
-              div(tags$b('No access permissions!', style='color: red;')),
-              br(),
-              span('Please contact site administrators to enable access'),
-              footer=modalButton('OK')
-            )
-          )
+          # don't show this in admin view
+          if(details()$where != 'admin'){
+            if(!is_admin){
+              showModal(
+                modalDialog(
+                  div(tags$b('No access permissions!', style='color: red;')),
+                  br(),
+                  span('Please contact site administrators to enable access'),
+                  footer=modalButton('OK')
+                )
+              )
+            } else {
+              no_projects_modal()
+            }
+          }
         }
       }
 
@@ -819,10 +876,12 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
                               full.names = TRUE)))
 
       if(is.null(l) | length(l) == 0){
-
-        showModal(
-          no_projects_modal()
-        ) # showModal
+        # don't show modal if in admin panel
+        if(details()$where != 'admin'){
+          showModal(
+            no_projects_modal()
+          ) # showModal
+        }
 
         ll <- list(assay_list=NULL,
                    reload_parent=reload_parent$flag,
@@ -849,9 +908,6 @@ settingsServer <- function(id, username, depth, end_offset, assay_fun){
         alist[[p]] <- l[idx]
         names(alist[[p]]) <- assays[idx]
       }
-
-      if(is.null(username)) username <- config$server$default_user
-      is_admin <- admin_group %in% user_access$orig$user_group[[ username ]]
 
       # if not admin, filter out 'dev' datasets
       # else, fix project & assay labels

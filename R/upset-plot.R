@@ -594,10 +594,14 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         df_unique <- unique(df[, setdiff(colnames(df), 'symbol')])
         rownames(df_unique) <- df_unique$set
         df_unique <- df_unique[, setdiff(colnames(df_unique), 'set')]
-        set_mapping <- apply(df_unique, 1, function(x){
-                         n <- colnames(df_unique)[x == 1]
-                         n
-            })
+        if(nrow(df_unique) == 1){
+          set_mapping <- setNames(list(colnames(df_unique)), rownames(df_unique))
+        } else {
+          set_mapping <- apply(df_unique, 1, function(x){
+                           n <- colnames(df_unique)[x == 1]
+                           n
+              })
+        }
         upset_table$set_mapping <- set_mapping
 
         # get columns with degree & comparisons & add to df
@@ -874,6 +878,16 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
 
         if(input$n_intersections < 0) n_intersections <- 0
         else n_intersections <- input$n_intersections
+
+        inter_sizes <- table(gdf$set)
+        if(min(inter_sizes) < min_size){
+          validate(
+            need(min(inter_sizes) >= min_size,
+                 paste0('No intersections left after filtering!\n\n',
+                        'Please adjust "Min intersection size" in settings menu to at least ', min(inter_sizes))
+            )
+          )
+        }
 
         p <- upset(gdf, intersect=intersect_sets,
                width_ratio=0.2,

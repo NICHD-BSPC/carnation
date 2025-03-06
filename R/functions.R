@@ -1,3 +1,30 @@
+#' Get path to access yaml file
+#'
+#' This function checks for an environment variable 'CARNATION_ACCESS_YAML'
+#' to specify directory to save access yaml. If env variable does not exist
+#' uses home directory as save location.
+#'
+#' @return path to access yaml
+#'
+get_access_path <- function(){
+  if(Sys.getenv('CARNATION_ACCESS_YAML') != ''){
+    path <- Sys.getenv('CARNATION_ACCESS_YAML')
+    if(!dir.exists(path)){
+      stop(
+        paste('Environment variable "CARNATION_ACCESS_YAML" exists',
+              'but specified location does not exist on disk:', path)
+      )
+    }
+  } else {
+    path <- path.expand('~')
+    message(
+      paste('Environment variable "CARNATION_ACCESS_YAML" not found.',
+            'Using default location to save access yaml:', path)
+    )
+  }
+  file.path(path, '.carnation-access.yaml')
+}
+
 #' Create access yaml
 #'
 #' This function creates an access yaml file.
@@ -9,14 +36,13 @@
 #'
 #' @export
 create_access_yaml <- function(user, user_group, data_area){
-    ug <- setNames(as.list(user_group), user)
-    da <- setNames(as.list(data_area), user_group)
+  ug <- setNames(as.list(user_group), user)
+  da <- setNames(as.list(data_area), user_group)
 
-    path <- file.path(system.file('extdata', package=packageName()),
-                      'access.yaml')
+  path <- get_access_path()
 
-    write_yaml(list(user_group=ug, data_area=da),
-               path)
+  write_yaml(list(user_group=ug, data_area=da),
+             path)
 }
 
 #' Read access yaml with user groups and data areas
@@ -27,18 +53,17 @@ create_access_yaml <- function(user, user_group, data_area){
 #'
 #' @export
 read_access_yaml <- function(){
-    # figure out access file based on host
-    f <- system.file('extdata', 'access.yaml',
-                     package=packageName())
+  # get path to access yaml
+  f <- get_access_path()
 
-    # check if yaml exists
-    if(!file.exists(f)){
-        stop('Access yaml not found. Have you run "create_access_yaml()" yet?')
-    }
+  # check if yaml exists
+  if(!file.exists(f)){
+      stop('Access yaml not found. Have you run "create_access_yaml()" yet?')
+  }
 
-    al <- read_yaml(f)
+  al <- read_yaml(f)
 
-    return(al)
+  return(al)
 }
 
 #' Get data areas a user has access to
@@ -54,28 +79,28 @@ read_access_yaml <- function(){
 #' @param admin Admin user group
 check_user_access <- function(al, u, admin='admin'){
 
-    # lab of user
-    idx <- which(names(al$user_group) == u)
-    if(length(idx) == 0){
-        return(NULL)
+  # lab of user
+  idx <- which(names(al$user_group) == u)
+  if(length(idx) == 0){
+    return(NULL)
+  } else {
+    user_group <- al$user_group[idx]
+
+    # if admin, give access to everything
+    if(admin %in% user_group){
+      data_area <- al$data_area
     } else {
-        user_group <- al$user_group[idx]
-
-        # if admin, give access to everything
-        if(admin %in% user_group){
-            data_area <- al$data_area
-        } else {
-            idx <- which(names(al$data_area) %in% user_group)
-            if(length(idx) == 0){
-                return(NULL)
-            } else {
-                data_area <- al$data_area[ idx ]
-            }
-        }
-        ll <- list(user_group=user_group, data_area=data_area)
+      idx <- which(names(al$data_area) %in% user_group)
+      if(length(idx) == 0){
+        return(NULL)
+      } else {
+        data_area <- al$data_area[ idx ]
+      }
     }
+    ll <- list(user_group=user_group, data_area=data_area)
+  }
 
-    return(ll)
+  return(ll)
 }
 
 #' Save access yaml to file
@@ -86,11 +111,10 @@ check_user_access <- function(al, u, admin='admin'){
 #' @param lst list of data frames with user_groups and
 #'  data_areas
 save_access_yaml <- function(lst){
-    # get access file
-    f <- system.file('extdata', 'access.yaml',
-                     package=packageName())
+  # get access file
+  f <- get_access_path()
 
-    write_yaml(list(user_group=lst$user_group,
+  write_yaml(list(user_group=lst$user_group,
                     data_area=lst$data_area), f)
 }
 
