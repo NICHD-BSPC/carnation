@@ -827,30 +827,39 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
         need(!is.null(access_yaml$l), '')
       )
 
-      if(is.null(username())){
+      if(is.null(username())) u <- config$server$default_user
+      else u <- username()
+      is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
+
+      if(is.null(u)){
         d <- check_user_access(access_yaml$l,
                                config$server$default_user,
                                admin=admin_group)
       } else {
         d <- check_user_access(access_yaml$l,
-                               username(),
+                               u,
                                admin=admin_group)
       }
 
       if(is.null(d)){
-        if(is.null(username())){
+        # single-user mode
+        if(is.null(u)){
           no_projects_modal()
         } else {
           # don't show this in admin view
           if(details()$where != 'admin'){
-            showModal(
-              modalDialog(
-                div(tags$b('No access permissions!', style='color: red;')),
-                br(),
-                span('Please contact site administrators to enable access'),
-                footer=modalButton('OK')
+            if(!is_admin){
+              showModal(
+                modalDialog(
+                  div(tags$b('No access permissions!', style='color: red;')),
+                  br(),
+                  span('Please contact site administrators to enable access'),
+                  footer=modalButton('OK')
+                )
               )
-            )
+            } else {
+              no_projects_modal()
+            }
           }
         }
       }
@@ -899,10 +908,6 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
         alist[[p]] <- l[idx]
         names(alist[[p]]) <- assays[idx]
       }
-
-      if(is.null(username())) u <- config$server$default_user
-      else u <- username()
-      is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
 
       # if not admin, filter out 'dev' datasets
       # else, fix project & assay labels
