@@ -11,7 +11,7 @@ get_access_path <- function(){
     path <- Sys.getenv('CARNATION_ACCESS_YAML')
     if(!dir.exists(path)){
       stop(
-        paste('Environment variable "CARNATION_ACCESS_YAML" exists,'
+        paste('Environment variable "CARNATION_ACCESS_YAML" exists',
               'but specified location does not exist on disk:', path)
       )
     }
