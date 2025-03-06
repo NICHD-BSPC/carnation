@@ -55,8 +55,8 @@ Next, open R, set repositories to get both CRAN and bioconductor packages and ru
 `devtools::install_github`.
 
 ```
-> setRepositories(ind=c(1,2,3,4,5))
-> devtools::install_github('NICHD-BSPC/carnation')
+setRepositories(ind=c(1,2,3,4,5))
+devtools::install_github('NICHD-BSPC/carnation')
 ```
 
 Note: This may be a time-consuming step, especially if working with a fresh R installation, as a large number of dependencies will be installed.
