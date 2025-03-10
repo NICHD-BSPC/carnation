@@ -4,3 +4,7 @@
 ^.github
 ^Dockerfile
 ^Singularity
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
