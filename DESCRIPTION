@@ -14,7 +14,7 @@ Description: Interactive Shiny dashboard app that can be used to
     and we also support gene pattern analysis. In addition, the app
     provides a platform to manage multiple projects and user groups
     that can be run on a central server.
-License: GPL (>= 3)
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
@@ -60,3 +60,4 @@ Suggests:
     org.Hs.eg.db,
     DEGreport
 VignetteBuilder: knitr
+URL: https://nichd-bspc.github.io/carnation/
