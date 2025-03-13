@@ -1,0 +1,354 @@
+# maximum upload file size (in MB)
+max_upload_size: 30
+
+# custom CSS styles used in the app
+style:
+  global: >
+    body, label, input, button, select, strong {
+      font-family: "Tahoma";
+    }
+
+    #sidebar {
+      background-color: #ffffff;
+      border-color: #e6e6e6;
+      border-width: 0px 3px 0px 0px;
+      min-width: 75px;
+      max-width: 75px;
+    }
+
+    div.panel-default {
+      border-color: #c1c1c1;
+      border-width: thin thick thick thin;
+      #text-align: center;
+    }
+
+    #shiny-notification-panel {
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .bucket-list-container.custom-sortable {
+      margin-left: 0px;
+      margin-right: 0px;
+      margin-top: -20px;
+      margin-bottom: -5px
+    }
+
+    .rank-list-container.custom-sortable {
+      background-color: #d0d0d0;
+      width: fit-content;
+    }
+
+  effect_class_headings: >-
+    margin-top: 10px;
+    padding-right: 0px;
+  help_buttons: >-
+    border-radius: 50%;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 7px;
+    padding-right: 7px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-style: bold;
+  dload_buttons: >-
+    padding-top: 2px;
+    padding-bottom: 2px;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin-bottom: 10px;
+    #font-size: 10px;
+    font-style: bold;
+
+# default values in the UI
+ui:
+  de_analysis:
+    filters:
+      fdr_threshold: 0.1
+      log2fc_threshold: 0
+      only_de_toggle: TRUE
+    gene_plot:
+      norm_method:
+        'library size': libsize
+        'vst': vst
+      x_rotate: 30
+      logy: TRUE
+      freey: FALSE
+      nrow: 2
+      boxes: TRUE
+      legend: TRUE
+      height: 600
+
+    ma_plot:
+      log2fc_limits:
+        min: -5
+        max: 5
+    upset_plot:
+      n_intersections: 40
+      min_size: 5
+      text_scale: 1
+      genes.per.line: 10
+    heatmap:
+      cluster_by: row
+      fontsize_row: 5
+      fontsize_col: 7
+
+      # scale can be 'row', 'column' or 'none'
+      scale: row
+
+      # rank can be 'padj' or 'log2FoldChange'
+      rank: padj
+
+  functional_enrichment:
+    plottype:
+      choices:
+        - summary_overview
+        - enrichment_map
+        - emap_distill
+        - emap_fuzzy
+        - cnetplot
+        - radar
+        - alluvial
+        - dendrogram
+      default: summary_overview
+    plots:
+      cnetplot:
+        numcat: 5
+        node_label: all
+        catlen: 50
+        color_edge: FALSE
+        circular: FALSE
+      summary_overview:
+        numcat: 20
+        catlen: 50
+        pval:
+          pvalue: gs_pvalue
+          p.adjust: p.adjust
+        color:
+          - z_score
+          - aggr_score
+      enrichment_map:
+        numcat: 30
+      emap_distill:
+        numcat: 30
+      emap_fuzzy:
+        numcat: 30
+      radar:
+        numcat: 20
+        catlen: 50
+        pval:
+          pvalue: gs_pvalue
+          p.adjust: p.adjust
+      horizon:
+        numcat: 20
+        catlen: 50
+        sort_by:
+          - clustered
+          - first_set
+      alluvial:
+        numcat: 4
+      dendrogram:
+        numcat: 30
+        catlen: 50
+    table:
+      genes.per.line: 6
+  pattern_analysis:
+    min_cluster_size: 10
+    x_rotate: 30
+
+server:
+  # set number of cores for app to use
+  cores: 1
+
+  # autoload first analysis for a selected project
+  # set to TRUE to save a few clicks when testing
+  autoload_first_analysis: FALSE
+
+  # this group will be considered 'admin'
+  admin_group: admin
+
+  # default user
+  # - this user name is used for single-user operation
+  default_user: admin
+
+  # this string can used to match and filter RDS files
+  # from data areas
+  # - specified pattern is attached to ".rds" extension
+  #   and searched from the end of the filename. The remainder
+  #   of the file name is used as the analysis label.
+  #
+  #   For example,
+  #
+  #   pattern: 'carnation'
+  #
+  #   will match files ending in 'carnation.rds'. And
+  #   a file named 'main.carnation.rds', will yield
+  #   the analysis label 'main'.
+  #
+  #   Note that, pattern: '' (default), will match all RDS files,
+  #   and the entire file name minus the '.rds' extension will
+  #   be used as analysis labels.
+  #
+  pattern: ''
+
+  # subdirectory name to hold staged datasets
+  staging_dir: staged
+
+  # these are metadata columns that will not be shown
+  # in tables
+  cols.to.drop:
+    - layout
+    - LibraryLayout
+    - orig_filename
+    - orig_filename_R2
+    - salmon.path
+    - kallisto.path
+    - sizeFactor
+
+  de_analysis:
+    pdf:
+      width: 10
+      height: 10
+    de_table:
+      # these are DE results columns that will not be shown
+      # in the table
+      cols.to.drop:
+        - lfcSE
+        - stat
+        - uniprot
+        - alias
+        - entrezid
+
+      # these columns will be rounded to significant digits
+      format_significant:
+        columns:
+          - baseMean
+          - log2FoldChange
+          - padj
+          - pvalue
+        digits: 4
+
+    # number of PCA dimensions to show, should be a number <= 8
+    pca_plot:
+      dims: 8
+
+    gene_plot:
+      # these are thresholds to determine when the y-axis will
+      # be rescaled
+      #
+      # minimum fraction of points that need to
+      # be within y-axis limits
+      min_fraction: 0.9
+
+      # minimum fraction of y-axis range that points need to cover
+      min_yrange_fraction: 0.25
+
+      # fraction outside y range of points to set initial y limits
+      y_delta: 0.05
+
+      # y axis labels corresponding to normalization methods
+      y_labels: Normalized counts
+      pseudocount: 0.1
+
+    upset_plot:
+      comp_num: 5
+      intersect_num: 10
+
+    gene_scratchpad:
+      # number of genes to add when clicking
+      # 'Add top genes by ...' buttons
+      ngenes: 6
+
+    heatmap:
+      # max genes to plot
+      max_ngenes: 150
+
+      # colors to label genes in row_side_colors
+      row_side_colors:
+        not_labeled: grey50
+        labeled: red
+
+      # relative widths of panels for heatmap
+      #
+      # with row dendrogram: three panels
+      # without row dendrogram: two panels
+      subplot_widths:
+        with_row_clustering:
+          - 0.8
+          - 0.05
+          - 0.15
+        without_row_clustering:
+          - 0.95
+          - 0.05
+
+      # download PDF resolution (in ppi)
+      pdf_res: 96
+
+
+  functional_enrichment:
+    # these are labels for pathway analysis
+    pathways:
+      BP: GO Biological Process
+      CC: GO Cellular Component
+      MF: GO Molecular Function
+      kegg: KEGG pathways
+      reactome: Reactome pathways
+
+    table:
+      genes.per.line: 6
+      enrichment:
+        # these columns will not be shown in the table
+        cols.to.drop:
+          - GeneRatio
+          - BgRatio
+          - qvalue
+
+        # these columns will be rounded to significant digits
+        format_significant:
+          columns:
+            - pvalue
+            - p.adjust
+            - enrichmentScore
+            - NES
+          digits: 3
+      distill_tbl:
+        cols.to.drop:
+          - term_id_list
+      fuzzy_tbl:
+        cols.to.drop:
+          - GeneRatio
+          - BgRatio
+          - qvalue
+          - DE_count
+          - ontology
+          - bg_count
+        format_significant:
+          columns:
+            - pvalue
+            - p.adjust
+            - z_score
+            - aggr_score
+            - NES
+          digits: 3
+    plot:
+      pdf:
+        width: 20
+        height: 10
+      cnetplot:
+        text_size: 15
+      summary_overview:
+        text_size: 20
+      horizon:
+        text_size: 20
+
+  pattern_analysis:
+    # these are metadata columns to not be shown in
+    # the color menu
+    cols.to.drop:
+      - genes
+      - merge
+      - value
+      - colored
+    pdf:
+      width: 12
+      height: 10

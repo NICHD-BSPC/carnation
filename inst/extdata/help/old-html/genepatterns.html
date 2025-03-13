@@ -1,0 +1,22 @@
+<h1 id="gene-patterns">Gene patterns</h1>
+<p>Here we visualize the results of pattern analysis using the <code>DEGreport</code> package based on hierarchical clustering to find groups of genes showing similar trends. This is often useful for time-series or dose-response experiments, that have a temporal component, to look for predominant patterns of gene expression.</p>
+<ul>
+<li>If multiple sets of pattern analysis was performed, the user has the option to select between them using the <code>Choose analysis</code> menu.</li>
+<li>The view is organized in two tabs:
+<ul>
+<li><code>Plot</code>: here we display the plots of gene expression trends for the clusters found in the analysis.</li>
+<li><code>Cluster membership</code>: interactive table showing the list of genes belonging to the clusters shown in the plot. The <code>cluster</code> column denotes cluster membership of the gene.</li>
+</ul></li>
+<li>The user can select <code>x axis</code> and <code>color</code> variables to adjust the plot display.
+<ul>
+<li>The <code>x axis</code> is used to denote the temporal element of the analysis.</li>
+<li>The <code>color</code> variable is used to connect groups of samples with different colored lines to highlight differing trends (default=<code>none</code>).</li>
+<li>Any column present in the sample metadata can be selected for either <code>x axis</code> or <code>color</code>. <strong>Note</strong>: custom metadata columns are not supported here.</li>
+</ul></li>
+<li>The pattern analysis includes results from <em>cuts</em> at different heights of the clustering dendrogram which can be selected from the <code>cluster column</code> menu in <code>More options</code>. The final level of the cut is displayed by default (<code>cluster</code>).
+<ul>
+<li>The cluster column names start with <code>cutoff</code> and are followed by a number denoting the height of the cut. <em>Smaller numbers correspond to lower cuts and finer/smaller clusters and vice-versa.</em></li>
+</ul></li>
+<li>The <code>rotate x labels</code> input can be used to control the angle of the x-axis labels which can help declutter the display.</li>
+<li>The cluster plot can be downloaded to pdf using the <code>Download plot</code> button.</li>
+</ul>

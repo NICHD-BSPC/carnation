@@ -1,0 +1,366 @@
+---
+title: "carnation - airway tutorial"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{carnation - airway tutorial}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Load libraries & airway dataset
+
+Load carnation.
+
+```{r setup}
+library(carnation)
+```
+
+First load some libraries that we will need for this tutorial.
+
+```{r message=FALSE}
+library(airway)
+library(DESeq2)
+library(org.Hs.eg.db)
+library(clusterProfiler)
+library(DEGreport)
+library(dplyr)
+library(GeneTonic)
+```
+
+We will be using the 'airway' dataset. First, we load this dataset.
+
+```{r}
+data('airway')
+```
+
+Next, we extract the counts matrix and and metadata.
+
+```{r}
+mat <- assay(airway)
+cdata <- colData(airway)
+```
+
+Now let's see what these look like.
+
+```{r}
+dim(mat)
+```
+
+So, `mat` is a matrix with 64102 rows and 8 columns. Each row
+corresponds to a single gene and each column corresponds to a
+single sample. As you will notice, the rownames of `mat` contains
+gene IDs and column names have the sample IDs.
+
+```{r}
+head(mat)
+```
+
+`cdata` contains the sample metadata. There is a lot of information here,
+but notice the `cell` and `dex` columns, as we will be using this for the
+differential expression analysis later.
+
+```{r}
+cdata
+```
+
+## Get more gene annotation
+
+The gene IDs that come with the dataset are from ENSEMBL and are not human-readable.
+So, next we will extract gene symbols and `ENTREZID` for these genes from
+the `org.Hs.eg.db` package.
+
+```{r message=FALSE}
+keytypes <- list('SYMBOL'='SYMBOL', 'ENTREZID'='ENTREZID')
+
+anno_df <- do.call('cbind',
+             lapply(keytypes, function(x){
+               mapIds(org.Hs.eg.db,
+                 column=x,
+                 keys=rownames(mat),
+                 keytype='ENSEMBL')
+               })
+             )
+
+# convert to data frame
+anno_df <- as.data.frame(anno_df)
+```
+
+Now, we have human readable gene names in the `SYMBOL` column and Entrez IDs in the
+`ENTREZ` column.
+
+```{r}
+head(anno_df)
+```
+
+## Create DESeqDataSet
+
+Next, we create a new `DESeqDataSet` using `mat` and `cdata`.
+
+```{r}
+dds <- DESeqDataSetFromMatrix(mat,
+                              colData=cdata,
+                              design=~cell + dex)
+```
+
+Let's check to make sure that everything looks okay:
+
+```{r}
+dds
+```
+
+Then we save `dds` in a list.
+
+```{r}
+dds_list <- list(main=dds)
+```
+
+We also normalize the counts data and save it in a list.
+
+```{r}
+rld_list <- lapply(dds_list, function(x) varianceStabilizingTransformation(x, blind=TRUE))
+```
+
+## Run differential expression analysis
+
+Now, the object `dds` is ready for differential expression (DE) analysis.
+
+```{r}
+dds <- DESeq(dds)
+```
+
+Since, we used `design=~cell + dex` while creating `dds`, the above step
+will automatically calculate some comparisons.
+
+```{r}
+resultsNames(dds)
+```
+
+The last comparison `dex_untrt_vs_trt` contains the effect of the `dex` treatment,
+while the other comparisons compare different cell lines. Next, we will extract
+two of these results and run `lfcShrink` on them.
+
+For the `cell` comparison, we choose a precomputed results using the `coef` parameter.
+
+```{r message=FALSE}
+cell_comparison <- lfcShrink(dds,
+                             coef='cell_N61311_vs_N052611',
+                             type='normal')
+```
+
+For the `dex` comparison, we use `contrast` to specify the direction of the comparison,
+since we want to use `untrt` as control.
+
+```{r message=FALSE}
+dex_comparison <- lfcShrink(dds,
+                            contrast=c('dex', 'trt', 'untrt'),
+                            type='normal')
+```
+
+Now, each of these comparisons, contain the DE analysis results. For example,
+
+```{r}
+head(dex_comparison)
+```
+
+Then, we save these results in a special nested list that `carnation` will use.
+Here,
+
+- `res` contains the actual DE analysis results
+- `dds` contains the name of the DESeqDataSet used for the DE analysis. These values
+  should map to `dds_list` names
+- `label` is a description of the comparison
+
+```{r}
+res_list <- list(
+        dex_trt_vs_untrt=list(
+            res=dex_comparison,
+            dds='main',
+            label='dex, treated vs untreated'),
+        cell_N61311_vs_N052611=list(
+            res=cell_comparison,
+            dds='main',
+            label='cell, N61311 vs N052611')
+        )
+```
+
+Finally, we add `SYMBOL` and `ENTREZID` columns to the DE results from the `anno_df`
+data frame.
+
+```{r}
+res_list <- lapply(res_list, function(x){
+              # save the rownames as a new 'gene' column
+              x$res[[ 'gene' ]] <- rownames(x$res)
+
+              # add 'SYMBOL' and 'ENTREZID' columns
+              x$res[[ 'SYMBOL' ]] <- anno_df[rownames(x$res), 'SYMBOL']
+              x$res[[ 'ENTREZID' ]] <- anno_df[rownames(x$res), 'ENTREZID']
+
+              x
+            })
+```
+
+## Add functional enrichment results (optional)
+
+Now we run functional enrichment on the DE genes from the two comparisons.
+For this, we first set significance thresholds and then extract the DE genes
+and save as a list.
+
+```{r}
+# padj cutoff
+alpha <- 0.01
+
+# log2FoldChange threshold; 1 == 2x difference
+lfc_threshold <- 1
+
+# list to save DE genes
+de.genes <- lapply(res_list, function(x){
+              # changed genes
+              idx <- x$res$padj < alpha &
+                     !is.na(x$res$padj) &
+                     abs(x$res$log2FoldChange) >= lfc_threshold
+
+              # return DE genes as a dataframe
+              x$res[idx, c('gene', 'ENTREZID')]
+            })
+```
+
+Next, we run functional enrichment and save the results in a list
+called `enrich_list`. We also save a converted list called `genetonic`
+which carnation uses for several plots from the `GeneTonic` package.
+
+```{r}
+# list to save functional enrichment results
+enrich_list <- list()
+
+# list to save a converted object for GeneTonic plots
+genetonic <- list()
+
+for(comp in names(res_list)){
+    go.res <- clusterProfiler::enrichGO(
+            gene=de.genes[[comp]][['ENTREZID']],
+            keyType='ENTREZID',
+            OrgDb=org.Hs.eg.db,
+            ont='BP',
+            pvalueCutoff=1, qvalueCutoff=1,
+            readable = TRUE)
+
+    enrich_list[[ comp ]] <- list(
+                               res=comp,
+                               changed=list( BP=as.data.frame(go.res) )
+                             )
+
+    genetonic[[ comp ]] <- list(
+                             res=comp,
+                             changed=list(
+                               BP=enrich_to_genetonic(go.res, res_list[[comp]]$res)
+                             )
+                           )
+
+}
+```
+
+`enrich_list` is a nested list where:
+
+- The top-level names are unique keys/identifiers
+- The second level corresponds to direction of change, e.g. `up`, `down` or `changed`.
+  This level also contains a special entry `res` which maps to `res_list` names,
+  as a way to record where the DE results came from.
+- The third level corresponds to the ontology, e.g. `BP` (GO Biological Process).
+
+Here, we are just using changed genes and the GO Biological Process (BP) ontology,
+so `enrich_list` looks like:
+
+```
+enrich_list
+  ├─ dex_trt_vs_untrt
+  │    ├─ res = 'des_trt_vs_untrt'    <--- comparison used to get FE results
+  │    └─ changed
+  │         └─ BP                     <--- functional enrichment results
+  │
+  └─ cell_N61311_vs_N052611
+       ├─ res = 'cell_N61311_vs_N052611'    <--- comparison used to get FE results
+       └─ changed
+            └─ BP                           <--- functional enrichment results
+
+```
+
+`genetonic` mirrors the same structure.
+
+## Add pattern analysis (optional)
+
+Finally, we add some pattern analysis for the `dex_trt_vs_untrt` comparison using
+the `DEGreport` package. First, we extract normalized data for the 755 DE genes from
+this comparison.
+
+```{r}
+# extract normalized data & metadata
+ma <- assay(rld_list[['main']])
+colData.i <- colData(rld_list[['main']])
+
+# only keep data from DE genes
+idx <- rownames(ma) %in% de.genes[['dex_trt_vs_untrt']][['gene']]
+ma.i <- ma[idx,]
+
+# remove any genes with 0 variance
+ma.i <- ma.i[rowVars(ma.i) != 0, ]
+```
+
+Then, we run the pattern analysis, using `cell` as the *time*
+variable and `dex` as the *color* variable.
+
+```{r}
+p <- DEGreport::degPatterns(
+        ma.i,
+        colData.i,
+
+        time='cell',
+        col='dex',
+
+        # NOTE: reduce and merge cutoff----------------------------------------
+        #   Reduce will merge clusters that are similar; similarity determined
+        #   by cutoff
+        reduce=TRUE,
+
+        # NOTE: set minimum cluster size to 1
+        minc=1,
+        plot=FALSE
+        )
+```
+
+Next, we extract the `normalized` slot from this object and save as a list.
+
+```{r}
+# extract normalized slot and add symbol column
+p_norm <- p$normalized
+p_norm[[ 'SYMBOL' ]] <- anno_df[p_norm[['genes']], 'SYMBOL']
+
+# save pattern analysis results
+degpatterns <- list(dex_by_cell=p_norm)
+```
+
+## Compose carnation object
+
+Now we have all the pieces to build the carnation object.
+
+```{r}
+combined <- list(res_list=res_list,
+                 dds_list=dds_list,
+                 rld_list=rld_list,
+                 enrich_list=enrich_list,
+                 genetonic=genetonic,
+                 degpatterns_list=degpatterns)
+saveRDS(combined, 'carnation_vignette.rds', compress=FALSE)
+```
+
+# sessionInfo
+
+```{r}
+sessionInfo()
+```

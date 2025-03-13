@@ -1,0 +1,147 @@
+<h1 id="functional-enrichment"><a id='top'></a> Functional enrichment</h1>
+<p>Here we visualize the functional enrichment analysis results.</p>
+<p>There are three main controls underpinning the displays in this tab:</p>
+<ul>
+<li><code>Select Comparison</code>: this control is used to select the specific gene sets that were analyzed. Note that depending on the specific project, a subset of the DE analysis comparisons are analyzed for functional enrichment.</li>
+<li><code>Effect class</code>: use this to show the results for upregulated (<code>up</code>) or downregulated (<code>dn</code>) genes.</li>
+<li><code>Database</code>: this is used to select the specific database that was analyzed. Options include:
+<ul>
+<li><code>GO Biological Process</code></li>
+<li><code>GO Cellular Component</code></li>
+<li><code>GO Molecular Function</code></li>
+<li><code>KEGG Pathways</code></li>
+</ul></li>
+</ul>
+<p>The analysis results selected using the above controls are organized into three tabs:</p>
+<ul>
+<li><a href="#tbl">Table</a></li>
+<li><a href="#plt">Plots</a></li>
+<li><a href="#comp">Compare results</a></li>
+</ul>
+<h2 id="table"><a id='tbl'></a> Table</h2>
+<p>This tab has three subtabs depicting interactive tabular views of the functional enrichment analysis results.</p>
+<ul>
+<li><p><code>Enrichment</code></p>
+<p>This is an interactive table of the results listing functional terms, associated genes and p-values. This table can be used to search for genes and pathways of interest using the search box at the top right hand corner.</p>
+<ul>
+<li>The table consists of the following columns:
+<ul>
+<li><code>ID</code>, <code>Description</code>: these are the ID and description of the functional term/pathway</li>
+<li><code>geneID</code>: comma-separated list of genes associated with the functional term</li>
+<li><code>Count</code>: number of genes associated with the functional term</li>
+<li><code>pvalue</code>, <code>p.adjust</code>: P-value and adjusted p-value from a hypergeometric test</li>
+</ul></li>
+<li>The number of genes displayed per line can be adjusted using the <code>genes per line</code> control. This can be useful to improve the display when many genes are associated with an enriched pathway/term.</li>
+</ul></li>
+<li><p><a id='dstl'></a> <code>Distill enrichment</code></p>
+<p>Here the top functional terms detected in the analysis are clustered based on similarities in associated genes. This provides a way to look for similar/dissimilar sets of functional terms enriched among genes of interest.</p>
+<ul>
+<li>The table consists of the following columns:
+<ul>
+<li><code>cluster</code>: cluster number</li>
+<li><code>number_of_terms</code>: number of terms grouped in the cluster</li>
+<li><code>number_of_genes</code>: number of genes that are associated with the grouped terms</li>
+<li><code>most_significant_term</code>: this is the term with the lowest p-value in the cluster</li>
+<li><code>strongest_term</code>: this is the most highly connected member of the cluster</li>
+<li><code>term_description_list</code>: comma-separated list of descriptions of terms in the cluster</li>
+</ul></li>
+<li>The number of functional terms in this meta-analysis can be adjusted using the <code># of terms</code> control. If this number is greater than the number of rows in the enrichment table, then this automatically defaults to the latter.</li>
+<li>The data shown in this table is visualized in the <code>emap_distill</code> plot.</li>
+</ul></li>
+<li><p><a id='fzy'></a> <code>Fuzzy clustering</code></p>
+<p>Here we cluster top functional terms as above, using a fuzzy approach which means that terms can appear in multiple clusters. This is a reimplementation of the algorithm underlying DAVID (https://david.ncifcrf.gov/).</p>
+<ul>
+<li>The table shares several columns with the <code>Enrichment</code> table, but has the following additional ones:
+<ul>
+<li><code>fuzzycluster</code>: cluster number</li>
+<li><code>cluster_status</code>: this can be either <code>Representative</code> or <code>Member</code>. The most significant term in the cluster is termed <code>Representative</code> while all others are <code>Members</code>.</li>
+<li><code>z_score</code>: measure of the direction of change. If <code>u</code> is the number of upregulated genes and <code>d</code> the number of downregulated genes, then <code>z = (u - d)/sqrt(u + d)</code>.</li>
+<li><code>aggr_score</code>: mean LFC of genes associated with the term</li>
+</ul></li>
+<li>The number of functional terms included in the fuzzy clustering can be adjusted using the <code># of terms</code> control. As above, if this number is greater than the number of terms in the enrichment table, then the latter is used instead.</li>
+<li>The data shown in this table is visualized in the <code>emap_fuzzy</code> plot.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="plots"><a id='plt'></a> Plots</h2>
+<p>This tab shows visualizations of the functional enrichment analysis. The <code>Type of plot</code> menu can be used choose the visualization style. Options include:</p>
+<ul>
+<li><p><code>summary_overview</code></p>
+<p>Horizontal bar chart depicting the most significantly enriched terms in the analysis. This replaces the earlier <code>dotplot</code>.</p>
+<ul>
+<li><em>This plot can be used to easily highlight the most enriched terms</em>.</li>
+<li>The x-axis depicts <code>-log10(p-value)</code>, so higher values correspond to greater statistical significance. The <code>p-value column</code> can be either <code>pvalue</code> or <code>p.adjust</code>.</li>
+<li>The color of the circles can be used to depict either <code>z_score</code> (default) or <code>aggr_score</code>, <code>z_score</code> being a measure of the number of genes associated with the term and <code>aggr_score</code> a measure of the size of the effect.</li>
+<li>Additionally, we can control the <code># of terms</code> depicted in the plot (default=20).</li>
+</ul></li>
+<li><p><code>enrichment_map</code></p>
+<p>Interactive network visualization of the enrichment analysis. Nodes in the network represent functional terms and the connections (edges) between nodes represent shared genes between the terms.</p>
+<ul>
+<li><em>This plot is good for identifying similarities between enriched terms, since terms with shared genes</em> <em>will cluster together.</em></li>
+<li>The color of the nodes corresponds to p-values.</li>
+<li>The size of nodes represent the number of DE genes associated with the term.</li>
+<li>The thickness of the edge represents the number of genes shared between the terms.</li>
+<li>By default the top 30 categories are shown. This can be adjusted using the <code># of terms</code> control.</li>
+</ul></li>
+<li><p><code>emap_distill</code></p>
+<p>Enrichment map view of the <a href="#dstl">Distill enrichment</a> meta-analysis.</p>
+<ul>
+<li>Colors represent different clusters. The rest of the graph parameters, such as, node size and edge width are shared with the <code>enrichment_map</code>.</li>
+</ul></li>
+<li><p><code>emap_fuzzy</code></p>
+<p>Enrichment map view of the <a href="#fzy">Fuzzy clustering</a> meta-analysis.</p>
+<ul>
+<li>Colors represent different clusters with <code>Representative</code> terms in a cluster outlined in black. The rest of the graph parameters, such as, node size and edge width are shared with the <code>enrichment_map</code>.</li>
+</ul></li>
+<li><p><code>cnetplot</code></p>
+<p>Network visualization showing the associations of genes with multiple functional terms or pathways.</p>
+<ul>
+<li><em>This plot is good for identifying which genes act as links between which categories.</em></li>
+<li>Node size represents the number of genes associated with the functional terms.</li>
+<li><code>Node labels</code> can be used to depict category and gene names (<code>all</code>), either <code>category</code> or <code>gene</code> names or turned off altogether.</li>
+<li>By default, the top 5 categories are plotted. This can be adjusted using the <code># of terms</code> control in the sidebar.</li>
+<li>Users can also <code>color edge by terms</code> or depict the network with a <code>circular layout</code>.</li>
+</ul></li>
+<li><p><code>radar</code></p>
+<p>Interactive plot depicting functional terms on spokes around a circle.</p>
+<ul>
+<li>The length of spokes represent <code>-log10(pvalue)</code>. The column used for the p-value can be adjusted with the <code>p-value column</code> menu.</li>
+</ul></li>
+<li><p><code>alluvial</code></p>
+<p>Interactive visualization showing functional terms and associated genes. Similar to <code>cnetplot</code> this plot can be used to show the association of genes with multiple terms.</p>
+<ul>
+<li>The color represents different functional terms.</li>
+<li>Incoming flow count indicate the number of terms associated with a gene, while outgoing flow count indicates the number of genes associated with a functional term.</li>
+</ul></li>
+<li><p><code>dendrogram</code></p>
+<p>Tree visualization showing hierarchical clustering of functional terms. This is an alternative to enrichment maps to group terms based on shared genes.</p>
+<ul>
+<li>Color of the leaves represent p-values.</li>
+<li>Size of leaves represent the number of genes associated with the term.</li>
+<li>Color of the branches represent different clusters.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
+<h2 id="compare-results"><a id='comp'></a> Compare results</h2>
+<p>In this tab, we compare two functional analysis results.</p>
+<ul>
+<li>Gene sets to compare are selected using the <code>Comparison 1</code> and <code>Comparison 2</code> menus.</li>
+<li>The top functional terms enriched in <code>Comparison 1</code> that are also enriched in <code>Comparison 2</code> are shown in these plot. Note that <code>Comparison 1</code> gets precedence, so the plot will be different if the comparisons are swapped.</li>
+</ul>
+<p>There are three options for visualization:</p>
+<ul>
+<li><p><code>summary_overview</code></p>
+<p>Horizontal bar chart comparing two gene sets.</p>
+<ul>
+<li>The circles with the solid black outline represents <code>Comparison 1</code>. The circles representing <code>Comparison 2</code> also have some transparency (<code>alpha = 0.7</code>) to help differentiate the two groups.</li>
+<li>The remaining details are shared with the single comparison, <code>summary_overview</code> plot.</li>
+</ul></li>
+<li><p><code>radar</code></p>
+<p>Radar plot depicting two gene sets, similar to the single gene set version.</p></li>
+<li><p><code>horizon</code></p>
+<p>An alternative to the <code>summary_overview</code> plot where functional terms shared by two comparisons are plotted side-by-side with terms corresponding to each comparison connected by solid lines.</p>
+<ul>
+<li>The default sorting (<code>clustered</code>) orders top shared terms according to the comparisons for which they have lower p-values. Sorting by <code>first_set</code> gives precedence to <code>Comparison 1</code> as in the other plots.</li>
+</ul></li>
+</ul>
+<p><a href="#top">Back to top</a></p>
