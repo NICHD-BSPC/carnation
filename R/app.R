@@ -621,17 +621,19 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     # list to hold original object and file path
     original <- reactiveValues(obj=NULL, path=NULL)
 
+    # list to hold user details
+    user_details <- reactiveValues(username=NULL, admin=FALSE)
+
     #################### authentication ####################
 
-    ## check_credentials directly on sqlite db
+    ########## shinymanager login #############
+
     res_auth <- secure_server(
       check_credentials = check_credentials(
           db=credentials,
           passphrase=passphrase
       )
     )
-
-    user_details <- reactiveValues(username=NULL, admin=FALSE)
 
     observeEvent(res_auth, {
 
