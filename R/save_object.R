@@ -249,7 +249,7 @@ saveServer <- function(id, original, current, coldata, pattern, username){
             # add data area
             # get access yaml and add data area
             y <- read_access_yaml()
-            if(is.null(username)) ug <- config$server$admin_group
+            if(is.null(username())) ug <- config$server$admin_group
             else ug <- input$user_group
 
             # check for empty user group
