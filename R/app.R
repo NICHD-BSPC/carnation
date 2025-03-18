@@ -643,6 +643,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       user_details$admin <- res_auth$user_info
     })
 
+    ########## proxy login ###########
+
+    # get username from http request header
+    observeEvent(session$request, {
+      user_details$username <- session$request[[ config$http_request_header ]]
+    })
 
     #################### Intro ####################
 
