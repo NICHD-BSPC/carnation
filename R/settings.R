@@ -820,6 +820,15 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
       ) # modalDialog
     }
 
+    no_access_modal <- function(){
+      modalDialog(
+        div(tags$b('No access permissions!', style='color: red;')),
+        br(),
+        span('Please contact site administrators to enable access'),
+        footer=modalButton('OK')
+      )
+    }
+
     # update object menu
     settings <- eventReactive(c(access_yaml$l,
                                 reload_parent$flag), {
@@ -841,24 +850,28 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
                                admin=admin_group)
       }
 
+      # var to detect if in shinymanager admin view
+      if(is.null(details()$where)) shinyadmin <- FALSE
+      else if(details()$where != 'admin') shinyadmin <- FALSE
+      else shinyadmin <- TRUE
+
       if(is.null(d)){
         # single-user mode
         if(is.null(u)){
-          no_projects_modal()
+          showModal(
+            no_projects_modal()
+          )
         } else {
-          # don't show this in admin view
-          if(details()$where != 'admin'){
+          # don't show if in shinymanager admin view
+          if(!shinyadmin){
             if(!is_admin){
               showModal(
-                modalDialog(
-                  div(tags$b('No access permissions!', style='color: red;')),
-                  br(),
-                  span('Please contact site administrators to enable access'),
-                  footer=modalButton('OK')
-                )
+                no_access_modal()
               )
             } else {
-              no_projects_modal()
+              showModal(
+                no_projects_modal()
+              )
             }
           }
         }
@@ -877,7 +890,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
 
       if(is.null(l) | length(l) == 0){
         # don't show modal if in admin panel
-        if(details()$where != 'admin'){
+        if(!shinyadmin){
           showModal(
             no_projects_modal()
           ) # showModal
