@@ -1,6 +1,9 @@
 # maximum upload file size (in MB)
 max_upload_size: 30
 
+# http request header with username
+http_request_header: HTTP_X_SP_USERID
+
 # custom CSS styles used in the app
 style:
   global: >

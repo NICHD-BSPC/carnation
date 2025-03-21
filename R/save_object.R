@@ -249,7 +249,7 @@ saveServer <- function(id, original, current, coldata, pattern, username){
             # add data area
             # get access yaml and add data area
             y <- read_access_yaml()
-            if(is.null(username)) ug <- config$server$admin_group
+            if(is.null(username())) ug <- config$server$admin_group
             else ug <- input$user_group
 
             # check for empty user group
@@ -265,14 +265,14 @@ saveServer <- function(id, original, current, coldata, pattern, username){
             # check for existence of user_group & add if new
             if(!ug %in% names(y$data_area)){
               y$data_area <- append(y$data_area,
-                                setNames(as.list(input$dir_new), ug))
+                                setNames(as.list(input$rds_path), ug))
               showModal(
                 modalDialog('Adding data area')
               )
             } else {
-              if(!input$dir_new %in% y$data_area[[ug]]){
+              if(!input$rds_path %in% y$data_area[[ug]]){
                 y$data_area[[ug]] <- c(y$data_area[[ug]],
-                                       input$dir_new)
+                                       input$rds_path)
               }
             }
             save_access_yaml(y)
