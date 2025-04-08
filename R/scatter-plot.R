@@ -320,10 +320,10 @@ scatterPlotServer <- function(id, obj, plot_args){
       # "plot_interactive", etc. and returns them all in a list.
       merged_data <- eventReactive({
         req(!is.null(app_object()$res))
-        # The "trigger expression" – if *any* of these reactives change, we rerun:
+        # The "trigger expression": Refresh button or new data
         list(
-          input$refresh,       # user clicks the "Refresh" button
-          names(obj$res)       # the set of available comparisons changes
+          input$refresh,
+          names(obj$res)
         )
         }, {
         # Merge data & set up the plot:
@@ -585,8 +585,6 @@ scatterPlotServer <- function(id, obj, plot_args){
         which_cols <- which(colnames(df_full) %in% columns_to_format)
         border_cols <- c(1, grep('padj', colnames(df_full)))
 
-        # Instead of referencing input$x_axis_comp, etc. here,
-        # we can store them in md if we truly need them in the header.
         x_comp_name <- isolate(input$x_axis_comp)
         y_comp_name <- isolate(input$y_axis_comp)
         all_comps   <- c(x_comp_name, y_comp_name)
