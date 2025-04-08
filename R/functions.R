@@ -2224,3 +2224,159 @@ plotScatter.label_ly <- function(compare,
   # Return the Plotly plot object
   return(p)
 }
+
+#' @title Auto-scale X-axis limits
+#'
+#' @description
+#' A helper function that updates the scatter plot's **x-axis** numeric inputs
+#' (`scatter_xmin` and `scatter_xmax`) based on the current data and user
+#' choice of LFC vs. P-adj.
+#'
+#' @details
+#' This function internally calls `buildMergedData()` to obtain the data,
+#' determines whether the user is looking at 'LFC' or 'P-adj', and applies a
+#' `-log10()` transformation if needed. It then computes the new x-range using
+#' `get_range()` and updates the UI inputs for x-min and x-max.
+#'
+#' @return No return value. This function is called for its side effects:
+#' it updates `scatter_xmin` and `scatter_xmax` in the Shiny UI.
+#'
+#' @keywords internal
+autoScaleX <- function(input, app_object, session) {
+  tmp <- buildMergedData(input, app_object)
+  compare <- isolate(input$compare)
+
+  if(compare == 'LFC'){
+    xcol <- 'log2FoldChange.x'
+  } else {
+    xcol <- 'padj.x'
+    tmp[[xcol]] <- -log10(tmp[[xcol]])
+  }
+
+  new_lim <- get_range(tmp, xcol, c(NA, NA))
+  updateNumericInput(session, 'scatter_xmin', value=new_lim[1])
+  updateNumericInput(session, 'scatter_xmax', value=new_lim[2])
+}
+
+#' @title Auto-scale Y-axis limits
+#'
+#' @description
+#' A helper function that updates the scatter plot's **y-axis** numeric inputs
+#' (`scatter_ymin` and `scatter_ymax`) based on the current data and user
+#' choice of LFC vs. P-adj.
+#'
+#' @details
+#' Similar to `autoScaleX()`, this function calls `buildMergedData()` to fetch
+#' the data, checks if 'LFC' or 'P-adj' is selected, applies transformations
+#' if needed, calculates a new y-range via `get_range()`, and then updates
+#' `scatter_ymin` and `scatter_ymax`.
+#'
+#' @return No return value. This function is called for its side effects:
+#' it updates `scatter_ymin` and `scatter_ymax` in the Shiny UI.
+#'
+#' @keywords internal
+autoScaleY <- function(input, app_object, session) {
+  tmp <- buildMergedData(input, app_object)
+  compare <- isolate(input$compare)
+
+  if(compare == 'LFC'){
+    ycol <- 'log2FoldChange.y'
+  } else {
+    ycol <- 'padj.y'
+    tmp[[ycol]] <- -log10(tmp[[ycol]])
+  }
+
+  new_lim <- get_range(tmp, ycol, c(NA, NA))
+  updateNumericInput(session, 'scatter_ymin', value=new_lim[1])
+  updateNumericInput(session, 'scatter_ymax', value=new_lim[2])
+}
+
+#' @title Merge LFC or P-adj Data from Two Contrasts
+#'
+#' @description
+#' A helper function that merges data from two user-selected contrasts, based on
+#' whether the user is comparing log2 fold change (\code{LFC}) or adjusted p-values
+#' (\code{P-adj}). It discards any genes not found in both contrasts and uses
+#' \code{geneid} for merging.
+#'
+#' @details
+#' \code{buildMergedData()} reads the current values of \code{input$x_axis_comp},
+#' \code{input$y_axis_comp}, and \code{input$compare} to determine which columns
+#' (either \code{log2FoldChange} or \code{padj}) to merge. It also lowercases the
+#' \code{SYMBOL} column to \code{symbol}, updates \code{geneid} to symbol if it
+#' appears to be unique, and then performs an inner join on \code{geneid}.
+#' If certain genes exist in only one contrast, they are omitted with a warning.
+#'
+#' @return A data frame containing merged columns for the chosen metric (LFC or
+#' P-adj) from both contrasts. Columns in the returned data are suffixed with
+#' \code{.x} and \code{.y}, corresponding to each selected contrast.
+#'
+#' @keywords internal
+buildMergedData <- function(input, app_object){
+  req(input$x_axis_comp, input$y_axis_comp, input$compare)
+  req(!is.null(app_object$res[[input$x_axis_comp]]),
+      !is.null(app_object$res[[input$y_axis_comp]]))
+
+  res_i <- as.data.frame(app_object$res[[input$x_axis_comp]])
+  res_j <- as.data.frame(app_object$res[[input$y_axis_comp]])
+
+  # Possibly drop genes not in both
+  diff.genes <- unique(unlist(c(
+    setdiff(rownames(res_i), rownames(res_j)),
+    setdiff(rownames(res_j), rownames(res_i))
+  )))
+  if(length(diff.genes) > 0){
+    warning(paste0(length(diff.genes),
+                   " genes omitted; found in one contrast but not the other"))
+  }
+
+  # Lowercase 'SYMBOL'
+  name.col <- "SYMBOL"
+  colnames(res_i)[colnames(res_i) %in% name.col] <- tolower(name.col)
+  colnames(res_j)[colnames(res_j) %in% name.col] <- tolower(name.col)
+
+  # Add geneid for joining
+  res_i$geneid <- rownames(res_i)
+  res_j$geneid <- rownames(res_j)
+
+  # Possibly update geneid if unique symbol
+  update_geneid <- function(df) {
+    na_idx <- is.na(df$symbol)
+    tbl <- table(df$symbol)
+    dups <- names(tbl)[tbl > 1]
+    duplicates_idx <- df$symbol %in% dups
+    symbols_to_fix <- na_idx | duplicates_idx
+    symbols_ok <- !symbols_to_fix
+    df$geneid[symbols_ok] <- df$symbol[symbols_ok]
+    df
+  }
+  res_i <- update_geneid(res_i)
+  res_j <- update_geneid(res_j)
+
+  # Merge minimal data for LFC or P-adj
+  if(input$compare == 'LFC'){
+    df <- dplyr::inner_join(
+      dplyr::select(res_i, geneid, log2FoldChange),
+      dplyr::select(res_j, geneid, log2FoldChange),
+      by = 'geneid',
+      suffix = c(".x", ".y")
+    )
+  } else {
+    df <- dplyr::inner_join(
+      dplyr::select(res_i, geneid, padj),
+      dplyr::select(res_j, geneid, padj),
+      by = 'geneid',
+      suffix = c(".x", ".y")
+    )
+  }
+  return(df)
+}
+
+get_range <- function(df, column, lim){
+  lim[1] <- min(df[[column]], na.rm=TRUE)
+  lim[2] <- max(df[[column]], na.rm=TRUE)
+  diff <- diff(lim) * 0.05
+  lim[1] <- round(lim[1] - diff, digits=2)
+  lim[2] <- round(lim[2] + diff, digits=2)
+  lim
+}
