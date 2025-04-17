@@ -45,7 +45,6 @@ Imports:
     shiny,
     shinyBS,
     shinycssloaders,
-    shinymanager,
     shinythemes,
     shinyWidgets,
     sortable,
@@ -58,6 +57,7 @@ Suggests:
     knitr,
     rmarkdown,
     org.Hs.eg.db,
-    DEGreport
+    DEGreport,
+    shinymanager
 VignetteBuilder: knitr
 URL: https://nichd-bspc.github.io/carnation/
