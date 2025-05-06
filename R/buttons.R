@@ -17,7 +17,7 @@ helpButtonUI <- function(id){
 
 #' Help button module server
 #'
-#' Server for download button module
+#' Server for help button module
 #'
 #' @param id Input id
 #' @param ... other params passed to helpModal()
