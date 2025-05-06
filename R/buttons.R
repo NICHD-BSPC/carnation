@@ -164,10 +164,15 @@ downloadButtonServer <- function(id, outplot, plot_type){
             # NOTE: this needs 'kaleido' module in python to be
             #       available for 'reticulate'
             ppi <- config$server$de_analysis$heatmap$pdf_res
-            save_image(outplot(),
-                       file=file,
-                       width=input$plot_wd*ppi,
-                       height=input$plot_ht*ppi)
+
+            # NOTE: turn off mathjax in kaleido to prevent "Loading MathJax ..." box in saved plot
+            # - solution from https://stackoverflow.com/questions/79464233/loading-mathjax-extensions-mathmenu-js-box-visible-in-pdf-when-running-plotl/
+            k <- plotly::kaleido()
+            k$scope$mathjax <- FALSE
+            k$transform(outplot(),
+                        file=file,
+                        width=input$plot_wd*ppi,
+                        height=input$plot_ht*ppi)
           } else {
             ggsave(file, plot = outplot(),
                    device='pdf',
