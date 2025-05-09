@@ -1123,6 +1123,7 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
 
   # DE genes
   idx <- res$padj < fdr.thres & !is.na(res$padj) & abs(res$log2FoldChange) >= fc.thres
+  if(sum(idx, na.rm=TRUE) == 0) return( NULL )
   res.de <- res[idx,]
 
   # get symbol column, if any
