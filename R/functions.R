@@ -1258,13 +1258,21 @@ fromList.with.names <- function(lst){
   data <- data.frame(matrix(data, ncol = length(lst), byrow = F))
 
   # This is the only way in which this function differs from UpSetR::fromList
-  rownames(data) <- element_names$id
+  # NOTE: here we use the unique column as rownames
+  if(sum(duplicated(element_names$id)) == 0)
+    rownames(data) <- element_names$id
+  else
+    rownames(data) <- element_names$symbol
 
   data <- data[which(rowSums(data) != 0), ]
   colnames(data) <- names(lst)
 
   # add symbol column
-  data$symbol <- element_names$symbol
+  # NOTE: if column 'id' was not unique, then 'symbol' is used instead
+  if(sum(duplicated(element_names$id)) == 0)
+    data$symbol <- element_names$symbol
+  else
+    data$symbol <- element_names$id
   data <- data %>% relocate(.data$symbol)
 
   return(data)
