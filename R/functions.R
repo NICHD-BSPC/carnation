@@ -1764,174 +1764,174 @@ plotPCA.san <- function (object, intgroup = "group",
                          samples=NULL,
                          loadings=FALSE,
                          loadings_ngenes=10){
-    pcx <- as.numeric(pcx)
-    pcy <- as.numeric(pcy)
-    if(!is.null(pcz)) pcz <- as.numeric(pcz)
+  pcx <- as.numeric(pcx)
+  pcy <- as.numeric(pcy)
+  if(!is.null(pcz)) pcz <- as.numeric(pcz)
 
-    mat <- assay(object)
-    cdata <- colData(object)
+  mat <- assay(object)
+  cdata <- colData(object)
 
-    if(!is.null(samples)){
-      mat <- mat[, colnames(mat) %in% samples]
-      cdata <- cdata[rownames(cdata) %in% samples,]
-    }
+  if(!is.null(samples)){
+    mat <- mat[, colnames(mat) %in% samples]
+    cdata <- cdata[rownames(cdata) %in% samples,]
+  }
 
-    rv <- rowVars(mat)
-    select <- order(rv, decreasing = TRUE)[seq_len(min(ntop,
-                                                       length(rv)))]
-    pca <- prcomp(t(mat[select, ]))
-    percentVar <- pca$sdev^2/sum(pca$sdev^2)
+  rv <- rowVars(mat)
+  select <- order(rv, decreasing = TRUE)[seq_len(min(ntop,
+                                                     length(rv)))]
+  pca <- prcomp(t(mat[select, ]))
+  percentVar <- pca$sdev^2/sum(pca$sdev^2)
 
-    if (!all(intgroup %in% names(cdata))) {
-      stop("the argument 'intgroup' should specify columns of colData(dds)")
-    }
-    intgroup.df <- as.data.frame(cdata[, intgroup, drop = FALSE])
-    group <- if (length(intgroup) > 1) {
-      factor(apply(intgroup.df, 1, paste, collapse = " : "))
-    }
-    else {
-      cdata[[intgroup]]
-    }
+  if (!all(intgroup %in% names(cdata))) {
+    stop("the argument 'intgroup' should specify columns of colData(dds)")
+  }
+  intgroup.df <- as.data.frame(cdata[, intgroup, drop = FALSE])
+  group <- if (length(intgroup) > 1) {
+    factor(apply(intgroup.df, 1, paste, collapse = " : "))
+  }
+  else {
+    cdata[[intgroup]]
+  }
 
 
-    xlab <- paste0("PC", pcx, ": ", round(percentVar[pcx] * 100), "% variance")
-    ylab <- paste0("PC", pcy, ": ", round(percentVar[pcy] * 100), "% variance")
+  xlab <- paste0("PC", pcx, ": ", round(percentVar[pcx] * 100), "% variance")
+  ylab <- paste0("PC", pcy, ": ", round(percentVar[pcy] * 100), "% variance")
+  if(is.null(pcz)){
+    d <- data.frame(PC1 = pca$x[, pcx],
+                    PC2 = pca$x[, pcy],
+                    group = group, intgroup.df, name = cdata[,1])
+
+
+    p <- plot_ly(d,
+                 x=~PC1, y=~PC2,
+                 color=~group,
+                 type='scatter',
+                 text=paste0('<b>', d[, 'group'],
+                             '</b>\nsample: ', d[, 'name']),
+                 mode='markers',
+                 hoverinfo='text',
+                 marker=list(size=12)) %>%
+          layout(xaxis=list(title=xlab,
+                            zeroline=FALSE,
+                            showline=TRUE,
+                            showgrid=FALSE,
+                            mirror=TRUE),
+                 yaxis=list(title=ylab,
+                            zeroline=FALSE,
+                            showline=TRUE,
+                            showgrid=FALSE,
+                            mirror=TRUE))
+
+  } else {
+    zlab <- paste0("PC", pcz, ": ", round(percentVar[pcz] * 100), "% variance")
+
+    d <- data.frame(PC1 = pca$x[, pcx],
+                    PC2 = pca$x[, pcy],
+                    PC3 = pca$x[, pcz],
+                    group = group, intgroup.df, name = cdata[,1])
+
+    p <- plot_ly(d,
+                 x=~PC1, y=~PC2, z=~PC3,
+                 color=~group,
+                 type='scatter3d',
+                 text=paste0('<b>', d[, 'group'],
+                             '</b>\nsample: ', d[, 'name']),
+                 mode='markers',
+                 hoverinfo='text',
+                 marker=list(size=8)) %>%
+          layout(scene = list(
+                              xaxis=list(title=xlab),
+                              yaxis=list(title=ylab),
+                              zaxis=list(title=zlab))
+                          )
+
+  }
+
+  # add loadings traces
+  if(loadings){
+
+    # get loadings for selected PCs
+    rot <- pca$rotation
+
+    # columns to use
+    cols <- c(pcx, pcy)
+    if(!is.null(pcz)) cols <- c(cols, pcz)
+
+    # calculate sum of squares (vector length^2)
+    ssq <- rot[, pcx]**2 + rot[, pcy]**2
+    if(!is.null(pcz)) ssq <- ssq + rot[, pcz]**2
+
+    # order SS to get top genes
+    ssq <- ssq[order(ssq, decreasing=T)]
+
+    top_genes <- names(ssq)[1:loadings_ngenes]
+
+    # double up a single gene to avoid single-row df effects
+    if(length(top_genes) == 1) top_genes <- c(top_genes, top_genes)
+
+    # subset loadings df
+    rot_df <- rot[top_genes, ]
+
+    # calculate scale ratio
+    all_ratios <- lapply(cols, function(x){
+                    diff(range(pca$x[, x]))/diff(range(rot[, x]))
+                  })
+    scaleratio <- round(mean(unlist(all_ratios)))
+
+    # build text
+    tt2 <- lapply(1:nrow(rot_df), function(x){
+             ll <- list(x=rot_df[x, pcx]*scaleratio*1.1,
+                        y=rot_df[x, pcy]*scaleratio*1.1,
+                        showarrow=FALSE,
+                        xanchor='center',
+                        yanchor='center',
+                        text=rownames(rot_df)[x],
+                        font=list(color='red', size=10))
+             if(!is.null(pcz)) ll[[ 'z' ]] <- rot_df[x, pcz]*scaleratio*1.1
+             ll
+           })
+
+    # build line data frame
+    line_df <- as.data.frame(rot_df)
+    line_df$gene <- rownames(line_df)
+    rownames(line_df) <- NULL
+
+    # add origin points
+    line_df0 <- line_df
+    line_df0[, cols] <- 0
+    line_df <- rbind(line_df, line_df0)
+    line_df <- unique(line_df)
+
     if(is.null(pcz)){
-      d <- data.frame(PC1 = pca$x[, pcx],
-                      PC2 = pca$x[, pcy],
-                      group = group, intgroup.df, name = cdata[,1])
-
-
-      p <- plot_ly(d,
-                   x=~PC1, y=~PC2,
-                   color=~group,
-                   type='scatter',
-                   text=paste0('<b>', d[, 'group'],
-                               '</b>\nsample: ', d[, 'name']),
-                   mode='markers',
-                   hoverinfo='text',
-                   marker=list(size=12)) %>%
-            layout(xaxis=list(title=xlab,
-                              zeroline=FALSE,
-                              showline=TRUE,
-                              showgrid=FALSE,
-                              mirror=TRUE),
-                   yaxis=list(title=ylab,
-                              zeroline=FALSE,
-                              showline=TRUE,
-                              showgrid=FALSE,
-                              mirror=TRUE))
-
+      p <- p %>%
+              add_trace(x=line_df[, pcx]*scaleratio,
+                        y=line_df[, pcy]*scaleratio,
+                        type='scatter',
+                        mode='lines',
+                        line=list(color='black'),
+                        split=line_df$gene,
+                        showlegend=FALSE,
+                        inherit=FALSE) %>%
+              layout(annotations=tt2,
+                     xaxis=list(zeroline=TRUE),
+                     yaxis=list(zeroline=TRUE))
     } else {
-      zlab <- paste0("PC", pcz, ": ", round(percentVar[pcz] * 100), "% variance")
-
-      d <- data.frame(PC1 = pca$x[, pcx],
-                      PC2 = pca$x[, pcy],
-                      PC3 = pca$x[, pcz],
-                      group = group, intgroup.df, name = cdata[,1])
-
-      p <- plot_ly(d,
-                   x=~PC1, y=~PC2, z=~PC3,
-                   color=~group,
-                   type='scatter3d',
-                   text=paste0('<b>', d[, 'group'],
-                               '</b>\nsample: ', d[, 'name']),
-                   mode='markers',
-                   hoverinfo='text',
-                   marker=list(size=8)) %>%
-            layout(scene = list(
-                                xaxis=list(title=xlab),
-                                yaxis=list(title=ylab),
-                                zaxis=list(title=zlab))
-                            )
-
+      p <- p %>%
+              add_trace(x=line_df[, pcx]*scaleratio,
+                        y=line_df[, pcy]*scaleratio,
+                        z=line_df[, pcz]*scaleratio,
+                        type='scatter3d',
+                        mode='lines',
+                        line=list(color='black'),
+                        split=line_df$gene,
+                        showlegend=FALSE,
+                        inherit=FALSE) %>%
+              layout(scene=list(annotations=tt2))
     }
 
-    # add loadings traces
-    if(loadings){
+  }
 
-      # get loadings for selected PCs
-      rot <- pca$rotation
-
-      # columns to use
-      cols <- c(pcx, pcy)
-      if(!is.null(pcz)) cols <- c(cols, pcz)
-
-      # calculate sum of squares (vector length^2)
-      ssq <- rot[, pcx]**2 + rot[, pcy]**2
-      if(!is.null(pcz)) ssq <- ssq + rot[, pcz]**2
-
-      # order SS to get top genes
-      ssq <- ssq[order(ssq, decreasing=T)]
-
-      top_genes <- names(ssq)[1:loadings_ngenes]
-
-      # double up a single gene to avoid single-row df effects
-      if(length(top_genes) == 1) top_genes <- c(top_genes, top_genes)
-
-      # subset loadings df
-      rot_df <- rot[top_genes, ]
-
-      # calculate scale ratio
-      all_ratios <- lapply(cols, function(x){
-                      diff(range(pca$x[, x]))/diff(range(rot[, x]))
-                    })
-      scaleratio <- round(mean(unlist(all_ratios)))
-
-      # build text
-      tt2 <- lapply(1:nrow(rot_df), function(x){
-               ll <- list(x=rot_df[x, pcx]*scaleratio*1.1,
-                          y=rot_df[x, pcy]*scaleratio*1.1,
-                          showarrow=FALSE,
-                          xanchor='center',
-                          yanchor='center',
-                          text=rownames(rot_df)[x],
-                          font=list(color='red', size=10))
-               if(!is.null(pcz)) ll[[ 'z' ]] <- rot_df[x, pcz]*scaleratio*1.1
-               ll
-             })
-
-      # build line data frame
-      line_df <- as.data.frame(rot_df)
-      line_df$gene <- rownames(line_df)
-      rownames(line_df) <- NULL
-
-      # add origin points
-      line_df0 <- line_df
-      line_df0[, cols] <- 0
-      line_df <- rbind(line_df, line_df0)
-      line_df <- unique(line_df)
-
-      if(is.null(pcz)){
-        p <- p %>%
-                add_trace(x=line_df[, pcx]*scaleratio,
-                          y=line_df[, pcy]*scaleratio,
-                          type='scatter',
-                          mode='lines',
-                          line=list(color='black'),
-                          split=line_df$gene,
-                          showlegend=FALSE,
-                          inherit=FALSE) %>%
-                layout(annotations=tt2,
-                       xaxis=list(zeroline=TRUE),
-                       yaxis=list(zeroline=TRUE))
-      } else {
-        p <- p %>%
-                add_trace(x=line_df[, pcx]*scaleratio,
-                          y=line_df[, pcy]*scaleratio,
-                          z=line_df[, pcz]*scaleratio,
-                          type='scatter3d',
-                          mode='lines',
-                          line=list(color='black'),
-                          split=line_df$gene,
-                          showlegend=FALSE,
-                          inherit=FALSE) %>%
-                layout(scene=list(annotations=tt2))
-      }
-
-    }
-
-    return(p)
+  return(p)
 }
 
 #' Make an enrichResult obj from a data frame
