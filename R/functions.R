@@ -87,10 +87,10 @@ check_user_access <- function(al, u, admin='admin'){
     user_group <- al$user_group[idx]
 
     # if admin, give access to everything
-    if(admin %in% user_group){
+    if(admin %in% unlist(user_group)){
       data_area <- al$data_area
     } else {
-      idx <- which(names(al$data_area) %in% user_group)
+      idx <- which(names(al$data_area) %in% unlist(user_group))
       if(length(idx) == 0){
         return(NULL)
       } else {
