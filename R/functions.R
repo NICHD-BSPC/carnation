@@ -136,7 +136,7 @@ is_admin <- function(u){
 #' @param u username
 #'
 in_admin_group <- function(u){
-  al <- check_user_access(u)
+  al <- read_yaml(get_access_path())
 
   cfg <- get_config()
   admin_group <- cfg$server$admin_group
