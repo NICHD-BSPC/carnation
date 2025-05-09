@@ -1614,7 +1614,7 @@ my.summary <- function(res, dds, alpha, lfc.thresh=0){
                     total.nonzero=notallzero,
                     outliers=outlier,
                     low.counts=filt,
-                    design=deparse(design(dds), width.cutoff=500L),
+                    design=curr_design,
                     contrast=contrast
                     )
    return(df)
