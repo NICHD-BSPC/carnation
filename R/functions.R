@@ -58,7 +58,7 @@ read_access_yaml <- function(){
 
   # check if yaml exists
   if(!file.exists(f)){
-      stop('Access yaml not found. Have you run "create_access_yaml()" yet?')
+    stop('Access yaml not found. Have you run "create_access_yaml()" yet?')
   }
 
   al <- read_yaml(f)
