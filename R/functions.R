@@ -115,7 +115,7 @@ save_access_yaml <- function(lst){
   f <- get_access_path()
 
   write_yaml(list(user_group=lst$user_group,
-                    data_area=lst$data_area), f)
+                  data_area=lst$data_area), f)
 }
 
 #' is user an admin?
@@ -902,7 +902,6 @@ add.set.column <- function(df){
     df <- df[order(df$set),]
 
     # move set & symbol column to beginning
-    #col.order <- c('set', setdiff(colnames(df), 'set'))
     df <- df %>% relocate('set') %>%
       relocate('symbol')
 
