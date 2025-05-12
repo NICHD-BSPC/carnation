@@ -258,7 +258,7 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   ymin <- ifelse(is.null(ymin), min(df$count), ymin)
   ymax <- ifelse(is.null(ymax), max(df$count), ymax)
 
-  p <- ggplot(df, aes_string(y='count', x=intgroup, color=color, name='sample')) +
+  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]], name=.data$sample)) +
     geom_point(position=position_jitterdodge(dodge.width=0.2),
                  size=2, alpha=0.5)
 
@@ -290,10 +290,10 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
 
   if(!is.null(title)) p <- p + ggtitle(title)
   if(trendline == 'smooth'){
-        p <- p + geom_smooth(aes_string(group=color), se=FALSE, size=0.5, linetype='dashed')
+        p <- p + geom_smooth(aes(group=.data[[ color ]]), se=FALSE, linewidth=0.5, linetype='dashed')
   } else if(trendline == 'line'){
         p <- p + stat_summary(fun=median, geom='line', linetype='dashed',
-                              aes_string(group=color), size=0.5)
+                              aes(group=.data[[ color ]]), linewidth=0.5)
   }
 
   if(!is.null(facet)){
@@ -767,7 +767,7 @@ plotMA.label <- function(res,
   # change theme and add horizontal line
   p <- p + theme_bw() +
     theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
-  p <- p + geom_hline(yintercept = 0, col="red", size=2, alpha=0.5)
+  p <- p + geom_hline(yintercept = 0, col="red", linewidth=2, alpha=0.5)
 
 
   if(!is.null(lab.genes)){
@@ -1326,8 +1326,8 @@ get_degplot <- function(obj, time, color=NULL,
     label_table <- table[gidx,]
 
     # if labeling genes background lines become grayed out
-    p <- ggplot(table, aes_string(x = time, y = "value",
-                                  fill = color))
+    p <- ggplot(table, aes(x = .data[[ time ]], y = .data$value,
+                           fill = .data[[ color ]]))
 
 
     # don't show lines/points if labeling genes
@@ -1345,8 +1345,8 @@ get_degplot <- function(obj, time, color=NULL,
     splan <- length(unique(table[[time]])) - 1L
 
     if(smooth == 'smooth'){
-      p <- p + geom_smooth(aes_string(x=time, y='value',
-                                      group=color),
+      p <- p + geom_smooth(aes(x=.data[[ time ]], y=.data$value,
+                               group=.data[[ color ]]),
                            color=base_color,
                            se=FALSE)
                            #method = "lm",
@@ -1355,10 +1355,10 @@ get_degplot <- function(obj, time, color=NULL,
       p <- p + stat_summary(
                   fun=median,
                   geom='line',
-                  aes_string(x=time, y='value',
-                             group=color),
+                  aes(x=.data[[ time ]], y=.data$value,
+                      group=.data[[ color ]]),
                   color=base_color,
-                  size=1)
+                  linewidth=1)
     }
 
     if (facet)
@@ -1372,38 +1372,38 @@ get_degplot <- function(obj, time, color=NULL,
     if(length(unique(label_table$line_group)) > 10){
       if(smooth == 'smooth'){
         p <- p + geom_smooth(data=label_table,
-                           aes_string(group="line_group",
-                                      linetype=color),
+                           aes(group=.data$line_group,
+                               linetype=color),
                            color='#F8766D',
                            alpha=0.5,
                            se=FALSE,
-                           size=0.75)
+                           linewidth=0.75)
       } else if(smooth == 'line'){
         p <- p + stat_summary(data=label_table,
                            fun=median,
                            geom='line',
-                           aes_string(group="line_group",
-                                      linetype=color),
+                           aes(group=.data$line_group,
+                               linetype=color),
                            color='#F8766D',
                            alpha=0.5,
-                           size=0.75)
+                           linewidth=0.75)
       }
     } else if(nrow(label_table) > 0){
       if(smooth == 'smooth'){
         p <- p + geom_smooth(data=label_table,
-                           aes_string(group="line_group",
-                                      color='symbol',
-                                      linetype=color),
+                           aes(group=.data$line_group,
+                               color=.data$symbol,
+                               linetype=.data[[ color ]]),
                            se=FALSE,
-                           size=0.75)
+                           linewidth=0.75)
       } else if(smooth == 'line'){
         p <- p + stat_summary(data=label_table,
                            fun=median,
                            geom='line',
-                           aes_string(group="line_group",
-                                      color='symbol',
-                                      linetype=color),
-                           size=0.75)
+                           aes(group=.data$line_group,
+                               color=.data$symbol,
+                               linetype=.data[[ color ]]),
+                           linewidth=0.75)
       }
     }
   } else {
@@ -1414,9 +1414,9 @@ get_degplot <- function(obj, time, color=NULL,
     names(cl_titles) <- title_df[[ 'cluster' ]]
     table[[ 'title' ]] <- factor(table[['title']], levels=cl_titles[ cluster_to_show ])
 
-    p <- ggplot(table, aes_string(x = time, y = "value",
-                                   fill = color,
-                                   color = color))
+    p <- ggplot(table, aes(x = .data[[ time ]], y = .data$value,
+                           fill = .data[[ color ]],
+                           color = .data[[ color ]]))
 
     if (boxes)
         p <- p + geom_boxplot(alpha = 0,
@@ -1430,9 +1430,9 @@ get_degplot <- function(obj, time, color=NULL,
     splan <- length(unique(table[[time]])) - 1L
 
     if(smooth == 'smooth'){
-          p <- p + geom_smooth(aes_string(x=time, y='value',
-                                          color=color,
-                                          group=color),
+          p <- p + geom_smooth(aes(x=.data[[ time ]], y=.data$value,
+                                   color=.data[[ color ]],
+                                   group=.data[[ color ]]),
                                se=FALSE)
                                #method = "lm",
                                #formula = y~poly(x, splan))
@@ -1440,15 +1440,15 @@ get_degplot <- function(obj, time, color=NULL,
       p <- p + stat_summary(
                   fun=median,
                   geom='line',
-                  aes_string(x=time, y='value',
-                             color=color,
-                             group=color),
-                  size=1)
+                  aes(x=.data[[ time ]], y=.data$value,
+                      color=.data[[ color ]],
+                      group=.data[[ color ]]),
+                  linewidth=1)
     }
 
     if (lines){
-        p <- p + geom_line(aes_string(group = "line_group"),
-                                      alpha = 0.1)
+        p <- p + geom_line(aes(group = .data$line_group),
+                               alpha = 0.1)
     }
 
     if (facet)
@@ -1575,7 +1575,7 @@ my.summary <- function(res, dds, alpha, lfc.thresh=0){
 plotPCA.ly <- function(rld, intgroup){
   mat <- plotPCA(rld, intgroup, returnData=TRUE)
   pv <- attr(mat, 'percentVar')
-  p <- ggplot(data=mat, aes_string(x='PC1', y='PC2', color='group', label='name')) +
+  p <- ggplot(data=mat, aes(x=.data$PC1, y=.data$PC2, color=.data$group, label=.data$name)) +
     geom_point(size=3) + xlab(paste0('PC1: ', round(pv[1]*100), '% variance')) +
     ylab(paste0('PC2: ', round(pv[2]*100), '% variance')) + coord_fixed()
   return(p)
