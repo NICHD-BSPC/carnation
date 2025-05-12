@@ -45,6 +45,7 @@ Imports:
     shiny,
     shinyBS,
     shinycssloaders,
+    shinymanager,
     shinythemes,
     shinyWidgets,
     sortable,
@@ -55,7 +56,6 @@ Imports:
     yaml
 Suggests:
     knitr,
-    rmarkdown,
-    shinymanager
+    rmarkdown
 VignetteBuilder: knitr
 URL: https://nichd-bspc.github.io/carnation/
