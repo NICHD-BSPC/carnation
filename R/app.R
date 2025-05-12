@@ -68,8 +68,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
         ), # column
         column(2,
           actionButton('intro', label='Take a tour!',
-                       icon=icon('info')
-                       )
+                       icon=icon('info'))
         ), # column
 
         column(2,
