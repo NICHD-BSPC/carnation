@@ -56,8 +56,6 @@ Imports:
 Suggests:
     knitr,
     rmarkdown,
-    org.Hs.eg.db,
-    DEGreport,
     shinymanager
 VignetteBuilder: knitr
 URL: https://nichd-bspc.github.io/carnation/
