@@ -863,7 +863,7 @@ add.set.column <- function(df){
     # save symbol column if any
     sidx <- which(tolower(colnames(df)) %in% 'symbol')
     scol <- df[, sidx]
-    df <- df %>% select(-sidx)
+    df <- df %>% select(-all_of(sidx))
 
     # add column with set
 
