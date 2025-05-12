@@ -122,7 +122,7 @@ save_access_yaml <- function(lst){
 #'
 #' @param u username
 #'
-is_admin <- function(u){
+is_site_admin <- function(u){
   cfg <- get_config()
   admin <- cfg$server$site_admin
 
