@@ -52,6 +52,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     titlePanel(
       fluidRow(
+        # add spacer to center heading
+        column(4, span()),
         column(4,
           tags$div(
             HTML(
