@@ -56,13 +56,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
           tags$div(
             HTML(
               paste0(
-              'ca',
-              span('rna', style='color: #e95420;'), # primary color from united theme
-              'tion'
-              )
-            )
+                'ca',
+                span('rna', style='color: #e95420;'), # primary color from united theme
+                'tion'
+              ) # paste
+            ) # HTML
           ),
-          # 'carnation',
           align='center',
           style='font-family: Helvetica; font-size: 40px;'
         ), # column
@@ -478,11 +477,11 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 ), # fluidRow
 
                 fluidRow(
-                   column(12,
-                          withSpinner(
-                            DTOutput('detable')
-                          ) # withSpinner
-                   ) # column
+                  column(12,
+                    withSpinner(
+                      DTOutput('detable')
+                    ) # withSpinner
+                  ) # column
                 ), # fluidRow
 
                 fluidRow(align='center', style='margin-top: 25px;',
@@ -1135,9 +1134,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
           app_object$all_rld <- NULL
       }
 
-      showNotification(
-        'Remember to save object to avoid preprocessing again next time!',
-        type='warning'
+        showNotification(
+          'Remember to save object to avoid preprocessing again next time!',
+          type='warning'
       )
       }
 
