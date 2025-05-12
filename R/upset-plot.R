@@ -998,7 +998,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         label_tbl <- cbind(gene=rownames(label_tbl), label_tbl)
 
         label_tbl %>% select(-any_of(upset_choices$current)) %>%
-          relocate(.data$set, .after=.data$comparisons) %>%
+          relocate('set', .after='comparisons') %>%
           datatable(rownames=FALSE,
                     selection='none',
                     class='stripe')
