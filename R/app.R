@@ -1272,7 +1272,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       df <- get_summary()
       if(!is.null(app_object$labels)){
           df %>%
-              relocate(.data$description, .after=.data$down) %>%
+              relocate('description', .after='down') %>%
               datatable(rownames=FALSE,
                         selection='none',
                         options=list(autoWidth=TRUE)) %>%
@@ -1385,7 +1385,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
         cols.to.drop <- config$server$de_analysis$de_table$cols.to.drop
         df <- df %>% as.data.frame %>%
-          relocate(!!symbol.col, .before=.data$baseMean) %>%
+          relocate(!!symbol.col, .before='baseMean') %>%
           relocate(!!gene.col, .before=!!symbol.col) %>%
           select(-any_of(c(cols.to.drop, toupper(cols.to.drop))))
 
