@@ -46,6 +46,8 @@ read_access_yaml <- function(){
 #'
 #' @param lst list of data frames with user_groups and
 #'  data_areas
+#'
+#' @export
 save_access_yaml <- function(lst){
   # get access file
   f <- get_access_path()
@@ -58,6 +60,7 @@ save_access_yaml <- function(lst){
 #'
 #' @param u username
 #'
+#' @export
 is_site_admin <- function(u){
   cfg <- get_config()
   admin <- cfg$server$site_admin
@@ -71,6 +74,7 @@ is_site_admin <- function(u){
 #'
 #' @param u username
 #'
+#' @export
 in_admin_group <- function(u){
   al <- read_yaml(get_access_path())
 
@@ -87,6 +91,8 @@ in_admin_group <- function(u){
 #' returns the list
 #'
 #' @return list containing config items
+#'
+#' @export
 get_config <- function(){
   cfg_path <- system.file('extdata', 'config.yaml',
                           package=packageName())
@@ -110,6 +116,8 @@ get_config <- function(){
 #' @param fsep file separator to split path with
 #'
 #' @return project name
+#'
+#' @export
 get_project_name_from_path <- function(x,
                                        depth=2, end_offset=0,
                                        staging_dir='dev',
@@ -138,6 +146,8 @@ get_project_name_from_path <- function(x,
 #' @param df data frame with two columns: data_area & user_group
 #'
 #' @return vector of base paths
+#'
+#' @export
 get_common_path_from_list <- function(df){
   patterns <- unlist(unique(lapply(1:nrow(df), function(i){
                     substr(df$data_area[i], 1, regexpr(df$user_group[i], df$data_area[i])-1)
@@ -316,6 +326,8 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
 #' @param y_delta y-axis padding for visualization, must be
 #' between 0 and 1
 #' @param pseudocount pseudo-count to add to the data.frame
+#'
+#' @export
 get_y_init <- function(df, y_delta, pseudocount){
     if(!'count' %in% colnames(df))
       stop('Column "count" not found in data frame')
@@ -1597,6 +1609,7 @@ plotPCA.ly <- function(rld, intgroup){
 #'
 #' @return ggplot handle
 #'
+#' @export
 gs_radar <- function(res_enrich,
                      res_enrich2 = NULL,
                      label1 = 'scenario 1',
@@ -1889,6 +1902,7 @@ plotPCA.san <- function (object, intgroup = "group",
 #' @param ontology ontology database being used
 #' @param type string, can be 'enrichResult' or 'gseaResult'
 #'
+#' @export
 makeEnrichResult <- function(df, split='/',
                              keytype="UNKNOWN",
                              ontology="UNKNOWN",
@@ -1939,6 +1953,8 @@ makeEnrichResult <- function(df, split='/',
 #' @param show.grid string, can be 'yes' (default) or 'no'.
 
 #' @return ggplot handle
+#'
+#' @export
 plotScatter.label <- function(compare,
                               df,
                               label_x,
@@ -2045,6 +2061,8 @@ plotScatter.label <- function(compare,
 #' @param show.grid string, can be 'yes' (default) or 'no'.
 
 #' @return plotly handle
+#'
+#' @export
 plotScatter.label_ly <- function(compare,
                                  df,
                                  label_x,

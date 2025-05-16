@@ -4,6 +4,7 @@
 #'
 #' @param id Input id
 #'
+#' @export
 helpButtonUI <- function(id){
   ns <- NS(id)
 
@@ -22,6 +23,7 @@ helpButtonUI <- function(id){
 #' @param id Input id
 #' @param ... other params passed to helpModal()
 #'
+#' @export
 helpButtonServer <- function(id, ...){
   moduleServer(
     id,
@@ -55,6 +57,7 @@ helpButtonServer <- function(id, ...){
 #' @param title Title of modal dialog
 #' @param ... other params passed to modalDialog()
 #'
+#' @export
 helpModal <- function(mdfile, title=NULL, ...){
   modalDialog(
       title=title,
@@ -73,6 +76,7 @@ helpModal <- function(mdfile, title=NULL, ...){
 #'
 #' @param id Input id
 #'
+#' @export
 downloadButtonUI <- function(id){
   ns <- NS(id)
 
@@ -92,6 +96,7 @@ downloadButtonUI <- function(id){
 #' @param outplot reactive plot handle
 #' @param plot_type reactive/static value used for output filename
 #'
+#' @export
 downloadButtonServer <- function(id, outplot, plot_type){
   moduleServer(
     id,

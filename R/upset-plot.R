@@ -3,6 +3,7 @@
 #' @param id ID string used to match the ID used to call the module server function
 #' @param panel string, can be 'sidebar' or 'main'
 #'
+#' @export
 upsetPlotUI <- function(id, panel){
   ns <- NS(id)
 
