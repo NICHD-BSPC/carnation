@@ -3,6 +3,7 @@
 #' @param id ID string used to match the ID used to call the module server function
 #' @param panel string, can be 'sidebar' or 'main'
 #'
+#' @export
 upsetPlotUI <- function(id, panel){
   ns <- NS(id)
 
@@ -880,11 +881,11 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         else n_intersections <- input$n_intersections
 
         inter_sizes <- table(gdf$set)
-        if(min(inter_sizes) < min_size){
+        if(max(inter_sizes) < min_size){
           validate(
-            need(min(inter_sizes) >= min_size,
+            need(max(inter_sizes) >= min_size,
                  paste0('No intersections left after filtering!\n\n',
-                        'Please adjust "Min intersection size" in settings menu to at least ', min(inter_sizes))
+                        'Please adjust "Min intersection size" in settings menu to at least ', max(inter_sizes))
             )
           )
         }
@@ -998,7 +999,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         label_tbl <- cbind(gene=rownames(label_tbl), label_tbl)
 
         label_tbl %>% select(-any_of(upset_choices$current)) %>%
-          relocate(.data$set, .after=.data$comparisons) %>%
+          relocate('set', .after='comparisons') %>%
           datatable(rownames=FALSE,
                     selection='none',
                     class='stripe')

@@ -7,6 +7,7 @@
 #' @param panel context for generating ui elements ('sidebar' or 'main')
 #' @param username user name
 #'
+#' @export
 settingsUI <- function(id, panel, username){
   ns <- NS(id)
 
@@ -130,6 +131,7 @@ settingsUI <- function(id, panel, username){
 #' @param end_offset project name end offset
 #' @param assay_fun function to parse assay names from file path
 #'
+#' @export
 settingsServer <- function(id, details, depth, end_offset, assay_fun){
   moduleServer(
     id,

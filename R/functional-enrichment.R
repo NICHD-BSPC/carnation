@@ -1185,8 +1185,8 @@ enrichServer <- function(id, obj, upset_table,
         tbl %>%
             mutate(genes=format_genes(.data$genes, genes.per.line=input$genes.per.line, sep=',')) %>%
             mutate(term_description_list=format_genes(.data$term_description_list, genes.per.line=5, sep=',')) %>%
-            relocate(.data$term_description_list, .after=.data$strongest_term) %>%
-            relocate(.data$genes, .after=.data$strongest_term) %>%
+            relocate('term_description_list', .after='strongest_term') %>%
+            relocate('genes', .after='strongest_term') %>%
             select(-any_of(cols.to.drop)) %>%
             datatable(rownames=FALSE,
                       escape=FALSE,
@@ -1420,9 +1420,9 @@ enrichServer <- function(id, obj, upset_table,
         tbl %>%
             mutate(genes=format_genes(.data$genes, genes.per.line=input$genes.per.line, sep=',')) %>%
             select(-any_of(cols.to.drop)) %>%
-            relocate(.data$fuzzycluster, .before=.data$pvalue) %>%
-            relocate(.data$cluster_status, .before=.data$pvalue) %>%
-            relocate(.data$genes, .before=.data$pvalue) %>%
+            relocate('fuzzycluster', .before='pvalue') %>%
+            relocate('cluster_status', .before='pvalue') %>%
+            relocate('genes', .before='pvalue') %>%
             datatable(rownames=FALSE, escape=FALSE) %>%
           formatSignif(columns=cols_to_format,
                        digits=format_cols$digits) %>%

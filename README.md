@@ -12,7 +12,7 @@ and pattern analysis.
 
 # Installation
 
-## conda/mamba (recommended)
+## conda (recommended)
 
 You can install carnation by creating a new conda environment containing
 all dependencies as listed in the file `requirements-pinned.yaml`. This is *recommended*.
@@ -24,31 +24,28 @@ or the build step will fail.
 cd .. && mamba env create -p env --file carnation/requirements-pinned.yaml
 ```
 
-Next, activate the environment and install using `R CMD build` and `install.packages`:
+Next, activate the environment and start R:
 
 ```
 conda activate ./env
-R CMD build carnation/
-Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
+R
+```
+
+Finally, install using `devtools::install_github`:
+
+```
+devtools::install_github('NICHD-BSPC/carnation')
 ```
 
 ## devtools
 
 You can also install carnation using the `devtools` package. Here, we use `devtools` to figure
-out the dependencies directly, mimicking a direct R installation.
+out the dependencies directly.
 
 First, install `devtools` in an existing R installation, e.g. in RStudio.
 
 ```
 install.packages('devtools')
-```
-
-If conda/mamba is installed, you could also do this with a conda environment
-that contains only `devtools`, e.g.
-
-```
-conda create -p env r-devtools
-conda activate ./env
 ```
 
 Next, open R, set repositories to get both CRAN and bioconductor packages and run
