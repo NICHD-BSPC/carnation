@@ -6,6 +6,7 @@
 #' @param id Input id
 #' @param panel context for generating ui elements ('sidebar' or 'main')
 #'
+#' @export
 metadataUI <- function(id, panel){
     ns <- NS(id)
 
@@ -77,6 +78,7 @@ metadataUI <- function(id, panel){
 #' @param obj internal app object
 #' @param cols.to.drop columns to hide from table
 #'
+#' @export
 metadataServer <- function(id, obj, cols.to.drop){
     moduleServer(
         id,

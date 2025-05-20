@@ -22,7 +22,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
   on.exit(options(oopt))
 
   if(!is.null(credentials)){
-    if(!file.exists(credentials)){
+
+    # check to see if shinymanager is available
+    if(!requireNamespace('shinymanager', quietly=TRUE)){
+      stop(
+        paste('Login functionality using SQL/sqlite credentials requires "shinymanager".',
+              'Please install using "install.packages(\'shinymanager\')"'),
+        .call=FALSE
+      )
+    } else if(!file.exists(credentials)){
       stop(
         paste0('Credentials specified, but file not found: "',
                credentials, '"')
@@ -44,24 +52,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     titlePanel(
       fluidRow(
+        # add spacer to center heading
+        column(4, span()),
         column(4,
           tags$div(
             HTML(
               paste0(
-              'ca',
-              span('rna', style='color: #e95420;'), # primary color from united theme
-              'tion'
-              )
-            )
+                'ca',
+                span('rna', style='color: #e95420;'), # primary color from united theme
+                'tion'
+              ) # paste
+            ) # HTML
           ),
-          # 'carnation',
           align='center',
           style='font-family: Helvetica; font-size: 40px;'
         ), # column
         column(2,
           actionButton('intro', label='Take a tour!',
-                       icon=icon('info')
-                       )
+                       icon=icon('info'))
         ), # column
 
         column(2,
@@ -471,11 +479,11 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 ), # fluidRow
 
                 fluidRow(
-                   column(12,
-                          withSpinner(
-                            DTOutput('detable')
-                          ) # withSpinner
-                   ) # column
+                  column(12,
+                    withSpinner(
+                      DTOutput('detable')
+                    ) # withSpinner
+                  ) # column
                 ), # fluidRow
 
                 fluidRow(align='center', style='margin-top: 25px;',
@@ -1128,9 +1136,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
           app_object$all_rld <- NULL
       }
 
-      showNotification(
-        'Remember to save object to avoid preprocessing again next time!',
-        type='warning'
+        showNotification(
+          'Remember to save object to avoid preprocessing again next time!',
+          type='warning'
       )
       }
 
@@ -1264,7 +1272,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       df <- get_summary()
       if(!is.null(app_object$labels)){
           df %>%
-              relocate(.data$description, .after=.data$down) %>%
+              relocate('description', .after='down') %>%
               datatable(rownames=FALSE,
                         selection='none',
                         options=list(autoWidth=TRUE)) %>%
@@ -1377,7 +1385,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
         cols.to.drop <- config$server$de_analysis$de_table$cols.to.drop
         df <- df %>% as.data.frame %>%
-          relocate(!!symbol.col, .before=.data$baseMean) %>%
+          relocate(!!symbol.col, .before='baseMean') %>%
           relocate(!!gene.col, .before=!!symbol.col) %>%
           select(-any_of(c(cols.to.drop, toupper(cols.to.drop))))
 

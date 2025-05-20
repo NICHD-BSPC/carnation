@@ -464,7 +464,7 @@ loadDataServer <- function(id, username, rds=NULL){
             colnames(res)[gcol] <- 'gene'
 
             rownames(res) <- res$gene
-            res <- res %>% relocate(.data$gene)
+            res <- res %>% relocate('gene')
           }
 
           # check for 'symbol' column

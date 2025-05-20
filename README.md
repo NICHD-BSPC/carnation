@@ -24,12 +24,17 @@ or the build step will fail.
 cd .. && conda env create -p env --file carnation/requirements-pinned.yaml
 ```
 
-Next, activate the environment and install using `R CMD build` and `install.packages`:
+Next, activate the environment and start R:
 
 ```
 conda activate ./env
-R CMD build carnation/
-Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
+R
+```
+
+Finally, install using `devtools::install_github`:
+
+```
+devtools::install_github('NICHD-BSPC/carnation')
 ```
 
 ## remotes

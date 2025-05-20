@@ -12,5 +12,5 @@ helpButtonServer(id, ...)
 \item{...}{other params passed to helpModal()}
 }
 \description{
-Server for download button module
+Server for help button module
 }
