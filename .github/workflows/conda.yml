@@ -82,7 +82,7 @@ jobs:
           cd .. && mkdir tmp && cd tmp
 
           # build, check
-          R CMD build ../carnation
+          R CMD build --no-build-vignettes --no-manual ../carnation
           R CMD check --as-cran --no-manual --no-build-vignettes carnation_${VERSION}.tar.gz
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
