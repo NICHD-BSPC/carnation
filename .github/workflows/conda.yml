@@ -81,8 +81,9 @@ jobs:
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
 
-          # use devtools::check to check, build, install
-          Rscript -e "devtools::check('../carnation', manual=FALSE, vignettes=FALSE, check_dir='.')"
+          # build, check
+          R CMD build ../carnation
+          R CMD check --as-cran --no-manual --no-build-vignettes carnation_${VERSION}.tar.gz
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
 
