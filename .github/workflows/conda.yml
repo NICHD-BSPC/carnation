@@ -93,3 +93,13 @@ jobs:
           name: carnation-bundle
           path: carnation.tar.gz
 
+      - name: remotes install
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda activate ../env
+
+          Rscript -e "remotes::install_github('NICHD-BSPC/carnation')"
+          Rscript -e "library(carnation)"
+
+
+
