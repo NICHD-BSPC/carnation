@@ -12,7 +12,7 @@ and pattern analysis.
 
 # Installation
 
-## conda/mamba (recommended)
+## conda (recommended)
 
 You can install carnation by creating a new conda environment containing
 all dependencies as listed in the file `requirements-pinned.yaml`. This is *recommended*.
@@ -21,7 +21,7 @@ all dependencies as listed in the file `requirements-pinned.yaml`. This is *reco
 or the build step will fail.
 
 ```
-cd .. && mamba env create -p env --file carnation/requirements-pinned.yaml
+cd .. && conda env create -p env --file carnation/requirements-pinned.yaml
 ```
 
 Next, activate the environment and install using `R CMD build` and `install.packages`:
@@ -32,31 +32,31 @@ R CMD build carnation/
 Rscript -e "install.packages('carnation_1.0.tar.gz', repos=NULL)"
 ```
 
-## devtools
+## remotes
 
-You can also install carnation using the `devtools` package. Here, we use `devtools` to figure
+You can also install carnation using the `remotes` package. Here, we use `remotes` to figure
 out the dependencies directly, mimicking a direct R installation.
 
-First, install `devtools` in an existing R installation, e.g. in RStudio.
+First, install `remotes` in an existing R installation, e.g. in RStudio.
 
 ```
-install.packages('devtools')
+install.packages('remotes')
 ```
 
-If conda/mamba is installed, you could also do this with a conda environment
-that contains only `devtools`, e.g.
+If conda is installed, you could also do this with a conda environment
+that contains only `remotes`, e.g.
 
 ```
-conda create -p env r-devtools
+conda create -p env r-remotes
 conda activate ./env
 ```
 
 Next, open R, set repositories to get both CRAN and bioconductor packages and run
-`devtools::install_github`.
+`remotes::install_github`.
 
 ```
 setRepositories(ind=c(1,2,3,4,5))
-devtools::install_github('NICHD-BSPC/carnation')
+remotes::install_github('NICHD-BSPC/carnation')
 ```
 
 Note: This may be a time-consuming step, especially if working with a fresh R installation, as a large number of dependencies will be installed.
