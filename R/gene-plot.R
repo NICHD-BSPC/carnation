@@ -904,7 +904,7 @@ genePlotServer <- function(id, obj,
 
       ################## buttons #####################
 
-      helpButtonServer('de_geneplt_help')
+      helpButtonServer('de_geneplt_help', size='l')
       helpButtonServer('geneplt_opts_help', size='l')
       helpButtonServer('geneplt_xaxis_help', size='l')
       helpButtonServer('geneplt_yaxis_help', size='l')
