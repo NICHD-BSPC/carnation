@@ -1,20 +1,28 @@
-#### Upset Plot
+#### UpSet Plot
 ---------------
 
-Visualization of intersections between DE gene sets of interest
+Visualization of intersections between multiple differentially expressed gene sets.
 
-- The top panel shows a bar chart of the intersection size.
-- The bottom panel shows the gene sets being compared on separate rows
-  - Bars to the left of set names denote the size of the gene sets
-  - Dots to the right of set names indicate the intersection.
-     - A single dot on any row depicts genes present only in that gene set
-     - Dots connected with lines depict genes shared by those gene sets
-- `Intersections` selected in the sidebar are highlighted on the plot.
-- If genes are selected in the `Gene scratchpad`, then
-  a table is shown below the UpSet plot to show which
-  intersections they are part of.
-  - A subset of columns from the `Table` view are shown here.
-- `FDR threshold` and `log2FC threshold` are used
-  for filtering genes before comparison. These controls
-  are shared with `Table`, `MA plot` & `Heatmap` tabs of `DE analysis`, so changes made here are also reflected
-  there.
+**What it shows:**
+- Size of each gene set intersection (top panel)
+- Size of individual gene sets (left bars)
+- Specific intersections between gene sets (connected dots)
+
+**When to use it:**
+- To identify genes shared across multiple comparisons
+- To discover unique gene signatures for specific conditions
+- To explore complex relationships between different DE gene sets
+
+**How to interpret:**
+- The top panel shows the size of each intersection
+- The left panel shows the total size of each gene set
+- Connected dots in the bottom panel indicate which gene sets are part of each intersection
+- A single dot represents genes unique to that gene set
+- Multiple connected dots represent genes shared between those specific gene sets
+
+**Interactive features:**
+- Select specific intersections using the sidebar controls
+- View genes from your Gene scratchpad in the context of these intersections
+- Filter gene sets based on FDR and log2FC thresholds
+
+**Note:** Changes to the FDR and LFC thresholds affect all DE analysis visualizations.

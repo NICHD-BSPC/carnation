@@ -1,26 +1,34 @@
-#### Scatter plot comparisons
+#### Scatter Plot Comparisons
 -----------------------------
 
-- Select `Comparison 1` & `Comparison 2` to compare using either log2FoldChange (`LFC`) or
-  adjusted p-values (`P-adj`). Switch the plotted values with the `Values to use` menu.
-- An interactive or static plot can be selected using the `Interactive?` menu.
-- If `Show table?` is `yes`, then a table is shown below the plot with `LFC` & `P-adj`
-  values from the selected comparisons.
-- Various elements of the plot can be further adjusted using the `Plot settings` menus
-  - *Axes limits*
+Interactive visualization comparing gene expression changes between two different contrasts.
 
-    Adjust x & y-axis limits or autoscale to fit the data.
-  - *Point aesthetics*
+**What it shows:**
+- Correlation between fold changes or p-values across two comparisons
+- Genes with consistent or divergent responses between conditions
+- Statistical significance in either or both comparisons
 
-    Adjust properties of plotted points (size & opacity) and the overall `Color palette`.
-    Also, we can choose to show all points or skip those that fall outside axis limits.
-    If `Show all points?` is *yes* then out-of-bound points are shown directly on the
-    axes borders.
-  - *Grid lines*
+**When to use it:**
+- To compare treatment responses across different conditions
+- To identify genes with consistent or unique responses
+- To discover potential interaction effects between experimental factors
 
-    Choose grid lines to show. There are four options that can be individually turned
-    on or off (by default, all are plotted):
-    - x = 0
-    - y = 0
-    - diagonal (x = y)
-    - x-y grid
+**How to interpret:**
+- Each point represents a gene
+- Position indicates the gene's behavior in both comparisons
+- Points in quadrants I and III show consistent direction of change
+- Points in quadrants II and IV show opposite directions of change
+- Color coding indicates significance categories:
+  1. Significant in both comparisons with same direction of change
+  2. Significant in both comparisons with opposite direction
+  3. Significant only in comparison 1 (x-axis)
+  4. Significant only in comparison 2 (y-axis)
+  5. Not significant in either comparison
+
+**Interactive features:**
+- Switch between comparing log2FoldChange values or adjusted p-values
+- Toggle between interactive and static plot modes
+- Display a detailed comparison table below the plot
+- Adjust plot aesthetics through the settings menu
+
+**Note:** Significance is determined by the global FDR and LFC threshold settings.

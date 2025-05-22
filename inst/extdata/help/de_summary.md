@@ -1,21 +1,26 @@
-#### Summary table
+#### Summary Table
 ------------------
 
-Table summarizing differential expression (DE) analysis results for
-all comparisons in an analysis.
+Overview table showing differential expression statistics for all comparisons in your analysis.
 
-Column key:
-- `comparison`: unique id for the comparison performed.
-- `up`, `down`: number of genes up or downregulated.
-- `total.genes`: number of annotated genes that are
-  included in the analysis.
-- `total.nonzero`: number of genes that do not have zero counts
-  in all samples.
-- `outliers`: number of genes that are flagged
-  as count outliers by DESeq2. Typically, these are genes
-  that have widely varying counts between replicates.
-- `low.counts`: number of genes with low counts across all
-  replicates that are filtered by DESeq2 in order to improve
-  the p-value adjustment for multiple testing.
-- `design`: linear model used for the analysis with DESeq2.
+**What it shows:**
+- Number of up and downregulated genes per comparison
+- Total genes analyzed and filtering statistics
+- Experimental design information
+
+**When to use it:**
+- To get a quick overview of your differential expression results
+- To compare the number of DE genes across different contrasts
+- To verify analysis parameters and filtering steps
+
+**How to interpret:**
+- `comparison`: Unique identifier for each differential expression comparison
+- `up`, `down`: Number of genes significantly up or downregulated
+- `total.genes`: Total number of annotated genes included in the analysis
+- `total.nonzero`: Number of genes with non-zero counts in at least one sample
+- `outliers`: Genes flagged as count outliers by DESeq2 (high variability between replicates)
+- `low.counts`: Genes filtered out due to low expression across all samples
+- `design`: Linear model formula used for the DESeq2 analysis
+
+**Note:** Changes to the FDR and LFC thresholds affect all DE analysis visualizations.
 

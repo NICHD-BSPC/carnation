@@ -1,19 +1,28 @@
-#### MA plot
+#### MA Plot
 ------------
 
-Interactive plot of average expression (`baseMean`) vs LFC (`log2FoldChange`)
+Interactive visualization showing the relationship between average expression and log fold change for all genes.
 
-- Mousing over a point displays the gene name.
-- The FDR, LFC thresholds and the y-axis limits can be adjusted using the plotting controls in the sidebar.
-- Genes that are statistically significant (`DE`) based on the FDR and LFC thresholds are colored red. If not, they
-  are colored grey (`not DE`).
-- Genes appearing beyond the y-axis limits are plotted at the y-axis limits using triangles
-  - Triangles point up or down based on gene LFCs above or below y-axis limits.
-  - Triangles are colored red or grey based on statistical significance.
-- Gene names entered into the `Gene scratchpad` are labeled on the plot using dark circles.
-- A PDF version of the plot can be downloaded using the
-  `Download` button.
-  - In the downloaded plot, labeled genes will have their names
-    printed directly on the plot and colored red or grey based on
-    statistical significance.
+**What it shows:**
+- Average expression level (`baseMean`) on the x-axis
+- Log2 fold change (`log2FoldChange`) on the y-axis
+- Statistical significance through color coding
 
+**When to use it:**
+- To identify differentially expressed genes
+- To assess the distribution of expression changes
+- To detect potential biases in your differential expression analysis
+
+**How to interpret:**
+- Red points represent statistically significant differentially expressed genes (based on FDR and LFC thresholds)
+- Grey points represent non-significant genes
+- Triangles at the top/bottom indicate genes with fold changes beyond the y-axis limits
+- Genes from your "Gene scratchpad" are highlighted with dark circles on the plot
+
+**Interactive features:**
+- Hover over points to see gene names and exact values
+- Adjust FDR and LFC thresholds using the sidebar controls
+- Modify y-axis limits to focus on specific fold change ranges
+- Download a publication-ready PDF version of the plot
+
+**Note:** Changes to the FDR and LFC thresholds affect all DE analysis visualizations.

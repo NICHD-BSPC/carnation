@@ -1,16 +1,34 @@
-#### Interactive PCA plot
--------------------------
+#### PCA Plot
+-------------
 
-Interactive plot to visualize the variation of samples in the analysis using PCA
+Interactive Principal Component Analysis (PCA) visualization of sample relationships based on gene expression.
+This is a useful tool for identifying potential outliers and assessing the overall quality of your samples.
 
-- Mousing over the points in the plot will show the sample ID.
-- The controls at the top right hand corner can be used to pan,
-  zoom or save a snapshot of the plot.
-- The plot can be colored using all variables available in the
-  experimental metadata including custom columns.
-  - This control also accepts multiple selections at once. For example, if an experiment has `genotype` and
-    `treatment` factors, coloring by both will set different colors for all combinations of the two factors.
-- The `gene loadings` menu in the sidebar allows us to overlay top gene loadings onto the PCA plot.
-- A PDF version of the current view can also be downloaded using
-  the `Download` button.
+**What it shows:**
+- Sample clustering based on gene expression patterns
+- Major sources of variation in your dataset
+- Relationships between experimental conditions
 
+**When to use it:**
+- To assess sample quality and identify potential outliers
+- To visualize separation between experimental groups
+- To explore sources of variation beyond your experimental design
+
+**How to interpret:**
+- Samples that cluster together have similar overall expression profiles
+- Distance between points represents degree of difference in expression
+- The percentage on each axis shows how much variation that principal component explains in the data
+- PC1 (first principal component) captures the largest source of variation in the data
+
+**Interactive features:**
+- Color points by any metadata variable
+- Select different principal components to visualize (PC1-PC6)
+- Selecting a third principal component creates a 3D plot
+- Use the `subset samples` controls to filter samples based on metadata variables. This recomputes the PCA plot
+  with only the selected samples.
+- Use the `gene loadings` controls to overlay gene loadings on the plot, showing the contribution of each gene
+  to the principal components.
+- Hover over points to see sample details
+- Download publication-ready versions of the plot
+
+**Note:** PCA is performed on variance-stabilized or regularized log-transformed data, which helps normalize for sequencing depth and reduces the influence of highly variable genes.

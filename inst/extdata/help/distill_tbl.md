@@ -1,19 +1,33 @@
-#### Distill enrichment
+#### Distill Enrichment
 -----------------------
 
-Here the top functional terms detected in the analysis are clustered based on similarities in
-associated genes. This provides a way to look for similar/dissimilar sets of functional terms enriched
-among genes of interest.
-- The table consists of the following columns:
-  - `cluster`: cluster number
-  - `#_terms`: number of terms grouped in the cluster
-  - `#_genes`: number of genes that are associated with the grouped terms
-  - `most_significant_term`: this is the term with the lowest p-value in the cluster
-  - `strongest_term`: this is the most highly connected member of the cluster
-  - `genes`: genes present in the cluster
-  - `term_description_list`: comma-separated list of descriptions of terms in the cluster
-- The number of functional terms in this meta-analysis can be adjusted using the `# of terms` control.
-  If this number is greater than the number of rows in the enrichment table, then this
-  automatically defaults to the latter.
-- The data shown in this table is visualized in the `emap_distill` plot.
+Interactive table showing clustered functional terms based on gene overlap similarity.
+This analysis is helpful to identify the major biological themes in your enrichment results by grouping similar terms together.
+
+**What it shows:**
+- Functional terms grouped into clusters based on shared genes
+- Summary statistics for each cluster
+- Representative terms for each functional group
+
+**When to use it:**
+- To reduce redundancy in enrichment results
+- To identify major functional themes in your data
+- To simplify interpretation of complex enrichment results
+
+**How to interpret:**
+- `cluster`: Unique identifier for each functional term group
+- `#_terms`: Number of related terms grouped in this cluster
+  - If this exceeds the number of rows in the enrichment table,
+    it automatically defaults to the latter.
+- `#_genes`: Total number of genes associated with the grouped terms
+- `most_significant_term`: Term with the lowest p-value in the cluster
+- `strongest_term`: Most highly connected member of the cluster
+- `genes`: Genes present in the cluster
+- `term_description_list`: Comma-separated descriptions of all terms in the cluster
+
+**Interactive features:**
+- Sort clusters by any column
+- Search for specific genes or terms
+- Adjust the number of terms included using the `# of terms` control
+- View the corresponding visualization in the `emap_distill` plot
 
