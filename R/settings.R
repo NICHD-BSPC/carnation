@@ -110,7 +110,10 @@ settingsUI <- function(id, panel, username){
                    fluidRow(
                      column(10,
                        DTOutput(ns('data_areas'))
-                     )  # column
+                     ), # column
+                     column(1, align='left',
+                       helpButtonUI(ns('settings_help'))
+                     )
                    )    # fluidRow
                  ), # tabPanel
                  user_main
@@ -979,6 +982,8 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
            reload_parent=reload_parent$flag,
            is_admin=is_admin)
     })
+
+    helpButtonServer('settings_help', size='l')
 
     return(reactive(settings()))
 
