@@ -1,7 +1,7 @@
-### Metadata Controls and Editing
----------------------------------
+### Metadata Controls
+---------------------
 
-#### Sample Groups
+#### Sample Group Selection
 
 - `Sample group`: sample groups that exist in the analysis.
   - `all_samples` denotes a group containing all samples.
@@ -39,4 +39,3 @@
 
 - Edits in metadata are only saved during the current
   session. To save changes to metadata, hit `Save changes` in the app header.
-

@@ -23,6 +23,13 @@ Interactive visualization showing the relationship between average expression an
 - Hover over points to see gene names and exact values
 - Adjust FDR and LFC thresholds using the sidebar controls
 - Modify y-axis limits to focus on specific fold change ranges
-- Download a publication-ready PDF version of the plot
+
+**Download Options**
+- Click the `Download` button to save a publication-ready PDF version of the static plot
+- The downloaded plot preserves all current settings including:
+  - Axis limits
+  - FDR and LFC thresholds
+  - Gene highlights
+  - Color scheme
 
 **Note:** Changes to the FDR and LFC thresholds affect all DE analysis visualizations.
