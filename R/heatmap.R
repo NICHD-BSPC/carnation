@@ -69,10 +69,7 @@ heatmapUI <- function(id, panel){
         ), # conditionalPanel
 
         fluidRow(
-          column(6, strong('Plot options')),
-          column(6, align='right',
-            helpButtonUI(ns('heatmap_controls_help'))
-          ) # column
+          column(12, strong('Plot options'))
         ), # fluidRow
 
         fluidRow(
@@ -131,12 +128,6 @@ heatmapUI <- function(id, panel){
           bsCollapsePanel('column settings',
 
             fluidRow(
-              column(12, align='right',
-                helpButtonUI(ns('heatmap_cols_help'))
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
               column(5, h5('labels')),
               column(7,
                 selectizeInput(ns('hmap_colnames'), label=NULL,
@@ -166,12 +157,6 @@ heatmapUI <- function(id, panel){
           ), # bsCollapsePanel
 
           bsCollapsePanel('More options',
-
-            fluidRow(
-              column(12, align='right',
-                helpButtonUI(ns('heatmap_more_help'))
-              ) # column
-            ), # fluidRow
 
             fluidRow(
               column(5, h5('row font')),
@@ -702,9 +687,6 @@ heatmapServer <- function(id, obj,
 
       # heatmap controls help
       helpButtonServer('hmap_geneset_help', size='l')
-      helpButtonServer('heatmap_controls_help', size='l')
-      helpButtonServer('heatmap_cols_help', size='l')
-      helpButtonServer('heatmap_more_help', size='l')
       helpButtonServer('de_hmap_help', size='l')
       downloadButtonServer('hmap_download', make_heatmap, 'heatmap')
 
