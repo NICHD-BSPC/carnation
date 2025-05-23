@@ -43,12 +43,6 @@ pcaPlotUI <- function(id, panel){
       ), # conditionalPanel
 
       fluidRow(
-        column(12, align='right',
-          helpButtonUI(ns('pca_opts_help'))
-        ) # column
-      ), # fluidRow
-
-      fluidRow(
         column(4, 'color by'),
         column(8,
           selectInput(ns('pca_color'), label=NULL,
@@ -473,8 +467,7 @@ pcaPlotServer <- function(id, obj, coldata){
 
       ######################### Help buttons #######################
 
-      helpButtonServer('pca_samples_help')
-      helpButtonServer('pca_opts_help')
+      helpButtonServer('pca_samples_help', size='l')
       helpButtonServer('de_pca_help', size='l')
       downloadButtonServer('pcaplot_download', pca_plot, 'pcaplot')
     }
