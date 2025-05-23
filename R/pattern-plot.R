@@ -35,10 +35,7 @@ patternPlotUI <- function(id, panel, tab){
         tagList(
 
           fluidRow(
-            column(6, strong('Plot options')),
-            column(6, align='right',
-              helpButtonUI(ns('dp_opts_help'))
-            ) # column
+            column(12, strong('Plot options')),
           ), # fluidRow
 
           fluidRow(
@@ -91,12 +88,6 @@ patternPlotUI <- function(id, panel, tab){
             bsCollapsePanel('cluster settings',
 
               fluidRow(
-                column(12, align='right',
-                  helpButtonUI(ns('dp_facet_help'))
-                ) # column
-              ), # fluidRow
-
-              fluidRow(
                 column(4, 'clusters to show'),
                 column(8,
                   selectizeInput(ns('facet_var_levels'),
@@ -134,11 +125,8 @@ patternPlotUI <- function(id, panel, tab){
             bsCollapsePanel('x-axis settings',
 
               fluidRow(
-                column(6, align='left',
+                column(12, align='left',
                        'variable levels'),
-                column(6, align='right',
-                  helpButtonUI(ns('dp_xaxis_help'))
-                ) # column
               ), # fluidRow
 
               uiOutput(ns('x_axis_bucket')),
@@ -167,12 +155,6 @@ patternPlotUI <- function(id, panel, tab){
             ), # bsCollapsePanel
 
             bsCollapsePanel('More options',
-
-              fluidRow(
-                column(12, align='right',
-                  helpButtonUI(ns('dp_more_help'))
-                ) # column
-              ), # fluidRow
 
               fluidRow(
                 column(6, h5('trendline')),
@@ -238,11 +220,6 @@ patternPlotUI <- function(id, panel, tab){
     } else if(tab == 'table'){
       tag <-
         tagList(
-          fluidRow(
-            column(12, align='right',
-              helpButtonUI(ns('dp_cluster_help'))
-            ) # column
-          ), # fluidRow
 
           fluidRow(
             column(6, 'Cluster column'),
@@ -908,15 +885,8 @@ patternPlotServer <- function(id,
         degtable()
       }, rownames=FALSE)
 
-      # pattern analysis controls help
-      helpButtonServer('dp_controls_help')
-      helpButtonServer('dp_opts_help', size='l')
-      helpButtonServer('dp_facet_help')
-      helpButtonServer('dp_xaxis_help', size='l')
-      helpButtonServer('dp_more_help', size='l')
-      helpButtonServer('dp_cluster_help', size='l')
-
       # pattern analysis help
+      helpButtonServer('dp_controls_help', size='l')
       helpButtonServer('pattern_plt_help', size='l')
       helpButtonServer('pattern_tbl_help', size='l')
 
