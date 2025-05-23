@@ -34,21 +34,6 @@ This section allows administrators to manage user access to different data areas
   - Click the "Remove selected" button to remove them.
   - Confirm the deletion when prompted.
 
-#### Data Directory Structure
-
-Carnation expects a specific directory structure for data areas:
-
-```
-/carnation/data/
-  ├─ project1
-  │  ├─ main.rds
-  │  ├─ subset.rds
-  │  └─ main-nooutlier.rds
-  │
-  └─ project2
-     └─ default.rds
-```
-
 #### Project Descriptions
 
 You can add descriptions to projects by creating a `project-description.yaml` file in the project directory. For example, for the
@@ -59,6 +44,9 @@ main: "Standard analysis of all samples"
 subset: "Standard analysis using only samples passing QC"
 main-nooutlier: "Standard analysis excluding outlier samples"
 ```
+
+If a `project-description.yaml` file is found in a project directory, the contents will be shown as an interactive
+table on the *Load Data* tab to serve as a quick reference for analysis details.
 
 #### Access Control
 
