@@ -1610,8 +1610,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     # general help
     helpButtonServer(id='gene_scratchpad_help', size='l')
-    helpButtonServer('de_filters_help')
-    helpButtonServer('metadata_sidebar_help')
+    helpButtonServer('de_filters_help', size='l')
+    helpButtonServer('metadata_sidebar_help', size='l')
     helpButtonServer('de_cmp_help')
 
     # de analysis help
