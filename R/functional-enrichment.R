@@ -1964,7 +1964,7 @@ enrichServer <- function(id, obj, upset_table,
       ######################## buttons #######################
 
       # functional enrichment controls help
-      helpButtonServer('tbl_ctrls_help')
+      helpButtonServer('tbl_ctrls_help', size='l')
       helpButtonServer('func_plt_help')
       helpButtonServer('func_cmp_help')
 
