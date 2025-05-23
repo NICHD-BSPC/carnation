@@ -1,28 +1,34 @@
 #### Upset Intersection Table
 -----------------------------
 
-- To view a specific intersection, select it from the `Intersections`
-  drop-down menu.
-- Intersections shown in the Upset plot are labeled based on the
-  order in which they appear. For example, the first set is
-  called `set01`, the second set is `set02` and so on.
-- The following columns are always shown:
-  - `gene`: gene ID
-  - `symbol`: gene symbol
-  - `set`: intersection set numbered based on UpSet plot
-  - `comparisons`: comparisons corresponding to selected intersection
-  - `degree`: number of comparisons for which the gene is differentially expressed.
-- The remaining columns show `log2FoldChange` and `padj`
-  columns from the gene sets being compared (selected in
-  `Comparisons`).
-- By default, the table is sorted by the `set` column, and
-  then by the first `log2FoldChange` column of the comparisons
-  that are part of the set.
-- `DE Filters` shown in the sidebar are used
-  for filtering genes before comparison. These controls
-  are shared with `Table`, `MA plot` & `Heatmap` tabs of `DE analysis`.
-- `Selection options`
-  - `Add to scratchpad` & `Remove from scratchpad` buttons will add/remove selected genes
-    from the scratchpad.
-  - `Reset selection` clears the selection.
+Interactive table displaying genes from selected intersections in the UpSet plot.
 
+**What it shows:**
+- Genes present in specific intersections between differential expression sets
+- Log2 fold change and adjusted p-values for each gene across selected comparisons
+- Intersection membership and degree information
+
+**When to use it:**
+- To explore genes shared across specific comparisons
+- To examine detailed statistics for genes in intersections of interest
+- To identify and select genes for further analysis
+
+**How to interpret:**
+- Each row represents a gene present in the selected intersection(s)
+- The `gene` column shows gene IDs
+- The `symbol` column shows gene symbols
+- The `set` column indicates which intersection the gene belongs to
+- The `comparisons` column lists which comparisons share this gene
+- The `degree` column shows in how many comparisons the gene is differentially expressed
+- Columns named for each comparison show 0 or 1, indicating whether the gene is DE in that comparison
+- Additional columns show `log2FoldChange` and `padj` values from each comparison grouped under
+  the comparison name
+
+**Interactive features:**
+- Select specific intersections using the `Intersections` dropdown menu
+- Sort the table by any column by clicking the column header
+- Search for specific genes using the search box
+- Select genes to add to your Gene scratchpad
+- Reset your selection using the `Reset selection` button
+
+**Note:** Changes to the FDR and LFC thresholds affect all DE analysis visualizations.
