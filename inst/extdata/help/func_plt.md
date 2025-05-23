@@ -1,30 +1,64 @@
-#### Enrichment Plot Controls
+### Enrichment Plot Controls
 -----------------------------
 
-Main controls for visualizing functional enrichment analysis results.
+#### Main Controls
 
-**What it controls:**
-- Selection of comparison, direction, and database for visualization
-- Plot type and plot-specific options
-- Visual parameters for the current enrichment visualization
+- `Comparison`: differential expression comparison that yielded the DE gene set being analyzed
 
-**Key components:**
-- `Comparison`: Select the differential expression comparison to analyze
-- `Direction`: Choose the direction of change (up, down, or both)
-- `Database`: Select the annotation database (GO, KEGG, Reactome, etc.)
+- `Direction`: direction of change in the DE genes
+  - Can be `up & down` (default) for all changed genes, `up` for upregulated genes, or `down` for downregulated genes
 
-**Available visualizations:**
-- *Summary overview*: Bar chart of top enriched terms
-- *Enrichment map*: Network visualization of related terms
-- *Cnetplot*: Network of genes and their associated terms
-- *Radar plot*: Circular visualization of enrichment significance
-- *Alluvial plot*: Sankey diagram showing gene-term relationships
-- *Dendrogram*: Hierarchical clustering of related terms
+- `Database`: annotation database used for the analysis
+  - Options may include Gene Ontology (GO), KEGG pathways, etc. depending on what was used during the analysis
 
-**How to use:**
-- Select your comparison, direction, and database
-- Choose a visualization type from the dropdown menu
-- Adjust plot-specific options as needed
-- Click "Refresh plot" to apply changes to plot options
+#### Available Visualizations
 
-**Note:** Changes to the main controls (comparison, direction, database) are immediately reflected in both the plot and table views.
+- `Type of plot`: select the visualization type for enrichment results
+  Available options include:
+
+  - `summary_overview`: bar chart of top enriched terms
+    - Provides clear ranking of terms by significance
+    - Terms are colored by z-score or aggregation score
+
+  - `enrichment_map`: network visualization of related terms
+    - Shows functional terms as nodes and their relationships as edges
+    - Terms with shared genes cluster together
+    - Node size represents gene count, edge thickness represents gene overlap
+
+  - `cnetplot`: network of genes and their associated terms
+    - Shows connections between genes and functional categories
+    - Identifies genes that link multiple biological processes
+    - Visualizes the specific genes driving enrichment results
+
+  - `radar`: circular visualization of enrichment significance
+    - Displays terms around a circle with significance shown as distance from center
+    - Useful for comparing significance across multiple terms
+    - Provides a compact view of many terms simultaneously
+
+  - `alluvial`: Sankey diagram showing gene-term relationships
+    - Visualizes how genes are shared across multiple terms using a flow-based layout
+    - Useful for identifying multi-functional genes
+
+  - `dendrogram`: hierarchical clustering tree of related terms
+    - Branches represent clusters of related biological processes
+    - Useful for identifying major functional themes
+
+  - `emap_distill`: network view of the Distill enrichment analysis
+    - Shows clustered terms based on gene overlap similarity
+    - Different colors represent different clusters
+    - Helps reduce redundancy in enrichment results
+
+  - `emap_fuzzy`: network view of the Fuzzy clustering analysis
+    - Shows fuzzy clusters with terms that can belong to multiple clusters
+    - Representative terms are outlined in black
+    - Useful for understanding complex biological responses
+
+#### Plot Options
+
+- Each plot type has specific options available in the `Plot options` section
+  - These options control the appearance and behavior of the current visualization
+  - Click `Refresh plot` to apply changes to plot options
+
+**Note:**
+- Changes to the main controls (comparison, direction, database) are immediately reflected in both the plot and table views
+- Use the plot-specific options to customize the visualization after selecting the main controls
