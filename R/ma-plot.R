@@ -17,7 +17,7 @@ maPlotUI <- function(id, panel){
                      'Comparison')
         ),
         column(6, align='right',
-          helpButtonUI(ns('de_cmp_help'))
+          helpButtonUI(ns('ma_controls_help'))
         ) # column
       ), # fluidRow
 
@@ -239,7 +239,7 @@ maPlotServer <- function(id, obj, plot_args){
         }
       })
 
-      helpButtonServer('de_cmp_help')
+      helpButtonServer('ma_controls_help')
       helpButtonServer('de_ma_help', size='l')
       downloadButtonServer('maplot_download', maplot, 'maplot')
     }
