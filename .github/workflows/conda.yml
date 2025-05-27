@@ -98,7 +98,7 @@ jobs:
           source "${HOME}/conda/etc/profile.d/conda.sh"
           conda activate ../env
 
-          Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation')"
+          Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation', upgrade='never')"
           Rscript -e "library(carnation)"
 
 
