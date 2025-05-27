@@ -1,82 +1,61 @@
 # Carnation
 
-Interactive shiny app for deeply exploring bulk RNA-Seq data, incorporating functional enrichment
-and pattern analysis.
+**Deeply explore your bulk RNA-Seq data with interactive visualizations**
 
-- Assess differential expression analysis results using interactive PCA, UpSet plots, heatmaps
-  and a highly customizable gene plot.
-- Dive into functional enrichment analysis with the help of fuzzy search across genes or pathway descriptions.
-- Easily track genes of interest across the app using the novel "Gene scratchpad".
-- Data access interface with an inbuilt authentication layer can be used in server mode to share results with
-  others or to organize RNA-Seq projects on your local machine.
+Carnation is an interactive Shiny dashboard that transforms complex bulk RNA-Seq data into beautiful, insightful visualizations. Designed for both computational and experimental biologists, Carnation makes exploring differential expression analysis, functional enrichment, and pattern analysis intuitive and exciting.
 
-# Installation
+## ✨ Key Features
 
-## conda (recommended)
+- **Interactive Visualizations**: Explore your data through multiple perspectives
+  - 📊 PCA plots - Visualize sample relationships with gene loadings overlay
+  - 🔥 Heatmaps - Examine expression patterns across samples and conditions
+  - 📈 MA plots - Identify differentially expressed genes
+  - 🧩 UpSet plots - Discover overlapping gene sets across comparisons
+  - 📉 Gene plots - Create customizable expression visualizations
+- **Functional Enrichment Analysis**: Understand the biological significance of your results
+  - 🌐 Network plots - Visualize gene-term relationships
+  - 📊 Summary overviews - Compare enrichment across conditions
+  - 🔍 Fuzzy search - Find relevant pathways across genes or descriptions
+- **Pattern Analysis**: Identify co-regulated gene clusters across conditions
+- **Gene Tracking**: Keep your genes of interest at your fingertips with the "Gene scratchpad"
+- **Flexible Deployment**: Run locally for personal analysis or on a server to share with collaborators
+- **User Management**: Optional authentication system for controlled access in multi-user environments
 
-You can install carnation by creating a new conda environment containing
-all dependencies as listed in the file `requirements-pinned.yaml`. This is *recommended*.
+## 🚀 Installation
 
-**WARNING:** Make sure you build the conda environment *outside* the carnation directory
-or the build step will fail.
+### conda (recommended)
 
-```
+The easiest way to get started with Carnation is through conda, which handles all dependencies automatically:
+
+```bash
+# Create environment outside the carnation directory
 cd .. && conda env create -p env --file carnation/requirements-pinned.yaml
-```
-
-Next, activate the environment and start R:
-
-```
 conda activate ./env
 R
 ```
 
-Finally, install using `devtools::install_github`:
+Then install the package with the `remotes` package. Note, here we set `upgrade='never'`
+to make sure the conda-installed package versions remain unchanged.
 
+```r
+remotes::install_github('NICHD-BSPC/carnation', upgrade='never')
 ```
-devtools::install_github('NICHD-BSPC/carnation')
-```
 
-## remotes
+### remotes
 
-You can also install carnation using the `remotes` package. Here, we use `remotes` to figure
-out the dependencies directly, mimicking a direct R installation.
+Alternatively, you can install directly with `remotes`:
 
-First, install `remotes` in an existing R installation, e.g. in RStudio.
-
-```
+```r
 install.packages('remotes')
-```
-
-If conda is installed, you could also do this with a conda environment
-that contains only `remotes`, e.g.
-
-```
-conda create -p env r-remotes
-conda activate ./env
-```
-
-Next, open R, set repositories to get both CRAN and bioconductor packages and run
-`remotes::install_github`.
-
-```
-setRepositories(ind=c(1,2,3,4,5))
+setRepositories(ind=c(1,2,3,4,5))  # Get both CRAN and Bioconductor packages
 remotes::install_github('NICHD-BSPC/carnation')
 ```
 
-Note: This may be a time-consuming step, especially if working with a fresh R installation, as a large number of dependencies will be installed.
+## 🏁 Getting Started
 
-# Getting started
+### Data Organization
 
-## Data setup
-
-Organize your data in a directory structure that carnation can use, e.g. in `/carnation/data`.
-For example, let's say you have two projects *project1* and *project2*.
-
-- *project1* has 3 analyses, *main*, *subset* and *main-nooutlier*
-- *project2* has 1 analysis, *default*
-
-Then your carnation data directory can look like this:
+Organize your data in a directory structure that Carnation can easily navigate:
 
 ```
 /carnation/data/
@@ -89,85 +68,80 @@ Then your carnation data directory can look like this:
      └─ default.rds
 ```
 
-The first time you run carnation, you will be asked to
-choose a data area. If you have set up your data as above, type in the
-location `/carnation/data` in the data area input.
+### First Run
 
-If everything worked as expected, then the *Available projects* menu should be populated with two options *project1* and *project2*.
+Load the library and install required Python dependencies:
 
-- If *project1* is selected, *Available assays* will show three options, *main*, *subset* and *main-nooutlier*.
-- If *project2* is selected, there will be one available assay - *default*.
-
-
-## First run
-
-First, load the `carnation` library.
-
-```
+```r
 library(carnation)
-```
-
-`carnation` uses the `kaleido` python module to allow interactive plots to be
-saved to PDF. To enable this functionality, you need to run:
-
-```
-install_carnation()
-```
-
-By default, this installs the python modules `plotly` and `kaleido` into a python virtual
-environment named `r-carnation`.
-
-Finally, run the main app function.
-
-```
+install_carnation()  # Installs plotly and kaleido for PDF export
 run_carnation()
 ```
 
-This will open up carnation in a browser window. Note that, if you're running carnation
-from a remote ssh server, you might need to add some additional options. For example,
-if you're running carnation on a remote server that is forwarding port `12345` via
-ssh tunneling:
+For remote servers with SSH port forwarding:
 
-```
+```r
 run_carnation(options=list(port=12345, launch.browser=FALSE))
 ```
 
-This will start carnation on port `12345`.
+Then access Carnation at `http://127.0.0.1:12345`
 
-Now point your web browser to the URL: `http://127.0.0.1:12345`.
-Since, this is your first run, carnation will ask you where your data is via
-a modal dialog.
+## 🔍 Exploring Your Data
 
+Once your data is loaded, Carnation offers multiple ways to explore:
 
-# Server mode
+- **DE Analysis**: Analyze differential expression through multiple visualizations
+  - **Summary**: Get a quick overview of your differential expression results
+  - **Metadata**: Explore sample metadata and experimental design
+  - **PCA Plot**: Visualize sample relationships with gene loadings overlay
+  - **MA Plot**: Identify differentially expressed genes with statistical significance
+  - **Gene Plot**: Create customizable expression visualizations for genes of interest
+  - **UpSet Plot**: Discover overlapping gene sets across multiple comparisons
+  - **Heatmap**: Examine expression patterns across samples and conditions
 
-Carnation supports running in server mode using `shinymanager` to add an
-authentication layer. For this, you need to first create a local sqlite database
-with user details (for more details see [shinymanager docs](https://datastorm-open.github.io/shinymanager/)).
+- **Functional Enrichment**: Understand the biological significance of your results
+  - **Table**: Interactive tables with powerful search capabilities
+  - **Plots**: Seven different visualizations including network plots and dendrograms
+  - **Compare Results**: Directly compare enrichment results between conditions
 
-```
-# create data frame with user details
+- **Pattern Analysis**: Identify co-regulated gene clusters across conditions
+  - **Plot**: Visualize expression patterns of gene clusters
+  - **Cluster Membership**: Explore which genes belong to which clusters
+
+- **Gene Scratchpad**: Track genes of interest across all visualizations
+
+## 📚 Documentation
+
+Each module includes comprehensive help documentation accessible through the help buttons throughout the interface. The documentation provides detailed explanations of plot options, statistical methods, and interpretation guidelines.
+
+## 🤝 Contributing
+
+We welcome contributions to Carnation! Please feel free to submit issues or pull requests to the GitHub repository.
+
+## 📄 License
+
+Carnation is available under the MIT license.
+
+## 💻 Server Mode
+
+Carnation supports multi-user environments with authentication:
+
+```r
+# Create user database
 credentials <- data.frame(
   user = c('shinymanager'),
   password = c('12345'),
-  # password will automatically be hashed
   admin = c(TRUE),
   stringsAsFactors = FALSE
 )
 
-# Init the database
+# Initialize the database
 shinymanager::create_db(
   credentials_data = credentials,
-  sqlite_path = 'credentials.sqlite', # will be created
+  sqlite_path = 'credentials.sqlite',
   passphrase = 'admin_passphrase'
 )
-```
 
-This will create an sqlite file with an admin user 'shinymanager'.
-Next, run carnation pointing to the credentials you just created.
-
-```
+# Run with authentication
 run_carnation(credentials='credentials.sqlite', passphrase='admin_passphrase')
 ```
-
-Now, you will see a login page asking you to authenticate before you can access carnation.
