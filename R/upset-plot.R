@@ -41,12 +41,6 @@ upsetPlotUI <- function(id, panel){
             bsCollapse(
                bsCollapsePanel('UpSet options',
                  fluidRow(
-                   column(12, align='right',
-                       helpButtonUI(ns('upset_opts_help'))
-                   ) # column
-                 ), # fluidRow
-
-                 fluidRow(
                    column(4, h5('Direction of change')),
                    column(8,
                      selectInput(ns('upset_type'), label=NULL,
@@ -930,8 +924,6 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
 
       ###################### buttons ###################
       helpButtonServer('upset_controls_help', size='l')
-      helpButtonServer('upset_opts_help', size='l')
-      helpButtonServer('upset_more_help', size='l')
       helpButtonServer('de_upset_help', size='l')
       helpButtonServer('de_upset_tbl_help', size='l')
       downloadButtonServer('upset_download', upsetplot, 'upsetplot')

@@ -6,6 +6,7 @@
 #'
 #' @return path to access yaml
 #'
+#' @export
 get_access_path <- function(){
   if(Sys.getenv('CARNATION_ACCESS_YAML') != ''){
     path <- Sys.getenv('CARNATION_ACCESS_YAML')
@@ -36,6 +37,8 @@ get_access_path <- function(){
 #' @param al list with access settings; should have two elements - user_group & data_area
 #' @param u user name
 #' @param admin Admin user group
+#'
+#' @export
 check_user_access <- function(al, u, admin='admin'){
 
   # lab of user

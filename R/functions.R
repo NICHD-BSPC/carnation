@@ -76,12 +76,14 @@ is_site_admin <- function(u){
 #'
 #' @export
 in_admin_group <- function(u){
-  al <- read_yaml(get_access_path())
+  al <- read_access_yaml()
 
   cfg <- get_config()
   admin_group <- cfg$server$admin_group
 
-  if(admin_group %in% al$user_group) return(TRUE)
+  ll <- check_user_access(al, u, admin_group)
+
+  if(admin_group %in% ll$user_group) return(TRUE)
   else return(FALSE)
 }
 

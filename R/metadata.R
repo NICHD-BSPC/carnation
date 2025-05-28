@@ -18,10 +18,7 @@ metadataUI <- function(id, panel){
                                 selected=NULL),
 
                  fluidRow(
-                   column(6, strong('Edit metadata')),
-                   column(6, align='right',
-                     helpButtonUI(ns('edit_metadata_help'))
-                   ) # column
+                   column(12, strong('Edit metadata')),
                  ), # fluidRow
 
                  fluidRow(

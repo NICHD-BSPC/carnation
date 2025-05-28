@@ -8,6 +8,11 @@ loadDataUI <- function(id){
 
   # TODO: add multiple dds
   tagList(
+    fluidRow(
+      column(12, align='left',
+        helpButtonUI(ns('load_new_help'))
+      ) # column
+    ), # fluidRow
     span('Step 1: ',
          style='font-style: italic;'),
     actionButton(ns('add_counts'), 'Add counts'),
@@ -1039,6 +1044,7 @@ loadDataServer <- function(id, username, rds=NULL){
         )
       }
 
+      helpButtonServer('load_new_help', size='l')
 
       return(reactive(reload_parent()))
 

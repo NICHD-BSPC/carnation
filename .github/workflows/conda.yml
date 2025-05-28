@@ -23,10 +23,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
-
       - name: git setup
         # Set up git and export env vars to be used in later steps.
         #   Note the unconventional mechanism for exporting envs by appending to
@@ -81,8 +81,9 @@ jobs:
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
 
-          # use devtools::check to check, build, install
-          Rscript -e "devtools::check('../carnation', manual=FALSE, vignettes=FALSE, check_dir='.')"
+          # build, check
+          R CMD build --no-build-vignettes --no-manual ../carnation
+          R CMD check --as-cran --no-manual --no-build-vignettes carnation_${VERSION}.tar.gz
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
 
@@ -91,4 +92,14 @@ jobs:
         with:
           name: carnation-bundle
           path: carnation.tar.gz
+
+      - name: remotes install
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda activate ../env
+
+          Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation', upgrade='never')"
+          Rscript -e "library(carnation)"
+
+
 

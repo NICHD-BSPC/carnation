@@ -62,11 +62,8 @@ genePlotUI <- function(id, panel){
           bsCollapsePanel('x-axis settings',
 
             fluidRow(
-              column(6, align='left',
-                     'variable levels'),
-              column(6, align='right',
-                helpButtonUI(ns('geneplt_xaxis_help'))
-              ) # column
+              column(12, align='left',
+                     'variable levels')
             ), # fluidRow
 
             uiOutput(ns('x_axis_bucket')),
@@ -94,12 +91,6 @@ genePlotUI <- function(id, panel){
           ), # bsCollapsePanel
 
           bsCollapsePanel('y-axis settings',
-
-            fluidRow(
-              column(12, align='right',
-                helpButtonUI(ns('geneplt_yaxis_help'))
-              ) # column
-            ), # fluidRow
 
             fluidRow(
               column(4, h5('y-axis max')),
@@ -143,12 +134,6 @@ genePlotUI <- function(id, panel){
           bsCollapsePanel('facet settings',
 
             fluidRow(
-              column(12, align='right',
-                helpButtonUI(ns('geneplt_facet_help'))
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
               column(4, 'variable'),
               column(8,
                 selectInput(ns('facet_vars'),
@@ -179,12 +164,6 @@ genePlotUI <- function(id, panel){
           ), # bsCollapsePanel
 
           bsCollapsePanel('More options',
-
-            fluidRow(
-              column(12, align='right',
-                helpButtonUI(ns('geneplt_more_help'))
-              ) # column
-            ), # fluidRow
 
             fluidRow(
               column(4, h5('normalization')),
@@ -904,12 +883,8 @@ genePlotServer <- function(id, obj,
 
       ################## buttons #####################
 
-      helpButtonServer('de_geneplt_help')
+      helpButtonServer('de_geneplt_help', size='l')
       helpButtonServer('geneplt_opts_help', size='l')
-      helpButtonServer('geneplt_xaxis_help', size='l')
-      helpButtonServer('geneplt_yaxis_help', size='l')
-      helpButtonServer('geneplt_facet_help', size='l')
-      helpButtonServer('geneplt_more_help', size='l')
 
       downloadButtonServer('normplot_download', reactive({ gene_plot_data$handle }),
                            'gene_plot')
