@@ -1078,6 +1078,13 @@ enrichServer <- function(id, obj, upset_table,
                 warning = function(w){ w },
                 error = function(e){ e }
               )
+
+        if(inherits(df, 'error')){
+           showNotification(
+             paste('Distill enrichment error:', as.character(df)), type='error'
+           )
+        }
+
         enrich_data$distill$tbl <- df
         enrich_data$distill$title <- paste0(input$comp_fun, ' | ',
                                             input$geneset, ' | ',
@@ -1158,6 +1165,7 @@ enrichServer <- function(id, obj, upset_table,
                 warning = function(w){ w },
                 error = function(e){ e }
               )
+
         enrich_data$distill$tbl <- df
         enrich_data$distill$title <- paste0(input$comp_tbl, ' | ',
                                             input$geneset_tbl, ' | ',
@@ -1296,13 +1304,22 @@ enrichServer <- function(id, obj, upset_table,
 
         subset_rows <- min(nrow(l_gs), numcat)
 
-        fuzzy_clusters <- gs_fuzzyclustering(l_gs[1:subset_rows,],
-          # n_gs = nrow(res_enrich_subset),
-          # gs_ids = NULL,
-          # similarity_matrix = NULL,
-          similarity_threshold = 0.35,
-          fuzzy_seeding_initial_neighbors = 3,
-          fuzzy_multilinkage_rule = 0.5)
+        fuzzy_clusters <- tryCatch(
+                            gs_fuzzyclustering(l_gs[1:subset_rows,],
+                              # n_gs = nrow(res_enrich_subset),
+                              # gs_ids = NULL,
+                              # similarity_matrix = NULL,
+                              similarity_threshold = 0.35,
+                              fuzzy_seeding_initial_neighbors = 3,
+                              fuzzy_multilinkage_rule = 0.5),
+                            warning = function(w){ w },
+                            error = function(e){ e })
+
+        if(inherits(fuzzy_clusters, 'error')){
+           showNotification(
+             paste('Fuzzy clustering error:', as.character(fuzzy_clusters)), type='error'
+           )
+        }
 
         enrich_data$fuzzy$tbl <- list(clusters=fuzzy_clusters,
                                       res=res, anno_df=anno_df)
@@ -1375,13 +1392,16 @@ enrichServer <- function(id, obj, upset_table,
 
         subset_rows <- min(nrow(l_gs), numcat)
 
-        fuzzy_clusters <- gs_fuzzyclustering(l_gs[1:subset_rows,],
-          # n_gs = nrow(res_enrich_subset),
-          # gs_ids = NULL,
-          # similarity_matrix = NULL,
-          similarity_threshold = 0.35,
-          fuzzy_seeding_initial_neighbors = 3,
-          fuzzy_multilinkage_rule = 0.5)
+        fuzzy_clusters <- tryCatch(
+                            gs_fuzzyclustering(l_gs[1:subset_rows,],
+                              # n_gs = nrow(res_enrich_subset),
+                              # gs_ids = NULL,
+                              # similarity_matrix = NULL,
+                              similarity_threshold = 0.35,
+                              fuzzy_seeding_initial_neighbors = 3,
+                              fuzzy_multilinkage_rule = 0.5),
+                            warning = function(w){ w },
+                            error = function(e){ e })
 
         enrich_data$fuzzy$tbl <- list(clusters=fuzzy_clusters,
                                       res=res, anno_df=anno_df)
