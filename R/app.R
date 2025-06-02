@@ -59,7 +59,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
             HTML(
               paste0(
                 'ca',
-                span('rna', style='color: #e95420;'), # primary color from united theme
+                span('rna', style='color: #e95420; font-weight: bold;'), # primary color from united theme
                 'tion'
               ) # paste
             ) # HTML
