@@ -169,7 +169,7 @@ genePlotUI <- function(id, panel){
               column(4, h5('normalization')),
               column(8,
                 selectInput(ns('norm_method'), label=NULL,
-                  choices=unlist(config$ui$de_analysis$gene_plot$norm)
+                  choices=unlist(config$ui$de_analysis$gene_plot$norm_method)
                 ) # selectInput
               ) # column
             ), # fluidRow
