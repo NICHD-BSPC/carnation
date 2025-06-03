@@ -113,7 +113,7 @@ settingsUI <- function(id, panel, username){
                      ), # column
                      column(1, align='left',
                        helpButtonUI(ns('settings_help'))
-                     )
+                     ) # column
                    )    # fluidRow
                  ), # tabPanel
                  user_main
