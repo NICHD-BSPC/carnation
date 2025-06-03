@@ -1539,7 +1539,7 @@ enrichServer <- function(id, obj, upset_table,
       })
 
       # plot modules
-      sumovPlotServer('sumov', genetonic_obj)
+      sumovPlotServer('sumov', genetonic_obj, config)
       enrichmapServer('enrichmap', genetonic_obj, enrich_obj)
       cnetPlotServer('cnetplot', enrich_obj)
       radarServer('radar', genetonic_obj)
@@ -1703,7 +1703,7 @@ enrichServer <- function(id, obj, upset_table,
       ###################### Compare functional enrichment ############################
 
       # plot modules
-      sumovPlotServer('sumov_comp', genetonic_comp_obj, type='comp')
+      sumovPlotServer('sumov_comp', genetonic_comp_obj, config, type='comp')
       radarServer('radar_comp', genetonic_comp_obj, type='comp')
       horizonServer('horizon', genetonic_comp_obj)
 

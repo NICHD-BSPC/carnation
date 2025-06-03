@@ -79,6 +79,7 @@
 sumovPlotUI <- function(id, panel, type=''){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -159,10 +160,11 @@ sumovPlotUI <- function(id, panel, type=''){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactiveValues object containing GeneTonic object
+#' @param config reactive list with config settings
 #' @param type string, if 'comp' then show the comparison view
 #'
 #' @export
-sumovPlotServer <- function(id, obj, type=''){
+sumovPlotServer <- function(id, obj, config, type=''){
 
   moduleServer(
     id,
@@ -171,22 +173,25 @@ sumovPlotServer <- function(id, obj, type=''){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       plottype <- 'summary_overview'
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
-      plot_args <- reactive({
-        list(
-          numcat=input$numcat,
-          catlen=input$catlen,
-          pcol=input$pval,
-          color=input$color
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots$summary_overview$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots$summary_overview$catlen)
+        updateSelectInput(session, 'pval',
+                          choices=config()$ui$functional_enrichment$plots$summary_overview$pval)
+        updateSelectInput(session, 'color',
+                          choices=config()$ui$functional_enrichment$plots$summary_overview$color)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
         # this is needed to handle reactive ui
         if(is.null(input$numcat)){
           numcat <- defaults$numcat
@@ -199,7 +204,8 @@ sumovPlotServer <- function(id, obj, type=''){
           pcol <- input$pval
           color_by <- input$color
         }
-        text_size <- config$server$functional_enrichment$plot[[ plottype ]]$text_size
+
+        text_size <- config()$server$functional_enrichment$plot[[ plottype ]]$text_size
         validate(
             need(!is.null(numcat) & numcat > 0,
                  'Number of terms must be > 0')
