@@ -1545,7 +1545,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                                   app_object,
                                   upset_plot_args,
                                   gene_scratchpad,
-                                  reactive({ input$reset.genes }))
+                                  reactive({ input$reset.genes }),
+                                  config)
 
     upset_table <- reactiveValues(tbl=NULL, intersections=NULL, set_labels=NULL)
 

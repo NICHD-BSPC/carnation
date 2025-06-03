@@ -7,6 +7,7 @@
 upsetPlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -197,7 +198,7 @@ upsetPlotUI <- function(id, panel){
 #' @param reset_genes reactive to reset gene scratchpad selection
 #'
 #' @export
-upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
+upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
 
   moduleServer(
     id,
@@ -205,8 +206,6 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
 
       # TODO: move to config
       comp_split_pattern <- ';'
@@ -242,6 +241,16 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         genes_clicked$g <- NULL
       }
 
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'n_intersections',
+                           value=config()$ui$de_analysis$upset_plot$n_intersections)
+        updateNumericInput(session, 'min_size',
+                           value=config()$ui$de_analysis$upset_plot$min_size)
+        updateNumericInput(session, 'text_scale',
+                           value=config()$ui$de_analysis$upset_plot$text_scale)
+      })
+
       # observer to initialize/reset upset_plot choices
       # NOTE: this is only run once per loaded assay
       observeEvent(app_object()$res, {
@@ -252,7 +261,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         choices <- names(app_object()$res)
         upset_choices$all <- choices
 
-        comp_num <- config$server$de_analysis$upset_plot$comp_num
+        comp_num <- config()$server$de_analysis$upset_plot$comp_num
         if(length(choices) > comp_num){
           choices <- choices[1:comp_num]
         }
@@ -479,9 +488,9 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         )
 
         fc.thres <- ifelse(plot_args()$fc.thres == '' | is.na(plot_args()$fc.thres),
-                           config$ui$de_analysis$filters$log2fc_threshold, plot_args()$fc.thres)
+                           config()$ui$de_analysis$filters$log2fc_threshold, plot_args()$fc.thres)
         fdr.thres <- ifelse(plot_args()$fdr.thres == '' | is.na(plot_args()$fdr.thres),
-                            config$ui$de_analysis$filters$fdr_threshold, plot_args()$fdr.thres)
+                            config()$ui$de_analysis$filters$fdr_threshold, plot_args()$fdr.thres)
 
         # gene lists to compare
         # TODO: move to function?
@@ -628,7 +637,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         if(!is.null(input$upset_intersections) & all(input$upset_intersections %in% inter_choices)) selected <- input$upset_intersections
         else selected <- inter_choices
 
-        intersect_num <- config$server$de_analysis$upset_plot$intersect_num
+        intersect_num <- config()$server$de_analysis$upset_plot$intersect_num
         if(length(selected) > intersect_num){
           selected <- selected[1:intersect_num]
         }

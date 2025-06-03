@@ -4,7 +4,7 @@
 \alias{upsetPlotServer}
 \title{Upset plot module server function}
 \usage{
-upsetPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes)
+upsetPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
