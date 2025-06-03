@@ -178,7 +178,7 @@ genePlotUI <- function(id, panel){
               column(4, h5('trendline')),
               column(8, align='left',
                 selectInput(ns('trendline'), label=NULL,
-                  choices=c('line','smooth'),
+                  choices=c('line','smooth')
                 ) # selectInput
               ) # column
             ), # fluidRow
