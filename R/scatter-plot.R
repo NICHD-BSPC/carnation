@@ -7,8 +7,6 @@
 scatterPlotUI <- function(id, panel){
   ns <- NS(id)
 
-  config <- get_config()
-
   if(panel == 'sidebar'){
     tagList(
       fluidRow(
@@ -44,8 +42,7 @@ scatterPlotUI <- function(id, panel){
         column(6,
           selectizeInput(ns('compare'),
                         label=NULL,
-                        choices=c('LFC', 'P-adj'),
-                        selected=config$ui$de_analysis$scatter_plot$compare
+                        choices=c('LFC', 'P-adj')
           ) # selectizeInput
         ) # column
       ), # fluidRow
