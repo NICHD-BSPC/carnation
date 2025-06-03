@@ -12,11 +12,11 @@
 run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
 
   # read config yaml
-  config <- get_config()
+  cfg <- get_config()
 
   # set some options
   oopt <- options(spinner.type = 4)
-  options(shiny.maxRequestSize = config$max_upload_size*1024^2)
+  options(shiny.maxRequestSize = cfg$max_upload_size*1024^2)
 
   # reset to previous options on exit
   on.exit(options(oopt))
@@ -46,7 +46,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     # custom CSS styles
     tags$head(
       tags$style(
-        HTML(config$style$global)
+        HTML(cfg$style$global)
       )  # tags$style
     ), # tags$head
 
@@ -108,7 +108,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                     column(4, h5('FDR threshold')),
                     column(8,
                       numericInput("fdr.thres", label=NULL,
-                        value=config$ui$de_analysis$filters$fdr_threshold,
+                        value=cfg$ui$de_analysis$filters$fdr_threshold,
                         min=0, max=1
                       ) # numericInput
                     ) # column
@@ -117,7 +117,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                     column(4, h5('log2FC threshold')),
                     column(8,
                       numericInput("fc.thres", label=NULL,
-                        value=config$ui$de_analysis$filters$log2fc_threshold,
+                        value=cfg$ui$de_analysis$filters$log2fc_threshold,
                         min=0
                       ) # numericInput
                     ) # column
@@ -185,7 +185,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 column(4, h5('Only DE genes')),
                 column(8,
                   checkboxInput("toggle_filters", label=NULL,
-                    value=config$ui$de_analysis$filters$only_de_toggle
+                    value=cfg$ui$de_analysis$filters$only_de_toggle
                   ) # checkboxInput
                 ) # column
               ) # fluidRow
@@ -368,7 +368,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                         column(8,
                           numericInput('scratchpad_ngenes',
                                       label=NULL,
-                                      value=config$server$de_analysis$gene_scratchpad$ngenes,
+                                      value=cfg$server$de_analysis$gene_scratchpad$ngenes,
                                       step=1)
                         ) # column
                       ), # fluidRow
