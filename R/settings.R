@@ -823,15 +823,6 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
       ) # modalDialog
     }
 
-    no_access_modal <- function(){
-      modalDialog(
-        div(tags$b('No access permissions!', style='color: red;')),
-        br(),
-        span('Please contact site administrators to enable access'),
-        footer=modalButton('OK')
-      )
-    }
-
     # update object menu
     settings <- eventReactive(c(access_yaml$l,
                                 reload_parent$flag), {
@@ -869,7 +860,12 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
           if(!shinyadmin){
             if(!is_admin){
               showModal(
-                no_access_modal()
+                modalDialog(
+                  div(tags$b('No access permissions!', style='color: red;')),
+                  br(),
+                  span('Please contact site administrators to enable access'),
+                  footer=modalButton('OK')
+                )
               )
             } else {
               showModal(
