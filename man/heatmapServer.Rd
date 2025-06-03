@@ -4,7 +4,7 @@
 \alias{heatmapServer}
 \title{Heatmap module server function}
 \usage{
-heatmapServer(id, obj, coldata, plot_args, gene_scratchpad)
+heatmapServer(id, obj, coldata, plot_args, gene_scratchpad, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -18,6 +18,8 @@ heatmapServer(id, obj, coldata, plot_args, gene_scratchpad)
 
 \item{gene_scratchpad}{reactiveValues object containing genes selected in scratchpad which will
 be labeled}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Heatmap module server function

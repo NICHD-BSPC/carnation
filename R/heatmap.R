@@ -7,6 +7,7 @@
 heatmapUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -85,8 +86,7 @@ heatmapUI <- function(id, panel){
           column(5, h5('cluster by')),
           column(7,
             selectInput(ns('hmap_clust'), label=NULL,
-                        choices=c('row', 'column', 'both', 'none'),
-                        selected=config$ui$de_analysis$heatmap$cluster_by
+                        choices=c('row', 'column', 'both', 'none')
             ) # selectInput
           ) # column
         ), # fluidRow
@@ -95,7 +95,6 @@ heatmapUI <- function(id, panel){
           column(5, h5('scale')),
           column(7,
             selectInput(ns('hmap_scale'), label=NULL,
-              selected=config$ui$de_analysis$heatmap$scale,
               choices=c('row', 'none', 'column')
             ) # selectInput
           ) # column
@@ -116,7 +115,6 @@ heatmapUI <- function(id, panel){
             column(5, h5('ranking metric')),
             column(7,
               selectInput(ns('hmap_rank'), label=NULL,
-                selected=config$ui$de_analysis$heatmap$rank,
                 choices=c('padj', 'log2FoldChange')
               ) # selectInput
             ) # column
@@ -220,12 +218,14 @@ heatmapUI <- function(id, panel){
 #' 'upset_data' (list containing data from upset plot module)
 #' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad which will
 #' be labeled
+#' @param config reactive list with config settings
 #'
 #' @export
 heatmapServer <- function(id, obj,
                           coldata,
                           plot_args,
-                          gene_scratchpad){
+                          gene_scratchpad,
+                          config){
 
   moduleServer(
     id,
@@ -233,11 +233,6 @@ heatmapServer <- function(id, obj,
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
-
-      # metadata columns to ignore
-      cols.to.drop <- config$server$cols.to.drop
 
       coldata.all <- reactive({
         list(all=coldata$all,
@@ -257,6 +252,17 @@ heatmapServer <- function(id, obj,
 
       # reactiveValues to save heatmap data being plotted
       hmap_plot_data <- reactiveValues(all=NULL, plotted=NULL)
+
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'max_ngenes',
+                           value=config()$server$de_analysis$heatmap$max_ngenes)
+        updateNumericInput(session, 'fontsize_row',
+                           value=config()$ui$de_analysis$heatmap$fontsize_row)
+        updateNumericInput(session, 'fontsize_col',
+                           value=config()$ui$de_analysis$heatmap$fontsize_col)
+
+      })
 
       # observer to update heatmap comparisons if metadata is changed
       observeEvent(coldata.all()$curr, {
@@ -288,7 +294,7 @@ heatmapServer <- function(id, obj,
         hmap_coldata$all <- cdata
         hmap_coldata$current <- cdata
 
-        column.names <- setdiff(colnames(cdata), cols.to.drop)
+        column.names <- setdiff(colnames(cdata), config()$server$cols.to.drop)
 
         if(is.null(input$hmap_cols)) selected <- column.names[1]
         else if(input$hmap_cols %in% column.names) selected <- input$hmap_cols
@@ -623,7 +629,7 @@ heatmapServer <- function(id, obj,
                 paste('Labeling', length(g.keep), 'genes found in current selection')
             )
             # get colors from config
-            hmap_colors <- config$server$de_analysis$heatmap$row_side_colors
+            hmap_colors <- config()$server$de_analysis$heatmap$row_side_colors
             row_side_colors <- rep(hmap_colors[['not_labeled']], nrow(mat))
             row_side_colors[rownames(mat) %in% g.keep] <- hmap_colors[['labeled']]
             row_side_colors <- data.frame('label'=row_side_colors,
@@ -631,9 +637,9 @@ heatmapServer <- function(id, obj,
 
             # set 3 subplot widths if row clustering is TRUE
             if(input$hmap_clust %in% c('row', 'both')){
-                subplot_widths <- config$server$de_analysis$heatmap$subplot_widths$with_row_clustering
+                subplot_widths <- config()$server$de_analysis$heatmap$subplot_widths$with_row_clustering
             } else {
-                subplot_widths <- config$server$de_analysis$heatmap$subplot_widths$without_row_clustering
+                subplot_widths <- config()$server$de_analysis$heatmap$subplot_widths$without_row_clustering
             }
         } else {
             row_side_colors <- NULL
