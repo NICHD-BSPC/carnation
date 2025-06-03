@@ -9,6 +9,7 @@
 patternPlotUI <- function(id, panel, tab){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -291,21 +292,20 @@ patternPlotUI <- function(id, panel, tab){
 #' @param coldata reactiveValues object containing object metadata
 #' @param plot_args reactive containing 'gene_scratchpad' (genes selected in scratchpad) &
 #' 'upset_data' (list containing data from upset plot module)
+#' @param config reactive list with config settings
 #'
 #' @export
 patternPlotServer <- function(id,
                               obj,
                               coldata,
-                              plot_args){
+                              plot_args,
+                              config){
   moduleServer(
     id,
 
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
-      cols.to.drop <- config$server$cols.to.drop
 
       res_obj <- reactive({
         obj$res
@@ -327,6 +327,14 @@ patternPlotServer <- function(id,
       current_facet_levels <- reactiveValues(l=NULL)
       upset_data <- reactiveValues(genes=NULL, labels=NULL)
       gene_scratchpad <- reactiveValues(genes=NULL)
+
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'min_cluster_size',
+                           value=config()$ui$pattern_analysis$min_cluster_size)
+        updateNumericInput(session, 'x_rotate',
+                           value=config()$ui$pattern_analysis$x_rotate)
+      })
 
       observeEvent(pattern_obj(), {
         obj <- pattern_obj()
@@ -428,18 +436,18 @@ patternPlotServer <- function(id,
         if(!all(colnames(cdata) %in% colnames(obj))){
             obj <- add_metadata(obj,
                                 cdata,
-                                cols.to.drop)
+                                config()$server$cols.to.drop)
         }
 
         # get time variable
         cols <- colnames(obj)
 
         # remove common metadata columns if available
-        cols <- setdiff(cols, cols.to.drop)
+        cols <- setdiff(cols, config()$server$cols.to.drop)
 
         # remove more columns from color options
         cols <- setdiff(cols,
-                        config$server$pattern_analysis$cols.to.drop)
+                        config()$server$pattern_analysis$cols.to.drop)
 
         # cluster options are 'cluster' and 'cutoff*'
         cluster.options <- c('cluster', cols[grep('cutoff', cols)])

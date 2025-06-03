@@ -1620,7 +1620,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     })
 
     patternPlotServer('deg_plot', app_object, coldata.all,
-                      pattern_plot_args)
+                      pattern_plot_args, config)
 
     ######################### Help buttons #######################
 
