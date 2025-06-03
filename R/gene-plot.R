@@ -22,7 +22,7 @@ genePlotUI <- function(id, panel){
         fluidRow(
           column(4, h5('sample group')),
           column(8,
-            selectInput(ns('norm_samples'), label=NULL,
+            selectInput(ns('samples'), label=NULL,
                         choices=NULL, selected=NULL
             ) # selectInput
           ) # column
@@ -50,7 +50,7 @@ genePlotUI <- function(id, panel){
         fluidRow(
           column(4, h5('color by')),
           column(8,
-            selectizeInput(ns('norm_color'), label=NULL,
+            selectizeInput(ns('color'), label=NULL,
                            choices=NULL,
                            selected=NULL
             ) # selectizeInput
@@ -71,18 +71,18 @@ genePlotUI <- function(id, panel){
             fluidRow(
               column(6, align='center',
                      style='margin-bottom: 10px;',
-                actionButton(ns('gene_x_all'), 'Select all')
+                actionButton(ns('x_all'), 'Select all')
               ), # column
               column(6, align='center',
                      style='margin-bottom: 10px;',
-                actionButton(ns('gene_x_none'), 'Select none')
+                actionButton(ns('x_none'), 'Select none')
               ) # column
             ), # fluidRow
 
             fluidRow(
               column(4, h5('rotate x labels')),
               column(8,
-                numericInput(ns('gene_x_rotate'), label=NULL,
+                numericInput(ns('x_rotate'), label=NULL,
                   value=config$ui$de_analysis$gene_plot$x_rotate,
                   step=15)
               ) # column
@@ -95,27 +95,27 @@ genePlotUI <- function(id, panel){
             fluidRow(
               column(4, h5('y-axis max')),
               column(8,
-                numericInput(ns('gene_ymax'), label=NULL, value=NA)
+                numericInput(ns('ymax'), label=NULL, value=NA)
               ) # column
             ), # fluidRow
 
             fluidRow(
               column(4, h5('y-axis min')),
               column(8,
-                numericInput(ns('gene_ymin'), label=NULL, value=NA)
+                numericInput(ns('ymin'), label=NULL, value=NA)
               ) # column
             ), # fluidRow
 
             fluidRow(
               column(4, align='left', style='margin-bottom: 10px;',
-                actionButton(ns('gene_y_auto'), label='Autoscale')
+                actionButton(ns('y_auto'), label='Autoscale')
               ) # column
             ), # fluidRow
 
             fluidRow(
               column(4, h5('log scale')),
               column(8, align='left',
-                checkboxInput(ns('norm_logy'), label=NULL,
+                checkboxInput(ns('logy'), label=NULL,
                   value=config$ui$de_analysis$gene_plot$logy
                 ) # checkboxInput
               ) # column
@@ -124,7 +124,7 @@ genePlotUI <- function(id, panel){
             fluidRow(
               column(4, h5('free y axes')),
               column(8, align='left',
-                checkboxInput(ns('norm_freey'), label=NULL,
+                checkboxInput(ns('freey'), label=NULL,
                   value=config$ui$de_analysis$gene_plot$freey
                 ) # checkboxInput
               ) # column
@@ -266,12 +266,12 @@ genePlotServer <- function(id, obj,
 
       gene_plot_data <- reactiveValues(all=NULL, plotted=NULL, handle=NULL)
 
-      gene_coldata <- eventReactive(c(coldata$curr, input$norm_samples), {
+      gene_coldata <- eventReactive(c(coldata$curr, input$samples), {
         validate(
-          need(!is.null(coldata$curr) & input$norm_samples != '', 'Waiting for selection')
+          need(!is.null(coldata$curr) & input$samples != '', 'Waiting for selection')
         )
 
-        coldata$curr[[ input$norm_samples ]]
+        coldata$curr[[ input$samples ]]
       })
 
       app_object <- reactive({
@@ -305,14 +305,14 @@ genePlotServer <- function(id, obj,
                 choices <- c(names(app_object()$dds),
                              'all_samples')
             }
-            if(!is.null(input$norm_samples) & input$norm_samples %in% choices) selected <- input$norm_samples
+            if(!is.null(input$samples) & input$samples %in% choices) selected <- input$samples
             else selected <- choices[1]
         } else {
             choices <- names(app_object()$dds)
             selected <- choices[1]
         }
         updateSelectInput(session,
-                          'norm_samples',
+                          'samples',
                           choices=choices,
                           selected=selected)
       }) # observeEvent update samples menu
@@ -322,7 +322,7 @@ genePlotServer <- function(id, obj,
       # to the module
       observeEvent(c(app_object(),
                      plot_args(),
-                     input$norm_samples,
+                     input$samples,
                      input$norm_method), {
 
         validate(
@@ -333,7 +333,7 @@ genePlotServer <- function(id, obj,
           need(all(names(app_object()$dds_mapping) %in% names(app_object()$res)), 'Waiting for selection')
         )
 
-        sample_grp <- input$norm_samples
+        sample_grp <- input$samples
         if(sample_grp != 'all_samples'){
             if(input$norm_method == 'vst') rld.i <- app_object()$rld[[ sample_grp ]]
             else if(input$norm_method == 'libsize') rld.i <- app_object()$dds[[ sample_grp ]]
@@ -367,14 +367,14 @@ genePlotServer <- function(id, obj,
         }
 
         # update color choices
-        if(is.null(input$norm_color) || !(input$norm_color %in% c(int.cols, 'sample', 'gene'))){
-            updateSelectizeInput(session, 'norm_color',
+        if(is.null(input$color) || !(input$color %in% c(int.cols, 'sample', 'gene'))){
+            updateSelectizeInput(session, 'color',
                                  choices=c(int.cols, 'sample','gene'),
                                  selected='gene')
         } else {
-            updateSelectizeInput(session, 'norm_color',
+            updateSelectizeInput(session, 'color',
                                  choices=c(int.cols, 'sample','gene'),
-                                 selected=input$norm_color)
+                                 selected=input$color)
         }
 
         # any columns not being used to group can be used to facet
@@ -404,8 +404,8 @@ genePlotServer <- function(id, obj,
         }
 
         # reset ymax/ymin for gene plot
-        updateNumericInput(session, 'gene_ymax', value=NA)
-        updateNumericInput(session, 'gene_ymin', value=NA)
+        updateNumericInput(session, 'ymax', value=NA)
+        updateNumericInput(session, 'ymin', value=NA)
       }) # observeEvent update coldata()$gene
 
       # update faceting variable when new grouping variable is selected
@@ -507,18 +507,18 @@ genePlotServer <- function(id, obj,
 
       # observer to update factor levels when 'Select all'
       # button is clicked
-      observeEvent(c(xchoices$all, input$gene_x_all), {
+      observeEvent(c(xchoices$all, input$x_all), {
         xchoices$current <- xchoices$all
       })
 
-      observeEvent(input$gene_x_order, {
-        if(length(setdiff(xchoices$current, input$gene_x_order)) != 0)
-          xchoices$current <- input$gene_x_order
+      observeEvent(input$x_order, {
+        if(length(setdiff(xchoices$current, input$x_order)) != 0)
+          xchoices$current <- input$x_order
       })
 
       # observer to update factor levels when 'Select none'
       # button is clicked
-      observeEvent(input$gene_x_none, {
+      observeEvent(input$x_none, {
         xchoices$current <- NULL
       })
 
@@ -535,13 +535,13 @@ genePlotServer <- function(id, obj,
                 add_rank_list(
                     text = 'current',
                     labels = xchoices$current,
-                    input_id=ns('gene_x_order')
+                    input_id=ns('x_order')
                 ), # add_rank_list
                 add_rank_list(
                     text = 'unused',
                     labels = setdiff(xchoices$all,
                                      xchoices$current),
-                    input_id=ns('gene_x_other')
+                    input_id=ns('x_other')
                 ) # add_rank_list
               ) # bucket_list
             ) # column
@@ -582,7 +582,7 @@ genePlotServer <- function(id, obj,
         #
         # NOTE: this is only run when the data set is loaded
         #       to prevent autoscaling when scale is manually changed
-        if(!is.null(gene_plot_data$plotted) & !is.na(input$gene_ymax)){
+        if(!is.null(gene_plot_data$plotted) & !is.na(input$ymax)){
             # add pseudocount
             pseudocount <- config$server$de_analysis$gene_plot$pseudocount
             df$count <- df$count + pseudocount
@@ -598,11 +598,11 @@ genePlotServer <- function(id, obj,
             df.min <- min(df$count)
 
             # get fraction of points within y-limits
-            include.idx <- df$count <= input$gene_ymax & df$count >= input$gene_ymin
+            include.idx <- df$count <= input$ymax & df$count >= input$ymin
             frac <- sum(include.idx)/nrow(df)
 
             # get fraction of y-limits covered by points
-            yrange <- (max(df$count[include.idx]) - min(df$count[include.idx]))/(input$gene_ymax - input$gene_ymin)
+            yrange <- (max(df$count[include.idx]) - min(df$count[include.idx]))/(input$ymax - input$ymin)
 
             # get thresholds for frac and yrange from config
             min_frac <- config$server$de_analysis$gene_plot$min_fraction
@@ -622,14 +622,14 @@ genePlotServer <- function(id, obj,
                     )
                 }
 
-                updateNumericInput(session, 'gene_ymax', value=y_init[2])
-                updateNumericInput(session, 'gene_ymin', value=y_init[1])
+                updateNumericInput(session, 'ymax', value=y_init[2])
+                updateNumericInput(session, 'ymin', value=y_init[1])
             }
         }
       }) # observeEvent update gene_plot y-limits
 
       # reset y-axis limits
-      observeEvent(input$gene_y_auto, {
+      observeEvent(input$y_auto, {
         validate(
             need(!is.null(gene_plot_data$plotted), 'Waiting for selection')
         )
@@ -644,15 +644,15 @@ genePlotServer <- function(id, obj,
 
         y_init <- get_y_init(df, y_delta, pseudocount)
 
-        updateNumericInput(session, 'gene_ymax', value=y_init[2])
-        updateNumericInput(session, 'gene_ymin', value=y_init[1])
+        updateNumericInput(session, 'ymax', value=y_init[2])
+        updateNumericInput(session, 'ymin', value=y_init[1])
 
       }) # observeEvent reset y-limits
 
       all_settings <- reactive({
         list(
-          input$gene_ymax,
-          input$gene_ymin,
+          input$ymax,
+          input$ymin,
           gene_plot_data$all,
           plot_args(),
           input$plot_do
@@ -738,14 +738,14 @@ genePlotServer <- function(id, obj,
 
         y_init <- get_y_init(df, y_delta, pseudocount)
 
-        # for the first run, gene_ymax is NA
+        # for the first run, ymax is NA
         # This forces an update and reruns this reactive
-        if(is.na(input$gene_ymax) | is.null(input$gene_ymax) | input$gene_ymax == 0){
-            updateNumericInput(session, 'gene_ymax', value=y_init[2])
-            updateNumericInput(session, 'gene_ymin', value=y_init[1])
+        if(is.na(input$ymax) | is.null(input$ymax) | input$ymax == 0){
+            updateNumericInput(session, 'ymax', value=y_init[2])
+            updateNumericInput(session, 'ymin', value=y_init[1])
 
             validate(
-              need(is.na(input$gene_ymax), 'Loading ...')
+              need(is.na(input$ymax), 'Loading ...')
             )
         }
 
@@ -763,17 +763,17 @@ genePlotServer <- function(id, obj,
         }
 
         # gather params for gene plot
-        logy <- input$norm_logy
-        freey <- input$norm_freey
-        rotate_x_labels <- input$gene_x_rotate
-        color <- input$norm_color
+        logy <- input$logy
+        freey <- input$freey
+        rotate_x_labels <- input$x_rotate
+        color <- input$color
         trendline <- input$trendline
         xvar <- input$xvar
         gene_nrow <- config$ui$de_analysis$gene_plot$nrow
         legend <- input$legend
-        ymax <- input$gene_ymax
-        ymin <- input$gene_ymin
         ylab <- config$server$de_analysis$gene_plot$y_labels
+        ymax <- input$ymax
+        ymin <- input$ymin
         boxes <- input$boxes
         ht <- config$ui$de_analysis$gene_plot$height
 
@@ -826,8 +826,8 @@ genePlotServer <- function(id, obj,
         }
 
         # set default x axis order; later take from bucket list
-        if(is.null(input$gene_x_order) | !(all(input$gene_x_order %in% xchoices$all))) x_order <- xchoices$all
-        else x_order <- input$gene_x_order
+        if(is.null(input$x_order) | !(all(input$x_order %in% xchoices$all))) x_order <- xchoices$all
+        else x_order <- input$x_order
 
         validate(
           need(length(x_order) > 0, 'Must have at least one value to plot on x-axis')
