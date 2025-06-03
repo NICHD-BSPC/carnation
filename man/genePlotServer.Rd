@@ -4,7 +4,7 @@
 \alias{genePlotServer}
 \title{Gene plot module server function}
 \usage{
-genePlotServer(id, obj, coldata, plot_args)
+genePlotServer(id, obj, coldata, plot_args, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -15,6 +15,8 @@ genePlotServer(id, obj, coldata, plot_args)
 
 \item{plot_args}{reactive list with 3 elements: 'gene.id' (all gene IDs) & 'gene_scratchpad'
 (genes selected in scratchpad) & 'comp_all' (selected comparison)}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Gene plot module server function

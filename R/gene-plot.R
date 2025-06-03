@@ -249,19 +249,19 @@ genePlotUI <- function(id, panel){
 #' @param coldata reactiveValues object containing object metadata
 #' @param plot_args reactive list with 3 elements: 'gene.id' (all gene IDs) & 'gene_scratchpad'
 #' (genes selected in scratchpad) & 'comp_all' (selected comparison)
+#' @param config reactive list with config settings
 #'
 #' @export
 genePlotServer <- function(id, obj,
                            coldata,
-                           plot_args){
+                           plot_args,
+                           config){
   moduleServer(
     id,
 
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
 
       xchoices <- reactiveValues(all=NULL, current=NULL)
 
@@ -287,7 +287,22 @@ genePlotServer <- function(id, obj,
       # faceting columns that are always shown
       facet.extra <- c('gene')
 
-      cols.to.drop <- config$server$cols.to.drop
+      cols.to.drop <- reactive({ config()$server$cols.to.drop })
+
+      # update menus from reactive config
+      observeEvent(config(), {
+
+        updateSelectInput(session, 'norm_method',
+                          choices=unlist(config()$ui$de_analysis$gene_plot$norm_method))
+        updateNumericInput(session, 'x_rotate',
+                           value=config()$ui$de_analysis$gene_plot$x_rotate)
+
+        # update checkbox inputs
+        for(name in c('logy', 'freey', 'boxes', 'legend')){
+          updateCheckboxInput(session, name,
+                              value=config()$ui$de_analysis$gene_plot[[ name ]])
+        }
+      })
 
       # observer to update samples menu for gene plot
       observeEvent(c(app_object()$res, plot_args()$comp_all), {
@@ -354,7 +369,7 @@ genePlotServer <- function(id, obj,
         )
 
         # get relevant columns from metadata
-        int.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% cols.to.drop]
+        int.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% cols.to.drop()]
 
         if(!input$xvar %in% int.cols){
             selected <- ifelse('group' %in% int.cols, 'group', int.cols[1])
@@ -380,7 +395,7 @@ genePlotServer <- function(id, obj,
 
         # any columns not being used to group can be used to facet
         # NOTE: this section is only used once per new comparison selected
-        facet.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% c(input$xvar, cols.to.drop)]
+        facet.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% c(input$xvar, cols.to.drop())]
         facet.cols <- c(facet.extra, facet.cols)
         if(length(facet.cols) > 0){
             if(is.null(input$facet) || !(input$facet %in% facet.cols)){
@@ -416,7 +431,7 @@ genePlotServer <- function(id, obj,
                'Waiting for selection')
         )
         # any columns not being used to group can be used to facet
-        facet.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% c(input$xvar, cols.to.drop)]
+        facet.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% c(input$xvar, cols.to.drop())]
         facet.cols <- c(facet.extra, facet.cols)
         if(length(facet.cols) > 0){
             if(is.null(input$facet) || !(input$facet %in% facet.cols)){
@@ -585,11 +600,11 @@ genePlotServer <- function(id, obj,
         #       to prevent autoscaling when scale is manually changed
         if(!is.null(gene_plot_data$plotted) & !is.na(input$ymax)){
             # add pseudocount
-            pseudocount <- config$server$de_analysis$gene_plot$pseudocount
+            pseudocount <- config()$server$de_analysis$gene_plot$pseudocount
             df$count <- df$count + pseudocount
 
             # set initial limits to y_delta % outside max & min
-            y_delta <- config$server$de_analysis$gene_plot$y_delta
+            y_delta <- config()$server$de_analysis$gene_plot$y_delta
 
             # get min and max init values for y-axis
             y_init <- get_y_init(df, y_delta, pseudocount)
@@ -605,9 +620,9 @@ genePlotServer <- function(id, obj,
             # get fraction of y-limits covered by points
             yrange <- (max(df$count[include.idx]) - min(df$count[include.idx]))/(input$ymax - input$ymin)
 
-            # get thresholds for frac and yrange from config
-            min_frac <- config$server$de_analysis$gene_plot$min_fraction
-            min_yrange <- config$server$de_analysis$gene_plot$min_yrange_fraction
+            # get thresholds for frac and yrange from config()
+            min_frac <- config()$server$de_analysis$gene_plot$min_fraction
+            min_yrange <- config()$server$de_analysis$gene_plot$min_yrange_fraction
             if(frac < min_frac | yrange < min_yrange){
                 if(frac < min_frac){
                     min_frac <- round(100*(1 - min_frac))
@@ -638,10 +653,10 @@ genePlotServer <- function(id, obj,
         df <- gene_plot_data$plotted
 
         # get pseudocount
-        pseudocount <- config$server$de_analysis$gene_plot$pseudocount
+        pseudocount <- config()$server$de_analysis$gene_plot$pseudocount
 
         # set initial limits to y_delta % outside max & min
-        y_delta <- config$server$de_analysis$gene_plot$y_delta
+        y_delta <- config()$server$de_analysis$gene_plot$y_delta
 
         y_init <- get_y_init(df, y_delta, pseudocount)
 
@@ -731,11 +746,11 @@ genePlotServer <- function(id, obj,
                               norm_method=input$norm_method)
 
         # add pseudocount
-        pseudocount <- config$server$de_analysis$gene_plot$pseudocount
+        pseudocount <- config()$server$de_analysis$gene_plot$pseudocount
         df$count <- df$count + pseudocount
 
         # set initial limits to y_delta % outside max & min
-        y_delta <- config$server$de_analysis$gene_plot$y_delta
+        y_delta <- config()$server$de_analysis$gene_plot$y_delta
 
         y_init <- get_y_init(df, y_delta, pseudocount)
 
@@ -754,7 +769,7 @@ genePlotServer <- function(id, obj,
         df$gene <- factor(df$gene, levels=g)
 
         # add metadata to count data frame
-        df <- add_metadata(df, coldata, cols.to.drop)
+        df <- add_metadata(df, coldata, cols.to.drop())
 
         # reset facet levels based on input
         if(!is.null(facet) & !all(facet %in% c('gene'))){
@@ -770,13 +785,13 @@ genePlotServer <- function(id, obj,
         color <- input$color
         trendline <- input$trendline
         xvar <- input$xvar
-        gene_nrow <- config$ui$de_analysis$gene_plot$nrow
+        gene_nrow <- config()$ui$de_analysis$gene_plot$nrow
         legend <- input$legend
-        ylab <- config$server$de_analysis$gene_plot$y_labels
         ymax <- input$ymax
         ymin <- input$ymin
+        ylab <- config()$server$de_analysis$gene_plot$y_labels
         boxes <- input$boxes
-        ht <- config$ui$de_analysis$gene_plot$height
+        ht <- config()$ui$de_analysis$gene_plot$height
 
         if(logy){
           validate(
@@ -813,7 +828,7 @@ genePlotServer <- function(id, obj,
           if(freey) gene_nrow <- ceiling(plot_num/6)
           else gene_nrow <- ceiling(plot_num/8)
 
-          nrow_def <- config$ui$de_analysis$gene_plot$nrow
+          nrow_def <- config()$ui$de_analysis$gene_plot$nrow
           if(gene_nrow == 0 | is.na(gene_nrow)){
             gene_nrow <- nrow_def
             showNotification(
