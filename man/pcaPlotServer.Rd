@@ -4,7 +4,7 @@
 \alias{pcaPlotServer}
 \title{PCA plot module server function}
 \usage{
-pcaPlotServer(id, obj, coldata)
+pcaPlotServer(id, obj, coldata, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -12,6 +12,8 @@ pcaPlotServer(id, obj, coldata)
 \item{obj}{reactiveValues object containing carnation object}
 
 \item{coldata}{reactiveValues object containing object metadata}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 PCA plot module server function

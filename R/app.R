@@ -1512,7 +1512,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     ####################### PCA Plot ###########################
 
-    pcaPlotServer('pcaplot', app_object, coldata.all)
+    pcaPlotServer('pcaplot', app_object, coldata.all, config)
 
     ####################### MA plot #############################
 
