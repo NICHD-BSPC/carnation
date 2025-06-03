@@ -7,6 +7,7 @@
 genePlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # load default config
   config <- get_config()
   if(panel == 'sidebar'){
     tag <-
