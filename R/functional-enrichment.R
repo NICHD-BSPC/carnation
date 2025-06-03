@@ -9,6 +9,7 @@
 enrichUI <- function(id, panel, tab='none'){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -151,7 +152,7 @@ enrichUI <- function(id, panel, tab='none'){
               column(5, h5('# of terms')),
               column(7,
                 numericInput(ns('numcat.fuzzy.tbl'), label=NULL,
-                  value=config$ui$functional_enrichment$plots$emap_distill$numcat
+                  value=config$ui$functional_enrichment$plots$emap_fuzzy$numcat
                 ) # numericInput
               ) # column
             ) # fluidRow
@@ -455,10 +456,11 @@ enrichUI <- function(id, panel, tab='none'){
 #' @param upset_table reactive, data from upset plot module
 #' @param gene_scratchpad reactive, genes selected in gene scratchpad
 #' @param reset_genes reactive to reset genes in scratchpad
+#' @param config reactive list with config settings
 #'
 #' @export
 enrichServer <- function(id, obj, upset_table,
-                         gene_scratchpad, reset_genes){
+                         gene_scratchpad, reset_genes, config){
 
   moduleServer(
     id,
@@ -466,8 +468,6 @@ enrichServer <- function(id, obj, upset_table,
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
 
       app_object <- reactive({
         list(res=obj$res,
@@ -489,6 +489,22 @@ enrichServer <- function(id, obj, upset_table,
 
       # reactive values to track genes clicked/labeled
       genes_clicked <- reactiveValues(g=NULL)
+
+      observeEvent(config(), {
+        updateNumericInput(session, 'genes.per.line',
+                           value=config()$ui$functional_enrichment$table$genes.per.line)
+
+        updateNumericInput(session, 'numcat.distill.tbl',
+                           value=config()$ui$functional_enrichment$plots$emap_distill$numcat)
+
+        updateNumericInput(session, 'numcat.fuzzy.tbl',
+                           value=config()$ui$functional_enrichment$plots$emap_fuzzy$numcat)
+
+        updateSelectInput(session, 'plottype',
+                          choices=config()$ui$functional_enrichment$plottype$choices,
+                          selected=config()$ui$functional_enrichment$plottype$default)
+
+      })
 
       observeEvent(app_object(), {
         enrich_data$enrich_list <- NULL
@@ -641,7 +657,7 @@ enrichServer <- function(id, obj, upset_table,
       observeEvent(c(input$comp_fun, input$geneset), {
         # get names of available pathway analyses
         # named vector of pathway names
-        p <- unlist(config$server$functional_enrichment$pathways)
+        p <- unlist(config()$server$functional_enrichment$pathways)
 
         all.p.names <- names(app_object()$enrich[[input$comp_fun]][[input$geneset]])
         p.choices <- p[p %in% all.p.names]
@@ -669,7 +685,7 @@ enrichServer <- function(id, obj, upset_table,
       observeEvent(c(input$comp_tbl, input$geneset_tbl), {
         # get names of available pathway analyses
         # named vector of pathway names
-        p <- unlist(config$server$functional_enrichment$pathways)
+        p <- unlist(config()$server$functional_enrichment$pathways)
 
         all.p.names <- names(app_object()$enrich[[input$comp_tbl]][[input$geneset_tbl]])
         p.choices <- p[p %in% all.p.names]
@@ -924,8 +940,8 @@ enrichServer <- function(id, obj, upset_table,
       output$func_table <- renderDT({
         df <- get_func_table()
 
-        format_cols <- config$server$functional_enrichment$table$enrichment$format_significant
-        cols.to.drop <- config$server$functional_enrichment$table$enrichment$cols.to.drop
+        format_cols <- config()$server$functional_enrichment$table$enrichment$format_significant
+        cols.to.drop <- config()$server$functional_enrichment$table$enrichment$cols.to.drop
 
         # support gseaResult and enrichResult
         gene.id.col <- if('geneID' %in% colnames(df)) 'geneID'
@@ -1038,7 +1054,7 @@ enrichServer <- function(id, obj, upset_table,
         })
 
         if(is.null(input$numcat.distill.tbl))
-          numcat <- config$ui$functional_enrichment$plots$enrichment_map$numcat
+          numcat <- config()$ui$functional_enrichment$plots$enrichment_map$numcat
         else numcat <- input$numcat.distill.tbl
 
         validate(
@@ -1125,7 +1141,7 @@ enrichServer <- function(id, obj, upset_table,
         })
 
         if(is.null(input$numcat.distill.tbl))
-          numcat <- config$ui$functional_enrichment$plots$enrichment_map$numcat
+          numcat <- config()$ui$functional_enrichment$plots$enrichment_map$numcat
         else numcat <- input$numcat.distill.tbl
 
         validate(
@@ -1188,7 +1204,7 @@ enrichServer <- function(id, obj, upset_table,
                            'term_id_list', 'term_description_list', 'most_significant_term',
                            'strongest_term')
 
-        cols.to.drop <- config$server$functional_enrichment$table$distill_tbl$cols.to.drop
+        cols.to.drop <- config()$server$functional_enrichment$table$distill_tbl$cols.to.drop
 
         tbl %>%
             mutate(genes=format_genes(.data$genes, genes.per.line=input$genes.per.line, sep=',')) %>%
@@ -1278,7 +1294,7 @@ enrichServer <- function(id, obj, upset_table,
         )
 
         if(is.null(input$numcat.fuzzy.tbl))
-          numcat <- config$ui$functional_enrichment$plots$enrichment_map$numcat
+          numcat <- config()$ui$functional_enrichment$plots$enrichment_map$numcat
         else numcat <- input$numcat.fuzzy.tbl
 
         validate(
@@ -1319,6 +1335,12 @@ enrichServer <- function(id, obj, upset_table,
            showNotification(
              paste('Fuzzy clustering error:', as.character(fuzzy_clusters)), type='error'
            )
+        } else {
+          # add highlights
+          fuzzy_clusters <- subset_func_tbl(fuzzy_clusters, gene_col='gs_genes', desc_col='gs_description', gene_sep=',',
+                                  input$search_opts, input$search_txt,
+                                  input$subset_opts, input$upset_intersect,
+                                  quiet=TRUE)
         }
 
         enrich_data$fuzzy$tbl <- list(clusters=fuzzy_clusters,
@@ -1367,7 +1389,7 @@ enrichServer <- function(id, obj, upset_table,
         )
 
         if(is.null(input$numcat.fuzzy.tbl))
-          numcat <- config$ui$functional_enrichment$plots$enrichment_map$numcat
+          numcat <- config()$ui$functional_enrichment$plots$enrichment_map$numcat
         else numcat <- input$numcat.fuzzy.tbl
 
         validate(
@@ -1403,6 +1425,14 @@ enrichServer <- function(id, obj, upset_table,
                             warning = function(w){ w },
                             error = function(e){ e })
 
+        if(!inherits(fuzzy_clusters, 'error')){
+          # add highlights
+          fuzzy_clusters <- subset_func_tbl(fuzzy_clusters, gene_col='gs_genes', desc_col='gs_description', gene_sep=',',
+                                  input$search_opts, input$search_txt,
+                                  input$subset_opts, input$upset_intersect,
+                                  quiet=TRUE)
+        }
+
         enrich_data$fuzzy$tbl <- list(clusters=fuzzy_clusters,
                                       res=res, anno_df=anno_df)
         enrich_data$fuzzy$title <- paste0(input$comp_tbl, ' | ',
@@ -1431,9 +1461,9 @@ enrichServer <- function(id, obj, upset_table,
         )
         colnames(tbl) <- sub('^gs_', '', colnames(tbl))
 
-        cols.to.drop <- config$server$functional_enrichment$table$fuzzy_tbl$cols.to.drop
+        cols.to.drop <- config()$server$functional_enrichment$table$fuzzy_tbl$cols.to.drop
 
-        format_cols <- config$server$functional_enrichment$table$fuzzy_tbl$format_significant
+        format_cols <- config()$server$functional_enrichment$table$fuzzy_tbl$format_significant
 
         cols_to_format <- intersect(colnames(tbl), format_cols$columns)
 
@@ -1876,7 +1906,7 @@ enrichServer <- function(id, obj, upset_table,
                      input$comp_fun2, input$geneset2), {
         # get names of available pathway analyses
         # named vector of pathway names
-        p <- unlist(config$server$functional_enrichment$pathways)
+        p <- unlist(config()$server$functional_enrichment$pathways)
 
         # NOTE: only pathway results in both sets can be compared
         all.p.names <- intersect(names(app_object()$enrich[[input$comp_fun1]][[input$geneset1]]),

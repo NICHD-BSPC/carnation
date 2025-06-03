@@ -1593,7 +1593,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     enrich_data <- enrichServer('func_enrich', app_object,
                                 upset_table,
                                 gene_scratchpad,
-                                reactive({ input$reset.genes }))
+                                reactive({ input$reset.genes }),
+                                config)
 
     observeEvent(enrich_data(), {
       g <- enrich_data()$genes

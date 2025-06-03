@@ -4,7 +4,7 @@
 \alias{enrichServer}
 \title{Functional enrichment module server function}
 \usage{
-enrichServer(id, obj, upset_table, gene_scratchpad, reset_genes)
+enrichServer(id, obj, upset_table, gene_scratchpad, reset_genes, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -16,6 +16,8 @@ enrichServer(id, obj, upset_table, gene_scratchpad, reset_genes)
 \item{gene_scratchpad}{reactive, genes selected in gene scratchpad}
 
 \item{reset_genes}{reactive to reset genes in scratchpad}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Functional enrichment module server function
