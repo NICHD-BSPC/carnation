@@ -733,9 +733,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                                depth=2,
                                end_offset=0,
                                assay_fun=function(x)
-                                 sub(paste0(pattern, '\\.rds$'), '',
+                                 sub(paste0(pattern(), '\\.rds$'), '',
                                      basename(x),
-                                     ignore.case=TRUE)
+                                     ignore.case=TRUE),
+                               config
                                )
 
     # update assay list
@@ -1506,7 +1507,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     genePlotServer('gene_plot', app_object,
                    coldata=coldata.all,
-                   gene_plot_args)
+                   gene_plot_args,
+                   config)
 
     ####################### PCA Plot ###########################
 
