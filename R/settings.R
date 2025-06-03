@@ -133,9 +133,10 @@ settingsUI <- function(id, panel, username){
 #' @param depth project name depth
 #' @param end_offset project name end offset
 #' @param assay_fun function to parse assay names from file path
+#' @param config reactive list with config settings
 #'
 #' @export
-settingsServer <- function(id, details, depth, end_offset, assay_fun){
+settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
   moduleServer(
     id,
 
@@ -143,13 +144,10 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
 
     ns <- NS(id)
 
-    # read config yaml
-    config <- get_config()
-
     # get vars from config
-    pattern <- config$server$pattern
-    admin_group <- config$server$admin_group
-    staging_dir <- config$server$staging_dir
+    pattern <- reactive({ config()$server$pattern })
+    admin_group <- reactive({ config()$server$admin_group })
+    staging_dir <- reactive({ config()$server$staging_dir })
 
     access_yaml <- reactiveValues(l=NULL)
     username <- reactive({
@@ -170,7 +168,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
                              textInput(ns('user_name'), label='User name',
                                        value=username()),
                              textInput(ns('user_group'), label='User group',
-                                       value=admin_group)
+                                       value=admin_group())
                             )
           } else {
             user_inputs <- tagList()
@@ -220,8 +218,8 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
 
       if(is.null(username())){
         # check that user name/group is not empty
-        create_access_yaml(config$server$default_user,
-                           admin_group,
+        create_access_yaml(config()$server$default_user,
+                           admin_group(),
                            input$data_area)
       } else {
         # check that user name is not empty
@@ -261,7 +259,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
         lst <- access_yaml$l
       } else {
         lst <- check_user_access(access_yaml$l, username(),
-                                 admin=admin_group)
+                                 admin=admin_group())
       }
 
       user_access$orig <- lst
@@ -321,7 +319,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
                 column(6,
                     selectizeInput(ns('add_user_grps'),
                             label=NULL,
-                            choices=c(admin_group, names(user_access$areas)),
+                            choices=c(admin_group(), names(user_access$areas)),
                             multiple=TRUE
                         )  # selectizeInput
                     )  # column
@@ -350,12 +348,12 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
         need(g != '' & !is.null(u) & u != '', 'Waiting for data')
       )
 
-      if(u == config$server$default_user){
+      if(u == config()$server$default_user){
         showNotification('User name is reserved for internal use!', type='warning')
       }
 
       validate(
-        need(u != config$server$default_user, 'User name reserved for internal use')
+        need(u != config()$server$default_user, 'User name reserved for internal use')
       )
 
       if(!all(g %in% df[[u]])){
@@ -480,7 +478,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
         )
 
         user_groups <- user_access$users[[ input$edit_user_name ]]
-        all_groups <- unique(c(admin_group, names(user_access$areas)))
+        all_groups <- unique(c(admin_group(), names(user_access$areas)))
 
         updateSelectizeInput(session,
                              'edit_user_grps',
@@ -748,9 +746,9 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
     # save access changes
     observeEvent(input$save_access, {
         # check if user is admin
-        if(is.null(username())) u <- config$server$default_user
+        if(is.null(username())) u <- config()$server$default_user
         else u <- username()
-        is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
+        is_admin <- admin_group() %in% user_access$orig$user_group[[ u ]]
 
         if(is_admin){
             showModal(
@@ -768,7 +766,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
                 modalDialog(
                     div(tags$b(
                       paste0('Forbidden: You must be member of "',
-                             admin_group, '" group to edit access settings!'),
+                             admin_group(), '" group to edit access settings!'),
                       style='color: red;'
                       ) # tags
                     ), # div
@@ -841,18 +839,18 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
         need(!is.null(access_yaml$l), '')
       )
 
-      if(is.null(username())) u <- config$server$default_user
+      if(is.null(username())) u <- config()$server$default_user
       else u <- username()
-      is_admin <- admin_group %in% user_access$orig$user_group[[ u ]]
+      is_admin <- admin_group() %in% user_access$orig$user_group[[ u ]]
 
-      if(is.null(u)){
+      if(is.null(username())){
         d <- check_user_access(access_yaml$l,
-                               config$server$default_user,
-                               admin=admin_group)
+                               config()$server$default_user,
+                               admin=admin_group())
       } else {
         d <- check_user_access(access_yaml$l,
-                               u,
-                               admin=admin_group)
+                               username(),
+                               admin=admin_group())
       }
 
       # var to detect if in shinymanager admin view
@@ -888,7 +886,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
 
       l <- unlist(lapply(unique(d$data_area),
               function(x) list.files(x,
-                              pattern=paste0(pattern, '\\.rds$'),
+                              pattern=paste0(pattern(), '\\.rds$'),
                               ignore.case=TRUE,
                               recursive=TRUE,
                               full.names = TRUE)))
@@ -913,7 +911,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
                 get_project_name_from_path(x,
                                            depth=depth,
                                            end_offset=end_offset,
-                                           staging_dir=staging_dir)
+                                           staging_dir=staging_dir())
               }))
 
       # get assay name
@@ -938,7 +936,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
       # main to dev/main
 
       # get list of dev datasets
-      dev_idx <- which(basename(names(alist)) == staging_dir)
+      dev_idx <- which(basename(names(alist)) == staging_dir())
       if(length(dev_idx) > 0){
         old_labels <- NULL
         if(!is_admin){
@@ -951,7 +949,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun){
               fixed_label <- dirname(old_label)
 
               # add dev/ prefix to assay label for dev datasets
-              names(alist[[old_label]]) <- paste0(staging_dir,
+              names(alist[[old_label]]) <- paste0(staging_dir(),
                                                   '/',
                                                   names(alist[[old_label]]))
 
