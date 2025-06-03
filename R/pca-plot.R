@@ -7,6 +7,7 @@
 pcaPlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # load default config
   config <- get_config()
   dims <- config$server$de_analysis$pca_plot$dims
   pc_choices <- setNames(1:dims, paste0('PC', 1:dims))
