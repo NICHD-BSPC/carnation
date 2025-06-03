@@ -4,18 +4,20 @@
 \alias{settingsServer}
 \title{Settings module server}
 \usage{
-settingsServer(id, details, depth, end_offset, assay_fun)
+settingsServer(id, details, depth, end_offset, assay_fun, config)
 }
 \arguments{
 \item{id}{Input id}
 
-\item{details}{user name & app location}
+\item{details}{reactive list with user name & app location details}
 
 \item{depth}{project name depth}
 
 \item{end_offset}{project name end offset}
 
 \item{assay_fun}{function to parse assay names from file path}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Server code for settings module
