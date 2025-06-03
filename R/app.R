@@ -613,11 +613,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     oopt <- options(spinner.type = 4)
 
-    # get admin group from config
-    admin_group <- config$server$admin_group
-
-    # metadata columns to ignore
-    cols.to.drop <- config$server$cols.to.drop
+    # store config in reactiveVal
+    config <- reactiveVal(cfg)
 
     # list to hold dds, rld and id mapping
     app_object <- reactiveValues(dds=NULL, rld=NULL, res=NULL,
@@ -631,6 +628,22 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     # list to hold user details
     user_details <- reactiveValues(username=NULL, admin=FALSE)
+
+    #################### config updates ####################
+
+    observeEvent(config(), {
+      updateNumericInput(session, 'fdr.thres',
+                         value=config()$ui$de_analysis$filters$fdr_threshold)
+
+      updateNumericInput(session, 'fc.thres',
+                         value=config()$ui$de_analysis$filters$log2fc_threshold)
+
+      updateCheckboxInput(session, 'toggle_filters',
+                         value=config()$ui$de_analysis$filters$only_de_toggle)
+
+      updateNumericInput(session, 'scratchpad_ngenes',
+                         value=config()$ui$de_analysis$gene_scratchpad$ngenes)
+    })
 
     #################### authentication ####################
 
@@ -655,7 +668,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     # get username from http request header
     observeEvent(session$request, {
-      user_details$username <- session$request[[ config$http_request_header ]]
+      user_details$username <- session$request[[ config()$http_request_header ]]
     })
 
     #################### Intro ####################
@@ -710,7 +723,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     ########### Settings module ###############
 
-    pattern <- config$server$pattern
+    pattern <- reactive({ config()$server$pattern })
 
     # reactive values to keep assay list
     assay.list <- reactiveValues(l=NULL)
@@ -767,7 +780,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     # get metadata from module
     metadata <- metadataServer('metadata', app_object,
-                               cols.to.drop)
+                               config()$server$cols.to.drop)
 
     observeEvent(c(app_object$dds, metadata()), {
       clist <- metadata()
@@ -783,7 +796,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                              original=original,
                              current=app_object,
                              coldata=coldata.all$curr,
-                             pattern=pattern,
+                             pattern=pattern(),
                              username=reactive({ user_details$username }))
 
     observeEvent(save_event(), {
@@ -839,7 +852,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       assay.choices <- l[[input$dds]]
 
       # if more than one assay found & autoload_first_analysis not set
-      if(length(assay.choices) > 1 & !config$server$autoload_first_analysis){
+      if(length(assay.choices) > 1 & !config()$server$autoload_first_analysis){
         assay.choices <- c('Choose one', assay.choices)
       }
 
@@ -1095,7 +1108,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
                       df <- enrich_to_genetonic(eres, res)
                       df
-                    }, BPPARAM=BiocParallel::MulticoreParam(config$server$cores))
+                    }, BPPARAM=BiocParallel::MulticoreParam(config()$server$cores))
 
         # reconstitute & clean up
         app_object$genetonic <- list()
@@ -1190,9 +1203,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       )
 
       fc.thres <- ifelse(input$fc.thres == '' | is.na(input$fc.thres),
-                         config$ui$de_analysis$filters$log2fc_threshold, input$fc.thres)
+                         config()$ui$de_analysis$filters$log2fc_threshold, input$fc.thres)
       fdr.thres <- ifelse(input$fdr.thres == '' | is.na(input$fdr.thres),
-                          config$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
+                          config()$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
 
       res <- app_object$res[[input$scratchpad_comp]]
 
@@ -1255,9 +1268,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       )
 
       fc.thres <- ifelse(input$fc.thres == '' | is.na(input$fc.thres),
-                         config$ui$de_analysis$filters$log2fc_threshold, input$fc.thres)
+                         config()$ui$de_analysis$filters$log2fc_threshold, input$fc.thres)
       fdr.thres <- ifelse(input$fdr.thres == '' | is.na(input$fdr.thres),
-                          config$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
+                          config()$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
 
       df <- summarize.res.list(app_object$res, app_object$dds, app_object$dds_mapping,
                                alpha=fdr.thres,
@@ -1358,9 +1371,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
 
         fc.thres <- ifelse(input$fc.thres == '' | is.na(input$fc.thres),
-                           config$ui$de_analysis$filters$log2fc_threshold, input$fc.thres)
+                           config()$ui$de_analysis$filters$log2fc_threshold, input$fc.thres)
         fdr.thres <- ifelse(input$fdr.thres == '' | is.na(input$fdr.thres),
-                            config$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
+                            config()$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
 
         # filter df
         if(input$toggle_filters){
@@ -1383,7 +1396,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
         gene.col <- 'gene'
         symbol.col <- ifelse('symbol' %in% colnames(df), 'symbol', 'SYMBOL')
 
-        cols.to.drop <- config$server$de_analysis$de_table$cols.to.drop
+        cols.to.drop <- config()$server$de_analysis$de_table$cols.to.drop
         df <- df %>% as.data.frame %>%
           relocate(!!symbol.col, .before='baseMean') %>%
           relocate(!!gene.col, .before=!!symbol.col) %>%
@@ -1427,8 +1440,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       tbl %>%
         datatable(rownames=FALSE,
                   selection=list(mode='multiple')) %>%
-        formatSignif(columns=config$server$de_analysis$de_table$format_significant$columns,
-                     digits=config$server$de_analysis$de_table$format_significant$digits)
+        formatSignif(columns=config()$server$de_analysis$de_table$format_significant$columns,
+                     digits=config()$server$de_analysis$de_table$format_significant$digits)
     }) # renderDT
 
     detable_proxy <- dataTableProxy('detable')
