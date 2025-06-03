@@ -39,11 +39,11 @@ settingsUI <- function(id, panel, username){
                    )  # fluidRow
                  ) # tabPanel
 
-    msg <- 'Add/edit carnation data & user settings here'
+    msg <- paste('Add/edit', packageName(), 'data & user settings here')
   } else {
     user_settings <- tagList()
     user_main <- tabPanel(title=NULL)
-    msg <- 'Add/edit carnation data settings here'
+    msg <- paste('Add/edit', packageName(), 'data settings here')
   }
 
   if(panel == 'sidebar'){
