@@ -1532,7 +1532,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
            gene.to.plot=gene_scratchpad())
     })
 
-    scatterPlotServer('scatterplot', app_object, scatterplot_args)
+    scatterPlotServer('scatterplot', app_object, scatterplot_args, config)
 
     ##################### UpSet plot #########################
 
