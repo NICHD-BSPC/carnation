@@ -1572,7 +1572,7 @@ enrichServer <- function(id, obj, upset_table,
       sumovPlotServer('sumov', genetonic_obj, config)
       enrichmapServer('enrichmap', genetonic_obj, enrich_obj, config)
       cnetPlotServer('cnetplot', enrich_obj, config)
-      radarServer('radar', genetonic_obj)
+      radarServer('radar', genetonic_obj, config)
       alluvialServer('alluvial', genetonic_obj,
                      enrich_obj)
       dendrogramServer('dendrogram', genetonic_obj)
@@ -1734,7 +1734,7 @@ enrichServer <- function(id, obj, upset_table,
 
       # plot modules
       sumovPlotServer('sumov_comp', genetonic_comp_obj, config, type='comp')
-      radarServer('radar_comp', genetonic_comp_obj, type='comp')
+      radarServer('radar_comp', genetonic_comp_obj, config, type='comp')
       horizonServer('horizon', genetonic_comp_obj)
 
       # enrichment objects

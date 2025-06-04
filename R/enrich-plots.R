@@ -663,6 +663,7 @@ cnetPlotServer <- function(id, obj, config){
 radarUI <- function(id, panel, type=''){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -735,9 +736,10 @@ radarUI <- function(id, panel, type=''){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
 #' @param type string, if 'comp' then show the comparison view
+#' @param config reactive list with config settings
 #'
 #' @export
-radarServer <- function(id, obj, type=''){
+radarServer <- function(id, obj, config, type=''){
 
   moduleServer(
     id,
@@ -746,25 +748,24 @@ radarServer <- function(id, obj, type=''){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'radar'
 
-      defaults <- config$ui$functional_enrichment$plots[[plottype]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat,
-          pval=input$pval,
-          catlen=input$catlen
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
+        updateSelectInput(session, 'pval',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$pval)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[plottype]]
+
         if(is.null(input$numcat)){
           numcat <- defaults$numcat
           pval <- unlist(defaults$pval)[1]
