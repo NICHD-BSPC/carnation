@@ -1735,7 +1735,7 @@ enrichServer <- function(id, obj, upset_table,
       # plot modules
       sumovPlotServer('sumov_comp', genetonic_comp_obj, config, type='comp')
       radarServer('radar_comp', genetonic_comp_obj, config, type='comp')
-      horizonServer('horizon', genetonic_comp_obj)
+      horizonServer('horizon', genetonic_comp_obj, config)
 
       # enrichment objects
       genetonic_comp_obj <- reactive({

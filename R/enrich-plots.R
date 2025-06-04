@@ -1205,6 +1205,7 @@ dendrogramServer <- function(id, obj, config){
 horizonUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -1274,9 +1275,10 @@ horizonUI <- function(id, panel){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
+#' @param config reactive list with config settings
 #'
 #' @export
-horizonServer <- function(id, obj){
+horizonServer <- function(id, obj, config){
 
   moduleServer(
     id,
@@ -1285,12 +1287,8 @@ horizonServer <- function(id, obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'horizon'
-
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
       plot_args <- reactive({
         # NOTE: list containing plot args
@@ -1302,8 +1300,22 @@ horizonServer <- function(id, obj){
         )
       })
 
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
+        updateSelectInput(session, 'sort_by',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$sort_by)
+      })
+
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
         # check if inputs exist (run first time/before plot options is uncollapsed)
         if(is.null(input$numcat)){
           numcat <- defaults$numcat
@@ -1343,7 +1355,7 @@ horizonServer <- function(id, obj){
                  'Duplicate category names for comparison 2 after truncation. Please increase max name length')
         )
 
-        text_size <- config$server$functional_enrichment$plot[[ plottype ]]$text_size
+        text_size <- config()$server$functional_enrichment$plot[[ plottype ]]$text_size
         comp_list <- list(l_gs2)
 
         # adjust group names if comparing within same contrast

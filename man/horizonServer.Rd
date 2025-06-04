@@ -4,12 +4,14 @@
 \alias{horizonServer}
 \title{Horizon plot server function}
 \usage{
-horizonServer(id, obj)
+horizonServer(id, obj, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
 
 \item{obj}{reactive containing GeneTonic object}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Horizon plot server function
