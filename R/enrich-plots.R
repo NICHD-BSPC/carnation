@@ -481,6 +481,7 @@ enrichmapServer <- function(id, obj, res_obj, config){
 cnetPlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   plottype <- 'cnetplot'
@@ -568,9 +569,10 @@ cnetPlotUI <- function(id, panel){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive, dataframe with enrichment results
+#' @param config reactive list with config settings
 #'
 #' @export
-cnetPlotServer <- function(id, obj){
+cnetPlotServer <- function(id, obj, config){
 
   moduleServer(
     id,
@@ -579,28 +581,29 @@ cnetPlotServer <- function(id, obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'cnetplot'
 
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat,
-          catlen=input$catlen,
-          node_label=input$node_label,
-          colorEdge=input$colorEdge,
-          circular=input$circular
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
+        updateSelectInput(session, 'node_label',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$node_label)
+        updateCheckboxInput(session, 'colorEdge',
+                            value=config()$ui$functional_enrichment$plots[[ plottype ]]$colorEdge)
+        updateCheckboxInput(session, 'circular',
+                            value=config()$ui$functional_enrichment$plots[[ plottype ]]$circular)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
         l <- obj()
+
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
 
         # this is needed to handle reactive ui (run first time)
         if(is.null(input$numcat)){
@@ -628,7 +631,7 @@ cnetPlotServer <- function(id, obj){
 
         l@result$Description <- substr(l@result$Description, 1, catlen)
 
-        text_size <- config$server$functional_enrichment$plot[[ plottype ]]$text_size
+        text_size <- config()$server$functional_enrichment$plot[[ plottype ]]$text_size
         p <- cnetplot(l,
                       showCategory = numcat,
                       color.params=list(edge=colorEdge),
