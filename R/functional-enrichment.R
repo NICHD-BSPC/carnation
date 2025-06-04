@@ -546,7 +546,7 @@ enrichServer <- function(id, obj, upset_table,
           updateSelectizeInput(session,
                                'comp_fun2',
                                choices=names(app_object()$enrich),
-                               selected=c(''))
+                               selected=names(app_object()$enrich)[2])
         }
 
         # reset genes when new data loaded
