@@ -412,23 +412,30 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                     id='mode',
 
           tabPanel('Load data',
-            selectInput('data_type', label='Type of data',
-                        choices=c('Existing', 'New', 'Edit')),
+            fluidRow(
+              column(3,
+                selectInput('data_type', label='Type of data',
+                            choices=c('Existing', 'New', 'Edit')),
 
-            conditionalPanel('input.data_type == "Existing"',
-                selectizeInput('dds',
-                               label=h5('Available projects'),
-                               choices=NULL,
-                               selected=NULL
-                ), # selectizeInput
-                selectizeInput('assay',
-                               label=h5('Available analyses'),
-                               choices=NULL,
-                               selected=NULL
-                ), # selectizeInput
-                actionButton('assay_do', label='Go!',
-                             class='btn-primary')
-            ), # conditionalPanel
+                conditionalPanel('input.data_type == "Existing"',
+                    selectizeInput('dds',
+                                   label=h5('Available projects'),
+                                   choices=NULL,
+                                   selected=NULL
+                    ), # selectizeInput
+                    selectizeInput('assay',
+                                   label=h5('Available analyses'),
+                                   choices=NULL,
+                                   selected=NULL
+                    ), # selectizeInput
+                    actionButton('assay_do', label='Go!',
+                                 class='btn-primary')
+                ) # conditionalPanel
+              ), # column
+              column(9, style='margin-top: 20px',
+                DTOutput('analysis_desc')
+              )
+            ), # fluidRow
 
             withSpinner(
               uiOutput('load_ui')
@@ -629,6 +636,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     # list to hold user details
     user_details <- reactiveValues(username=NULL, admin=FALSE)
 
+    # list to hold project/analysis descriptions
+    project_info <- reactiveValues(descriptions=list(), current=NULL)
+
     #################### config updates ####################
 
     observeEvent(config(), {
@@ -742,6 +752,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     # update assay list
     observeEvent(settings(), {
       l <- settings()
+
+      project_info$descriptions <- l$project_descriptions
 
       validate(
          need(!is.null(l$assay_list), 'No projects found')
@@ -861,8 +873,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                            choices=assay.choices,
                            selected=assay.choices[1])
 
-      reset_data()
     }) # observeEvent
+
+    output$analysis_desc <- renderDT({
+      req(input$dds)
+
+      df <- data.frame(
+        'analysis_name'=names(project_info$descriptions[[ input$dds ]]),
+        'description'=unname(unlist(project_info$descriptions[[ input$dds ]]))
+      )
+
+      datatable(df,
+                rownames=FALSE,
+                selection='none',
+                caption=tags$caption(style='font-weight: bold; font-size: 15px;',
+                                     'Summary of available analyses'),
+                options=list(dom='t'))
+
+    })
 
     # observer to load data
     observeEvent(input$assay_do, {

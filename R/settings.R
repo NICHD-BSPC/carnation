@@ -972,9 +972,35 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
 
       assay_list <- alist
 
+      # find and read project descriptions
+      project_descriptions <- list()
+      for(name in names(assay_list)){
+        # First parse project directory
+        # 1. find match for project name
+        # 2. get substring from assay_choices
+        mm <- regexpr(name, assay_list[[name]][1])
+        pd_path <- file.path(
+                     substr(assay_list[[name]][1], 1, mm + attr(mm, 'match.length') - 1),
+                     'project-description.yaml')
+
+        # read project descriptions if file exists
+        if(file.exists(pd_path)){
+          tmp_desc <- read_yaml(pd_path)
+
+          # if not admin, filter out staged data
+          if(!is_admin){
+            idx <- grep(staging_dir(), names(tmp_desc))
+            tmp_desc <- tmp_desc[ -idx ]
+          }
+
+          project_descriptions[[ name ]] <- tmp_desc
+        }
+      }
+
       list(assay_list=assay_list,
            reload_parent=reload_parent$flag,
-           is_admin=is_admin)
+           is_admin=is_admin,
+           project_descriptions=project_descriptions)
     })
 
     helpButtonServer('settings_help', size='l')
