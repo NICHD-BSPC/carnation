@@ -713,7 +713,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     })
 
     reload_new <- loadDataServer('load_new_data',
-                                 username=reactive({ user_details$username }))
+                                 username=reactive({ user_details$username }),
+                                 config)
 
     observeEvent(reload_new(), {
       flag <- reload_new()
@@ -723,6 +724,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     reload_edit <- loadDataServer('edit_obj',
                                   username=reactive({ user_details$username }),
+                                  config,
                                   rds=original)
 
     observeEvent(reload_edit(), {
@@ -810,7 +812,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                              current=app_object,
                              coldata=coldata.all$curr,
                              pattern=pattern(),
-                             username=reactive({ user_details$username }))
+                             username=reactive({ user_details$username }),
+                             config)
 
     observeEvent(save_event(), {
       validate(
