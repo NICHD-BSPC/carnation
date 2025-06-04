@@ -1402,8 +1402,6 @@ horizonServer <- function(id, obj, config){
 distillPlotUI <- function(id, panel){
   ns <- NS(id)
 
-  config <- get_config()
-
   # NOTE: enter plottype here
   plottype <- 'emap_distill'
 
@@ -1449,9 +1447,10 @@ distillPlotUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing 'distilled' enrichment results
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
+#' @param config reactive list with config settings
 #'
 #' @export
-distillPlotServer <- function(id, obj, args){
+distillPlotServer <- function(id, obj, args, config){
 
   moduleServer(
     id,
@@ -1460,12 +1459,8 @@ distillPlotServer <- function(id, obj, args){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'emap_distill'
-
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
       #plot_args <- reactive({
       #  # NOTE: list containing plot args
@@ -1477,10 +1472,13 @@ distillPlotServer <- function(id, obj, args){
 
       curr_args <- reactiveValues(numcat=NULL)
 
-      observeEvent(args()$numcat, {
+      observeEvent(c(args()$numcat, config()), {
         numcat <- args()$numcat
 
-        updt <- TRUE
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
+        updt <- FALSE
         if(is.null(numcat)){
           curr_args$numcat <- defaults$numcat
           updt <- TRUE
@@ -1559,8 +1557,6 @@ distillPlotServer <- function(id, obj, args){
 fuzzyPlotUI <- function(id, panel){
   ns <- NS(id)
 
-  config <- get_config()
-
   # NOTE: enter plottype here
   plottype <- 'emap_fuzzy'
 
@@ -1606,9 +1602,10 @@ fuzzyPlotUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing fuzzy enrichment object
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
+#' @param config reactive list with config settings
 #'
 #' @export
-fuzzyPlotServer <- function(id, obj, args){
+fuzzyPlotServer <- function(id, obj, args, config){
 
   moduleServer(
     id,
@@ -1617,12 +1614,8 @@ fuzzyPlotServer <- function(id, obj, args){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'emap_fuzzy'
-
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
       #plot_args <- reactive({
       #  # NOTE: list containing plot args
@@ -1634,10 +1627,13 @@ fuzzyPlotServer <- function(id, obj, args){
 
       curr_args <- reactiveValues(numcat=NULL)
 
-      observeEvent(args()$numcat, {
+      observeEvent(c(args()$numcat, config()), {
         numcat <- args()$numcat
 
-        updt <- TRUE
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
+        updt <- FALSE
         if(is.null(numcat)){
           curr_args$numcat <- defaults$numcat
           updt <- TRUE

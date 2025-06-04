@@ -1585,7 +1585,8 @@ enrichServer <- function(id, obj, upset_table,
 
       distill_data <- distillPlotServer('emap_distill',
                                         reactive({ enrich_data$distill$tbl }),
-                                        distill_args)
+                                        distill_args,
+                                        config)
 
       observeEvent(distill_data(), {
         numcat <- distill_data()
@@ -1604,7 +1605,8 @@ enrichServer <- function(id, obj, upset_table,
 
       fuzzy_data <- fuzzyPlotServer('emap_fuzzy',
                                     reactive({ enrich_data$fuzzy$tbl }),
-                                    fuzzy_args)
+                                    fuzzy_args,
+                                    config)
 
       observeEvent(fuzzy_data(), {
         numcat <- fuzzy_data()

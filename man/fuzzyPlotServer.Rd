@@ -4,7 +4,7 @@
 \alias{fuzzyPlotServer}
 \title{Fuzzy enrichment plot server function}
 \usage{
-fuzzyPlotServer(id, obj, args)
+fuzzyPlotServer(id, obj, args, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -12,6 +12,8 @@ fuzzyPlotServer(id, obj, args)
 \item{obj}{reactive containing fuzzy enrichment object}
 
 \item{args}{reactive, list with plot arguments, 'numcat' (number of categories to plot)}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Fuzzy enrichment plot server function
