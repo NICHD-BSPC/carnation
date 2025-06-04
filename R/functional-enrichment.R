@@ -1575,7 +1575,7 @@ enrichServer <- function(id, obj, upset_table,
       radarServer('radar', genetonic_obj, config)
       alluvialServer('alluvial', genetonic_obj,
                      enrich_obj, config)
-      dendrogramServer('dendrogram', genetonic_obj)
+      dendrogramServer('dendrogram', genetonic_obj, config)
 
       ##################### Distill plot ####################
 

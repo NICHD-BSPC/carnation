@@ -1044,6 +1044,7 @@ alluvialServer <- function(id, obj, res_obj, config){
 dendrogramUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -1104,9 +1105,10 @@ dendrogramUI <- function(id, panel){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
+#' @param config reactive list with config settings
 #'
 #' @export
-dendrogramServer <- function(id, obj){
+dendrogramServer <- function(id, obj, config){
 
   moduleServer(
     id,
@@ -1115,20 +1117,15 @@ dendrogramServer <- function(id, obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'dendrogram'
 
-      defaults <- config$ui$functional_enrichment$plots[[plottype]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat,
-          catlen=input$catlen
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
       })
 
       enrichplot <- eventReactive(c(obj(),
@@ -1138,6 +1135,9 @@ dendrogramServer <- function(id, obj){
         validate(
           need(nrow(l_gs) > 0, '')
         )
+
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[plottype]]
 
         # this is needed to handle reactive ui
         if(is.null(input$numcat)){
