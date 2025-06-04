@@ -178,13 +178,13 @@ sumovPlotServer <- function(id, obj, config, type=''){
       # update from reactive config
       observeEvent(config(), {
         updateNumericInput(session, 'numcat',
-                           value=config()$ui$functional_enrichment$plots$summary_overview$numcat)
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
         updateNumericInput(session, 'catlen',
-                           value=config()$ui$functional_enrichment$plots$summary_overview$catlen)
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
         updateSelectInput(session, 'pval',
-                          choices=config()$ui$functional_enrichment$plots$summary_overview$pval)
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$pval)
         updateSelectInput(session, 'color',
-                          choices=config()$ui$functional_enrichment$plots$summary_overview$color)
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$color)
       })
 
       enrichplot <- eventReactive(c(obj(),
