@@ -352,6 +352,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
 enrichmapUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -399,9 +400,10 @@ enrichmapUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
 #' @export
-enrichmapServer <- function(id, obj, res_obj){
+enrichmapServer <- function(id, obj, res_obj, config){
 
   moduleServer(
     id,
@@ -410,23 +412,20 @@ enrichmapServer <- function(id, obj, res_obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'enrichment_map'
 
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
         l_gs <- obj()$l_gs
         anno_df <- obj()$anno_df
         res <- res_obj()

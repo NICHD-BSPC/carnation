@@ -1570,7 +1570,7 @@ enrichServer <- function(id, obj, upset_table,
 
       # plot modules
       sumovPlotServer('sumov', genetonic_obj, config)
-      enrichmapServer('enrichmap', genetonic_obj, enrich_obj)
+      enrichmapServer('enrichmap', genetonic_obj, enrich_obj, config)
       cnetPlotServer('cnetplot', enrich_obj)
       radarServer('radar', genetonic_obj)
       alluvialServer('alluvial', genetonic_obj,
