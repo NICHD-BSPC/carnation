@@ -4,7 +4,7 @@
 \alias{alluvialServer}
 \title{Alluvial plot server function}
 \usage{
-alluvialServer(id, obj, res_obj)
+alluvialServer(id, obj, res_obj, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -12,6 +12,8 @@ alluvialServer(id, obj, res_obj)
 \item{obj}{reactive containing GeneTonic object}
 
 \item{res_obj}{reactive, dataframe containing enrichment results}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Alluvial plot server function

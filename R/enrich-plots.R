@@ -926,6 +926,7 @@ radarServer <- function(id, obj, config, type=''){
 alluvialUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -975,9 +976,10 @@ alluvialUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
 #' @export
-alluvialServer <- function(id, obj, res_obj){
+alluvialServer <- function(id, obj, res_obj, config){
 
   moduleServer(
     id,
@@ -986,19 +988,12 @@ alluvialServer <- function(id, obj, res_obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'alluvial'
 
-      defaults <- config$ui$functional_enrichment$plots[[plottype]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat
-        )
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
       })
 
       enrichplot <- eventReactive(c(obj(),
@@ -1006,6 +1001,8 @@ alluvialServer <- function(id, obj, res_obj){
         l_gs <- obj()$l_gs
         anno_df <- obj()$anno_df
         res <- res_obj()
+
+        defaults <- config()$ui$functional_enrichment$plots[[plottype]]
 
         if(is.null(input$numcat)){
           numcat <- defaults$numcat

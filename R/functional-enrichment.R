@@ -1574,7 +1574,7 @@ enrichServer <- function(id, obj, upset_table,
       cnetPlotServer('cnetplot', enrich_obj, config)
       radarServer('radar', genetonic_obj, config)
       alluvialServer('alluvial', genetonic_obj,
-                     enrich_obj)
+                     enrich_obj, config)
       dendrogramServer('dendrogram', genetonic_obj)
 
       ##################### Distill plot ####################
