@@ -52,6 +52,7 @@ Imports:
     SummarizedExperiment,
     tools,
     utils,
+    viridisLite,
     visNetwork,
     yaml
 Suggests:
