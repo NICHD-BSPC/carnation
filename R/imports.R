@@ -14,7 +14,7 @@
 #' @import ggplot2
 #' @importFrom ggrepel geom_label_repel
 #' @importFrom graphics par
-#' @importFrom grDevices dev.off pdf
+#' @importFrom grDevices dev.off pdf colorRampPalette
 #' @importFrom heatmaply heatmaply is.plotly
 #' @importFrom htmltools withTags tagAppendChild tagAppendChildren tags tagList
 #' @importFrom igraph V "V<-"
@@ -36,6 +36,7 @@
 #' @importFrom SummarizedExperiment "colData<-" colData assay
 #' @importFrom tools file_path_sans_ext
 #' @importFrom utils read.table packageName
+#' @importFrom viridisLite viridis
 #' @importFrom visNetwork renderVisNetwork visNetworkOutput visIgraph visOptions visNodes
 #' @importFrom yaml read_yaml write_yaml
 NULL

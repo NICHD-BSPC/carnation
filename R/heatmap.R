@@ -175,6 +175,15 @@ heatmapUI <- function(id, panel){
                   step=1
                 ) # numericInput
               ) # column
+            ), # fluidRow
+
+            fluidRow(
+              column(5, h5('colormap')),
+              column(7,
+                selectInput(ns('hmap_colormap'), label=NULL,
+                  choices=c('viridis', 'blue-white-red', 'magma', 'inferno', 'plasma', 'RdBu', 'YlOrRd', 'YlGnBu')
+                ) # selectInput
+              ) # column
             ) # fluidRow
 
           ) # bsCollapsePanel
@@ -657,6 +666,15 @@ heatmapServer <- function(id, obj,
         } else {
           col_labels <- hmap_coldata$current[, input$hmap_colnames]
         }
+        # Determine colormap based on selection
+        colormap <- if(input$hmap_colormap == 'blue-white-red') {
+          colorRampPalette(c('blue', 'white', 'red'))(256)
+        } else if(input$hmap_colormap %in% c('viridis', 'magma', 'inferno', 'plasma')){
+          viridis(256, alpha=1, begin=0, end=1, option=input$hmap_colormap)
+        } else if(input$hmap_colormap %in% c('RdBu', 'YlOrRd', 'YlGnBu')){
+          brewer.pal(256, input$hmap_colormap)
+        }
+
         p <- tryCatch(
                  heatmaply::heatmaply(mat,
                            Rowv=rowv, Colv=colv,
@@ -665,7 +683,8 @@ heatmapServer <- function(id, obj,
                            RowSideColors=row_side_colors,
                            subplot_widths=subplot_widths,
                            fontsize_row=input$hmap_fontsize_row,
-                           fontsize_col=input$hmap_fontsize_col),
+                           fontsize_col=input$hmap_fontsize_col,
+                           colors=colormap),
                  error=function(e){ e })
 
         # check error message
