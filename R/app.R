@@ -1469,10 +1469,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       tbl <- res_data$tbl
 
+      format_cols <- intersect(colnames(tbl), config()$server$de_analysis$de_table$format_significant$columns)
+
       tbl %>%
         datatable(rownames=FALSE,
                   selection=list(mode='multiple')) %>%
-        formatSignif(columns=config()$server$de_analysis$de_table$format_significant$columns,
+        formatSignif(columns=format_cols,
                      digits=config()$server$de_analysis$de_table$format_significant$digits)
     }) # renderDT
 
