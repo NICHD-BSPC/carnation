@@ -1430,8 +1430,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
         cols.to.drop <- config()$server$de_analysis$de_table$cols.to.drop
         df <- df %>% as.data.frame %>%
-          relocate(!!symbol.col, .before='baseMean') %>%
-          relocate(!!gene.col, .before=!!symbol.col) %>%
+          relocate(!!symbol.col) %>%
+          relocate(!!gene.col) %>%
           select(-any_of(c(cols.to.drop, toupper(cols.to.drop))))
 
         res_data$tbl <- df
