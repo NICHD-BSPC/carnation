@@ -79,6 +79,7 @@
 sumovPlotUI <- function(id, panel, type=''){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -159,10 +160,11 @@ sumovPlotUI <- function(id, panel, type=''){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactiveValues object containing GeneTonic object
+#' @param config reactive list with config settings
 #' @param type string, if 'comp' then show the comparison view
 #'
 #' @export
-sumovPlotServer <- function(id, obj, type=''){
+sumovPlotServer <- function(id, obj, config, type=''){
 
   moduleServer(
     id,
@@ -171,22 +173,25 @@ sumovPlotServer <- function(id, obj, type=''){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       plottype <- 'summary_overview'
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
-      plot_args <- reactive({
-        list(
-          numcat=input$numcat,
-          catlen=input$catlen,
-          pcol=input$pval,
-          color=input$color
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
+        updateSelectInput(session, 'pval',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$pval)
+        updateSelectInput(session, 'color',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$color)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
         # this is needed to handle reactive ui
         if(is.null(input$numcat)){
           numcat <- defaults$numcat
@@ -199,7 +204,8 @@ sumovPlotServer <- function(id, obj, type=''){
           pcol <- input$pval
           color_by <- input$color
         }
-        text_size <- config$server$functional_enrichment$plot[[ plottype ]]$text_size
+
+        text_size <- config()$server$functional_enrichment$plot[[ plottype ]]$text_size
         validate(
             need(!is.null(numcat) & numcat > 0,
                  'Number of terms must be > 0')
@@ -346,6 +352,7 @@ sumovPlotServer <- function(id, obj, type=''){
 enrichmapUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -393,9 +400,10 @@ enrichmapUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
 #' @export
-enrichmapServer <- function(id, obj, res_obj){
+enrichmapServer <- function(id, obj, res_obj, config){
 
   moduleServer(
     id,
@@ -404,23 +412,20 @@ enrichmapServer <- function(id, obj, res_obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'enrichment_map'
 
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
         l_gs <- obj()$l_gs
         anno_df <- obj()$anno_df
         res <- res_obj()
@@ -476,6 +481,7 @@ enrichmapServer <- function(id, obj, res_obj){
 cnetPlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   plottype <- 'cnetplot'
@@ -563,9 +569,10 @@ cnetPlotUI <- function(id, panel){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive, dataframe with enrichment results
+#' @param config reactive list with config settings
 #'
 #' @export
-cnetPlotServer <- function(id, obj){
+cnetPlotServer <- function(id, obj, config){
 
   moduleServer(
     id,
@@ -574,28 +581,29 @@ cnetPlotServer <- function(id, obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'cnetplot'
 
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat,
-          catlen=input$catlen,
-          node_label=input$node_label,
-          colorEdge=input$colorEdge,
-          circular=input$circular
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
+        updateSelectInput(session, 'node_label',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$node_label)
+        updateCheckboxInput(session, 'colorEdge',
+                            value=config()$ui$functional_enrichment$plots[[ plottype ]]$colorEdge)
+        updateCheckboxInput(session, 'circular',
+                            value=config()$ui$functional_enrichment$plots[[ plottype ]]$circular)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
         l <- obj()
+
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
 
         # this is needed to handle reactive ui (run first time)
         if(is.null(input$numcat)){
@@ -623,7 +631,7 @@ cnetPlotServer <- function(id, obj){
 
         l@result$Description <- substr(l@result$Description, 1, catlen)
 
-        text_size <- config$server$functional_enrichment$plot[[ plottype ]]$text_size
+        text_size <- config()$server$functional_enrichment$plot[[ plottype ]]$text_size
         p <- cnetplot(l,
                       showCategory = numcat,
                       color.params=list(edge=colorEdge),
@@ -655,6 +663,7 @@ cnetPlotServer <- function(id, obj){
 radarUI <- function(id, panel, type=''){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -727,9 +736,10 @@ radarUI <- function(id, panel, type=''){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
 #' @param type string, if 'comp' then show the comparison view
+#' @param config reactive list with config settings
 #'
 #' @export
-radarServer <- function(id, obj, type=''){
+radarServer <- function(id, obj, config, type=''){
 
   moduleServer(
     id,
@@ -738,25 +748,24 @@ radarServer <- function(id, obj, type=''){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'radar'
 
-      defaults <- config$ui$functional_enrichment$plots[[plottype]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat,
-          pval=input$pval,
-          catlen=input$catlen
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
+        updateSelectInput(session, 'pval',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$pval)
       })
 
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[plottype]]
+
         if(is.null(input$numcat)){
           numcat <- defaults$numcat
           pval <- unlist(defaults$pval)[1]
@@ -917,6 +926,7 @@ radarServer <- function(id, obj, type=''){
 alluvialUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -966,9 +976,10 @@ alluvialUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
 #' @export
-alluvialServer <- function(id, obj, res_obj){
+alluvialServer <- function(id, obj, res_obj, config){
 
   moduleServer(
     id,
@@ -977,19 +988,12 @@ alluvialServer <- function(id, obj, res_obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'alluvial'
 
-      defaults <- config$ui$functional_enrichment$plots[[plottype]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat
-        )
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
       })
 
       enrichplot <- eventReactive(c(obj(),
@@ -997,6 +1001,8 @@ alluvialServer <- function(id, obj, res_obj){
         l_gs <- obj()$l_gs
         anno_df <- obj()$anno_df
         res <- res_obj()
+
+        defaults <- config()$ui$functional_enrichment$plots[[plottype]]
 
         if(is.null(input$numcat)){
           numcat <- defaults$numcat
@@ -1038,6 +1044,7 @@ alluvialServer <- function(id, obj, res_obj){
 dendrogramUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -1098,9 +1105,10 @@ dendrogramUI <- function(id, panel){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
+#' @param config reactive list with config settings
 #'
 #' @export
-dendrogramServer <- function(id, obj){
+dendrogramServer <- function(id, obj, config){
 
   moduleServer(
     id,
@@ -1109,20 +1117,15 @@ dendrogramServer <- function(id, obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'dendrogram'
 
-      defaults <- config$ui$functional_enrichment$plots[[plottype]]
-
-      plot_args <- reactive({
-        # NOTE: list containing plot args
-        # - each element should correspond to inputs listed above
-        list(
-          numcat=input$numcat,
-          catlen=input$catlen
-        )
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
       })
 
       enrichplot <- eventReactive(c(obj(),
@@ -1132,6 +1135,9 @@ dendrogramServer <- function(id, obj){
         validate(
           need(nrow(l_gs) > 0, '')
         )
+
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[plottype]]
 
         # this is needed to handle reactive ui
         if(is.null(input$numcat)){
@@ -1199,6 +1205,7 @@ dendrogramServer <- function(id, obj){
 horizonUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   # NOTE: enter plottype here
@@ -1268,9 +1275,10 @@ horizonUI <- function(id, panel){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing GeneTonic object
+#' @param config reactive list with config settings
 #'
 #' @export
-horizonServer <- function(id, obj){
+horizonServer <- function(id, obj, config){
 
   moduleServer(
     id,
@@ -1279,12 +1287,8 @@ horizonServer <- function(id, obj){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'horizon'
-
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
       plot_args <- reactive({
         # NOTE: list containing plot args
@@ -1296,8 +1300,22 @@ horizonServer <- function(id, obj){
         )
       })
 
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'numcat',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$numcat)
+        updateNumericInput(session, 'catlen',
+                           value=config()$ui$functional_enrichment$plots[[ plottype ]]$catlen)
+        updateSelectInput(session, 'sort_by',
+                          choices=config()$ui$functional_enrichment$plots[[ plottype ]]$sort_by)
+      })
+
       enrichplot <- eventReactive(c(obj(),
                                     input$plot_do), {
+
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
         # check if inputs exist (run first time/before plot options is uncollapsed)
         if(is.null(input$numcat)){
           numcat <- defaults$numcat
@@ -1337,7 +1355,7 @@ horizonServer <- function(id, obj){
                  'Duplicate category names for comparison 2 after truncation. Please increase max name length')
         )
 
-        text_size <- config$server$functional_enrichment$plot[[ plottype ]]$text_size
+        text_size <- config()$server$functional_enrichment$plot[[ plottype ]]$text_size
         comp_list <- list(l_gs2)
 
         # adjust group names if comparing within same contrast
@@ -1384,8 +1402,6 @@ horizonServer <- function(id, obj){
 distillPlotUI <- function(id, panel){
   ns <- NS(id)
 
-  config <- get_config()
-
   # NOTE: enter plottype here
   plottype <- 'emap_distill'
 
@@ -1431,9 +1447,10 @@ distillPlotUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing 'distilled' enrichment results
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
+#' @param config reactive list with config settings
 #'
 #' @export
-distillPlotServer <- function(id, obj, args){
+distillPlotServer <- function(id, obj, args, config){
 
   moduleServer(
     id,
@@ -1442,12 +1459,8 @@ distillPlotServer <- function(id, obj, args){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'emap_distill'
-
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
       #plot_args <- reactive({
       #  # NOTE: list containing plot args
@@ -1459,10 +1472,13 @@ distillPlotServer <- function(id, obj, args){
 
       curr_args <- reactiveValues(numcat=NULL)
 
-      observeEvent(args()$numcat, {
+      observeEvent(c(args()$numcat, config()), {
         numcat <- args()$numcat
 
-        updt <- TRUE
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
+        updt <- FALSE
         if(is.null(numcat)){
           curr_args$numcat <- defaults$numcat
           updt <- TRUE
@@ -1541,8 +1557,6 @@ distillPlotServer <- function(id, obj, args){
 fuzzyPlotUI <- function(id, panel){
   ns <- NS(id)
 
-  config <- get_config()
-
   # NOTE: enter plottype here
   plottype <- 'emap_fuzzy'
 
@@ -1588,9 +1602,10 @@ fuzzyPlotUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactive containing fuzzy enrichment object
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
+#' @param config reactive list with config settings
 #'
 #' @export
-fuzzyPlotServer <- function(id, obj, args){
+fuzzyPlotServer <- function(id, obj, args, config){
 
   moduleServer(
     id,
@@ -1599,12 +1614,8 @@ fuzzyPlotServer <- function(id, obj, args){
 
       ns <- NS(id)
 
-      config <- get_config()
-
       # NOTE: enter plottype here
       plottype <- 'emap_fuzzy'
-
-      defaults <- config$ui$functional_enrichment$plots[[ plottype ]]
 
       #plot_args <- reactive({
       #  # NOTE: list containing plot args
@@ -1616,10 +1627,13 @@ fuzzyPlotServer <- function(id, obj, args){
 
       curr_args <- reactiveValues(numcat=NULL)
 
-      observeEvent(args()$numcat, {
+      observeEvent(c(args()$numcat, config()), {
         numcat <- args()$numcat
 
-        updt <- TRUE
+        # get defaults from reactive config
+        defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
+
+        updt <- FALSE
         if(is.null(numcat)){
           curr_args$numcat <- defaults$numcat
           updt <- TRUE

@@ -4,7 +4,7 @@
 \alias{enrichmapServer}
 \title{Enrichment map plot server function}
 \usage{
-enrichmapServer(id, obj, res_obj)
+enrichmapServer(id, obj, res_obj, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -12,6 +12,8 @@ enrichmapServer(id, obj, res_obj)
 \item{obj}{reactiveValues object containing GeneTonic object}
 
 \item{res_obj}{reactive, dataframe containing enrichment results}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Enrichment map plot server function

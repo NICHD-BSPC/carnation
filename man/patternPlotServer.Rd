@@ -4,7 +4,7 @@
 \alias{patternPlotServer}
 \title{Pattern plot module server function}
 \usage{
-patternPlotServer(id, obj, coldata, plot_args)
+patternPlotServer(id, obj, coldata, plot_args, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -15,6 +15,8 @@ patternPlotServer(id, obj, coldata, plot_args)
 
 \item{plot_args}{reactive containing 'gene_scratchpad' (genes selected in scratchpad) &
 'upset_data' (list containing data from upset plot module)}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Pattern plot module server function

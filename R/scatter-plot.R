@@ -7,8 +7,6 @@
 scatterPlotUI <- function(id, panel){
   ns <- NS(id)
 
-  config <- get_config()
-
   if(panel == 'sidebar'){
     tagList(
       fluidRow(
@@ -44,8 +42,7 @@ scatterPlotUI <- function(id, panel){
         column(6,
           selectizeInput(ns('compare'),
                         label=NULL,
-                        choices=c('LFC', 'P-adj'),
-                        selected=config$ui$de_analysis$scatter_plot$compare
+                        choices=c('LFC', 'P-adj')
           ) # selectizeInput
         ) # column
       ), # fluidRow
@@ -267,9 +264,10 @@ scatterPlotUI <- function(id, panel){
 #' @param obj reactiveValues object containing carnation object
 #' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
 #' 'gene.to.plot' (genes to be labeled)
+#' @param config reactive list with config settings
 #'
 #' @export
-scatterPlotServer <- function(id, obj, plot_args){
+scatterPlotServer <- function(id, obj, plot_args, config){
 
   moduleServer(
     id,
@@ -277,8 +275,6 @@ scatterPlotServer <- function(id, obj, plot_args){
     function(input, output, session){
       # -- Set ns, Get config, Load data, Trigger data laoded flag -- #
       ns <- NS(id)
-
-      config <- get_config()
 
       app_object <- reactive({
         list(res=obj$res)
@@ -316,8 +312,14 @@ scatterPlotServer <- function(id, obj, plot_args){
       # -------------------------------------------------------------- #
 
       # --------------- Set FDR and FC thresholds ---------------- #
-      curr_thres <- reactiveValues(fdr.thres=config$ui$de_analysis$filters$fdr_threshold,
-                                   fc.thres=config$ui$de_analysis$filters$log2fc_threshold)
+      curr_thres <- reactiveValues(fdr.thres=0.1,
+                                   fc.thres=0)
+
+      # update from reactive config
+      observeEvent(config(), {
+        curr_thres$fdr.thres <- config()$ui$de_analysis$filters$fdr_threshold
+        curr_thres$fc.thres <- config()$ui$de_analysis$filters$log2fc_threshold
+      })
 
       observeEvent(c(plot_args()$fdr.thres, plot_args()$fc.thres), {
         fc.thres <- ifelse(plot_args()$fc.thres == '' | is.na(plot_args()$fc.thres), 0, plot_args()$fc.thres)

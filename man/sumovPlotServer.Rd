@@ -4,12 +4,14 @@
 \alias{sumovPlotServer}
 \title{Summary overview plot server function}
 \usage{
-sumovPlotServer(id, obj, type = "")
+sumovPlotServer(id, obj, config, type = "")
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
 
 \item{obj}{reactiveValues object containing GeneTonic object}
+
+\item{config}{reactive list with config settings}
 
 \item{type}{string, if 'comp' then show the comparison view}
 }

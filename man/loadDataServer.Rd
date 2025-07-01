@@ -4,12 +4,14 @@
 \alias{loadDataServer}
 \title{Load data module server function}
 \usage{
-loadDataServer(id, username, rds = NULL)
+loadDataServer(id, username, config, rds = NULL)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
 
 \item{username}{user name}
+
+\item{config}{reactive list with config settings}
 
 \item{rds}{Object to be edited}
 }

@@ -4,7 +4,7 @@
 \alias{distillPlotServer}
 \title{Distill enrichment plot server function}
 \usage{
-distillPlotServer(id, obj, args)
+distillPlotServer(id, obj, args, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -12,6 +12,8 @@ distillPlotServer(id, obj, args)
 \item{obj}{reactive containing 'distilled' enrichment results}
 
 \item{args}{reactive, list with plot arguments, 'numcat' (number of categories to plot)}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Distill enrichment plot server function

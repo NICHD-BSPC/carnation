@@ -4,12 +4,14 @@
 \alias{cnetPlotServer}
 \title{Cnetplot server function}
 \usage{
-cnetPlotServer(id, obj)
+cnetPlotServer(id, obj, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
 
 \item{obj}{reactive, dataframe with enrichment results}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Cnetplot server function

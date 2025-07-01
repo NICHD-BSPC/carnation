@@ -4,7 +4,7 @@
 \alias{maPlotServer}
 \title{MA plot module server function}
 \usage{
-maPlotServer(id, obj, plot_args)
+maPlotServer(id, obj, plot_args, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -13,6 +13,8 @@ maPlotServer(id, obj, plot_args)
 
 \item{plot_args}{reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
 & 'gene.to.plot' (genes selected in scratchpad)}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 MA plot module server function
