@@ -7,6 +7,7 @@
 pcaPlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # load default config
   config <- get_config()
   dims <- config$server$de_analysis$pca_plot$dims
   pc_choices <- setNames(1:dims, paste0('PC', 1:dims))
@@ -41,12 +42,6 @@ pcaPlotUI <- function(id, panel){
           ) # column
         ) # fluidRow
       ), # conditionalPanel
-
-      fluidRow(
-        column(12, align='right',
-          helpButtonUI(ns('pca_opts_help'))
-        ) # column
-      ), # fluidRow
 
       fluidRow(
         column(4, 'color by'),
@@ -172,9 +167,10 @@ pcaPlotUI <- function(id, panel){
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param obj reactiveValues object containing carnation object
 #' @param coldata reactiveValues object containing object metadata
+#' @param config reactive list with config settings
 #'
 #' @export
-pcaPlotServer <- function(id, obj, coldata){
+pcaPlotServer <- function(id, obj, coldata, config){
 
   moduleServer(
     id,
@@ -182,9 +178,6 @@ pcaPlotServer <- function(id, obj, coldata){
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
-      cols.to.drop <- config$server$cols.to.drop
 
       coldata_pca <- reactiveValues(all=NULL, current=NULL)
       plot_data <- reactiveValues(rld=NULL)
@@ -219,6 +212,21 @@ pcaPlotServer <- function(id, obj, coldata){
                           selected=NULL)
       }
 
+      # update min menus from reactive config
+      observeEvent(config(), {
+        dims <- config()$server$de_analysis$pca_plot$dims
+        pc_choices <- setNames(1:dims, paste0('PC', 1:dims))
+
+        updateSelectInput(session, 'pcx',
+                          choices=pc_choices)
+        updateSelectInput(session, 'pcy',
+                          choices=pc_choices,
+                          selected=pc_choices[2])
+        updateSelectInput(session, 'pcz',
+                          choices=c('none', pc_choices))
+
+      })
+ 
       # get plot data & update menus at first load
       observeEvent(c(app_object()$dds_mapping, coldata.all()), {
         validate(
@@ -316,7 +324,7 @@ pcaPlotServer <- function(id, obj, coldata){
         coldata_pca$all <- cdata
         coldata_pca$current <- cdata
 
-        column.names <- setdiff(colnames(cdata), cols.to.drop)
+        column.names <- setdiff(colnames(cdata), config()$server$cols.to.drop)
 
         if(!is.null(input$pca_cols) & input$pca_cols %in% column.names)
           selected <- input$pca_cols
@@ -473,8 +481,7 @@ pcaPlotServer <- function(id, obj, coldata){
 
       ######################### Help buttons #######################
 
-      helpButtonServer('pca_samples_help')
-      helpButtonServer('pca_opts_help')
+      helpButtonServer('pca_samples_help', size='l')
       helpButtonServer('de_pca_help', size='l')
       downloadButtonServer('pcaplot_download', pca_plot, 'pcaplot')
     }

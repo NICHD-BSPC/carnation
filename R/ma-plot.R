@@ -7,6 +7,7 @@
 maPlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -17,7 +18,7 @@ maPlotUI <- function(id, panel){
                      'Comparison')
         ),
         column(6, align='right',
-          helpButtonUI(ns('de_cmp_help'))
+          helpButtonUI(ns('ma_controls_help'))
         ) # column
       ), # fluidRow
 
@@ -92,9 +93,10 @@ maPlotUI <- function(id, panel){
 #' @param obj reactiveValues object containing carnation object
 #' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
 #' & 'gene.to.plot' (genes selected in scratchpad)
+#' @param config reactive list with config settings
 #'
 #' @export
-maPlotServer <- function(id, obj, plot_args){
+maPlotServer <- function(id, obj, plot_args, config){
 
   moduleServer(
     id,
@@ -102,8 +104,6 @@ maPlotServer <- function(id, obj, plot_args){
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
 
       app_object <- reactive({
           list(res=obj$res)
@@ -118,12 +118,27 @@ maPlotServer <- function(id, obj, plot_args){
                           choices=names(app_object()$res))
       })
 
-      curr_thres <- reactiveValues(fdr.thres=config$ui$de_analysis$filters$fdr_threshold,
-                                   fc.thres=config$ui$de_analysis$filters$log2fc_threshold)
+      curr_thres <- reactiveValues(fdr.thres=0.1,
+                                   fc.thres=0)
+
+      # update from reactive config
+      observeEvent(config(), {
+        curr_thres$fdr.thres <- config()$ui$de_analysis$filters$fdr_threshold
+        curr_thres$fc.thres <- config()$ui$de_analysis$filters$log2fc_threshold
+
+        updateNumericInput(session, 'ma_ymax',
+                           value=config()$ui$de_analysis$ma_plot$log2fc_limits$max)
+        updateNumericInput(session, 'ma_ymin',
+                           value=config()$ui$de_analysis$ma_plot$log2fc_limits$min)
+      })
 
       observeEvent(c(plot_args()$fdr.thres, plot_args()$fc.thres), {
-        fc.thres <- ifelse(plot_args()$fc.thres == '' | is.na(plot_args()$fc.thres), 0, plot_args()$fc.thres)
-        fdr.thres <- ifelse(plot_args()$fdr.thres == '' | is.na(plot_args()$fdr.thres), 0.1, plot_args()$fdr.thres)
+        fc.thres <- ifelse(plot_args()$fc.thres == '' | is.na(plot_args()$fc.thres),
+                           config()$ui$de_analysis$filters$log2fc_threshold,
+                           plot_args()$fc.thres)
+        fdr.thres <- ifelse(plot_args()$fdr.thres == '' | is.na(plot_args()$fdr.thres),
+                            config()$ui$de_analysis$filters$fdr_threshold,
+                            plot_args()$fdr.thres)
 
         curr_thres$fdr.thres <- fdr.thres
         curr_thres$fc.thres <- fc.thres
@@ -239,7 +254,7 @@ maPlotServer <- function(id, obj, plot_args){
         }
       })
 
-      helpButtonServer('de_cmp_help')
+      helpButtonServer('ma_controls_help')
       helpButtonServer('de_ma_help', size='l')
       downloadButtonServer('maplot_download', maplot, 'maplot')
     }

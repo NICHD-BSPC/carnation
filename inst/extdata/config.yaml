@@ -1,6 +1,9 @@
 # maximum upload file size (in MB)
 max_upload_size: 30
 
+# http request header with username
+http_request_header: HTTP_X_SP_USERID
+
 # custom CSS styles used in the app
 style:
   global: >
@@ -89,15 +92,8 @@ ui:
       text_scale: 1
       genes.per.line: 10
     heatmap:
-      cluster_by: row
       fontsize_row: 5
       fontsize_col: 7
-
-      # scale can be 'row', 'column' or 'none'
-      scale: row
-
-      # rank can be 'padj' or 'log2FoldChange'
-      rank: padj
 
   functional_enrichment:
     plottype:

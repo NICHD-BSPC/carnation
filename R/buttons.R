@@ -4,6 +4,7 @@
 #'
 #' @param id Input id
 #'
+#' @export
 helpButtonUI <- function(id){
   ns <- NS(id)
 
@@ -17,11 +18,12 @@ helpButtonUI <- function(id){
 
 #' Help button module server
 #'
-#' Server for download button module
+#' Server for help button module
 #'
 #' @param id Input id
 #' @param ... other params passed to helpModal()
 #'
+#' @export
 helpButtonServer <- function(id, ...){
   moduleServer(
     id,
@@ -55,6 +57,7 @@ helpButtonServer <- function(id, ...){
 #' @param title Title of modal dialog
 #' @param ... other params passed to modalDialog()
 #'
+#' @export
 helpModal <- function(mdfile, title=NULL, ...){
   modalDialog(
       title=title,
@@ -73,6 +76,7 @@ helpModal <- function(mdfile, title=NULL, ...){
 #'
 #' @param id Input id
 #'
+#' @export
 downloadButtonUI <- function(id){
   ns <- NS(id)
 
@@ -92,6 +96,7 @@ downloadButtonUI <- function(id){
 #' @param outplot reactive plot handle
 #' @param plot_type reactive/static value used for output filename
 #'
+#' @export
 downloadButtonServer <- function(id, outplot, plot_type){
   moduleServer(
     id,
@@ -164,10 +169,15 @@ downloadButtonServer <- function(id, outplot, plot_type){
             # NOTE: this needs 'kaleido' module in python to be
             #       available for 'reticulate'
             ppi <- config$server$de_analysis$heatmap$pdf_res
-            save_image(outplot(),
-                       file=file,
-                       width=input$plot_wd*ppi,
-                       height=input$plot_ht*ppi)
+
+            # NOTE: turn off mathjax in kaleido to prevent "Loading MathJax ..." box in saved plot
+            # - solution from https://stackoverflow.com/questions/79464233/loading-mathjax-extensions-mathmenu-js-box-visible-in-pdf-when-running-plotl/
+            k <- plotly::kaleido()
+            k$scope$mathjax <- FALSE
+            k$transform(outplot(),
+                        file=file,
+                        width=input$plot_wd*ppi,
+                        height=input$plot_ht*ppi)
           } else {
             ggsave(file, plot = outplot(),
                    device='pdf',

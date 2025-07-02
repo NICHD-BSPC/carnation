@@ -3,9 +3,11 @@
 #' @param id ID string used to match the ID used to call the module server function
 #' @param panel string, can be 'sidebar' or 'main'
 #'
+#' @export
 upsetPlotUI <- function(id, panel){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -39,12 +41,6 @@ upsetPlotUI <- function(id, panel){
 
             bsCollapse(
                bsCollapsePanel('UpSet options',
-                 fluidRow(
-                   column(12, align='right',
-                       helpButtonUI(ns('upset_opts_help'))
-                   ) # column
-                 ), # fluidRow
-
                  fluidRow(
                    column(4, h5('Direction of change')),
                    column(8,
@@ -202,7 +198,7 @@ upsetPlotUI <- function(id, panel){
 #' @param reset_genes reactive to reset gene scratchpad selection
 #'
 #' @export
-upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
+upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
 
   moduleServer(
     id,
@@ -210,8 +206,6 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
 
       # TODO: move to config
       comp_split_pattern <- ';'
@@ -247,6 +241,16 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         genes_clicked$g <- NULL
       }
 
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'n_intersections',
+                           value=config()$ui$de_analysis$upset_plot$n_intersections)
+        updateNumericInput(session, 'min_size',
+                           value=config()$ui$de_analysis$upset_plot$min_size)
+        updateNumericInput(session, 'text_scale',
+                           value=config()$ui$de_analysis$upset_plot$text_scale)
+      })
+
       # observer to initialize/reset upset_plot choices
       # NOTE: this is only run once per loaded assay
       observeEvent(app_object()$res, {
@@ -257,7 +261,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         choices <- names(app_object()$res)
         upset_choices$all <- choices
 
-        comp_num <- config$server$de_analysis$upset_plot$comp_num
+        comp_num <- config()$server$de_analysis$upset_plot$comp_num
         if(length(choices) > comp_num){
           choices <- choices[1:comp_num]
         }
@@ -484,9 +488,9 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         )
 
         fc.thres <- ifelse(plot_args()$fc.thres == '' | is.na(plot_args()$fc.thres),
-                           config$ui$de_analysis$filters$log2fc_threshold, plot_args()$fc.thres)
+                           config()$ui$de_analysis$filters$log2fc_threshold, plot_args()$fc.thres)
         fdr.thres <- ifelse(plot_args()$fdr.thres == '' | is.na(plot_args()$fdr.thres),
-                            config$ui$de_analysis$filters$fdr_threshold, plot_args()$fdr.thres)
+                            config()$ui$de_analysis$filters$fdr_threshold, plot_args()$fdr.thres)
 
         # gene lists to compare
         # TODO: move to function?
@@ -633,7 +637,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         if(!is.null(input$upset_intersections) & all(input$upset_intersections %in% inter_choices)) selected <- input$upset_intersections
         else selected <- inter_choices
 
-        intersect_num <- config$server$de_analysis$upset_plot$intersect_num
+        intersect_num <- config()$server$de_analysis$upset_plot$intersect_num
         if(length(selected) > intersect_num){
           selected <- selected[1:intersect_num]
         }
@@ -880,11 +884,11 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         else n_intersections <- input$n_intersections
 
         inter_sizes <- table(gdf$set)
-        if(min(inter_sizes) < min_size){
+        if(max(inter_sizes) < min_size){
           validate(
-            need(min(inter_sizes) >= min_size,
+            need(max(inter_sizes) >= min_size,
                  paste0('No intersections left after filtering!\n\n',
-                        'Please adjust "Min intersection size" in settings menu to at least ', min(inter_sizes))
+                        'Please adjust "Min intersection size" in settings menu to at least ', max(inter_sizes))
             )
           )
         }
@@ -929,8 +933,6 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
 
       ###################### buttons ###################
       helpButtonServer('upset_controls_help', size='l')
-      helpButtonServer('upset_opts_help', size='l')
-      helpButtonServer('upset_more_help', size='l')
       helpButtonServer('de_upset_help', size='l')
       helpButtonServer('de_upset_tbl_help', size='l')
       downloadButtonServer('upset_download', upsetplot, 'upsetplot')
@@ -998,7 +1000,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes){
         label_tbl <- cbind(gene=rownames(label_tbl), label_tbl)
 
         label_tbl %>% select(-any_of(upset_choices$current)) %>%
-          relocate(.data$set, .after=.data$comparisons) %>%
+          relocate('set', .after='comparisons') %>%
           datatable(rownames=FALSE,
                     selection='none',
                     class='stripe')

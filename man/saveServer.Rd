@@ -4,7 +4,7 @@
 \alias{saveServer}
 \title{Save object module server function}
 \usage{
-saveServer(id, original, current, coldata, pattern, username)
+saveServer(id, original, current, coldata, pattern, username, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -18,6 +18,8 @@ saveServer(id, original, current, coldata, pattern, username)
 \item{pattern}{regex pattern for finding carnation data}
 
 \item{username}{user name}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Save object module server function

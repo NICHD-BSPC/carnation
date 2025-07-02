@@ -4,12 +4,14 @@
 \alias{radarServer}
 \title{Radar plot server function}
 \usage{
-radarServer(id, obj, type = "")
+radarServer(id, obj, config, type = "")
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
 
 \item{obj}{reactive containing GeneTonic object}
+
+\item{config}{reactive list with config settings}
 
 \item{type}{string, if 'comp' then show the comparison view}
 }

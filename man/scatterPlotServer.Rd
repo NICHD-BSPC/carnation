@@ -4,7 +4,7 @@
 \alias{scatterPlotServer}
 \title{Scatterplot module server function}
 \usage{
-scatterPlotServer(id, obj, plot_args)
+scatterPlotServer(id, obj, plot_args, config)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -13,6 +13,8 @@ scatterPlotServer(id, obj, plot_args)
 
 \item{plot_args}{reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
 'gene.to.plot' (genes to be labeled)}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Scatterplot module server function

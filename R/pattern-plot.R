@@ -9,6 +9,7 @@
 patternPlotUI <- function(id, panel, tab){
   ns <- NS(id)
 
+  # get default config
   config <- get_config()
 
   if(panel == 'sidebar'){
@@ -35,10 +36,7 @@ patternPlotUI <- function(id, panel, tab){
         tagList(
 
           fluidRow(
-            column(6, strong('Plot options')),
-            column(6, align='right',
-              helpButtonUI(ns('dp_opts_help'))
-            ) # column
+            column(12, strong('Plot options')),
           ), # fluidRow
 
           fluidRow(
@@ -91,12 +89,6 @@ patternPlotUI <- function(id, panel, tab){
             bsCollapsePanel('cluster settings',
 
               fluidRow(
-                column(12, align='right',
-                  helpButtonUI(ns('dp_facet_help'))
-                ) # column
-              ), # fluidRow
-
-              fluidRow(
                 column(4, 'clusters to show'),
                 column(8,
                   selectizeInput(ns('facet_var_levels'),
@@ -134,11 +126,8 @@ patternPlotUI <- function(id, panel, tab){
             bsCollapsePanel('x-axis settings',
 
               fluidRow(
-                column(6, align='left',
+                column(12, align='left',
                        'variable levels'),
-                column(6, align='right',
-                  helpButtonUI(ns('dp_xaxis_help'))
-                ) # column
               ), # fluidRow
 
               uiOutput(ns('x_axis_bucket')),
@@ -167,12 +156,6 @@ patternPlotUI <- function(id, panel, tab){
             ), # bsCollapsePanel
 
             bsCollapsePanel('More options',
-
-              fluidRow(
-                column(12, align='right',
-                  helpButtonUI(ns('dp_more_help'))
-                ) # column
-              ), # fluidRow
 
               fluidRow(
                 column(6, h5('trendline')),
@@ -238,11 +221,6 @@ patternPlotUI <- function(id, panel, tab){
     } else if(tab == 'table'){
       tag <-
         tagList(
-          fluidRow(
-            column(12, align='right',
-              helpButtonUI(ns('dp_cluster_help'))
-            ) # column
-          ), # fluidRow
 
           fluidRow(
             column(6, 'Cluster column'),
@@ -314,21 +292,20 @@ patternPlotUI <- function(id, panel, tab){
 #' @param coldata reactiveValues object containing object metadata
 #' @param plot_args reactive containing 'gene_scratchpad' (genes selected in scratchpad) &
 #' 'upset_data' (list containing data from upset plot module)
+#' @param config reactive list with config settings
 #'
 #' @export
 patternPlotServer <- function(id,
                               obj,
                               coldata,
-                              plot_args){
+                              plot_args,
+                              config){
   moduleServer(
     id,
 
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
-      cols.to.drop <- config$server$cols.to.drop
 
       res_obj <- reactive({
         obj$res
@@ -350,6 +327,14 @@ patternPlotServer <- function(id,
       current_facet_levels <- reactiveValues(l=NULL)
       upset_data <- reactiveValues(genes=NULL, labels=NULL)
       gene_scratchpad <- reactiveValues(genes=NULL)
+
+      # update from reactive config
+      observeEvent(config(), {
+        updateNumericInput(session, 'min_cluster_size',
+                           value=config()$ui$pattern_analysis$min_cluster_size)
+        updateNumericInput(session, 'x_rotate',
+                           value=config()$ui$pattern_analysis$x_rotate)
+      })
 
       observeEvent(pattern_obj(), {
         obj <- pattern_obj()
@@ -451,18 +436,18 @@ patternPlotServer <- function(id,
         if(!all(colnames(cdata) %in% colnames(obj))){
             obj <- add_metadata(obj,
                                 cdata,
-                                cols.to.drop)
+                                config()$server$cols.to.drop)
         }
 
         # get time variable
         cols <- colnames(obj)
 
         # remove common metadata columns if available
-        cols <- setdiff(cols, cols.to.drop)
+        cols <- setdiff(cols, config()$server$cols.to.drop)
 
         # remove more columns from color options
         cols <- setdiff(cols,
-                        config$server$pattern_analysis$cols.to.drop)
+                        config()$server$pattern_analysis$cols.to.drop)
 
         # cluster options are 'cluster' and 'cutoff*'
         cluster.options <- c('cluster', cols[grep('cutoff', cols)])
@@ -908,15 +893,8 @@ patternPlotServer <- function(id,
         degtable()
       }, rownames=FALSE)
 
-      # pattern analysis controls help
-      helpButtonServer('dp_controls_help')
-      helpButtonServer('dp_opts_help', size='l')
-      helpButtonServer('dp_facet_help')
-      helpButtonServer('dp_xaxis_help', size='l')
-      helpButtonServer('dp_more_help', size='l')
-      helpButtonServer('dp_cluster_help', size='l')
-
       # pattern analysis help
+      helpButtonServer('dp_controls_help', size='l')
       helpButtonServer('pattern_plt_help', size='l')
       helpButtonServer('pattern_tbl_help', size='l')
 

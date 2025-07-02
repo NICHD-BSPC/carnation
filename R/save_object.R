@@ -19,16 +19,15 @@ saveUI <- function(id){
 #' @param coldata reactiveValues object containing object metadata
 #' @param pattern regex pattern for finding carnation data
 #' @param username user name
+#' @param config reactive list with config settings
 #'
 #' @export
-saveServer <- function(id, original, current, coldata, pattern, username){
+saveServer <- function(id, original, current, coldata, pattern, username, config){
   moduleServer(
     id,
 
     function(input, output, session){
         ns <- NS(id)
-
-        config <- get_config()
 
         reload_parent <- reactiveValues(flag=FALSE)
         save_flag <- reactiveValues(l=FALSE)
@@ -249,30 +248,30 @@ saveServer <- function(id, original, current, coldata, pattern, username){
             # add data area
             # get access yaml and add data area
             y <- read_access_yaml()
-            if(is.null(username)) ug <- config$server$admin_group
+            if(is.null(username())) ug <- config()$server$admin_group
             else ug <- input$user_group
 
             # check for empty user group
             if(ug == ''){
               showNotification(
-                paste0('User group is empty. Using "', config$server$admin_group,
+                paste0('User group is empty. Using "', config()$server$admin_group,
                        '" by default'),
                 type='warning'
               )
-              ug <- config$server$admin_group
+              ug <- config()$server$admin_group
             }
 
             # check for existence of user_group & add if new
             if(!ug %in% names(y$data_area)){
               y$data_area <- append(y$data_area,
-                                setNames(as.list(input$dir_new), ug))
+                                setNames(as.list(input$rds_path), ug))
               showModal(
                 modalDialog('Adding data area')
               )
             } else {
-              if(!input$dir_new %in% y$data_area[[ug]]){
+              if(!input$rds_path %in% y$data_area[[ug]]){
                 y$data_area[[ug]] <- c(y$data_area[[ug]],
-                                       input$dir_new)
+                                       input$rds_path)
               }
             }
             save_access_yaml(y)

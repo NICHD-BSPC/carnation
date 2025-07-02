@@ -8,6 +8,11 @@ loadDataUI <- function(id){
 
   # TODO: add multiple dds
   tagList(
+    fluidRow(
+      column(12, align='left',
+        helpButtonUI(ns('load_new_help'))
+      ) # column
+    ), # fluidRow
     span('Step 1: ',
          style='font-style: italic;'),
     actionButton(ns('add_counts'), 'Add counts'),
@@ -37,18 +42,17 @@ loadDataUI <- function(id){
 #'
 #' @param id ID string used to match the ID used to call the module UI function
 #' @param username user name
+#' @param config reactive list with config settings
 #' @param rds Object to be edited
 #'
 #' @export
-loadDataServer <- function(id, username, rds=NULL){
+loadDataServer <- function(id, username, config, rds=NULL){
   moduleServer(
     id,
 
     function(input, output, session){
 
       ns <- NS(id)
-
-      config <- get_config()
 
       # flag to indicate whether to reload parent or not
       reload_parent <- reactiveVal(FALSE)
@@ -464,7 +468,7 @@ loadDataServer <- function(id, username, rds=NULL){
             colnames(res)[gcol] <- 'gene'
 
             rownames(res) <- res$gene
-            res <- res %>% relocate(.data$gene)
+            res <- res %>% relocate('gene')
           }
 
           # check for 'symbol' column
@@ -554,7 +558,7 @@ loadDataServer <- function(id, username, rds=NULL){
           func_choices <- ''
         }
 
-        pathway_choices <- unlist(config$server$functional_enrichment$pathways)
+        pathway_choices <- unlist(config()$server$functional_enrichment$pathways)
 
         showModal(
           modalDialog(
@@ -602,7 +606,7 @@ loadDataServer <- function(id, username, rds=NULL){
           func_choices <- ''
         }
 
-        pathway_choices <- unlist(config$server$functional_enrichment$pathways)
+        pathway_choices <- unlist(config()$server$functional_enrichment$pathways)
 
         tag <- tagList(
                  fluidRow(
@@ -932,17 +936,17 @@ loadDataServer <- function(id, username, rds=NULL){
             # add data area
             # get access yaml and add data area
             y <- read_access_yaml()
-            if(is.null(username())) ug <- config$server$admin_group
+            if(is.null(username())) ug <- config()$server$admin_group
             else ug <- input$user_group
 
             # check for empty user group
             if(ug == ''){
               showNotification(
-                paste0('User group is empty. Using "', config$server$admin_group,
+                paste0('User group is empty. Using "', config()$server$admin_group,
                        '" by default'),
                 type='warning'
               )
-              ug <- config$server$admin_group
+              ug <- config()$server$admin_group
             }
 
             # check for existence of user_group & add if new
@@ -986,7 +990,7 @@ loadDataServer <- function(id, username, rds=NULL){
         y <- read_access_yaml()
 
         # if username is NULL (single-user mode), user default user
-        if(is.null(username)) username <- config$server$default_user
+        if(is.null(username)) username <- config()$server$default_user
         ug <- y$user_group[[ username ]]
         da <- y$data_area[[ ug ]]
 
@@ -1009,11 +1013,11 @@ loadDataServer <- function(id, username, rds=NULL){
                 )
 
         # don't show user group input in single-user mode
-        if(username != config$server$default_user){
+        if(username != config()$server$default_user){
           tags <- tagAppendChildren(
                     tags,
                     textInput(ns('user_group'), 'User group',
-                              value=config$server$group_admin),
+                              value=config()$server$group_admin),
                     span('User group that will have access to this data',
                          style='font-style: italic;'), br()
                   )
@@ -1039,6 +1043,7 @@ loadDataServer <- function(id, username, rds=NULL){
         )
       }
 
+      helpButtonServer('load_new_help', size='l')
 
       return(reactive(reload_parent()))
 

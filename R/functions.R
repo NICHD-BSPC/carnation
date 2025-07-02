@@ -1,30 +1,3 @@
-#' Get path to access yaml file
-#'
-#' This function checks for an environment variable 'CARNATION_ACCESS_YAML'
-#' to specify directory to save access yaml. If env variable does not exist
-#' uses home directory as save location.
-#'
-#' @return path to access yaml
-#'
-get_access_path <- function(){
-  if(Sys.getenv('CARNATION_ACCESS_YAML') != ''){
-    path <- Sys.getenv('CARNATION_ACCESS_YAML')
-    if(!dir.exists(path)){
-      stop(
-        paste('Environment variable "CARNATION_ACCESS_YAML" exists',
-              'but specified location does not exist on disk:', path)
-      )
-    }
-  } else {
-    path <- path.expand('~')
-    message(
-      paste('Environment variable "CARNATION_ACCESS_YAML" not found.',
-            'Using default location to save access yaml:', path)
-    )
-  }
-  file.path(path, '.carnation-access.yaml')
-}
-
 #' Create access yaml
 #'
 #' This function creates an access yaml file.
@@ -58,49 +31,12 @@ read_access_yaml <- function(){
 
   # check if yaml exists
   if(!file.exists(f)){
-      stop('Access yaml not found. Have you run "create_access_yaml()" yet?')
+    stop('Access yaml not found. Have you run "create_access_yaml()" yet?')
   }
 
   al <- read_yaml(f)
 
   return(al)
-}
-
-#' Get data areas a user has access to
-#'
-#' This function takes a username and returns a
-#' list with two elements:
-#'
-#' user_group: one element vector
-#' data_area: vector of data areas
-#'
-#' @param al list with access settings; should have two elements - user_group & data_area
-#' @param u user name
-#' @param admin Admin user group
-check_user_access <- function(al, u, admin='admin'){
-
-  # lab of user
-  idx <- which(names(al$user_group) == u)
-  if(length(idx) == 0){
-    return(NULL)
-  } else {
-    user_group <- al$user_group[idx]
-
-    # if admin, give access to everything
-    if(admin %in% user_group){
-      data_area <- al$data_area
-    } else {
-      idx <- which(names(al$data_area) %in% user_group)
-      if(length(idx) == 0){
-        return(NULL)
-      } else {
-        data_area <- al$data_area[ idx ]
-      }
-    }
-    ll <- list(user_group=user_group, data_area=data_area)
-  }
-
-  return(ll)
 }
 
 #' Save access yaml to file
@@ -110,19 +46,22 @@ check_user_access <- function(al, u, admin='admin'){
 #'
 #' @param lst list of data frames with user_groups and
 #'  data_areas
+#'
+#' @export
 save_access_yaml <- function(lst){
   # get access file
   f <- get_access_path()
 
   write_yaml(list(user_group=lst$user_group,
-                    data_area=lst$data_area), f)
+                  data_area=lst$data_area), f)
 }
 
 #' is user an admin?
 #'
 #' @param u username
 #'
-is_admin <- function(u){
+#' @export
+is_site_admin <- function(u){
   cfg <- get_config()
   admin <- cfg$server$site_admin
 
@@ -135,13 +74,16 @@ is_admin <- function(u){
 #'
 #' @param u username
 #'
+#' @export
 in_admin_group <- function(u){
-  al <- check_user_access(u)
+  al <- read_access_yaml()
 
   cfg <- get_config()
   admin_group <- cfg$server$admin_group
 
-  if(admin_group %in% al$user_group) return(TRUE)
+  ll <- check_user_access(al, u, admin_group)
+
+  if(admin_group %in% ll$user_group) return(TRUE)
   else return(FALSE)
 }
 
@@ -151,6 +93,8 @@ in_admin_group <- function(u){
 #' returns the list
 #'
 #' @return list containing config items
+#'
+#' @export
 get_config <- function(){
   cfg_path <- system.file('extdata', 'config.yaml',
                           package=packageName())
@@ -174,6 +118,8 @@ get_config <- function(){
 #' @param fsep file separator to split path with
 #'
 #' @return project name
+#'
+#' @export
 get_project_name_from_path <- function(x,
                                        depth=2, end_offset=0,
                                        staging_dir='dev',
@@ -202,6 +148,8 @@ get_project_name_from_path <- function(x,
 #' @param df data frame with two columns: data_area & user_group
 #'
 #' @return vector of base paths
+#'
+#' @export
 get_common_path_from_list <- function(df){
   patterns <- unlist(unique(lapply(1:nrow(df), function(i){
                     substr(df$data_area[i], 1, regexpr(df$user_group[i], df$data_area[i])-1)
@@ -322,7 +270,7 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   ymin <- ifelse(is.null(ymin), min(df$count), ymin)
   ymax <- ifelse(is.null(ymax), max(df$count), ymax)
 
-  p <- ggplot(df, aes_string(y='count', x=intgroup, color=color, name='sample')) +
+  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]], name=.data$sample)) +
     geom_point(position=position_jitterdodge(dodge.width=0.2),
                  size=2, alpha=0.5)
 
@@ -354,10 +302,10 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
 
   if(!is.null(title)) p <- p + ggtitle(title)
   if(trendline == 'smooth'){
-        p <- p + geom_smooth(aes_string(group=color), se=FALSE, size=0.5, linetype='dashed')
+        p <- p + geom_smooth(aes(group=.data[[ color ]]), se=FALSE, linewidth=0.5, linetype='dashed')
   } else if(trendline == 'line'){
         p <- p + stat_summary(fun=median, geom='line', linetype='dashed',
-                              aes_string(group=color), size=0.5)
+                              aes(group=.data[[ color ]]), linewidth=0.5)
   }
 
   if(!is.null(facet)){
@@ -380,6 +328,8 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
 #' @param y_delta y-axis padding for visualization, must be
 #' between 0 and 1
 #' @param pseudocount pseudo-count to add to the data.frame
+#'
+#' @export
 get_y_init <- function(df, y_delta, pseudocount){
     if(!'count' %in% colnames(df))
       stop('Column "count" not found in data frame')
@@ -831,7 +781,7 @@ plotMA.label <- function(res,
   # change theme and add horizontal line
   p <- p + theme_bw() +
     theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())
-  p <- p + geom_hline(yintercept = 0, col="red", size=2, alpha=0.5)
+  p <- p + geom_hline(yintercept = 0, col="red", linewidth=2, alpha=0.5)
 
 
   if(!is.null(lab.genes)){
@@ -863,7 +813,7 @@ add.set.column <- function(df){
     # save symbol column if any
     sidx <- which(tolower(colnames(df)) %in% 'symbol')
     scol <- df[, sidx]
-    df <- df %>% select(-sidx)
+    df <- df %>% select(-all_of(sidx))
 
     # add column with set
 
@@ -902,7 +852,6 @@ add.set.column <- function(df){
     df <- df[order(df$set),]
 
     # move set & symbol column to beginning
-    #col.order <- c('set', setdiff(colnames(df), 'set'))
     df <- df %>% relocate('set') %>%
       relocate('symbol')
 
@@ -1123,6 +1072,7 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
 
   # DE genes
   idx <- res$padj < fdr.thres & !is.na(res$padj) & abs(res$log2FoldChange) >= fc.thres
+  if(sum(idx, na.rm=TRUE) == 0) return( NULL )
   res.de <- res[idx,]
 
   # get symbol column, if any
@@ -1257,13 +1207,21 @@ fromList.with.names <- function(lst){
   data <- data.frame(matrix(data, ncol = length(lst), byrow = F))
 
   # This is the only way in which this function differs from UpSetR::fromList
-  rownames(data) <- element_names$id
+  # NOTE: here we use the unique column as rownames
+  if(sum(duplicated(element_names$id)) == 0)
+    rownames(data) <- element_names$id
+  else
+    rownames(data) <- element_names$symbol
 
   data <- data[which(rowSums(data) != 0), ]
   colnames(data) <- names(lst)
 
   # add symbol column
-  data$symbol <- element_names$symbol
+  # NOTE: if column 'id' was not unique, then 'symbol' is used instead
+  if(sum(duplicated(element_names$id)) == 0)
+    data$symbol <- element_names$symbol
+  else
+    data$symbol <- element_names$id
   data <- data %>% relocate(.data$symbol)
 
   return(data)
@@ -1382,8 +1340,8 @@ get_degplot <- function(obj, time, color=NULL,
     label_table <- table[gidx,]
 
     # if labeling genes background lines become grayed out
-    p <- ggplot(table, aes_string(x = time, y = "value",
-                                  fill = color))
+    p <- ggplot(table, aes(x = .data[[ time ]], y = .data$value,
+                           fill = .data[[ color ]]))
 
 
     # don't show lines/points if labeling genes
@@ -1401,8 +1359,8 @@ get_degplot <- function(obj, time, color=NULL,
     splan <- length(unique(table[[time]])) - 1L
 
     if(smooth == 'smooth'){
-      p <- p + geom_smooth(aes_string(x=time, y='value',
-                                      group=color),
+      p <- p + geom_smooth(aes(x=.data[[ time ]], y=.data$value,
+                               group=.data[[ color ]]),
                            color=base_color,
                            se=FALSE)
                            #method = "lm",
@@ -1411,10 +1369,10 @@ get_degplot <- function(obj, time, color=NULL,
       p <- p + stat_summary(
                   fun=median,
                   geom='line',
-                  aes_string(x=time, y='value',
-                             group=color),
+                  aes(x=.data[[ time ]], y=.data$value,
+                      group=.data[[ color ]]),
                   color=base_color,
-                  size=1)
+                  linewidth=1)
     }
 
     if (facet)
@@ -1428,38 +1386,38 @@ get_degplot <- function(obj, time, color=NULL,
     if(length(unique(label_table$line_group)) > 10){
       if(smooth == 'smooth'){
         p <- p + geom_smooth(data=label_table,
-                           aes_string(group="line_group",
-                                      linetype=color),
+                           aes(group=.data$line_group,
+                               linetype=color),
                            color='#F8766D',
                            alpha=0.5,
                            se=FALSE,
-                           size=0.75)
+                           linewidth=0.75)
       } else if(smooth == 'line'){
         p <- p + stat_summary(data=label_table,
                            fun=median,
                            geom='line',
-                           aes_string(group="line_group",
-                                      linetype=color),
+                           aes(group=.data$line_group,
+                               linetype=color),
                            color='#F8766D',
                            alpha=0.5,
-                           size=0.75)
+                           linewidth=0.75)
       }
     } else if(nrow(label_table) > 0){
       if(smooth == 'smooth'){
         p <- p + geom_smooth(data=label_table,
-                           aes_string(group="line_group",
-                                      color='symbol',
-                                      linetype=color),
+                           aes(group=.data$line_group,
+                               color=.data$symbol,
+                               linetype=.data[[ color ]]),
                            se=FALSE,
-                           size=0.75)
+                           linewidth=0.75)
       } else if(smooth == 'line'){
         p <- p + stat_summary(data=label_table,
                            fun=median,
                            geom='line',
-                           aes_string(group="line_group",
-                                      color='symbol',
-                                      linetype=color),
-                           size=0.75)
+                           aes(group=.data$line_group,
+                               color=.data$symbol,
+                               linetype=.data[[ color ]]),
+                           linewidth=0.75)
       }
     }
   } else {
@@ -1470,9 +1428,9 @@ get_degplot <- function(obj, time, color=NULL,
     names(cl_titles) <- title_df[[ 'cluster' ]]
     table[[ 'title' ]] <- factor(table[['title']], levels=cl_titles[ cluster_to_show ])
 
-    p <- ggplot(table, aes_string(x = time, y = "value",
-                                   fill = color,
-                                   color = color))
+    p <- ggplot(table, aes(x = .data[[ time ]], y = .data$value,
+                           fill = .data[[ color ]],
+                           color = .data[[ color ]]))
 
     if (boxes)
         p <- p + geom_boxplot(alpha = 0,
@@ -1486,9 +1444,9 @@ get_degplot <- function(obj, time, color=NULL,
     splan <- length(unique(table[[time]])) - 1L
 
     if(smooth == 'smooth'){
-          p <- p + geom_smooth(aes_string(x=time, y='value',
-                                          color=color,
-                                          group=color),
+          p <- p + geom_smooth(aes(x=.data[[ time ]], y=.data$value,
+                                   color=.data[[ color ]],
+                                   group=.data[[ color ]]),
                                se=FALSE)
                                #method = "lm",
                                #formula = y~poly(x, splan))
@@ -1496,15 +1454,15 @@ get_degplot <- function(obj, time, color=NULL,
       p <- p + stat_summary(
                   fun=median,
                   geom='line',
-                  aes_string(x=time, y='value',
-                             color=color,
-                             group=color),
-                  size=1)
+                  aes(x=.data[[ time ]], y=.data$value,
+                      color=.data[[ color ]],
+                      group=.data[[ color ]]),
+                  linewidth=1)
     }
 
     if (lines){
-        p <- p + geom_line(aes_string(group = "line_group"),
-                                      alpha = 0.1)
+        p <- p + geom_line(aes(group = .data$line_group),
+                               alpha = 0.1)
     }
 
     if (facet)
@@ -1614,7 +1572,7 @@ my.summary <- function(res, dds, alpha, lfc.thresh=0){
                     total.nonzero=notallzero,
                     outliers=outlier,
                     low.counts=filt,
-                    design=deparse(design(dds), width.cutoff=500L),
+                    design=curr_design,
                     contrast=contrast
                     )
    return(df)
@@ -1631,7 +1589,7 @@ my.summary <- function(res, dds, alpha, lfc.thresh=0){
 plotPCA.ly <- function(rld, intgroup){
   mat <- plotPCA(rld, intgroup, returnData=TRUE)
   pv <- attr(mat, 'percentVar')
-  p <- ggplot(data=mat, aes_string(x='PC1', y='PC2', color='group', label='name')) +
+  p <- ggplot(data=mat, aes(x=.data$PC1, y=.data$PC2, color=.data$group, label=.data$name)) +
     geom_point(size=3) + xlab(paste0('PC1: ', round(pv[1]*100), '% variance')) +
     ylab(paste0('PC2: ', round(pv[2]*100), '% variance')) + coord_fixed()
   return(p)
@@ -1653,6 +1611,7 @@ plotPCA.ly <- function(rld, intgroup){
 #'
 #' @return ggplot handle
 #'
+#' @export
 gs_radar <- function(res_enrich,
                      res_enrich2 = NULL,
                      label1 = 'scenario 1',
@@ -1764,174 +1723,174 @@ plotPCA.san <- function (object, intgroup = "group",
                          samples=NULL,
                          loadings=FALSE,
                          loadings_ngenes=10){
-    pcx <- as.numeric(pcx)
-    pcy <- as.numeric(pcy)
-    if(!is.null(pcz)) pcz <- as.numeric(pcz)
+  pcx <- as.numeric(pcx)
+  pcy <- as.numeric(pcy)
+  if(!is.null(pcz)) pcz <- as.numeric(pcz)
 
-    mat <- assay(object)
-    cdata <- colData(object)
+  mat <- assay(object)
+  cdata <- colData(object)
 
-    if(!is.null(samples)){
-      mat <- mat[, colnames(mat) %in% samples]
-      cdata <- cdata[rownames(cdata) %in% samples,]
-    }
+  if(!is.null(samples)){
+    mat <- mat[, colnames(mat) %in% samples]
+    cdata <- cdata[rownames(cdata) %in% samples,]
+  }
 
-    rv <- rowVars(mat)
-    select <- order(rv, decreasing = TRUE)[seq_len(min(ntop,
-                                                       length(rv)))]
-    pca <- prcomp(t(mat[select, ]))
-    percentVar <- pca$sdev^2/sum(pca$sdev^2)
+  rv <- rowVars(mat)
+  select <- order(rv, decreasing = TRUE)[seq_len(min(ntop,
+                                                     length(rv)))]
+  pca <- prcomp(t(mat[select, ]))
+  percentVar <- pca$sdev^2/sum(pca$sdev^2)
 
-    if (!all(intgroup %in% names(cdata))) {
-      stop("the argument 'intgroup' should specify columns of colData(dds)")
-    }
-    intgroup.df <- as.data.frame(cdata[, intgroup, drop = FALSE])
-    group <- if (length(intgroup) > 1) {
-      factor(apply(intgroup.df, 1, paste, collapse = " : "))
-    }
-    else {
-      cdata[[intgroup]]
-    }
+  if (!all(intgroup %in% names(cdata))) {
+    stop("the argument 'intgroup' should specify columns of colData(dds)")
+  }
+  intgroup.df <- as.data.frame(cdata[, intgroup, drop = FALSE])
+  group <- if (length(intgroup) > 1) {
+    factor(apply(intgroup.df, 1, paste, collapse = " : "))
+  }
+  else {
+    cdata[[intgroup]]
+  }
 
 
-    xlab <- paste0("PC", pcx, ": ", round(percentVar[pcx] * 100), "% variance")
-    ylab <- paste0("PC", pcy, ": ", round(percentVar[pcy] * 100), "% variance")
+  xlab <- paste0("PC", pcx, ": ", round(percentVar[pcx] * 100), "% variance")
+  ylab <- paste0("PC", pcy, ": ", round(percentVar[pcy] * 100), "% variance")
+  if(is.null(pcz)){
+    d <- data.frame(PC1 = pca$x[, pcx],
+                    PC2 = pca$x[, pcy],
+                    group = group, intgroup.df, name = cdata[,1])
+
+
+    p <- plot_ly(d,
+                 x=~PC1, y=~PC2,
+                 color=~group,
+                 type='scatter',
+                 text=paste0('<b>', d[, 'group'],
+                             '</b>\nsample: ', d[, 'name']),
+                 mode='markers',
+                 hoverinfo='text',
+                 marker=list(size=12)) %>%
+          layout(xaxis=list(title=xlab,
+                            zeroline=FALSE,
+                            showline=TRUE,
+                            showgrid=FALSE,
+                            mirror=TRUE),
+                 yaxis=list(title=ylab,
+                            zeroline=FALSE,
+                            showline=TRUE,
+                            showgrid=FALSE,
+                            mirror=TRUE))
+
+  } else {
+    zlab <- paste0("PC", pcz, ": ", round(percentVar[pcz] * 100), "% variance")
+
+    d <- data.frame(PC1 = pca$x[, pcx],
+                    PC2 = pca$x[, pcy],
+                    PC3 = pca$x[, pcz],
+                    group = group, intgroup.df, name = cdata[,1])
+
+    p <- plot_ly(d,
+                 x=~PC1, y=~PC2, z=~PC3,
+                 color=~group,
+                 type='scatter3d',
+                 text=paste0('<b>', d[, 'group'],
+                             '</b>\nsample: ', d[, 'name']),
+                 mode='markers',
+                 hoverinfo='text',
+                 marker=list(size=8)) %>%
+          layout(scene = list(
+                              xaxis=list(title=xlab),
+                              yaxis=list(title=ylab),
+                              zaxis=list(title=zlab))
+                          )
+
+  }
+
+  # add loadings traces
+  if(loadings){
+
+    # get loadings for selected PCs
+    rot <- pca$rotation
+
+    # columns to use
+    cols <- c(pcx, pcy)
+    if(!is.null(pcz)) cols <- c(cols, pcz)
+
+    # calculate sum of squares (vector length^2)
+    ssq <- rot[, pcx]**2 + rot[, pcy]**2
+    if(!is.null(pcz)) ssq <- ssq + rot[, pcz]**2
+
+    # order SS to get top genes
+    ssq <- ssq[order(ssq, decreasing=T)]
+
+    top_genes <- names(ssq)[1:loadings_ngenes]
+
+    # double up a single gene to avoid single-row df effects
+    if(length(top_genes) == 1) top_genes <- c(top_genes, top_genes)
+
+    # subset loadings df
+    rot_df <- rot[top_genes, ]
+
+    # calculate scale ratio
+    all_ratios <- lapply(cols, function(x){
+                    diff(range(pca$x[, x]))/diff(range(rot[, x]))
+                  })
+    scaleratio <- round(mean(unlist(all_ratios)))
+
+    # build text
+    tt2 <- lapply(1:nrow(rot_df), function(x){
+             ll <- list(x=rot_df[x, pcx]*scaleratio*1.1,
+                        y=rot_df[x, pcy]*scaleratio*1.1,
+                        showarrow=FALSE,
+                        xanchor='center',
+                        yanchor='center',
+                        text=rownames(rot_df)[x],
+                        font=list(color='red', size=10))
+             if(!is.null(pcz)) ll[[ 'z' ]] <- rot_df[x, pcz]*scaleratio*1.1
+             ll
+           })
+
+    # build line data frame
+    line_df <- as.data.frame(rot_df)
+    line_df$gene <- rownames(line_df)
+    rownames(line_df) <- NULL
+
+    # add origin points
+    line_df0 <- line_df
+    line_df0[, cols] <- 0
+    line_df <- rbind(line_df, line_df0)
+    line_df <- unique(line_df)
+
     if(is.null(pcz)){
-      d <- data.frame(PC1 = pca$x[, pcx],
-                      PC2 = pca$x[, pcy],
-                      group = group, intgroup.df, name = cdata[,1])
-
-
-      p <- plot_ly(d,
-                   x=~PC1, y=~PC2,
-                   color=~group,
-                   type='scatter',
-                   text=paste0('<b>', d[, 'group'],
-                               '</b>\nsample: ', d[, 'name']),
-                   mode='markers',
-                   hoverinfo='text',
-                   marker=list(size=12)) %>%
-            layout(xaxis=list(title=xlab,
-                              zeroline=FALSE,
-                              showline=TRUE,
-                              showgrid=FALSE,
-                              mirror=TRUE),
-                   yaxis=list(title=ylab,
-                              zeroline=FALSE,
-                              showline=TRUE,
-                              showgrid=FALSE,
-                              mirror=TRUE))
-
+      p <- p %>%
+              add_trace(x=line_df[, pcx]*scaleratio,
+                        y=line_df[, pcy]*scaleratio,
+                        type='scatter',
+                        mode='lines',
+                        line=list(color='black'),
+                        split=line_df$gene,
+                        showlegend=FALSE,
+                        inherit=FALSE) %>%
+              layout(annotations=tt2,
+                     xaxis=list(zeroline=TRUE),
+                     yaxis=list(zeroline=TRUE))
     } else {
-      zlab <- paste0("PC", pcz, ": ", round(percentVar[pcz] * 100), "% variance")
-
-      d <- data.frame(PC1 = pca$x[, pcx],
-                      PC2 = pca$x[, pcy],
-                      PC3 = pca$x[, pcz],
-                      group = group, intgroup.df, name = cdata[,1])
-
-      p <- plot_ly(d,
-                   x=~PC1, y=~PC2, z=~PC3,
-                   color=~group,
-                   type='scatter3d',
-                   text=paste0('<b>', d[, 'group'],
-                               '</b>\nsample: ', d[, 'name']),
-                   mode='markers',
-                   hoverinfo='text',
-                   marker=list(size=8)) %>%
-            layout(scene = list(
-                                xaxis=list(title=xlab),
-                                yaxis=list(title=ylab),
-                                zaxis=list(title=zlab))
-                            )
-
+      p <- p %>%
+              add_trace(x=line_df[, pcx]*scaleratio,
+                        y=line_df[, pcy]*scaleratio,
+                        z=line_df[, pcz]*scaleratio,
+                        type='scatter3d',
+                        mode='lines',
+                        line=list(color='black'),
+                        split=line_df$gene,
+                        showlegend=FALSE,
+                        inherit=FALSE) %>%
+              layout(scene=list(annotations=tt2))
     }
 
-    # add loadings traces
-    if(loadings){
+  }
 
-      # get loadings for selected PCs
-      rot <- pca$rotation
-
-      # columns to use
-      cols <- c(pcx, pcy)
-      if(!is.null(pcz)) cols <- c(cols, pcz)
-
-      # calculate sum of squares (vector length^2)
-      ssq <- rot[, pcx]**2 + rot[, pcy]**2
-      if(!is.null(pcz)) ssq <- ssq + rot[, pcz]**2
-
-      # order SS to get top genes
-      ssq <- ssq[order(ssq, decreasing=T)]
-
-      top_genes <- names(ssq)[1:loadings_ngenes]
-
-      # double up a single gene to avoid single-row df effects
-      if(length(top_genes) == 1) top_genes <- c(top_genes, top_genes)
-
-      # subset loadings df
-      rot_df <- rot[top_genes, ]
-
-      # calculate scale ratio
-      all_ratios <- lapply(cols, function(x){
-                      diff(range(pca$x[, x]))/diff(range(rot[, x]))
-                    })
-      scaleratio <- round(mean(unlist(all_ratios)))
-
-      # build text
-      tt2 <- lapply(1:nrow(rot_df), function(x){
-               ll <- list(x=rot_df[x, pcx]*scaleratio*1.1,
-                          y=rot_df[x, pcy]*scaleratio*1.1,
-                          showarrow=FALSE,
-                          xanchor='center',
-                          yanchor='center',
-                          text=rownames(rot_df)[x],
-                          font=list(color='red', size=10))
-               if(!is.null(pcz)) ll[[ 'z' ]] <- rot_df[x, pcz]*scaleratio*1.1
-               ll
-             })
-
-      # build line data frame
-      line_df <- as.data.frame(rot_df)
-      line_df$gene <- rownames(line_df)
-      rownames(line_df) <- NULL
-
-      # add origin points
-      line_df0 <- line_df
-      line_df0[, cols] <- 0
-      line_df <- rbind(line_df, line_df0)
-      line_df <- unique(line_df)
-
-      if(is.null(pcz)){
-        p <- p %>%
-                add_trace(x=line_df[, pcx]*scaleratio,
-                          y=line_df[, pcy]*scaleratio,
-                          type='scatter',
-                          mode='lines',
-                          line=list(color='black'),
-                          split=line_df$gene,
-                          showlegend=FALSE,
-                          inherit=FALSE) %>%
-                layout(annotations=tt2,
-                       xaxis=list(zeroline=TRUE),
-                       yaxis=list(zeroline=TRUE))
-      } else {
-        p <- p %>%
-                add_trace(x=line_df[, pcx]*scaleratio,
-                          y=line_df[, pcy]*scaleratio,
-                          z=line_df[, pcz]*scaleratio,
-                          type='scatter3d',
-                          mode='lines',
-                          line=list(color='black'),
-                          split=line_df$gene,
-                          showlegend=FALSE,
-                          inherit=FALSE) %>%
-                layout(scene=list(annotations=tt2))
-      }
-
-    }
-
-    return(p)
+  return(p)
 }
 
 #' Make an enrichResult obj from a data frame
@@ -1945,6 +1904,7 @@ plotPCA.san <- function (object, intgroup = "group",
 #' @param ontology ontology database being used
 #' @param type string, can be 'enrichResult' or 'gseaResult'
 #'
+#' @export
 makeEnrichResult <- function(df, split='/',
                              keytype="UNKNOWN",
                              ontology="UNKNOWN",
@@ -1995,6 +1955,8 @@ makeEnrichResult <- function(df, split='/',
 #' @param show.grid string, can be 'yes' (default) or 'no'.
 
 #' @return ggplot handle
+#'
+#' @export
 plotScatter.label <- function(compare,
                               df,
                               label_x,
@@ -2101,6 +2063,8 @@ plotScatter.label <- function(compare,
 #' @param show.grid string, can be 'yes' (default) or 'no'.
 
 #' @return plotly handle
+#'
+#' @export
 plotScatter.label_ly <- function(compare,
                                  df,
                                  label_x,

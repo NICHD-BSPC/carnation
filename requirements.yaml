@@ -12,7 +12,6 @@ dependencies:
   - r-colorspace
   - r-complexupset
   - r-dendextend
-  - r-devtools
   - r-dplyr
   - r-dt
   - r-ggplot2
@@ -21,6 +20,7 @@ dependencies:
   - r-igraph
   - r-plotly
   - r-readr
+  - r-remotes
   - r-reticulate
   - r-rintrojs
   - r-scales
