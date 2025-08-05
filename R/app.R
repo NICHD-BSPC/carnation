@@ -867,6 +867,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       assay.choices <- l[[input$dds]]
 
+      # if project description exists, order assay choices by description names
+      proj_desc <- project_info$descriptions[[ input$dds ]]
+      if(!is.null(proj_desc)){
+        # names from proj desc, that are in assay choices
+        # are moved to the front
+        pnames <- intersect(names(proj_desc), names(assay.choices))
+
+        if(length(pnames) != length(proj_desc)){
+          pmissing <- setdiff(names(proj_desc), names(assay.choices))
+          showNotification(
+            paste0("Warning - Some datasets in project description not found in 'Available analyses': ",
+                   paste(pmissing, collapse=', ')),
+            type='warning'
+          )
+        }
+        anames <- c(pnames, setdiff(names(assay.choices), pnames))
+        assay.choices <- assay.choices[anames]
+      }
       # if more than one assay found & autoload_first_analysis not set
       if(length(assay.choices) > 1 & !config()$server$autoload_first_analysis){
         assay.choices <- c('Choose one', assay.choices)
