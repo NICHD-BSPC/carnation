@@ -275,7 +275,21 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         names(app_object()$res)
       })
 
+      # reactive values used to track/store different settings
       flags <- reactiveValues(data_loaded=0)
+
+      # current FDR/fold-change thresholds
+      curr_thres <- reactiveValues(fdr.thres=0.1,
+                                   fc.thres=0)
+
+      # Reactive df that will be used for autoscaling and plotting
+      # df_react: data frame used for plotting
+      # df_full: full data frame
+      df_react <- reactiveVal(NULL)
+      df_full <- reactiveVal(NULL)
+
+      # reactive values to keep track of axis limits
+      axis_limits <- reactiveValues(lim.x=NULL, lim.y=NULL)
 
       # Initialize comparison selection dropdowns when data is available
       observeEvent(comp_all(), {
@@ -297,8 +311,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       # -------------------------------------------------------------- #
 
       # --------------- Set FDR and FC thresholds ---------------- #
-      curr_thres <- reactiveValues(fdr.thres=0.1,
-                                   fc.thres=0)
 
       # update from reactive config
       observeEvent(config(), {
@@ -332,13 +344,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       })
       # ---------------------------------------------------------- #
 
-      # --------- Generate universal scatter data frame ---------- #
-      # Initialize the reactive df that will be used for autoscaling and plotting
-      df_react <- reactiveVal(NULL)
-      df_full <- reactiveVal(NULL)
-
-      # reactive values to keep track of axis limits
-      axis_limits <- reactiveValues(lim.x=NULL, lim.y=NULL)
+      # ------------- helper functions -----------------------------#
 
       # function to get range of column in df after handling NAs
       get_range <- function(df, column, lim){
@@ -353,7 +359,39 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         return(lim)
       }
 
+      update_geneid <- function(df) {
+        na_idx <- is.na(df$symbol)
+        tbl <- table(df$symbol)
+        dups <- names(tbl)[tbl>1]
+        duplicates_idx <- df$symbol %in% dups
+        symbols_to_fix <- na_idx | duplicates_idx
+        symbols_ok <- !symbols_to_fix
+        df$geneid[symbols_ok] <- df$symbol[symbols_ok]
+        return(df)
+      }
 
+      # Function to get autoscale limits for both plot types and both axes
+      autoscale <- function(df, compare, lim.x, lim.y) {
+        # Determine columns based on compare parameter
+        x_column <- paste0(compare, '.x')
+        y_column <- paste0(compare, '.y')
+        df_temp <- df
+        if (compare == 'padj') {
+          df_temp[[x_column]] <- -log10(df_temp[[x_column]])
+          df_temp[[y_column]] <- -log10(df_temp[[y_column]])
+        }
+
+        # Set axis limits
+        lim.x <- get_range(df_temp, x_column, lim.x)
+        lim.y <- get_range(df_temp, y_column, lim.y)
+
+        return(list(lim.x = lim.x, lim.y = lim.y))
+      }
+      # ---------------------------------------------------------- #
+
+
+      # --------- Generate universal scatter data frame ---------- #
+ 
       observeEvent({
         list(input$compare,
              input$x_axis_comp,
@@ -388,17 +426,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         # Initialize geneid column to join by
         res_i$geneid <- rownames(res_i)
         res_j$geneid <- rownames(res_j)
-
-        update_geneid <- function(df) {
-          na_idx <- is.na(df$symbol)
-          tbl <- table(df$symbol)
-          dups <- names(tbl)[tbl>1]
-          duplicates_idx <- df$symbol %in% dups
-          symbols_to_fix <- na_idx | duplicates_idx
-          symbols_ok <- !symbols_to_fix
-          df$geneid[symbols_ok] <- df$symbol[symbols_ok]
-          return(df)
-        }
 
         # Prepare geneid column in both dfs to prepare for joining
         res_i <- update_geneid(res_i)
@@ -563,30 +590,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         } else {
           return(0)
         }
-      }
-      # ---------------------------------------------------------- #
-
-      # ----------------- Function: Autoscale -------------------- #
-      # Function to get autoscale limits for both plot types and both axes
-      autoscale <- function(df, compare, lim.x, lim.y) {
-        # Determine columns based on compare parameter
-        if (compare == 'LFC') {
-          x_column <- 'log2FoldChange.x'
-          y_column <- 'log2FoldChange.y'
-          df_temp <- df
-        } else if (compare == 'P-adj') {
-          x_column <- 'padj.x'
-          y_column <- 'padj.y'
-          df_temp <- df
-          df_temp[[x_column]] <- -log10(df_temp[[x_column]])
-          df_temp[[y_column]] <- -log10(df_temp[[y_column]])
-        }
-
-        # Set axis limits
-        lim.x <- get_range(df_temp, x_column, lim.x)
-        lim.y <- get_range(df_temp, y_column, lim.y)
-
-        return(list(lim.x = lim.x, lim.y = lim.y))
       }
       # ---------------------------------------------------------- #
 
