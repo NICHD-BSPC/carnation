@@ -1999,8 +1999,8 @@ plotScatter.label <- function(compare,
       axis.text.x = element_text(size = 12),
       axis.text.y = element_text(size = 12)) +
     labs(color = 'Significant in:') +
-    scale_y_continuous(limits = c(lim.y[1], lim.y[2]), expand = c(0.0, 0)) +
-    scale_x_continuous(limits = c(lim.x[1], lim.x[2]), expand = c(0.0, 0)) +
+    scale_y_continuous(limits = c(lim.y[1] + 0.02*lim.y[1], lim.y[2] + 0.02*lim.y[2]), expand = c(0.0, 0)) +
+    scale_x_continuous(limits = c(lim.x[1] + 0.02*lim.x[1], lim.x[2] + 0.02*lim.x[2]), expand = c(0.0, 0)) +
     xlab(label_x) +
     ylab(label_y)
 
@@ -2142,14 +2142,14 @@ plotScatter.label_ly <- function(compare,
 
   # Now add the layout
   p <- p %>% layout(xaxis = list(title = label_x,
-                                 range = c(lim.x[1], lim.x[2]),
+                                 range = c(lim.x[1] + 0.02*lim.x[1], lim.x[2] + 0.02*lim.x[2]),
                                  zeroline = FALSE,
                                  showgrid = show.grid,
                                  linecolor = 'black',
                                  linewidth = 0.5,
                                  mirror = TRUE),
                     yaxis = list(title = label_y,
-                                 range = c(lim.y[1], lim.y[2]),
+                                 range = c(lim.y[1] + 0.02*lim.y[1], lim.y[2] + 0.02*lim.y[2]),
                                  zeroline = FALSE,
                                  showgrid = show.grid,
                                  linecolor = 'black',
