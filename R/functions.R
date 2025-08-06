@@ -1975,10 +1975,14 @@ plotScatter.label <- function(compare,
   names(color.palette) <- c('None', label_x, label_y, 'Both - opposite LFC sign', 'Both - same LFC sign')
 
   # Determine x and y based on compare
-  x <- if (compare=='LFC') 'log2FoldChange.x' else if (compare=='P-adj') 'padj.x'
-  y <- if (compare=='LFC') 'log2FoldChange.y' else if (compare=='P-adj') 'padj.y'
-  label_x <- if (compare=='LFC') paste0('LFC: ', label_x) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_x)
-  label_y <- if (compare=='LFC') paste0('LFC: ', label_y) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_y)
+  x <- paste0(compare, '.x')
+  y <- paste0(compare, '.y')
+
+  # add '-log10' if padj
+  if(compare == 'padj'){
+    label_x <- paste('-log10', label_x)
+    label_y <- paste('-log10', label_y)
+  }
 
   if (label_x == label_y) {
     label_x <- paste0(label_x, '_x')
@@ -2082,11 +2086,17 @@ plotScatter.label_ly <- function(compare,
   names(color.palette) <- c('None', label_x, label_y, 'Both - opposite LFC sign', 'Both - same LFC sign')
 
   # Determine x and y based on compare
-  x <- if (compare=='LFC') 'log2FoldChange.x' else if (compare=='P-adj') 'padj.x'
-  y <- if (compare=='LFC') 'log2FoldChange.y' else if (compare=='P-adj') 'padj.y'
-  label_x <- if (compare=='LFC') paste0('LFC: ', label_x) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_x)
-  label_y <- if (compare=='LFC') paste0('LFC: ', label_y) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_y)
+  x <- paste0(compare, '.x')
+  y <- paste0(compare, '.y')
 
+  label_x <- paste0(compare, ': ', label_x)
+  label_y <- paste0(compare, ': ', label_y)
+
+  # add '-log10' if padj
+  if(compare == 'padj'){
+    label_x <- paste('-log10', label_x)
+    label_y <- paste('-log10', label_y)
+  }
 
   if (label_x == label_y) {
     label_x <- paste0(label_x, '_x')
