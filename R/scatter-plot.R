@@ -514,11 +514,25 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         # Add significance column in df using df_color values
         df <- df %>%
           mutate(significance = case_when(
-          df_full$padj.x <= fdr.thres & df_full$padj.y <= fdr.thres & (df_full$log2FoldChange.x * df_full$log2FoldChange.y >= 0) & abs(df_full$log2FoldChange.x) >= fc.thres & abs(df_full$log2FoldChange.y) >= fc.thres ~ 'Both - same LFC sign',
-          df_full$padj.x <= fdr.thres & df_full$padj.y <= fdr.thres & (df_full$log2FoldChange.x * df_full$log2FoldChange.y < 0) & abs(df_full$log2FoldChange.x) >= fc.thres & abs(df_full$log2FoldChange.y) >= fc.thres  ~ 'Both - opposite LFC sign',
-          (df_full$padj.x <= fdr.thres & abs(df_full$log2FoldChange.x) >= fc.thres) & (df_full$padj.y > fdr.thres | abs(df_full$log2FoldChange.y) < fc.thres) ~ label_i,
-          (df_full$padj.y <= fdr.thres & abs(df_full$log2FoldChange.y) >= fc.thres) & (df_full$padj.x > fdr.thres | abs(df_full$log2FoldChange.x) < fc.thres) ~ label_j,
-          TRUE ~ 'None'))
+            df_full$padj.x <= fdr.thres &
+            df_full$padj.y <= fdr.thres &
+            (df_full$log2FoldChange.x * df_full$log2FoldChange.y >= 0) &
+            abs(df_full$log2FoldChange.x) >= fc.thres &
+            abs(df_full$log2FoldChange.y) >= fc.thres ~ 'Both - same LFC sign',
+
+            df_full$padj.x <= fdr.thres &
+            df_full$padj.y <= fdr.thres &
+            (df_full$log2FoldChange.x * df_full$log2FoldChange.y < 0) &
+            abs(df_full$log2FoldChange.x) >= fc.thres &
+            abs(df_full$log2FoldChange.y) >= fc.thres  ~ 'Both - opposite LFC sign',
+
+            (df_full$padj.x <= fdr.thres & abs(df_full$log2FoldChange.x) >= fc.thres) &
+            (df_full$padj.y > fdr.thres | abs(df_full$log2FoldChange.y) < fc.thres) ~ label_i,
+
+            (df_full$padj.y <= fdr.thres & abs(df_full$log2FoldChange.y) >= fc.thres) &
+            (df_full$padj.x > fdr.thres | abs(df_full$log2FoldChange.x) < fc.thres) ~ label_j,
+
+            TRUE ~ 'None'))
 
         if (label_i == label_j) {
           label_i <- paste0(label_i, '_x')
