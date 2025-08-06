@@ -296,11 +296,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         })
       # -------------------------------------------------------------- #
 
-      # -- Populate y-axis comparison dropdown when x-axis selection is made -- #
-      #observeEvent(input$x_axis_comp, {
-      #        }, ignoreInit=TRUE)
-      # -------------------------------------------------------------- #
-
       # --------------- Set FDR and FC thresholds ---------------- #
       curr_thres <- reactiveValues(fdr.thres=0.1,
                                    fc.thres=0)
