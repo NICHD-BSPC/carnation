@@ -2105,22 +2105,46 @@ plotScatter.label_ly <- function(compare,
 
   show.grid <- if (show.grid == 'yes') TRUE else FALSE
 
-  # Loop over each level of the factor and create a trace
   p <- plot_ly()
 
+  # list of plotting characters
+  pch <- c('in'='circle',
+           'above'='triangle-up-open',
+           'below'='triangle-down-open',
+           'left'='triangle-left-open',
+           'right'='triangle-right-open')
+
+  # Loop over each level of the factor and create a trace
   for (level in levels(df$significance)) {
-    p <- p %>% add_trace(data = df[df$significance == level, ],
-                         x = ~get(x),
-                         y = ~get(y),
-                         type = 'scatter',
-                         mode = 'markers',
-                         text = ~get(name.col),
-                         hoverinfo = 'text',
-                         marker = list(size = size,
-                                       opacity = alpha,
-                                       color = color.palette[level]),
-                         showlegend = TRUE,
-                         name = level) # This will be the legend entry
+    df_i <- df[df$significance == level, ]
+
+    # further subdivide based on shape column
+    all_sym <- unique(df_i[['shape']])
+    for(sym in all_sym){
+      # don't show legend if point is outside limits
+      if(sym != 'in'){
+        ps <- size + 1
+
+        # only show legend if the *only* points in this level are outside
+        if(!all(all_sym == sym)) showlegend <- FALSE
+      } else {
+        ps <- size
+        showlegend <- TRUE
+      }
+      p <- p %>% add_trace(data = df_i[df_i$shape == sym, ],
+                           x = ~get(x),
+                           y = ~get(y),
+                           type = 'scatter',
+                           mode = 'markers',
+                           text = ~get(name.col),
+                           hoverinfo = 'text',
+                           marker = list(size = ps,
+                                         opacity = alpha,
+                                         symbol = pch[sym],
+                                         color = color.palette[level]),
+                           showlegend = showlegend,
+                           name = level) # This will be the legend entry
+    }
   }
 
   # add labels if any
