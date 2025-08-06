@@ -412,47 +412,31 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         res_j <- update_geneid(res_j)
 
         # Make a temp df that will be used to determine significance in the single column df
-          # required for df_react() to react to changed in input$compare
-          cols.sub <- c('log2FoldChange', 'padj', 'geneid')
-          df_full <- dplyr::inner_join(
-            dplyr::select(res_i, all_of(cols.sub)),
-            dplyr::select(res_j, all_of(cols.sub)),
-            by = 'geneid',
-            suffix = c('.x', '.y')
-          )
+        # required for df_react() to react to changed in input$compare
+        cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+        df_full <- dplyr::inner_join(
+          dplyr::select(res_i, all_of(cols.sub)),
+          dplyr::select(res_j, all_of(cols.sub)),
+          by = 'geneid',
+          suffix = c('.x', '.y')
+        )
 
-        if (input$compare == 'LFC') {
-          # Join to make df for df_react(). df_react() must change in response
-          # to input$compare so we make a distinct df for each input$compare choice
-          cols.sub <- c('log2FoldChange', 'geneid')
-          df <- dplyr::inner_join(
-            dplyr::select(res_i, all_of(cols.sub)),
-            dplyr::select(res_j, all_of(cols.sub)),
-            by = 'geneid',
-            suffix = c('.x', '.y')
-          )
-        } else if (input$compare == 'P-adj') {
-          cols.sub <- c('padj', 'geneid')
-          df <- dplyr::inner_join(
-            dplyr::select(res_i, all_of(cols.sub)),
-            dplyr::select(res_j, all_of(cols.sub)),
-            by = 'geneid',
-            suffix = c('.x', '.y')
-          )
-        }
+        cols.sub <- c(input$compare, 'geneid')
+        df <- dplyr::inner_join(
+          dplyr::select(res_i, all_of(cols.sub)),
+          dplyr::select(res_j, all_of(cols.sub)),
+          by = 'geneid',
+          suffix = c('.x', '.y')
+        )
 
         compare <- input$compare
 
-        # Determine columns based on compare parameter
-        if (compare == 'LFC') {
-          x_column <- 'log2FoldChange.x'
-          y_column <- 'log2FoldChange.y'
-          df_temp <- df
-        } else if (compare == 'P-adj') {
-          x_column <- 'padj.x'
-          y_column <- 'padj.y'
-          # Need to -log10 transform padj.x and padj.y to get proper limits
-          df_temp <- df
+        x_column <- paste0(input$compare, '.x')
+        y_column <- paste0(input$compare, '.y')
+        df_temp <- df
+
+        # Need to -log10 transform padj.x and padj.y to get proper limits
+        if(input$compare == 'padj'){
           df_temp[[x_column]] <- -log10(df_temp[[x_column]])
           df_temp[[y_column]] <- -log10(df_temp[[y_column]])
         }
@@ -463,34 +447,18 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
         # update & handle NAs
         x_lfc_allna <- all(is.na(df_temp[, x_column]))
-        if(x_lfc_allna){
-          showNotification(
-            paste('Scatter-plot warning:', input$x_axis_comp,
-                  'LFC column has all NAs!',
-                  'Please choose different contrast for x-axis'),
-            duration=15
-          )
-        }
 
         validate(
           need(!x_lfc_allna,
-               paste(input$x_axis_comp, 'log2FoldChange column has all NAs!',
+               paste(input$x_axis_comp, compare, ' column has all NAs!',
                      'Please choose different contrast for x-axis'))
         )
 
         y_lfc_allna <- all(is.na(df_temp[, y_column]))
-        if(y_lfc_allna){
-          showNotification(
-            paste('Scatter-plot warning:', input$y_axis_comp,
-                  'log2FoldChange column has all NAs!',
-                  'Please choose different contrast for x-axis'),
-            duration=15
-          )
-        }
 
         validate(
           need(!y_lfc_allna,
-               paste(input$y_axis_comp, 'log2FoldChange column has all NAs!',
+               paste(input$y_axis_comp, compare, ' column has all NAs!',
                      'Please choose different contrast for x-axis'))
         )
         lim.x <- get_range(df_temp, x_column, lim.x)
