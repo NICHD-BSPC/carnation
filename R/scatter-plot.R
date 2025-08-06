@@ -545,33 +545,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       })
       # ---------------------------------------------------------- #
 
-      # --------- Function: Count OB DE points ---------- #
-      count_OB_DE_points <- function(min_max, x_y, limit, compare, df) {
-
-        prefix <- if (compare == 'LFC') 'log2FoldChange' else 'padj'
-        column <- paste0(prefix, ".", x_y)
-
-        # Filter the full dataframe based on thresholds
-        sig_df <- df[(!is.na(df[['padj.x']]) & df[['padj.x']] <= curr_thres$fdr.thres &
-                          !is.na(df[['log2FoldChange.x']]) & abs(df[['log2FoldChange.x']]) >= curr_thres$fc.thres) |
-                          (!is.na(df[['padj.y']]) & df[['padj.y']] <= curr_thres$fdr.thres &
-                          !is.na(df[['log2FoldChange.y']]) & abs(df[['log2FoldChange.y']]) >= curr_thres$fc.thres), ]
-
-        # padj Limit is for -log10 padj so we need to transform that column before making the check
-        sig_df[[column]] <- if (column == 'padj.x' | column == 'padj.y') -log10(sig_df[[column]]) else sig_df[[column]]
-        # Check if any filtered values exceed the limits
-        if (min_max == 'max' & any(sig_df[[column]] > limit, na.rm=TRUE)) {
-          over_max_ct <- sum(sig_df[[column]] > limit, na.rm=TRUE)
-          return(over_max_ct)
-        } else if (min_max == 'min' & any(sig_df[[column]] < limit, na.rm=TRUE)) {
-          under_min_ct <- sum(sig_df[[column]] < limit, na.rm=TRUE)
-          return(under_min_ct)
-        } else {
-          return(0)
-        }
-      }
-      # ---------------------------------------------------------- #
-
       # ------------------ Observer: Axis limits ----------------- #
       observeEvent(input$scatter_xmin, {
         axis_limits$lim.x[1] <- input$scatter_xmin
