@@ -42,7 +42,7 @@ scatterPlotUI <- function(id, panel){
         column(6,
           selectizeInput(ns('compare'),
                         label=NULL,
-                        choices=c('LFC', 'P-adj')
+                        choices=c('LFC'='log2FoldChange', 'P-adj'='padj')
           ) # selectizeInput
         ) # column
       ), # fluidRow
@@ -143,7 +143,7 @@ scatterPlotUI <- function(id, panel){
               column(6, h5('Marker opacity')),
               column(6,
                 numericInput(ns("alpha"), label=NULL,
-                  value=1,
+                  value=0.7,
                   min=0,
                   max=1,
                   step=0.1
@@ -160,16 +160,6 @@ scatterPlotUI <- function(id, panel){
                   max=10,
                   step=0.1
                 ) # numericInput
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
-              column(6, h5('Show all points?')),
-              column(6,
-                selectInput(ns("plot_all"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='no'
-                ) # selectInput
               ) # column
             ) # fluidRow
 
