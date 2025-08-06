@@ -529,18 +529,30 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
       # ------------------ Observer: Axis limits ----------------- #
       observeEvent(input$scatter_xmin, {
+        validate(
+          need(!is.na(input$scatter_xmin), '')
+        )
         axis_limits$lim.x[1] <- input$scatter_xmin
       })
 
       observeEvent(input$scatter_xmax, {
+        validate(
+          need(!is.na(input$scatter_xmax), '')
+        )
         axis_limits$lim.x[2] <- input$scatter_xmax
       })
 
       observeEvent(input$scatter_ymin, {
+        validate(
+          need(!is.na(input$scatter_ymin), '')
+        )
         axis_limits$lim.y[1] <- input$scatter_ymin
       })
 
       observeEvent(input$scatter_ymax, {
+        validate(
+          need(!is.na(input$scatter_ymax), '')
+        )
         axis_limits$lim.y[2] <- input$scatter_ymax
       })
 
