@@ -643,8 +643,59 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       }) # observeEvent
       # --------------------------------------------------------- #
 
-      # ---------------- Function: validate limits -------------- #
-      validate_limits <- function() {
+      # -------------------- Plot preparations ------------------ #
+      plot_prep <- function() {
+        df <- df_react()
+        compare <- input$compare
+        lim.x <- axis_limits$lim.x
+        lim.y <- axis_limits$lim.y
+
+        xcol <- paste0(compare, '.x')
+        ycol <- paste0(compare, '.y')
+
+        if (compare=='padj') {
+          # Convert padj to -log10(padj) for x and y
+          df$padj.x <- -log10(df$padj.x)
+          df$padj.y <- -log10(df$padj.y)
+        }
+
+        # filter rows with NA values
+        df <- df %>% filter(!is.na(.data[[ xcol ]]))
+        df <- df %>% filter(!is.na(.data[[ xcol ]]))
+
+        # Create column with plotting character based on lim.x
+        # Change point values for those outside plot limits to values that are within the limits
+        df$shape <- 'in'
+
+        # count number of points out of axis limits
+        num_ob_points <- sum(df[[ xcol ]] > lim.x[2] |
+                             df[[ xcol ]] < lim.x[1] |
+                             df[[ ycol ]] > lim.y[2] |
+                             df[[ ycol ]] < lim.y[1])
+        if(!is.na(num_ob_points)){
+          if(num_ob_points > 0){
+            showNotification(
+              paste0('Warning: ', num_ob_points, ' points outside plot axes limits. ',
+                     'These are being shown along the respective boundary.'),
+              type='warning'
+            )
+          }
+        }
+
+        # replace x values outside limits with axes limits
+        # build shape column to use for different plotting symbols
+        df[[ xcol ]][ df[[ xcol ]] > lim.x[2] ] <- lim.x[2]
+        df[[ xcol ]][ df[[ xcol ]] < lim.x[1] ] <- lim.x[1]
+        df[[ 'shape' ]][ df[[ xcol ]] == lim.x[2] ] <- 'right'
+        df[[ 'shape' ]][ df[[ xcol ]] == lim.x[1] ] <- 'left'
+
+        # same for y
+        df[[ ycol ]][ df[[ ycol ]] > lim.y[2] ] <- lim.y[2]
+        df[[ ycol ]][ df[[ ycol ]] < lim.y[1] ] <- lim.y[1]
+        df[[ 'shape' ]][ df[[ ycol ]] == lim.y[2] ] <- 'above'
+        df[[ 'shape' ]][ df[[ ycol ]] == lim.y[1] ] <- 'below'
+        df[[ 'shape' ]] <- as.factor(df[[ 'shape' ]])
+
         validate(
           if (!is.na(input$scatter_xmin) && !is.na(input$scatter_xmax)) {
             need(input$scatter_xmin < input$scatter_xmax,
@@ -658,136 +709,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
                  'y-axis min must be < y-axis max')
           }
         )
-      }
-      # --------------------------------------------------------- #
-
-      # -------------- Function: Report OB points --------------- #
-      report_OB_points <- function() {
-
-        # Parameters for the OB sig point checks
-        checks <- list(
-          list(type = 'max', axis = 'x', limit = axis_limits$lim.x[2], compare = input$compare, df = df_full()),
-          list(type = 'min', axis = 'x', limit = axis_limits$lim.x[1], compare = input$compare, df = df_full()),
-          list(type = 'max', axis = 'y', limit = axis_limits$lim.y[2], compare = input$compare, df = df_full()),
-          list(type = 'min', axis = 'y', limit = axis_limits$lim.y[1], compare = input$compare, df = df_full())
-        )
-
-        # Initialize DE OB point counters
-        OB_counts <- list(over_xmax = 0, under_xmin = 0, over_ymax = 0, under_ymin = 0)
-
-        msg <- NULL
-        for (check in checks) {
-          if (!is.na(check$limit)) {
-            if (check$type == 'max' & check$axis =='x') {
-              OB_counts$over_xmax <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$over_xmax > 0){
-                msg <- paste0(msg, OB_counts$over_xmax, ' genes > x-max; ')
-              }
-            }
-            if (check$type == 'min' & check$axis =='x') {
-              OB_counts$under_xmin <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$under_xmin > 0){
-                msg <- paste0(msg, OB_counts$under_xmin, ' genes < x-min; ')
-              }
-            }
-            if (check$type == 'max' & check$axis =='y') {
-              OB_counts$over_ymax <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$over_ymax > 0){
-                msg <- paste0(msg, OB_counts$over_ymax, ' genes > y-max; ')
-              }
-            }
-            if (check$type == 'min' & check$axis =='y') {
-              OB_counts$under_ymin <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$under_ymin > 0){
-                msg <- paste0(msg, OB_counts$under_ymin, ' genes < y-min;')
-              }
-            }
-          }
-        }
-
-        # Show a notification if there are any OB DE points
-        if (any(OB_counts > 0)) {
-          showNotification(
-            paste0(
-              'Warning: DE genes outside plot limits: ', msg
-            ),
-            type='warning',
-            duration=7
-          )
-        }
-      }
-      # --------------------------------------------------------- #
-
-      # -------------- Function: Plot all OB points  ------------ #
-      plot_all_OB <- function(df) {
-        # Fetch reactives
-        compare <- input$compare
-        plot_all <- input$plot_all
-        lim.x <- axis_limits$lim.x
-        lim.y <- axis_limits$lim.y
-
-        # Set x and y for plot based on plot type
-        if (compare=='LFC') {
-            # Need a default shape column regardless of plot_all
-          df$shape <- 'in'
-
-          if (plot_all == 'yes') {
-            # Create column with plotting character based on lim.x
-            # Change point values for those outside plot limits to values that are within the limits
-            df$shape <- 'in'
-            df <- df %>%
-              filter(!is.na(.data$log2FoldChange.x)) %>%
-              mutate(log2FoldChange.x = replace(.data$log2FoldChange.x, .data$log2FoldChange.x > lim.x[2], lim.x[2])) %>%
-              mutate(log2FoldChange.x = replace(.data$log2FoldChange.x, .data$log2FoldChange.x < lim.x[1], lim.x[1])) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.x == lim.x[2], 'right')) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.x == lim.x[1], 'left'))
-
-            # same for y
-            df <- df %>%
-              filter(!is.na(.data$log2FoldChange.y)) %>%
-              mutate(log2FoldChange.y = replace(.data$log2FoldChange.y, .data$log2FoldChange.y > lim.y[2], lim.y[2])) %>%
-              mutate(log2FoldChange.y = replace(.data$log2FoldChange.y, .data$log2FoldChange.y < lim.y[1], lim.y[1])) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.y == lim.y[2], 'above')) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.y == lim.y[1], 'below')) %>%
-              mutate(shape = as.factor(.data$shape))
-          }
-
-        } else if (compare=='P-adj') {
-          # Convert padj to -log10(padj) for x and y
-          df$padj.x <- -log10(df$padj.x)
-          df$padj.y <- -log10(df$padj.y)
-          df$shape <- 'in'
-
-          if (plot_all == 'yes') {
-            # create column with plotting character based on lim.x
-            # change plotted values for those outside plot limits to within the limits
-            df$shape <- 'in'
-            df <- df %>%
-              filter(!is.na(.data$padj.x)) %>%
-              mutate(padj.x = replace(.data$padj.x, .data$padj.x > lim.x[2], lim.x[2])) %>%
-              mutate(padj.x = replace(.data$padj.x, .data$padj.x < lim.x[1], lim.x[1])) %>%
-              mutate(shape = replace(.data$shape, .data$padj.x == lim.x[2], 'right')) %>%
-              mutate(shape = replace(.data$shape, .data$padj.x == lim.x[1], 'left'))
-
-            # same for y
-            df <- df %>%
-              filter(!is.na(.data$padj.y)) %>%
-              mutate(padj.y = replace(.data$padj.y, .data$padj.y > lim.y[2], lim.y[2])) %>%
-              mutate(padj.y = replace(.data$padj.y, .data$padj.y < lim.y[1], lim.y[1])) %>%
-              mutate(shape = replace(.data$shape, .data$padj.y == lim.y[2], 'above')) %>%
-              mutate(shape = replace(.data$shape, .data$padj.y == lim.y[1], 'below')) %>%
-              mutate(shape = as.factor(.data$shape))
-          }
-        }
-        return(df)
-      }
-      # --------------------------------------------------------- #
-
-      # -------------------- Plot preparations ------------------ #
-      plot_prep <- function() {
-        report_OB_points()
-        df <- plot_all_OB(df_react())
-        validate_limits()
 
         # Get genes to label
         genes <- plot_args()$gene.to.plot
