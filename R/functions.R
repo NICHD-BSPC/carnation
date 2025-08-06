@@ -2006,9 +2006,9 @@ plotScatter.label <- function(compare,
 
   if (plot_all == 'yes') {
     p <- p + scale_shape_manual(breaks=c('in','above','below','left','right'),
-                                values=c(16, 16, 16, 16, 16),
+                                values=c(16, 2, 6, 3, 3),
                                 guide='none') +
-             scale_size_manual(values=c(size, size, size, size, size))
+             scale_size_manual(values=c(size, size+1, size+1, size+1, size+1))
   } else if (plot_all == 'no') {
     p <- p + scale_shape_manual(breaks=c('in'),
                                 values=c(16),
