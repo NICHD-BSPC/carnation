@@ -530,7 +530,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         label_j <- input$y_axis_comp
         fdr.thres <- curr_thres$fdr.thres
         fc.thres <- curr_thres$fc.thres
-        plot_all <- input$plot_all
 
         # Add significance column in df using df_color values
         df <- df %>%
@@ -833,7 +832,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
           lab.genes=lab.genes,
           lim.x=params[['lim.x']],
           lim.y=params[['lim.y']],
-          plot_all=input$plot_all,
+          plot_all='yes',
           name.col='geneid',
           lines=c(input$vline, input$hline, input$dline),
           alpha=input$alpha,
