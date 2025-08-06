@@ -327,23 +327,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       })
       # ------------------------------------------------------------#
 
-      # ----- Needs to delay premature triggering of events ------ #
-      needs_react <- reactive({
-        list(!is.na(input$compare),
-             !is.null(app_object()$res),
-             !is.null(input$y_axis_comp),
-             !is.na(input$y_axis_comp),
-             input$y_axis_comp != '',
-             !is.na(input$x_axis_comp),
-             !is.null(input$x_axis_comp),
-             input$x_axis_comp != '',
-             input$y_axis_comp %in% names(app_object()$res),
-             input$x_axis_comp %in% names(app_object()$res),
-             !is.na(input$plot_all)
-        )
-      })
-      # ---------------------------------------------------------- #
-
       # ------------- helper functions -----------------------------#
 
       # function to get range of column in df after handling NAs
@@ -400,10 +383,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
              curr_thres$fdr.thres)
       }, {
 
-        needs <- needs_react()
-        for (need in needs) {
-          validate(need(need, "Waiting for selection"))
-        }
+        req(app_object()$res)
 
         res_i <- as.data.frame(app_object()$res[[input$x_axis_comp]])
         res_j <- as.data.frame(app_object()$res[[input$y_axis_comp]])
@@ -613,11 +593,9 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
       # --------------- Observer: Autoscale x button ------------- #
       observeEvent(list(input$scatter_x_auto, df_react()), {
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        for (need in needs) {
-          validate(need(need, "Waiting for selection"))
-        }
+        validate(
+          need(!is.null(df_react()), "Waiting for selection")
+        )
 
         # Get x lims
         lims <- autoscale(df=df_react(), compare=input$compare, lim.x=numeric(2), lim.y=numeric(2))
@@ -629,11 +607,9 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
       # --------------- Observer: Autoscale y button ------------- #
       observeEvent(list(input$scatter_y_auto, df_react()), {
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        for (need in needs) {
-          validate(need(need, "Waiting for selection"))
-        }
+        validate(
+          need(!is.null(df_react()), "Waiting for selection")
+        )
 
         # Get y lims
         lims <- autoscale(df=df_react(), compare=input$compare, lim.x=numeric(2), lim.y=numeric(2))
@@ -732,9 +708,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       scatterplot <- eventReactive(c(input$refresh, flags$data_loaded), {
 
         # Validation
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        needs <- append(needs, !is.null(df_full()))
+        needs <- c(!is.null(df_react()), !is.null(df_full()))
         for (need in needs) {
           validate(need(need, "Waiting for selection"))
         }
@@ -769,9 +743,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       scatterplot_ly <- eventReactive(c(input$refresh, flags$data_loaded), {
 
         # Validation
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        needs <- append(needs, !is.null(df_full()))
+        needs <- c(!is.null(df_react()), !is.null(df_full()))
         for (need in needs) {
           validate(need(need, "Waiting for selection"))
         }
