@@ -314,13 +314,16 @@ sumovPlotServer <- function(id, obj, config, type=''){
           p <- gs_summary_overview_pair(l_gs, l_gs2,
                            n_gs = n_gs,
                            p_value_column = pcol,
-                           color_by = color_by) +
+                           color_by = color_by,
+                           alpha_set2 = 0.75) +
 
                 # change y-axis label to show selected pvalue column
                 # without a 'gs_' prefix
                 ylab(paste('-log10', sub('gs_', '', pcol))) +
                 theme(text=element_text(size=text_size))
 
+          # change border width of set 1
+          p$layers[[2]]$aes_params$stroke <- 1.25
         }
         p
       })
