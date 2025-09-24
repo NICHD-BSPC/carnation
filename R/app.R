@@ -1105,6 +1105,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
         elem_names <- NULL
         sep <- '*'
         res_keys <- list()
+        enrich_copy <- app_object$enrich
         for(x in names(app_object$enrich)){
           for(y in names(app_object$enrich[[x]])){
             # NOTE: if key is 'res' save & skip
@@ -1178,10 +1179,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
             for(z in names(app_object$enrich[[x]][[y]])){
               key <- paste(x, y, z, sep=sep)
-              app_object$genetonic[[x]][[y]][[z]] <- flat_obj[[key]]
+              if(!is.null(flat_obj[[key]])){
+                app_object$genetonic[[x]][[y]][[z]] <- flat_obj[[key]]
+              } else {
+                app_object$genetonic[[x]][[y]][[z]] <- dummy_genetonic(enrich_copy[[x]][[y]][[z]])
+              }
             }
           }
         }
+        rm(enrich_copy)
 
         end_time <- Sys.time()
 
