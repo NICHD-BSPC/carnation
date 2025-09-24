@@ -469,12 +469,33 @@ enrichmapServer <- function(id, obj, res_obj, config){
           visNodes(font=list(size=25))
       })
 
+      # set some graph parameters for saving to file
+      enrichplot_out <- reactive({
+        gg <- enrichplot()
+
+        set_graph_attr(gg)
+      })
+
       helpButtonServer(paste0(plottype, '_help'), size='l')
-      downloadButtonServer('enrichplot_download', enrichplot,
+      downloadButtonServer('enrichplot_download', enrichplot_out,
                            plottype)
     } # function
   ) # moduleServer
 } # function
+
+set_graph_attr <- function(gg){
+  # compute distance of labels from vertices
+  vsizes <- igraph::V(gg)$size
+  vdists <- 0.5 + vsizes/max(vsizes)
+  V(gg)$color <- igraph::V(gg)$color.background
+  V(gg)$frame.color <- igraph::V(gg)$color.border
+  V(gg)$size <- igraph::V(gg)$size*0.35
+  V(gg)$label.family <- 'sans'
+  V(gg)$label.dist <- vdists
+  V(gg)$label.color <- 'black'
+  V(gg)$label.degree <- pi/2
+  gg
+}
 
 ######################### Cnetplot #############################################
 
@@ -1547,8 +1568,16 @@ distillPlotServer <- function(id, obj, args, config){
           visNodes(font=list(size=25))
       })
 
-      helpButtonServer(paste0(plottype, '_help'), size='l')
+      # set some graph parameters for saving to file
+      enrichplot_out <- reactive({
+        gg <- enrichplot()
 
+        set_graph_attr(gg)
+      })
+
+      helpButtonServer(paste0(plottype, '_help'), size='l')
+      downloadButtonServer('enrichplot_download', enrichplot_out,
+                           plottype)
 
       plot_data <- eventReactive(input$plot_do, {
         curr_args$numcat
@@ -1745,7 +1774,16 @@ fuzzyPlotServer <- function(id, obj, args, config){
           visNodes(font=list(size=25))
       })
 
+      # set some graph parameters for saving to file
+      enrichplot_out <- reactive({
+        gg <- enrichplot()
+
+        set_graph_attr(gg)
+      })
+
       helpButtonServer(paste0(plottype, '_help'), size='l')
+      downloadButtonServer('enrichplot_download', enrichplot_out,
+                           plottype)
 
       plot_data <- eventReactive(input$plot_do, {
         curr_args$numcat
