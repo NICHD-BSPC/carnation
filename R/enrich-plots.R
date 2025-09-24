@@ -384,8 +384,11 @@ enrichmapUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -720,8 +723,11 @@ radarUI <- function(id, panel, type=''){
     }
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(hlp))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -960,8 +966,11 @@ alluvialUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -1431,8 +1440,11 @@ distillPlotUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -1586,8 +1598,11 @@ fuzzyPlotUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList

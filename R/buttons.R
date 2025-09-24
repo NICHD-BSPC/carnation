@@ -178,10 +178,21 @@ downloadButtonServer <- function(id, outplot, plot_type){
                         file=file,
                         width=input$plot_wd*ppi,
                         height=input$plot_ht*ppi)
-          } else {
+          } else if(inherits(outplot(), 'ggplot')){
             ggsave(file, plot = outplot(),
                    device='pdf',
                    width=input$plot_wd, height=input$plot_ht)
+          } else if(inherits(outplot(), 'igraph')){
+            pdf(file, width=input$plot_wd, height=input$plot_ht)
+
+            plot(outplot())
+
+            dev.off()
+          } else {
+            showNotification(
+              paste0('Plot type: "', class(outplot()), '" not supported'),
+              type='error'
+            )
           }
           removeModal()
         }
