@@ -2222,3 +2222,26 @@ plotScatter.label_ly <- function(compare,
   # Return the Plotly plot object
   return(p)
 }
+
+#' Make dummy GeneTonic object
+#'
+#' @param eres enrichResult object
+#'
+#' @return GeneTonic object
+dummy_genetonic <- function(eres){
+
+  if(!inherits(eres, 'enrichResult')) return(NULL)
+  eres2 <- GeneTonic::shake_enrichResult(eres)
+
+  ## add dummy/placeholder columns
+  eres2[[ 'z_score' ]] <- 1
+  eres2[[ 'aggr_score' ]] <- 0
+
+  # add dummy gene mapping
+  all_genes <- unique(unlist(lapply(eres2$gs_genes, function(x) strsplit(x, '\\,')[[1]])))
+  anno_df <- data.frame(gene_id=all_genes, gene_name=all_genes, row.names=all_genes)
+
+  return(
+    list(l_gs=eres2, anno_df=anno_df)
+  )
+}
