@@ -723,10 +723,6 @@ enrichServer <- function(id, obj, upset_table,
             res <- NULL
         }
 
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset')
-        )
-
         genetonic.list <- app_object()$genetonic[[input$comp_fun]][[input$geneset]][[input$pathway]]
         title <- paste0(input$comp_fun, ' | ',
                         input$geneset, ' | ',
@@ -746,10 +742,6 @@ enrichServer <- function(id, obj, upset_table,
         } else {
             res <- NULL
         }
-
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset_tbl')
-        )
 
         genetonic.list <- app_object()$genetonic[[input$comp_tbl]][[input$geneset_tbl]][[input$pathway_tbl]]
         title <- paste0(input$comp_tbl, ' | ',
@@ -1303,10 +1295,6 @@ enrichServer <- function(id, obj, upset_table,
 
         res <- enrich_data$enrich_list$res
 
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset')
-        )
-
         genetonic.list <- enrich_data$genetonic_list
         l_gs <- genetonic.list$l_gs
         anno_df <- genetonic.list$anno_df
@@ -1397,10 +1385,6 @@ enrichServer <- function(id, obj, upset_table,
           )
 
         res <- enrich_data$enrich_list$res
-
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset')
-        )
 
         genetonic.list <- enrich_data$genetonic_list
         l_gs <- genetonic.list$l_gs
