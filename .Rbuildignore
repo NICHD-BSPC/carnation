@@ -1,6 +1,7 @@
 ^LICENSE\.md$
 ^requirements\.yaml$
 ^requirements-pinned\.yaml$
+^requirements-rsconnect\.yaml$
 ^.github
 ^Dockerfile
 ^Singularity
