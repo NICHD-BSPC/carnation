@@ -1,6 +1,6 @@
 Package: carnation
 Title: Shiny App to Explore RNA-Seq Analysis
-Version: 1.2
+Version: 0.99.0
 Authors@R: 
     person("Apratim", "Mitra", , "apratim.mitra@nih.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3279-0054"))
@@ -19,7 +19,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends:
-    R (>= 4.0)
+    R (>= 4.3.0)
 Imports:
     BiocParallel,
     colorspace,
@@ -60,3 +60,7 @@ Suggests:
     rmarkdown
 VignetteBuilder: knitr
 URL: https://nichd-bspc.github.io/carnation/
+biocViews:
+    GUI, GeneExpression, Software, ShinyApps, GO, Transcription,
+    Transcriptomics, Visualization, DifferentialExpression,
+    Pathways

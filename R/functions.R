@@ -1975,10 +1975,14 @@ plotScatter.label <- function(compare,
   names(color.palette) <- c('None', label_x, label_y, 'Both - opposite LFC sign', 'Both - same LFC sign')
 
   # Determine x and y based on compare
-  x <- if (compare=='LFC') 'log2FoldChange.x' else if (compare=='P-adj') 'padj.x'
-  y <- if (compare=='LFC') 'log2FoldChange.y' else if (compare=='P-adj') 'padj.y'
-  label_x <- if (compare=='LFC') paste0('LFC: ', label_x) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_x)
-  label_y <- if (compare=='LFC') paste0('LFC: ', label_y) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_y)
+  x <- paste0(compare, '.x')
+  y <- paste0(compare, '.y')
+
+  # add '-log10' if padj
+  if(compare == 'padj'){
+    label_x <- paste('-log10', label_x)
+    label_y <- paste('-log10', label_y)
+  }
 
   if (label_x == label_y) {
     label_x <- paste0(label_x, '_x')
@@ -1995,16 +1999,16 @@ plotScatter.label <- function(compare,
       axis.text.x = element_text(size = 12),
       axis.text.y = element_text(size = 12)) +
     labs(color = 'Significant in:') +
-    scale_y_continuous(limits = c(lim.y[1], lim.y[2]), expand = c(0.0, 0)) +
-    scale_x_continuous(limits = c(lim.x[1], lim.x[2]), expand = c(0.0, 0)) +
+    scale_y_continuous(limits = c(lim.y[1] + 0.02*lim.y[1], lim.y[2] + 0.02*lim.y[2]), expand = c(0.0, 0)) +
+    scale_x_continuous(limits = c(lim.x[1] + 0.02*lim.x[1], lim.x[2] + 0.02*lim.x[2]), expand = c(0.0, 0)) +
     xlab(label_x) +
     ylab(label_y)
 
   if (plot_all == 'yes') {
     p <- p + scale_shape_manual(breaks=c('in','above','below','left','right'),
-                                values=c(16, 16, 16, 16, 16),
+                                values=c(16, 2, 6, 3, 3),
                                 guide='none') +
-             scale_size_manual(values=c(size, size, size, size, size))
+             scale_size_manual(values=c(size, size+1, size+1, size+1, size+1))
   } else if (plot_all == 'no') {
     p <- p + scale_shape_manual(breaks=c('in'),
                                 values=c(16),
@@ -2019,7 +2023,7 @@ plotScatter.label <- function(compare,
     p <- p + geom_hline(yintercept=0, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
   }
    if (lines[3] == 'yes') {
-    p <- p + geom_abline(color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
+    p <- p + geom_abline(yintercept=0, slope=1, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
   }
   # show.grid
   show.grid <- if(show.grid == 'yes') TRUE else FALSE
@@ -2082,11 +2086,17 @@ plotScatter.label_ly <- function(compare,
   names(color.palette) <- c('None', label_x, label_y, 'Both - opposite LFC sign', 'Both - same LFC sign')
 
   # Determine x and y based on compare
-  x <- if (compare=='LFC') 'log2FoldChange.x' else if (compare=='P-adj') 'padj.x'
-  y <- if (compare=='LFC') 'log2FoldChange.y' else if (compare=='P-adj') 'padj.y'
-  label_x <- if (compare=='LFC') paste0('LFC: ', label_x) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_x)
-  label_y <- if (compare=='LFC') paste0('LFC: ', label_y) else if (compare=='P-adj') paste0('-log10 P-adj: ', label_y)
+  x <- paste0(compare, '.x')
+  y <- paste0(compare, '.y')
 
+  label_x <- paste0(compare, ': ', label_x)
+  label_y <- paste0(compare, ': ', label_y)
+
+  # add '-log10' if padj
+  if(compare == 'padj'){
+    label_x <- paste('-log10', label_x)
+    label_y <- paste('-log10', label_y)
+  }
 
   if (label_x == label_y) {
     label_x <- paste0(label_x, '_x')
@@ -2095,22 +2105,46 @@ plotScatter.label_ly <- function(compare,
 
   show.grid <- if (show.grid == 'yes') TRUE else FALSE
 
-  # Loop over each level of the factor and create a trace
   p <- plot_ly()
 
+  # list of plotting characters
+  pch <- c('in'='circle',
+           'above'='triangle-up-open',
+           'below'='triangle-down-open',
+           'left'='triangle-left-open',
+           'right'='triangle-right-open')
+
+  # Loop over each level of the factor and create a trace
   for (level in levels(df$significance)) {
-    p <- p %>% add_trace(data = df[df$significance == level, ],
-                         x = ~get(x),
-                         y = ~get(y),
-                         type = 'scatter',
-                         mode = 'markers',
-                         text = ~get(name.col),
-                         hoverinfo = 'text',
-                         marker = list(size = size,
-                                       opacity = alpha,
-                                       color = color.palette[level]),
-                         showlegend = TRUE,
-                         name = level) # This will be the legend entry
+    df_i <- df[df$significance == level, ]
+
+    # further subdivide based on shape column
+    all_sym <- unique(df_i[['shape']])
+    for(sym in all_sym){
+      # don't show legend if point is outside limits
+      if(sym != 'in'){
+        ps <- size + 1
+
+        # only show legend if the *only* points in this level are outside
+        if(!all(all_sym == sym)) showlegend <- FALSE
+      } else {
+        ps <- size
+        showlegend <- TRUE
+      }
+      p <- p %>% add_trace(data = df_i[df_i$shape == sym, ],
+                           x = ~get(x),
+                           y = ~get(y),
+                           type = 'scatter',
+                           mode = 'markers',
+                           text = ~get(name.col),
+                           hoverinfo = 'text',
+                           marker = list(size = ps,
+                                         opacity = alpha,
+                                         symbol = pch[sym],
+                                         color = color.palette[level]),
+                           showlegend = showlegend,
+                           name = level) # This will be the legend entry
+    }
   }
 
   # add labels if any
@@ -2132,14 +2166,14 @@ plotScatter.label_ly <- function(compare,
 
   # Now add the layout
   p <- p %>% layout(xaxis = list(title = label_x,
-                                 range = c(lim.x[1], lim.x[2]),
+                                 range = c(lim.x[1] + 0.02*lim.x[1], lim.x[2] + 0.02*lim.x[2]),
                                  zeroline = FALSE,
                                  showgrid = show.grid,
                                  linecolor = 'black',
                                  linewidth = 0.5,
                                  mirror = TRUE),
                     yaxis = list(title = label_y,
-                                 range = c(lim.y[1], lim.y[2]),
+                                 range = c(lim.y[1] + 0.02*lim.y[1], lim.y[2] + 0.02*lim.y[2]),
                                  zeroline = FALSE,
                                  showgrid = show.grid,
                                  linecolor = 'black',
@@ -2187,4 +2221,27 @@ plotScatter.label_ly <- function(compare,
 
   # Return the Plotly plot object
   return(p)
+}
+
+#' Make dummy GeneTonic object
+#'
+#' @param eres enrichResult object
+#'
+#' @return GeneTonic object
+dummy_genetonic <- function(eres){
+
+  if(!inherits(eres, 'enrichResult')) return(NULL)
+  eres2 <- GeneTonic::shake_enrichResult(eres)
+
+  ## add dummy/placeholder columns
+  eres2[[ 'z_score' ]] <- 1
+  eres2[[ 'aggr_score' ]] <- 0
+
+  # add dummy gene mapping
+  all_genes <- unique(unlist(lapply(eres2$gs_genes, function(x) strsplit(x, '\\,')[[1]])))
+  anno_df <- data.frame(gene_id=all_genes, gene_name=all_genes, row.names=all_genes)
+
+  return(
+    list(l_gs=eres2, anno_df=anno_df)
+  )
 }

@@ -723,10 +723,6 @@ enrichServer <- function(id, obj, upset_table,
             res <- NULL
         }
 
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset')
-        )
-
         genetonic.list <- app_object()$genetonic[[input$comp_fun]][[input$geneset]][[input$pathway]]
         title <- paste0(input$comp_fun, ' | ',
                         input$geneset, ' | ',
@@ -746,10 +742,6 @@ enrichServer <- function(id, obj, upset_table,
         } else {
             res <- NULL
         }
-
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset_tbl')
-        )
 
         genetonic.list <- app_object()$genetonic[[input$comp_tbl]][[input$geneset_tbl]][[input$pathway_tbl]]
         title <- paste0(input$comp_tbl, ' | ',
@@ -940,8 +932,9 @@ enrichServer <- function(id, obj, upset_table,
       output$func_table <- renderDT({
         df <- get_func_table()
 
-        format_cols <- config()$server$functional_enrichment$table$enrichment$format_significant
-        cols.to.drop <- config()$server$functional_enrichment$table$enrichment$cols.to.drop
+        float_idx <- sapply(df, function(x) typeof(x) %in% c('double', 'float'))
+        format_cols <- colnames(df)[float_idx]
+        digits <- config()$server$functional_enrichment$table$enrichment$format_significant$digits
 
         # support gseaResult and enrichResult
         gene.id.col <- if('geneID' %in% colnames(df)) 'geneID'
@@ -962,10 +955,9 @@ enrichServer <- function(id, obj, upset_table,
           col.order <- c(rem.cols[1:desc.idx], gene.id.col,
                          rem.cols[(desc.idx+1): length(rem.cols)])
         }
-        cols_to_format <- intersect(colnames(df), format_cols$columns)
+        cols_to_format <- intersect(colnames(df), format_cols)
 
         df %>%
-          select(-any_of(cols.to.drop)) %>%
           datatable(rownames=FALSE,
                     escape=FALSE,
                     options=list(
@@ -973,7 +965,7 @@ enrichServer <- function(id, obj, upset_table,
                       columnDefs=list(list(width='40%', targets=c(3)))
                     )) %>%
           formatSignif(columns=cols_to_format,
-                       digits=format_cols$digits) %>%
+                       digits=digits) %>%
           formatStyle('Description', 'white-space'='nowrap')
       })
 
@@ -1303,10 +1295,6 @@ enrichServer <- function(id, obj, upset_table,
 
         res <- enrich_data$enrich_list$res
 
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset')
-        )
-
         genetonic.list <- enrich_data$genetonic_list
         l_gs <- genetonic.list$l_gs
         anno_df <- genetonic.list$anno_df
@@ -1398,10 +1386,6 @@ enrichServer <- function(id, obj, upset_table,
 
         res <- enrich_data$enrich_list$res
 
-        validate(
-            need(!is.null(res), 'DE results not found for this geneset')
-        )
-
         genetonic.list <- enrich_data$genetonic_list
         l_gs <- genetonic.list$l_gs
         anno_df <- genetonic.list$anno_df
@@ -1461,21 +1445,20 @@ enrichServer <- function(id, obj, upset_table,
         )
         colnames(tbl) <- sub('^gs_', '', colnames(tbl))
 
-        cols.to.drop <- config()$server$functional_enrichment$table$fuzzy_tbl$cols.to.drop
+        float_idx <- sapply(tbl, function(x) typeof(x) %in% c('double', 'float'))
+        format_cols <- colnames(tbl)[float_idx]
+        digits <- config()$server$functional_enrichment$table$fuzzy_tbl$format_significant$digits
 
-        format_cols <- config()$server$functional_enrichment$table$fuzzy_tbl$format_significant
-
-        cols_to_format <- intersect(colnames(tbl), format_cols$columns)
+        cols_to_format <- intersect(colnames(tbl), format_cols)
 
         tbl %>%
             mutate(genes=format_genes(.data$genes, genes.per.line=input$genes.per.line, sep=',')) %>%
-            select(-any_of(cols.to.drop)) %>%
             relocate('fuzzycluster', .before='pvalue') %>%
             relocate('cluster_status', .before='pvalue') %>%
             relocate('genes', .before='pvalue') %>%
             datatable(rownames=FALSE, escape=FALSE) %>%
           formatSignif(columns=cols_to_format,
-                       digits=format_cols$digits) %>%
+                       digits=digits) %>%
           formatStyle('description', 'white-space'='nowrap')
       }) # renderDT fuzzy_table
 

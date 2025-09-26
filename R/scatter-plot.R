@@ -42,7 +42,7 @@ scatterPlotUI <- function(id, panel){
         column(6,
           selectizeInput(ns('compare'),
                         label=NULL,
-                        choices=c('LFC', 'P-adj')
+                        choices=c('LFC'='log2FoldChange', 'P-adj'='padj')
           ) # selectizeInput
         ) # column
       ), # fluidRow
@@ -143,7 +143,7 @@ scatterPlotUI <- function(id, panel){
               column(6, h5('Marker opacity')),
               column(6,
                 numericInput(ns("alpha"), label=NULL,
-                  value=1,
+                  value=0.7,
                   min=0,
                   max=1,
                   step=0.1
@@ -160,16 +160,6 @@ scatterPlotUI <- function(id, panel){
                   max=10,
                   step=0.1
                 ) # numericInput
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
-              column(6, h5('Show all points?')),
-              column(6,
-                selectInput(ns("plot_all"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='no'
-                ) # selectInput
               ) # column
             ) # fluidRow
 
@@ -285,7 +275,21 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         names(app_object()$res)
       })
 
+      # reactive values used to track/store different settings
       flags <- reactiveValues(data_loaded=0)
+
+      # current FDR/fold-change thresholds
+      curr_thres <- reactiveValues(fdr.thres=0.1,
+                                   fc.thres=0)
+
+      # Reactive df that will be used for autoscaling and plotting
+      # df_react: data frame used for plotting
+      # df_full: full data frame
+      df_react <- reactiveVal(NULL)
+      df_full <- reactiveVal(NULL)
+
+      # reactive values to keep track of axis limits
+      axis_limits <- reactiveValues(lim.x=NULL, lim.y=NULL)
 
       # Initialize comparison selection dropdowns when data is available
       observeEvent(comp_all(), {
@@ -306,14 +310,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         })
       # -------------------------------------------------------------- #
 
-      # -- Populate y-axis comparison dropdown when x-axis selection is made -- #
-      #observeEvent(input$x_axis_comp, {
-      #        }, ignoreInit=TRUE)
-      # -------------------------------------------------------------- #
-
       # --------------- Set FDR and FC thresholds ---------------- #
-      curr_thres <- reactiveValues(fdr.thres=0.1,
-                                   fc.thres=0)
 
       # update from reactive config
       observeEvent(config(), {
@@ -330,30 +327,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       })
       # ------------------------------------------------------------#
 
-      # ----- Needs to delay premature triggering of events ------ #
-      needs_react <- reactive({
-        list(!is.na(input$compare),
-             !is.null(app_object()$res),
-             !is.null(input$y_axis_comp),
-             !is.na(input$y_axis_comp),
-             input$y_axis_comp != '',
-             !is.na(input$x_axis_comp),
-             !is.null(input$x_axis_comp),
-             input$x_axis_comp != '',
-             input$y_axis_comp %in% names(app_object()$res),
-             input$x_axis_comp %in% names(app_object()$res),
-             !is.na(input$plot_all)
-        )
-      })
-      # ---------------------------------------------------------- #
-
-      # --------- Generate universal scatter data frame ---------- #
-      # Initialize the reactive df that will be used for autoscaling and plotting
-      df_react <- reactiveVal(NULL)
-      df_full <- reactiveVal(NULL)
-
-      # reactive values to keep track of axis limits
-      axis_limits <- reactiveValues(lim.x=NULL, lim.y=NULL)
+      # ------------- helper functions -----------------------------#
 
       # function to get range of column in df after handling NAs
       get_range <- function(df, column, lim){
@@ -368,7 +342,39 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         return(lim)
       }
 
+      update_geneid <- function(df) {
+        na_idx <- is.na(df$symbol)
+        tbl <- table(df$symbol)
+        dups <- names(tbl)[tbl>1]
+        duplicates_idx <- df$symbol %in% dups
+        symbols_to_fix <- na_idx | duplicates_idx
+        symbols_ok <- !symbols_to_fix
+        df$geneid[symbols_ok] <- df$symbol[symbols_ok]
+        return(df)
+      }
 
+      # Function to get autoscale limits for both plot types and both axes
+      autoscale <- function(df, compare, lim.x, lim.y) {
+        # Determine columns based on compare parameter
+        x_column <- paste0(compare, '.x')
+        y_column <- paste0(compare, '.y')
+        df_temp <- df
+        if (compare == 'padj') {
+          df_temp[[x_column]] <- -log10(df_temp[[x_column]])
+          df_temp[[y_column]] <- -log10(df_temp[[y_column]])
+        }
+
+        # Set axis limits
+        lim.x <- get_range(df_temp, x_column, lim.x)
+        lim.y <- get_range(df_temp, y_column, lim.y)
+
+        return(list(lim.x = lim.x, lim.y = lim.y))
+      }
+      # ---------------------------------------------------------- #
+
+
+      # --------- Generate universal scatter data frame ---------- #
+ 
       observeEvent({
         list(input$compare,
              input$x_axis_comp,
@@ -377,10 +383,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
              curr_thres$fdr.thres)
       }, {
 
-        needs <- needs_react()
-        for (need in needs) {
-          validate(need(need, "Waiting for selection"))
-        }
+        req(app_object()$res)
 
         res_i <- as.data.frame(app_object()$res[[input$x_axis_comp]])
         res_j <- as.data.frame(app_object()$res[[input$y_axis_comp]])
@@ -404,63 +407,36 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         res_i$geneid <- rownames(res_i)
         res_j$geneid <- rownames(res_j)
 
-        update_geneid <- function(df) {
-          na_idx <- is.na(df$symbol)
-          tbl <- table(df$symbol)
-          dups <- names(tbl)[tbl>1]
-          duplicates_idx <- df$symbol %in% dups
-          symbols_to_fix <- na_idx | duplicates_idx
-          symbols_ok <- !symbols_to_fix
-          df$geneid[symbols_ok] <- df$symbol[symbols_ok]
-          return(df)
-        }
-
         # Prepare geneid column in both dfs to prepare for joining
         res_i <- update_geneid(res_i)
         res_j <- update_geneid(res_j)
 
         # Make a temp df that will be used to determine significance in the single column df
-          # required for df_react() to react to changed in input$compare
-          cols.sub <- c('log2FoldChange', 'padj', 'geneid')
-          df_full <- dplyr::inner_join(
-            dplyr::select(res_i, all_of(cols.sub)),
-            dplyr::select(res_j, all_of(cols.sub)),
-            by = 'geneid',
-            suffix = c('.x', '.y')
-          )
+        # required for df_react() to react to changed in input$compare
+        cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+        df_full <- dplyr::inner_join(
+          dplyr::select(res_i, all_of(cols.sub)),
+          dplyr::select(res_j, all_of(cols.sub)),
+          by = 'geneid',
+          suffix = c('.x', '.y')
+        )
 
-        if (input$compare == 'LFC') {
-          # Join to make df for df_react(). df_react() must change in response
-          # to input$compare so we make a distinct df for each input$compare choice
-          cols.sub <- c('log2FoldChange', 'geneid')
-          df <- dplyr::inner_join(
-            dplyr::select(res_i, all_of(cols.sub)),
-            dplyr::select(res_j, all_of(cols.sub)),
-            by = 'geneid',
-            suffix = c('.x', '.y')
-          )
-        } else if (input$compare == 'P-adj') {
-          cols.sub <- c('padj', 'geneid')
-          df <- dplyr::inner_join(
-            dplyr::select(res_i, all_of(cols.sub)),
-            dplyr::select(res_j, all_of(cols.sub)),
-            by = 'geneid',
-            suffix = c('.x', '.y')
-          )
-        }
+        cols.sub <- c(input$compare, 'geneid')
+        df <- dplyr::inner_join(
+          dplyr::select(res_i, all_of(cols.sub)),
+          dplyr::select(res_j, all_of(cols.sub)),
+          by = 'geneid',
+          suffix = c('.x', '.y')
+        )
 
         compare <- input$compare
 
-        # Determine columns based on compare parameter
-        if (compare == 'LFC') {
-          x_column <- 'log2FoldChange.x'
-          y_column <- 'log2FoldChange.y'
-          df_temp <- df
-        } else if (compare == 'P-adj') {
-          x_column <- 'padj.x'
-          y_column <- 'padj.y'
-          # Need to -log10 transform padj.x and padj.y to get proper limits
-          df_temp <- df
+        x_column <- paste0(input$compare, '.x')
+        y_column <- paste0(input$compare, '.y')
+        df_temp <- df
+
+        # Need to -log10 transform padj.x and padj.y to get proper limits
+        if(input$compare == 'padj'){
           df_temp[[x_column]] <- -log10(df_temp[[x_column]])
           df_temp[[y_column]] <- -log10(df_temp[[y_column]])
         }
@@ -471,34 +447,18 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
         # update & handle NAs
         x_lfc_allna <- all(is.na(df_temp[, x_column]))
-        if(x_lfc_allna){
-          showNotification(
-            paste('Scatter-plot warning:', input$x_axis_comp,
-                  'LFC column has all NAs!',
-                  'Please choose different contrast for x-axis'),
-            duration=15
-          )
-        }
 
         validate(
           need(!x_lfc_allna,
-               paste(input$x_axis_comp, 'log2FoldChange column has all NAs!',
+               paste(input$x_axis_comp, compare, ' column has all NAs!',
                      'Please choose different contrast for x-axis'))
         )
 
         y_lfc_allna <- all(is.na(df_temp[, y_column]))
-        if(y_lfc_allna){
-          showNotification(
-            paste('Scatter-plot warning:', input$y_axis_comp,
-                  'log2FoldChange column has all NAs!',
-                  'Please choose different contrast for x-axis'),
-            duration=15
-          )
-        }
 
         validate(
           need(!y_lfc_allna,
-               paste(input$y_axis_comp, 'log2FoldChange column has all NAs!',
+               paste(input$y_axis_comp, compare, ' column has all NAs!',
                      'Please choose different contrast for x-axis'))
         )
         lim.x <- get_range(df_temp, x_column, lim.x)
@@ -518,16 +478,29 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         label_j <- input$y_axis_comp
         fdr.thres <- curr_thres$fdr.thres
         fc.thres <- curr_thres$fc.thres
-        plot_all <- input$plot_all
 
         # Add significance column in df using df_color values
         df <- df %>%
           mutate(significance = case_when(
-          df_full$padj.x <= fdr.thres & df_full$padj.y <= fdr.thres & (df_full$log2FoldChange.x * df_full$log2FoldChange.y >= 0) & abs(df_full$log2FoldChange.x) >= fc.thres & abs(df_full$log2FoldChange.y) >= fc.thres ~ 'Both - same LFC sign',
-          df_full$padj.x <= fdr.thres & df_full$padj.y <= fdr.thres & (df_full$log2FoldChange.x * df_full$log2FoldChange.y < 0) & abs(df_full$log2FoldChange.x) >= fc.thres & abs(df_full$log2FoldChange.y) >= fc.thres  ~ 'Both - opposite LFC sign',
-          (df_full$padj.x <= fdr.thres & abs(df_full$log2FoldChange.x) >= fc.thres) & (df_full$padj.y > fdr.thres | abs(df_full$log2FoldChange.y) < fc.thres) ~ label_i,
-          (df_full$padj.y <= fdr.thres & abs(df_full$log2FoldChange.y) >= fc.thres) & (df_full$padj.x > fdr.thres | abs(df_full$log2FoldChange.x) < fc.thres) ~ label_j,
-          TRUE ~ 'None'))
+            df_full$padj.x <= fdr.thres &
+            df_full$padj.y <= fdr.thres &
+            (df_full$log2FoldChange.x * df_full$log2FoldChange.y >= 0) &
+            abs(df_full$log2FoldChange.x) >= fc.thres &
+            abs(df_full$log2FoldChange.y) >= fc.thres ~ 'Both - same LFC sign',
+
+            df_full$padj.x <= fdr.thres &
+            df_full$padj.y <= fdr.thres &
+            (df_full$log2FoldChange.x * df_full$log2FoldChange.y < 0) &
+            abs(df_full$log2FoldChange.x) >= fc.thres &
+            abs(df_full$log2FoldChange.y) >= fc.thres  ~ 'Both - opposite LFC sign',
+
+            (df_full$padj.x <= fdr.thres & abs(df_full$log2FoldChange.x) >= fc.thres) &
+            (df_full$padj.y > fdr.thres | abs(df_full$log2FoldChange.y) < fc.thres) ~ label_i,
+
+            (df_full$padj.y <= fdr.thres & abs(df_full$log2FoldChange.y) >= fc.thres) &
+            (df_full$padj.x > fdr.thres | abs(df_full$log2FoldChange.x) < fc.thres) ~ label_j,
+
+            TRUE ~ 'None'))
 
         if (label_i == label_j) {
           label_i <- paste0(label_i, '_x')
@@ -554,71 +527,32 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       })
       # ---------------------------------------------------------- #
 
-      # --------- Function: Count OB DE points ---------- #
-      count_OB_DE_points <- function(min_max, x_y, limit, compare, df) {
-
-        prefix <- if (compare == 'LFC') 'log2FoldChange' else 'padj'
-        column <- paste0(prefix, ".", x_y)
-
-        # Filter the full dataframe based on thresholds
-        sig_df <- df[(!is.na(df[['padj.x']]) & df[['padj.x']] <= curr_thres$fdr.thres &
-                          !is.na(df[['log2FoldChange.x']]) & abs(df[['log2FoldChange.x']]) >= curr_thres$fc.thres) |
-                          (!is.na(df[['padj.y']]) & df[['padj.y']] <= curr_thres$fdr.thres &
-                          !is.na(df[['log2FoldChange.y']]) & abs(df[['log2FoldChange.y']]) >= curr_thres$fc.thres), ]
-
-        # padj Limit is for -log10 padj so we need to transform that column before making the check
-        sig_df[[column]] <- if (column == 'padj.x' | column == 'padj.y') -log10(sig_df[[column]]) else sig_df[[column]]
-        # Check if any filtered values exceed the limits
-        if (min_max == 'max' & any(sig_df[[column]] > limit, na.rm=TRUE)) {
-          over_max_ct <- sum(sig_df[[column]] > limit, na.rm=TRUE)
-          return(over_max_ct)
-        } else if (min_max == 'min' & any(sig_df[[column]] < limit, na.rm=TRUE)) {
-          under_min_ct <- sum(sig_df[[column]] < limit, na.rm=TRUE)
-          return(under_min_ct)
-        } else {
-          return(0)
-        }
-      }
-      # ---------------------------------------------------------- #
-
-      # ----------------- Function: Autoscale -------------------- #
-      # Function to get autoscale limits for both plot types and both axes
-      autoscale <- function(df, compare, lim.x, lim.y) {
-        # Determine columns based on compare parameter
-        if (compare == 'LFC') {
-          x_column <- 'log2FoldChange.x'
-          y_column <- 'log2FoldChange.y'
-          df_temp <- df
-        } else if (compare == 'P-adj') {
-          x_column <- 'padj.x'
-          y_column <- 'padj.y'
-          df_temp <- df
-          df_temp[[x_column]] <- -log10(df_temp[[x_column]])
-          df_temp[[y_column]] <- -log10(df_temp[[y_column]])
-        }
-
-        # Set axis limits
-        lim.x <- get_range(df_temp, x_column, lim.x)
-        lim.y <- get_range(df_temp, y_column, lim.y)
-
-        return(list(lim.x = lim.x, lim.y = lim.y))
-      }
-      # ---------------------------------------------------------- #
-
       # ------------------ Observer: Axis limits ----------------- #
       observeEvent(input$scatter_xmin, {
+        validate(
+          need(!is.na(input$scatter_xmin), '')
+        )
         axis_limits$lim.x[1] <- input$scatter_xmin
       })
 
       observeEvent(input$scatter_xmax, {
+        validate(
+          need(!is.na(input$scatter_xmax), '')
+        )
         axis_limits$lim.x[2] <- input$scatter_xmax
       })
 
       observeEvent(input$scatter_ymin, {
+        validate(
+          need(!is.na(input$scatter_ymin), '')
+        )
         axis_limits$lim.y[1] <- input$scatter_ymin
       })
 
       observeEvent(input$scatter_ymax, {
+        validate(
+          need(!is.na(input$scatter_ymax), '')
+        )
         axis_limits$lim.y[2] <- input$scatter_ymax
       })
 
@@ -626,11 +560,9 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
       # --------------- Observer: Autoscale x button ------------- #
       observeEvent(list(input$scatter_x_auto, df_react()), {
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        for (need in needs) {
-          validate(need(need, "Waiting for selection"))
-        }
+        validate(
+          need(!is.null(df_react()), "Waiting for selection")
+        )
 
         # Get x lims
         lims <- autoscale(df=df_react(), compare=input$compare, lim.x=numeric(2), lim.y=numeric(2))
@@ -642,11 +574,9 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
       # --------------- Observer: Autoscale y button ------------- #
       observeEvent(list(input$scatter_y_auto, df_react()), {
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        for (need in needs) {
-          validate(need(need, "Waiting for selection"))
-        }
+        validate(
+          need(!is.null(df_react()), "Waiting for selection")
+        )
 
         # Get y lims
         lims <- autoscale(df=df_react(), compare=input$compare, lim.x=numeric(2), lim.y=numeric(2))
@@ -656,8 +586,59 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       }) # observeEvent
       # --------------------------------------------------------- #
 
-      # ---------------- Function: validate limits -------------- #
-      validate_limits <- function() {
+      # -------------------- Plot preparations ------------------ #
+      plot_prep <- function() {
+        df <- df_react()
+        compare <- input$compare
+        lim.x <- axis_limits$lim.x
+        lim.y <- axis_limits$lim.y
+
+        xcol <- paste0(compare, '.x')
+        ycol <- paste0(compare, '.y')
+
+        if (compare=='padj') {
+          # Convert padj to -log10(padj) for x and y
+          df$padj.x <- -log10(df$padj.x)
+          df$padj.y <- -log10(df$padj.y)
+        }
+
+        # filter rows with NA values
+        df <- df %>% filter(!is.na(.data[[ xcol ]]))
+        df <- df %>% filter(!is.na(.data[[ xcol ]]))
+
+        # Create column with plotting character based on lim.x
+        # Change point values for those outside plot limits to values that are within the limits
+        df$shape <- 'in'
+
+        # count number of points out of axis limits
+        num_ob_points <- sum(df[[ xcol ]] > lim.x[2] |
+                             df[[ xcol ]] < lim.x[1] |
+                             df[[ ycol ]] > lim.y[2] |
+                             df[[ ycol ]] < lim.y[1])
+        if(!is.na(num_ob_points)){
+          if(num_ob_points > 0){
+            showNotification(
+              paste0('Warning: ', num_ob_points, ' points outside plot axes limits. ',
+                     'These are being shown along the respective boundary.'),
+              type='warning'
+            )
+          }
+        }
+
+        # replace x values outside limits with axes limits
+        # build shape column to use for different plotting symbols
+        df[[ xcol ]][ df[[ xcol ]] > lim.x[2] ] <- lim.x[2]
+        df[[ xcol ]][ df[[ xcol ]] < lim.x[1] ] <- lim.x[1]
+        df[[ 'shape' ]][ df[[ xcol ]] == lim.x[2] ] <- 'right'
+        df[[ 'shape' ]][ df[[ xcol ]] == lim.x[1] ] <- 'left'
+
+        # same for y
+        df[[ ycol ]][ df[[ ycol ]] > lim.y[2] ] <- lim.y[2]
+        df[[ ycol ]][ df[[ ycol ]] < lim.y[1] ] <- lim.y[1]
+        df[[ 'shape' ]][ df[[ ycol ]] == lim.y[2] ] <- 'above'
+        df[[ 'shape' ]][ df[[ ycol ]] == lim.y[1] ] <- 'below'
+        df[[ 'shape' ]] <- as.factor(df[[ 'shape' ]])
+
         validate(
           if (!is.na(input$scatter_xmin) && !is.na(input$scatter_xmax)) {
             need(input$scatter_xmin < input$scatter_xmax,
@@ -671,136 +652,6 @@ scatterPlotServer <- function(id, obj, plot_args, config){
                  'y-axis min must be < y-axis max')
           }
         )
-      }
-      # --------------------------------------------------------- #
-
-      # -------------- Function: Report OB points --------------- #
-      report_OB_points <- function() {
-
-        # Parameters for the OB sig point checks
-        checks <- list(
-          list(type = 'max', axis = 'x', limit = axis_limits$lim.x[2], compare = input$compare, df = df_full()),
-          list(type = 'min', axis = 'x', limit = axis_limits$lim.x[1], compare = input$compare, df = df_full()),
-          list(type = 'max', axis = 'y', limit = axis_limits$lim.y[2], compare = input$compare, df = df_full()),
-          list(type = 'min', axis = 'y', limit = axis_limits$lim.y[1], compare = input$compare, df = df_full())
-        )
-
-        # Initialize DE OB point counters
-        OB_counts <- list(over_xmax = 0, under_xmin = 0, over_ymax = 0, under_ymin = 0)
-
-        msg <- NULL
-        for (check in checks) {
-          if (!is.na(check$limit)) {
-            if (check$type == 'max' & check$axis =='x') {
-              OB_counts$over_xmax <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$over_xmax > 0){
-                msg <- paste0(msg, OB_counts$over_xmax, ' genes > x-max; ')
-              }
-            }
-            if (check$type == 'min' & check$axis =='x') {
-              OB_counts$under_xmin <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$under_xmin > 0){
-                msg <- paste0(msg, OB_counts$under_xmin, ' genes < x-min; ')
-              }
-            }
-            if (check$type == 'max' & check$axis =='y') {
-              OB_counts$over_ymax <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$over_ymax > 0){
-                msg <- paste0(msg, OB_counts$over_ymax, ' genes > y-max; ')
-              }
-            }
-            if (check$type == 'min' & check$axis =='y') {
-              OB_counts$under_ymin <- count_OB_DE_points(check$type, check$axis, check$limit, check$compare, check$df)
-              if(OB_counts$under_ymin > 0){
-                msg <- paste0(msg, OB_counts$under_ymin, ' genes < y-min;')
-              }
-            }
-          }
-        }
-
-        # Show a notification if there are any OB DE points
-        if (any(OB_counts > 0)) {
-          showNotification(
-            paste0(
-              'Warning: DE genes outside plot limits: ', msg
-            ),
-            type='warning',
-            duration=7
-          )
-        }
-      }
-      # --------------------------------------------------------- #
-
-      # -------------- Function: Plot all OB points  ------------ #
-      plot_all_OB <- function(df) {
-        # Fetch reactives
-        compare <- input$compare
-        plot_all <- input$plot_all
-        lim.x <- axis_limits$lim.x
-        lim.y <- axis_limits$lim.y
-
-        # Set x and y for plot based on plot type
-        if (compare=='LFC') {
-            # Need a default shape column regardless of plot_all
-          df$shape <- 'in'
-
-          if (plot_all == 'yes') {
-            # Create column with plotting character based on lim.x
-            # Change point values for those outside plot limits to values that are within the limits
-            df$shape <- 'in'
-            df <- df %>%
-              filter(!is.na(.data$log2FoldChange.x)) %>%
-              mutate(log2FoldChange.x = replace(.data$log2FoldChange.x, .data$log2FoldChange.x > lim.x[2], lim.x[2])) %>%
-              mutate(log2FoldChange.x = replace(.data$log2FoldChange.x, .data$log2FoldChange.x < lim.x[1], lim.x[1])) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.x == lim.x[2], 'right')) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.x == lim.x[1], 'left'))
-
-            # same for y
-            df <- df %>%
-              filter(!is.na(.data$log2FoldChange.y)) %>%
-              mutate(log2FoldChange.y = replace(.data$log2FoldChange.y, .data$log2FoldChange.y > lim.y[2], lim.y[2])) %>%
-              mutate(log2FoldChange.y = replace(.data$log2FoldChange.y, .data$log2FoldChange.y < lim.y[1], lim.y[1])) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.y == lim.y[2], 'above')) %>%
-              mutate(shape = replace(.data$shape, .data$log2FoldChange.y == lim.y[1], 'below')) %>%
-              mutate(shape = as.factor(.data$shape))
-          }
-
-        } else if (compare=='P-adj') {
-          # Convert padj to -log10(padj) for x and y
-          df$padj.x <- -log10(df$padj.x)
-          df$padj.y <- -log10(df$padj.y)
-          df$shape <- 'in'
-
-          if (plot_all == 'yes') {
-            # create column with plotting character based on lim.x
-            # change plotted values for those outside plot limits to within the limits
-            df$shape <- 'in'
-            df <- df %>%
-              filter(!is.na(.data$padj.x)) %>%
-              mutate(padj.x = replace(.data$padj.x, .data$padj.x > lim.x[2], lim.x[2])) %>%
-              mutate(padj.x = replace(.data$padj.x, .data$padj.x < lim.x[1], lim.x[1])) %>%
-              mutate(shape = replace(.data$shape, .data$padj.x == lim.x[2], 'right')) %>%
-              mutate(shape = replace(.data$shape, .data$padj.x == lim.x[1], 'left'))
-
-            # same for y
-            df <- df %>%
-              filter(!is.na(.data$padj.y)) %>%
-              mutate(padj.y = replace(.data$padj.y, .data$padj.y > lim.y[2], lim.y[2])) %>%
-              mutate(padj.y = replace(.data$padj.y, .data$padj.y < lim.y[1], lim.y[1])) %>%
-              mutate(shape = replace(.data$shape, .data$padj.y == lim.y[2], 'above')) %>%
-              mutate(shape = replace(.data$shape, .data$padj.y == lim.y[1], 'below')) %>%
-              mutate(shape = as.factor(.data$shape))
-          }
-        }
-        return(df)
-      }
-      # --------------------------------------------------------- #
-
-      # -------------------- Plot preparations ------------------ #
-      plot_prep <- function() {
-        report_OB_points()
-        df <- plot_all_OB(df_react())
-        validate_limits()
 
         # Get genes to label
         genes <- plot_args()$gene.to.plot
@@ -824,9 +675,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       scatterplot <- eventReactive(c(input$refresh, flags$data_loaded), {
 
         # Validation
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        needs <- append(needs, !is.null(df_full()))
+        needs <- c(!is.null(df_react()), !is.null(df_full()))
         for (need in needs) {
           validate(need(need, "Waiting for selection"))
         }
@@ -845,7 +694,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
           lab.genes=lab.genes,
           lim.x=params[['lim.x']],
           lim.y=params[['lim.y']],
-          plot_all=input$plot_all,
+          plot_all='yes',
           name.col='geneid',
           lines=c(input$vline, input$hline, input$dline),
           alpha=input$alpha,
@@ -861,9 +710,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       scatterplot_ly <- eventReactive(c(input$refresh, flags$data_loaded), {
 
         # Validation
-        needs <- needs_react()
-        needs <- append(needs, !is.null(df_react()))
-        needs <- append(needs, !is.null(df_full()))
+        needs <- c(!is.null(df_react()), !is.null(df_full()))
         for (need in needs) {
           validate(need(need, "Waiting for selection"))
         }

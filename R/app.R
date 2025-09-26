@@ -867,6 +867,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       assay.choices <- l[[input$dds]]
 
+      # if project description exists, order assay choices by description names
+      proj_desc <- project_info$descriptions[[ input$dds ]]
+      if(!is.null(proj_desc)){
+        # names from proj desc, that are in assay choices
+        # are moved to the front
+        pnames <- intersect(names(proj_desc), names(assay.choices))
+
+        if(length(pnames) != length(proj_desc)){
+          pmissing <- setdiff(names(proj_desc), names(assay.choices))
+          showNotification(
+            paste0("Warning - Some datasets in project description not found in 'Available analyses': ",
+                   paste(pmissing, collapse=', ')),
+            type='warning'
+          )
+        }
+        anames <- c(pnames, setdiff(names(assay.choices), pnames))
+        assay.choices <- assay.choices[anames]
+      }
       # if more than one assay found & autoload_first_analysis not set
       if(length(assay.choices) > 1 & !config()$server$autoload_first_analysis){
         assay.choices <- c('Choose one', assay.choices)
@@ -1087,6 +1105,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
         elem_names <- NULL
         sep <- '*'
         res_keys <- list()
+        enrich_copy <- app_object$enrich
         for(x in names(app_object$enrich)){
           for(y in names(app_object$enrich[[x]])){
             # NOTE: if key is 'res' save & skip
@@ -1160,10 +1179,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
             for(z in names(app_object$enrich[[x]][[y]])){
               key <- paste(x, y, z, sep=sep)
-              app_object$genetonic[[x]][[y]][[z]] <- flat_obj[[key]]
+              if(!is.null(flat_obj[[key]])){
+                app_object$genetonic[[x]][[y]][[z]] <- flat_obj[[key]]
+              } else {
+                app_object$genetonic[[x]][[y]][[z]] <- dummy_genetonic(enrich_copy[[x]][[y]][[z]])
+              }
             }
           }
         }
+        rm(enrich_copy)
 
         end_time <- Sys.time()
 
@@ -1469,7 +1493,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       tbl <- res_data$tbl
 
-      format_cols <- intersect(colnames(tbl), config()$server$de_analysis$de_table$format_significant$columns)
+      float_idx <- sapply(tbl, function(x) typeof(x) %in% c('double', 'float'))
+      format_cols <- colnames(tbl)[float_idx]
 
       tbl %>%
         datatable(rownames=FALSE,

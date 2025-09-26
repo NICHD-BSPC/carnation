@@ -1,0 +1,53 @@
+name: carnation-env
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - bioconductor-biocversion
+  - bioconductor-biocgenerics
+  - bioconductor-deseq2
+  - bioconductor-enrichplot
+  - bioconductor-genetonic
+  - bioconductor-matrixgenerics
+  - bioconductor-summarizedexperiment
+  - r-base==4.3.1
+  - r-backbone<3.0.0
+  - r-biocmanager
+  - r-colorspace
+  - r-complexupset
+  - r-dendextend
+  - r-dplyr
+  - r-dt
+  - r-ggiraph
+  - r-ggplot2<4.0.0
+  - r-ggrepel
+  - r-heatmaply
+  - r-igraph
+  - r-litedown
+  - r-plotly
+  - r-readr
+  - r-remotes
+  - r-reticulate
+  - r-rintrojs
+  - r-rsconnect
+  - r-s7
+  - r-scales
+  - r-shiny
+  - r-shinybs
+  - r-shinycssloaders
+  - r-shinymanager
+  - r-shinythemes
+  - r-shinywidgets
+  - r-sortable
+  - r-uuid
+  - r-viridis
+  - r-viridislite
+  - r-visnetwork
+  - r-yaml
+  - python==3.10.5
+  - pandoc
+  - pdflatex
+  - plotly
+  - python-kaleido
+  - qpdf
+

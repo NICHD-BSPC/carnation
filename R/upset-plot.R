@@ -719,6 +719,12 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
                    # save symbol column
                    df <- x[idx, c('log2FoldChange', 'padj')]
 
+                   # if some rows are missing, impute NA's
+                   if(nrow(df) < nrow(gdf)){
+                     add.rows <- setdiff(rownames(gdf), rownames(df))
+                     df[add.rows, ] <- NA
+                   }
+
                    # order by rownames - this is needed for
                    # combining data frames
                    df[order(rownames(df)),]

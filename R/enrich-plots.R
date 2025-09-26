@@ -314,13 +314,16 @@ sumovPlotServer <- function(id, obj, config, type=''){
           p <- gs_summary_overview_pair(l_gs, l_gs2,
                            n_gs = n_gs,
                            p_value_column = pcol,
-                           color_by = color_by) +
+                           color_by = color_by,
+                           alpha_set2 = 0.75) +
 
                 # change y-axis label to show selected pvalue column
                 # without a 'gs_' prefix
                 ylab(paste('-log10', sub('gs_', '', pcol))) +
                 theme(text=element_text(size=text_size))
 
+          # change border width of set 1
+          p$layers[[2]]$aes_params$stroke <- 1.25
         }
         p
       })
@@ -381,8 +384,11 @@ enrichmapUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -463,12 +469,33 @@ enrichmapServer <- function(id, obj, res_obj, config){
           visNodes(font=list(size=25))
       })
 
+      # set some graph parameters for saving to file
+      enrichplot_out <- reactive({
+        gg <- enrichplot()
+
+        set_graph_attr(gg)
+      })
+
       helpButtonServer(paste0(plottype, '_help'), size='l')
-      downloadButtonServer('enrichplot_download', enrichplot,
+      downloadButtonServer('enrichplot_download', enrichplot_out,
                            plottype)
     } # function
   ) # moduleServer
 } # function
+
+set_graph_attr <- function(gg){
+  # compute distance of labels from vertices
+  vsizes <- igraph::V(gg)$size
+  vdists <- 0.5 + vsizes/max(vsizes)
+  V(gg)$color <- igraph::V(gg)$color.background
+  V(gg)$frame.color <- igraph::V(gg)$color.border
+  V(gg)$size <- igraph::V(gg)$size*0.35
+  V(gg)$label.family <- 'sans'
+  V(gg)$label.dist <- vdists
+  V(gg)$label.color <- 'black'
+  V(gg)$label.degree <- pi/2
+  gg
+}
 
 ######################### Cnetplot #############################################
 
@@ -717,8 +744,11 @@ radarUI <- function(id, panel, type=''){
     }
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(hlp))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -957,8 +987,11 @@ alluvialUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -1428,8 +1461,11 @@ distillPlotUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -1532,8 +1568,16 @@ distillPlotServer <- function(id, obj, args, config){
           visNodes(font=list(size=25))
       })
 
-      helpButtonServer(paste0(plottype, '_help'), size='l')
+      # set some graph parameters for saving to file
+      enrichplot_out <- reactive({
+        gg <- enrichplot()
 
+        set_graph_attr(gg)
+      })
+
+      helpButtonServer(paste0(plottype, '_help'), size='l')
+      downloadButtonServer('enrichplot_download', enrichplot_out,
+                           plottype)
 
       plot_data <- eventReactive(input$plot_do, {
         curr_args$numcat
@@ -1583,8 +1627,11 @@ fuzzyPlotUI <- function(id, panel){
   } else if(panel == 'main_btns'){
     tagList(
       fluidRow(
-        column(12, align='right',
+        column(6, align='right',
           helpButtonUI(ns(paste0(plottype, '_help')))
+        ), # column
+        column(6,
+          downloadButtonUI(ns('enrichplot_download'))
         ) # column
       ) # fluidRow
     ) # tagList
@@ -1727,7 +1774,16 @@ fuzzyPlotServer <- function(id, obj, args, config){
           visNodes(font=list(size=25))
       })
 
+      # set some graph parameters for saving to file
+      enrichplot_out <- reactive({
+        gg <- enrichplot()
+
+        set_graph_attr(gg)
+      })
+
       helpButtonServer(paste0(plottype, '_help'), size='l')
+      downloadButtonServer('enrichplot_download', enrichplot_out,
+                           plottype)
 
       plot_data <- eventReactive(input$plot_do, {
         curr_args$numcat
