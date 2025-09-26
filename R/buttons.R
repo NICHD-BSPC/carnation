@@ -174,6 +174,13 @@ downloadButtonServer <- function(id, outplot, plot_type){
             # - solution from https://stackoverflow.com/questions/79464233/loading-mathjax-extensions-mathmenu-js-box-visible-in-pdf-when-running-plotl/
             k <- plotly::kaleido()
             k$scope$mathjax <- FALSE
+
+            # add chromium flag if running in docker to prevent kaleido gpu crash error
+            # see: https://github.com/plotly/Kaleido/issues/74
+            if(Sys.getenv('IN_DOCKER') == 'true'){
+              k$scope$chromium_args <- c(k$scope$chromium_args, '--single-process')
+            }
+
             k$transform(outplot(),
                         file=file,
                         width=input$plot_wd*ppi,
