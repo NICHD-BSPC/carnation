@@ -5,11 +5,11 @@ channels:
 dependencies:
   - bioconductor-deseq2
   - bioconductor-enrichplot
-  #- bioconductor-genetonic
+  - bioconductor-genetonic
   - bioconductor-matrixgenerics
   - bioconductor-summarizedexperiment
   - r-base>=4.0
-  #- r-backbone<3.0.0
+  - r-backbone<3.0.0
   - r-colorspace
   - r-complexupset
   - r-dendextend
