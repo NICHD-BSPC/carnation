@@ -6,6 +6,7 @@
 ^Dockerfile
 ^Singularity
 ^_pkgdown\.yml$
+^pkgdown-requirements.yaml$
 ^docs$
 ^pkgdown$
 ^\.github$
