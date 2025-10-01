@@ -40,6 +40,13 @@ jobs:
       #    extra-packages: any::pkgdown, local::., airway, org.Hs.eg.db, clusterProfiler, DEGreport
       #    needs: website
 
+      - name: install miniforge
+        run: |
+          wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+          bash Miniforge3.sh -b -p "${HOME}/conda"
+          echo "^Miniforge3\.sh$" >> .Rbuildignore
+
+
       - name: conda env
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
