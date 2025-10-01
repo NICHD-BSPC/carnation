@@ -16,6 +16,8 @@ upsetPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes, config)
 \item{gene_scratchpad}{reactiveValues object containing genes selected in scratchpad}
 
 \item{reset_genes}{reactive to reset gene scratchpad selection}
+
+\item{config}{reactive list with config settings}
 }
 \description{
 Upset plot module server function
