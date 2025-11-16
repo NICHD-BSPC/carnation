@@ -38,6 +38,7 @@ maPlotUI <- function(id, panel){
       ), # fluidRow
 
       bsCollapse(
+        id=ns('plot_opts'),
         bsCollapsePanel('Plot options',
 
           tags$label(class='control-label',
