@@ -436,7 +436,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 ) # conditionalPanel
               ), # column
               column(9, style='margin-top: 20px',
-                DTOutput('analysis_desc')
+                conditionalPanel('input.data_type == "Existing"',
+                  DTOutput('analysis_desc')
+                ) # conditionalPanel
               )
             ), # fluidRow
 
