@@ -57,7 +57,8 @@ Imports:
     yaml
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat
 VignetteBuilder: knitr
 URL: https://nichd-bspc.github.io/carnation/
 biocViews:
