@@ -1,4 +1,3 @@
-library(testthat)
 library(carnation)
 library(dplyr)
 library(shiny)
