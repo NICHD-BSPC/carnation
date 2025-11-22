@@ -1,4 +1,3 @@
-library(testthat)
 library(shiny)
 library(carnation)
 library(DESeq2)

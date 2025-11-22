@@ -1,10 +1,8 @@
-library(testthat)
 library(shiny)
 library(carnation)
 library(DESeq2)
 library(SummarizedExperiment)
 library(plotly)
-#devtools::load_all()
 
 # Helper function to create mock DESeq2 data for testing
 create_mock_dds <- function(n_genes = 100, n_samples = 6) {
