@@ -196,6 +196,7 @@ upsetPlotUI <- function(id, panel){
 #' @param plot_args reactive containing 'fdr.thres' (padj threshold) & 'fc.thres' (log2FC)
 #' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad
 #' @param reset_genes reactive to reset gene scratchpad selection
+#' @param config reactive list with config settings
 #'
 #' @export
 upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){

@@ -42,6 +42,8 @@ dependencies:
   - python-kaleido
   - qpdf
 
+  - r-pkgdown
   - bioconductor-airway
-  - bioconductor-degreport
   - bioconductor-org.hs.eg.db
+  - bioconductor-degreport
+
