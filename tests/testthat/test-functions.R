@@ -237,49 +237,6 @@ test_that("plotPCA.san function works correctly", {
   expect_true(heatmaply::is.plotly(p_loadings))
 })
 
-# Helper function to create mock DESeq2 data for testing
-create_mock_dds <- function(n_genes = 100, n_samples = 6) {
-  # Create count matrix
-  counts <- matrix(
-    rpois(n_genes * n_samples, lambda = 100),
-    nrow = n_genes,
-    ncol = n_samples
-  )
-  rownames(counts) <- paste0("gene", 1:n_genes)
-  colnames(counts) <- paste0("sample", 1:n_samples)
-
-  # Create sample metadata
-  coldata <- data.frame(
-    condition = factor(rep(c("control", "treatment"), each = 3)),
-    batch = factor(rep(c("A", "B"), times = 3)),
-    samplename = colnames(counts),
-    row.names = colnames(counts)
-  )
-
-  # Create DESeqDataSet
-  dds <- DESeqDataSetFromMatrix(
-    countData = counts,
-    colData = coldata,
-    design = ~ condition
-  )
-
-  return(dds)
-}
-
-# Helper function to create mock DESeq2 results
-create_mock_results <- function(n_genes = 100) {
-  data.frame(
-    baseMean = runif(n_genes, 10, 1000),
-    log2FoldChange = rnorm(n_genes, 0, 2),
-    lfcSE = runif(n_genes, 0.1, 0.5),
-    stat = rnorm(n_genes, 0, 3),
-    pvalue = runif(n_genes, 0, 1),
-    padj = runif(n_genes, 0, 1),
-    symbol = paste0("GENE", 1:n_genes),
-    row.names = paste0("gene", 1:n_genes)
-  )
-}
-
 # Test plotMA.label function
 test_that("plotMA.label creates correct MA plot", {
   # Create mock results data
