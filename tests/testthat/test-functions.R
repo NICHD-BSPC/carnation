@@ -887,7 +887,7 @@ test_that("get_gene_counts and getcountplot work together correctly", {
 # Test getcountplot with real DESeq2 workflow data
 test_that("getcountplot works with DESeq2 transformed data", {
   # Create mock DESeq2 data and transform it
-  mock_dds <- create_mock_dds(n_genes = 5, n_samples = 6)
+  mock_dds <- create_mock_dds()
   mock_rld <- varianceStabilizingTransformation(mock_dds, blind = TRUE)
 
   # Extract counts from transformed data

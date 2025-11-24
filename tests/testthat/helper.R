@@ -1,5 +1,8 @@
 # Helper function to create mock DESeq2 data for testing
 create_mock_dds <- function(n_genes = 100, n_samples = 6) {
+  # round up to even number
+  if((n_samples %% 2) != 0) n_samples <- n_samples + 1
+
   # Create count matrix
   counts <- matrix(
     rpois(n_genes * n_samples, lambda = 100),
@@ -11,8 +14,8 @@ create_mock_dds <- function(n_genes = 100, n_samples = 6) {
 
   # Create sample metadata
   coldata <- data.frame(
-    condition = factor(rep(c("control", "treatment"), each = 3)),
-    batch = factor(rep(c("A", "B"), times = 3)),
+    condition = factor(rep(c("control", "treatment"), each = n_samples/2)),
+    batch = factor(rep(c("A", "B"), times = n_samples/2)),
     samplename = colnames(counts),
     row.names = colnames(counts)
   )
