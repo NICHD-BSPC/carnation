@@ -75,8 +75,15 @@ test_that("genePlotServer handles gene selection correctly", {
     expect_true(exists("gene_coldata"))
     expect_true(exists("gene_plot_data"))
 
+    expect_true(any(plot_args()$gene.to.plot %in% plot_args()$gene.id))
+    expect_true(any(plot_args()$gene.to.plot %in% rownames(gene_plot_data$all)))
+
     # Test that the reactive functions exist
     expect_true(is.reactive(normplot))
-    expect_is(normplot(), "plotly")
+
+    expect_true(!is.null(gene_plot_data$plotted))
+    expect_true(!is.null(gene_plot_data$handle))
+
+    expect_is(gene_plot_data$handle, "ggplot")
   })
 })
