@@ -58,7 +58,7 @@ Imports:
 Suggests:
     airway,
     clusterProfiler,
-    DEGreport
+    DEGreport,
     knitr,
     org.Hs.eg.db,
     rmarkdown,
