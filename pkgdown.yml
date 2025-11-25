@@ -3,7 +3,7 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   carnation: carnation.html
-last_built: 2025-11-24T20:23Z
+last_built: 2025-11-25T15:44Z
 urls:
   reference: https://nichd-bspc.github.io/carnation/reference
   article: https://nichd-bspc.github.io/carnation/articles
