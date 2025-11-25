@@ -1,4 +1,32 @@
 url: https://nichd-bspc.github.io/carnation/
 template:
   bootstrap: 5
+  theme: solarized
+  bslib:
+    bootswatch: united
 
+navbar:
+structure:
+  left:
+  - home
+  - intro
+  - articles
+  - reference
+  - tutorials
+  right: github
+components:
+  home:
+    icon: fa-home fa-lg
+    href: index.html
+  articles:
+    text: Articles
+    menu:
+    - text: |
+        Carnation - airway tutorial
+      href: articles/carnation.html
+  reference:
+    text: Reference
+    href: reference/index.html
+  github:
+    icon: fab fa-github fa-lg
+    href: https://github.com/NICHD-BSPC/carnation
