@@ -192,7 +192,16 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
             ) # modalDialog
           ) # showModal
         } else {
-          stop('Error loading access yaml: ', p$message)
+          showModal(
+            modalDialog(
+              tags$b('Error loading access settings', style='color: red;'),
+              br(), br(),
+              span(p$message),
+              br(),
+              span('Please check file permissions of "', get_access_path(), '" and try again'),
+              footer=NULL
+            ) # modalDialog
+          ) # showModal
         }
       } else {
         access_yaml$l <- p
