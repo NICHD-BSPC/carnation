@@ -395,7 +395,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         )))
 
         if (length(diff.genes) > 0) {
-            warning(paste0(length(diff.genes), ' genes were discarded because found in one res but not the other'))
+            warning(length(diff.genes), ' genes were discarded because found in one res but not the other')
         }
 
         # Lowercase specified column names in both dataframes

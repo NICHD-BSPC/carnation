@@ -12,15 +12,15 @@ get_access_path <- function(){
     path <- Sys.getenv('CARNATION_ACCESS_YAML')
     if(!dir.exists(path)){
       stop(
-        paste('Environment variable "CARNATION_ACCESS_YAML" exists',
-              'but specified location does not exist on disk:', path)
+        'Environment variable "CARNATION_ACCESS_YAML" exists',
+        'but specified location does not exist on disk:', path
       )
     }
   } else {
     path <- path.expand('~')
     message(
-      paste('Environment variable "CARNATION_ACCESS_YAML" not found.',
-            'Using default location to save access yaml:', path)
+      'Environment variable "CARNATION_ACCESS_YAML" not found.',
+      'Using default location to save access yaml:', path
     )
   }
   file.path(path, '.carnation-access.yaml')
