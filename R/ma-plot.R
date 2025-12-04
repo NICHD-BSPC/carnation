@@ -187,9 +187,9 @@ maPlotServer <- function(id, obj, plot_args, config){
         df <- app_object()$res[[input$comp_all]]
 
         # add a 5% buffer and round to 3 significant digits
-        df.max <- round(max(df$log2FoldChange, na.rm=T)*1.05,
+        df.max <- round(max(df$log2FoldChange, na.rm=TRUE)*1.05,
                         digits=3)
-        df.min <- round(min(df$log2FoldChange, na.rm=T)*1.05,
+        df.min <- round(min(df$log2FoldChange, na.rm=TRUE)*1.05,
                         digits=3)
 
         updateNumericInput(session, 'ma_ymin', value=df.min)
