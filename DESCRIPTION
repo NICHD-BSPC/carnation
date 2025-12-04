@@ -64,6 +64,7 @@ Suggests:
     rmarkdown,
 VignetteBuilder: knitr
 URL: https://nichd-bspc.github.io/carnation/
+BugReports: https://github.com/NICHD-BSPC/carnation/issues
 biocViews:
     GUI, GeneExpression, Software, ShinyApps, GO, Transcription,
     Transcriptomics, Visualization, DifferentialExpression,
