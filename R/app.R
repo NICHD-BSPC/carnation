@@ -1493,7 +1493,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       tbl <- res_data$tbl
 
-      float_idx <- sapply(tbl, function(x) typeof(x) %in% c('double', 'float'))
+      float_idx <- vapply(tbl, function(x) typeof(x) %in% c('double', 'float'), logical(1))
       format_cols <- colnames(tbl)[float_idx]
 
       tbl %>%

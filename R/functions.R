@@ -838,7 +838,7 @@ add.set.column <- function(df){
     # - set numbers are padded with 0 to have the same number of digits
     #   e.g. if there are 10 sets, sets are numbered 'set01' ... 'set10'
     max.digits <- nchar(length(set.counts))
-    set.names <- unlist(sapply(1:length(set.counts),
+    set.names <- unlist(lapply(seq_len(length(set.counts)),
                                function(x){
                                    paste0('set', paste(rep(0, max.digits-nchar(x)), collapse=''), x)
                                }))

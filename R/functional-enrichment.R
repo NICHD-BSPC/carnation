@@ -932,7 +932,7 @@ enrichServer <- function(id, obj, upset_table,
       output$func_table <- renderDT({
         df <- get_func_table()
 
-        float_idx <- sapply(df, function(x) typeof(x) %in% c('double', 'float'))
+        float_idx <- vapply(df, function(x) typeof(x) %in% c('double', 'float'), logical(1))
         format_cols <- colnames(df)[float_idx]
         digits <- config()$server$functional_enrichment$table$enrichment$format_significant$digits
 
@@ -1445,7 +1445,7 @@ enrichServer <- function(id, obj, upset_table,
         )
         colnames(tbl) <- sub('^gs_', '', colnames(tbl))
 
-        float_idx <- sapply(tbl, function(x) typeof(x) %in% c('double', 'float'))
+        float_idx <- vapply(tbl, function(x) typeof(x) %in% c('double', 'float'), logical(1))
         format_cols <- colnames(tbl)[float_idx]
         digits <- config()$server$functional_enrichment$table$fuzzy_tbl$format_significant$digits
 
