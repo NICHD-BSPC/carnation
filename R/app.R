@@ -26,14 +26,14 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     # check to see if shinymanager is available
     if(!requireNamespace('shinymanager', quietly=TRUE)){
       stop(
-        paste('Login functionality using SQL/sqlite credentials requires "shinymanager".',
-              'Please install using "install.packages(\'shinymanager\')"'),
+        'Login functionality using SQL/sqlite credentials requires "shinymanager".',
+        'Please install using "install.packages(\'shinymanager\')"',
         .call=FALSE
       )
     } else if(!file.exists(credentials)){
       stop(
-        paste0('Credentials specified, but file not found: "',
-               credentials, '"')
+        'Credentials specified, but file not found: "',
+        credentials, '"'
       )
     }
   }

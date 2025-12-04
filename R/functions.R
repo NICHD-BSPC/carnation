@@ -483,8 +483,8 @@ make_final_object <- function(obj){
               idmap_names <- rownames(res)
           } else {
               message(
-                paste0('No gene column or row names found in ',
-                       'res object: ', name, '. Skipping\n')
+                'No gene column or row names found in ',
+                'res object: ', name, '. Skipping\n'
               )
               next
           }
