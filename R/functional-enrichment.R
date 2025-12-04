@@ -757,7 +757,7 @@ enrichServer <- function(id, obj, upset_table,
       # with the matches in bold (optional)
       # - can do exact or partial matching
       match_text_tbl <- function(df, search_txt, gene_col, gene_sep, highlight, exact_match){
-        ll <- lapply(1:nrow(df), function(x){
+        ll <- lapply(seq_len(nrow(df)), function(x){
                 tmp <- strsplit(df[x, gene_col], gene_sep)[[1]]
 
                 # case-insensitive search
@@ -947,12 +947,12 @@ enrichServer <- function(id, obj, upset_table,
           rem.cols <- setdiff(colnames(df), c('Count',
                                               gene.id.col))
           desc.idx <- which(rem.cols == 'Description')
-          col.order <- c(rem.cols[1:desc.idx], gene.id.col,
+          col.order <- c(rem.cols[seq_len(desc.idx)], gene.id.col,
                          'Count', rem.cols[(desc.idx+1):length(rem.cols)])
         } else {
           rem.cols <- setdiff(colnames(df), gene.id.col)
           desc.idx <- which(rem.cols == 'Description')
-          col.order <- c(rem.cols[1:desc.idx], gene.id.col,
+          col.order <- c(rem.cols[seq_len(desc.idx)], gene.id.col,
                          rem.cols[(desc.idx+1): length(rem.cols)])
         }
         cols_to_format <- intersect(colnames(df), format_cols)
@@ -1309,7 +1309,7 @@ enrichServer <- function(id, obj, upset_table,
         subset_rows <- min(nrow(l_gs), numcat)
 
         fuzzy_clusters <- tryCatch(
-                            gs_fuzzyclustering(l_gs[1:subset_rows,],
+                            gs_fuzzyclustering(l_gs[seq_len(subset_rows),],
                               # n_gs = nrow(res_enrich_subset),
                               # gs_ids = NULL,
                               # similarity_matrix = NULL,
@@ -1399,7 +1399,7 @@ enrichServer <- function(id, obj, upset_table,
         subset_rows <- min(nrow(l_gs), numcat)
 
         fuzzy_clusters <- tryCatch(
-                            gs_fuzzyclustering(l_gs[1:subset_rows,],
+                            gs_fuzzyclustering(l_gs[seq_len(subset_rows),],
                               # n_gs = nrow(res_enrich_subset),
                               # gs_ids = NULL,
                               # similarity_matrix = NULL,

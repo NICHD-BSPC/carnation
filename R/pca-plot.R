@@ -10,7 +10,7 @@ pcaPlotUI <- function(id, panel){
   # load default config
   config <- get_config()
   dims <- config$server$de_analysis$pca_plot$dims
-  pc_choices <- setNames(1:dims, paste0('PC', 1:dims))
+  pc_choices <- setNames(seq_len(dims), paste0('PC', seq_len(dims)))
 
   if(panel == 'sidebar'){
     tagList(
@@ -215,7 +215,7 @@ pcaPlotServer <- function(id, obj, coldata, config){
       # update min menus from reactive config
       observeEvent(config(), {
         dims <- config()$server$de_analysis$pca_plot$dims
-        pc_choices <- setNames(1:dims, paste0('PC', 1:dims))
+        pc_choices <- setNames(seq_len(dims), paste0('PC', seq_len(dims)))
 
         updateSelectInput(session, 'pcx',
                           choices=pc_choices)

@@ -709,7 +709,7 @@ genePlotServer <- function(id, obj,
         if(length(facet) > 2){
           showNotification('More than 2 faceting variables specified. Using first two ...',
                            duration=5)
-          facet <- facet[1:2]
+          facet <- facet[seq_len(2)]
         }
 
         if(!is.null(facet) & !all(facet %in% c('gene'))){

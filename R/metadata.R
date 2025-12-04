@@ -360,7 +360,7 @@ metadataServer <- function(id, obj, cols.to.drop){
               meta_df <- meta_df[, cols.to.keep]
 
               # update values in staged df
-              for(i in 1:nrow(edit_df)){
+              for(i in seq_len(nrow(edit_df))){
                   r <- edit_df$row[i]
                   c <- edit_df$col[i]
                   v <- edit_df$value[i]

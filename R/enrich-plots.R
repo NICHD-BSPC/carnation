@@ -229,7 +229,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
           n_gs <- min(nrow(l_gs), numcat)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs)])) == 0,
                    'Duplicate category names after truncation. Please increase max name length')
           )
 
@@ -268,7 +268,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
           n_gs1 <- min(nrow(l_gs), numcat)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs1])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs1)])) == 0,
                    'Duplicate category names for comparison 1 after truncation. Please increase max name length')
           )
 
@@ -280,7 +280,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
           n_gs2 <- min(nrow(l_gs2), numcat)
 
           validate(
-              need(sum(duplicated(l_gs2$gs_description[1:n_gs2])) == 0,
+              need(sum(duplicated(l_gs2$gs_description[seq_len(n_gs2)])) == 0,
                    'Duplicate category names for comparison 2 after truncation. Please increase max name length')
           )
 
@@ -829,7 +829,7 @@ radarServer <- function(id, obj, config, type=''){
           l_gs$gs_description <- substr(l_gs$gs_description, 1, catlen)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs)])) == 0,
                    'Duplicate category names after truncation. Please increase max name length')
           )
 
@@ -864,7 +864,7 @@ radarServer <- function(id, obj, config, type=''){
           l_gs$gs_description <- substr(l_gs$gs_description, 1, catlen)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs1])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs1)])) == 0,
                    'Duplicate category names for comparison 1 after truncation. Please increase max name length')
           )
 
@@ -876,7 +876,7 @@ radarServer <- function(id, obj, config, type=''){
           l_gs2$gs_description <- substr(l_gs2$gs_description, 1, catlen)
 
           validate(
-              need(sum(duplicated(l_gs2$gs_description[1:n_gs2])) == 0,
+              need(sum(duplicated(l_gs2$gs_description[seq_len(n_gs2)])) == 0,
                    'Duplicate category names for comparison 2 after truncation. Please increase max name length')
           )
 
@@ -1372,7 +1372,7 @@ horizonServer <- function(id, obj, config){
         l_gs1$gs_description <- substr(l_gs1$gs_description, 1, catlen)
 
         validate(
-            need(sum(duplicated(l_gs1$gs_description[1:n_gs1])) == 0,
+            need(sum(duplicated(l_gs1$gs_description[seq_len(n_gs1)])) == 0,
                  'Duplicate category names for comparison 1 after truncation. Please increase max name length')
         )
 
@@ -1384,7 +1384,7 @@ horizonServer <- function(id, obj, config){
         l_gs2$gs_description <- substr(l_gs2$gs_description, 1, catlen)
 
         validate(
-            need(sum(duplicated(l_gs2$gs_description[1:n_gs2])) == 0,
+            need(sum(duplicated(l_gs2$gs_description[seq_len(n_gs2)])) == 0,
                  'Duplicate category names for comparison 2 after truncation. Please increase max name length')
         )
 

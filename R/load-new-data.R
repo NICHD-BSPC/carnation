@@ -354,7 +354,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
                  ) # fluidRow
                ) # tagList
 
-        for(i in 1:nrow(input$res_file)){
+        for(i in seq_len(nrow(input$res_file))){
           # get placeholder
           tmp_id <- tools::file_path_sans_ext(basename(input$res_file$name[i]))
 
@@ -411,7 +411,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
 
         # get number of uploaded DE results
         nres <- nrow(input$res_file)
-        all_names <- paste0(c('res_id', 'res_label'), 1:nres)
+        all_names <- paste0(c('res_id', 'res_label'), seq_len(nres))
 
         # check that counts name & label are not empty
         for(name in c(all_names)){
@@ -428,7 +428,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
         }
 
         # read DE files & build res_list
-        for(i in 1:nres){
+        for(i in seq_len(nres)){
           res <- read.table(input$res_file$datapath[i],
                             sep='\t', header=TRUE)
 
@@ -617,7 +617,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
                  ) # fluidRow
                ) # tagList
 
-        for(i in 1:nrow(input$func_file)){
+        for(i in seq_len(nrow(input$func_file))){
 
           # get placeholder names
           tmp_id <- tools::file_path_sans_ext(basename(input$func_file$name[i]))
@@ -704,7 +704,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
         req(input$func_file)
 
         neres <- nrow(input$func_file)
-        all_names <- paste0(c('func_id', 'func_res_id', 'func_pathway'), 1:neres)
+        all_names <- paste0(c('func_id', 'func_res_id', 'func_pathway'), seq_len(neres))
 
         # check that FE name, DE comp name & pathway names are not empty
         for(name in all_names){
@@ -720,7 +720,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
           )
         }
 
-        for(i in 1:neres){
+        for(i in seq_len(neres)){
           # read FE table
           eres <- read.table(input$func_file$datapath[i],
                             sep='\t', header=TRUE)

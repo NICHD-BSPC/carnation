@@ -807,7 +807,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
                       container=sketch,
                       options=list(autoWidth=TRUE,
                                    columnDefs=list(list(className='dt-center',
-                                                        targets=1:(ncol(df)-1))))) %>%
+                                                        targets=seq_len((ncol(df)-1)))))) %>%
             formatStyle(columns=border_cols,
                         'border-right'='solid 1px') %>%
             formatSignif(columns=which_cols, digits=5)

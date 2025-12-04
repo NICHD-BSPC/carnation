@@ -151,7 +151,7 @@ get_project_name_from_path <- function(x,
 #'
 #' @export
 get_common_path_from_list <- function(df){
-  patterns <- unlist(unique(lapply(1:nrow(df), function(i){
+  patterns <- unlist(unique(lapply(seq_len(nrow(df)), function(i){
                     substr(df$data_area[i], 1, regexpr(df$user_group[i], df$data_area[i])-1)
                 })))
   # remove any trailing slashes
@@ -200,8 +200,8 @@ get_gene_counts <- function (dds,
 
   if(!all(gene %in% rownames(cnts))){
     num.to.skip <- sum(!gene %in% rownames(cnts))
-    cat('Skipping ', num.to.skip,
-        ' genes not found in data\n')
+    message('Skipping ', num.to.skip,
+            ' genes not found in data\n')
     gene <- gene[gene %in% rownames(cnts)]
   }
 
@@ -459,7 +459,7 @@ make_final_object <- function(obj){
         } else if(name %in% names(obj[[res.name]])){
           res <- obj[[res.name]][[name]]
         } else {
-          cat('no matching dds object found for ', name, ', skipping\n')
+          message('no matching dds object found for ', name, ', skipping\n')
           obj[[dds.name]] <- obj[[dds.name]][!names(obj[[dds.name]]) %in% name]
           obj[[rld.name]] <- obj[[rld.name]][!names(obj[[rld.name]]) %in% name]
           next
@@ -628,7 +628,7 @@ make_final_object <- function(obj){
             obj$all_rld <- varianceStabilizingTransformation(all_dds, blind=TRUE)
             colData(obj$all_rld)$sample <- rownames(colData(obj$all_rld))
           } else {
-            cat('No shared samples in dds objects ...\n')
+            message('No shared samples in dds objects ...\n')
 
             obj$all_dds <- NULL
             obj$all_rld <- NULL
@@ -667,12 +667,10 @@ make_final_object <- function(obj){
 #'
 #' @export
 enrich_to_genetonic <- function(enrich, res){
-    suppressMessages({
-      if(inherits(enrich, 'enrichResult'))
-        l_gs <- shake_enrichResult(enrich)
-      else if(inherits(enrich, 'gseaResult'))
-        l_gs <- shake_gsenrichResult(enrich)
-    })
+    if(inherits(enrich, 'enrichResult'))
+      l_gs <- shake_enrichResult(enrich)
+    else if(inherits(enrich, 'gseaResult'))
+      l_gs <- shake_gsenrichResult(enrich)
 
     if(!'gene' %in% colnames(res)){
       if(!is.null(rownames(res))){
@@ -1097,9 +1095,9 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
     n.up <- ceiling(n/2)
 
     # get top upregulated & downregulated genes
-    top.idx <- c(1:n.up, (nrow(res.de) - (n - n.up) + 1):nrow(res.de))
+    top.idx <- c(seq_len(n.up), (nrow(res.de) - (n - n.up) + 1):nrow(res.de))
   } else if(by == 'padj'){
-    top.idx <- 1:n
+    top.idx <- seq_len(n)
   }
 
   if(is.null(sidx)) return( unique(rownames(res.de)[top.idx]) )
@@ -1166,12 +1164,12 @@ format_genes <- function(g, sep='\\/', genes.per.line=6){
 
                       if(rem == 0){
                         start.idx <- (0:(nsets-1))*genes.per.line + 1
-                        end.idx <- (1:nsets)*genes.per.line
+                        end.idx <- (seq_len(nsets))*genes.per.line
                       } else {
                         start.idx <- (0:nsets)*genes.per.line + 1
-                        end.idx <- c((1:nsets)*genes.per.line, length(g.tmp))
+                        end.idx <- c((seq_len(nsets))*genes.per.line, length(g.tmp))
                       }
-                      gg <- unlist(lapply(1:length(start.idx),
+                      gg <- unlist(lapply(seq_len(length(start.idx)),
                                 function(x){
                                     tmp <- paste(g.tmp[start.idx[x]:end.idx[x]],
                                                  collapse=',')
@@ -1204,7 +1202,7 @@ fromList.with.names <- function(lst){
   }))
   data[is.na(data)] <- as.integer(0)
   data[data != 0] <- as.integer(1)
-  data <- data.frame(matrix(data, ncol = length(lst), byrow = F))
+  data <- data.frame(matrix(data, ncol = length(lst), byrow = FALSE))
 
   # This is the only way in which this function differs from UpSetR::fromList
   # NOTE: here we use the unique column as rownames
@@ -1286,15 +1284,15 @@ get_degplot <- function(obj, time, color=NULL,
   }
 
   if (is.null(color)){
-      color = "dummy"
-      table[[color]] = "one_group"
+      color <- "dummy"
+      table[[color]] <- "one_group"
   }
 
   if("symbol" %in% colnames(table)){
-    table[["line_group"]] = paste(table[["symbol"]],
+    table[["line_group"]] <- paste(table[["symbol"]],
                                 table[[color]])
   } else {
-    table[["line_group"]] = paste(table[["genes"]],
+    table[["line_group"]] <- paste(table[["genes"]],
                                   table[[color]])
   }
 
@@ -1821,9 +1819,9 @@ plotPCA.san <- function (object, intgroup = "group",
     if(!is.null(pcz)) ssq <- ssq + rot[, pcz]**2
 
     # order SS to get top genes
-    ssq <- ssq[order(ssq, decreasing=T)]
+    ssq <- ssq[order(ssq, decreasing=TRUE)]
 
-    top_genes <- names(ssq)[1:loadings_ngenes]
+    top_genes <- names(ssq)[seq_len(loadings_ngenes)]
 
     # double up a single gene to avoid single-row df effects
     if(length(top_genes) == 1) top_genes <- c(top_genes, top_genes)
@@ -1838,7 +1836,7 @@ plotPCA.san <- function (object, intgroup = "group",
     scaleratio <- round(mean(unlist(all_ratios)))
 
     # build text
-    tt2 <- lapply(1:nrow(rot_df), function(x){
+    tt2 <- lapply(seq_len(nrow(rot_df)), function(x){
              ll <- list(x=rot_df[x, pcx]*scaleratio*1.1,
                         y=rot_df[x, pcy]*scaleratio*1.1,
                         showarrow=FALSE,

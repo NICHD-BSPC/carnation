@@ -470,7 +470,7 @@ heatmapServer <- function(id, obj,
                 paste('Too many genes to plot. Showing top',
                       max_ngenes, 'genes based on', input$hmap_rank)
             )
-            s <- s[1:max_ngenes]
+            s <- s[seq_len(max_ngenes)]
           }
 
         } else if(input$geneset_type == 'upset_intersections'){
@@ -605,7 +605,7 @@ heatmapServer <- function(id, obj,
           )
 
           mat <- mat[order(rowVars(mat), decreasing=TRUE),]
-          mat <- mat[1:input$max_gene_num,]
+          mat <- mat[seq_len(input$max_gene_num),]
         }
 
         validate(

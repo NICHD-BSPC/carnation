@@ -264,7 +264,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
 
         comp_num <- config()$server$de_analysis$upset_plot$comp_num
         if(length(choices) > comp_num){
-          choices <- choices[1:comp_num]
+          choices <- choices[seq_len(comp_num)]
         }
 
         upset_choices$current <- choices
@@ -393,7 +393,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
       })
 
       observeEvent(input$custom_reset, {
-        for(i in 1:nrow(upset_choices$tbl)){
+        for(i in seq_len(nrow(upset_choices$tbl))){
           upset_choices$tbl[i, ] <- ''
         }
         custom_tbl_proxy %>% selectCells(NULL)
@@ -450,7 +450,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
 
             # empty tbl
             new_tbl <- upset_choices$tbl
-            for(i in 1:nrow(upset_choices$tbl)){
+            for(i in seq_len(nrow(upset_choices$tbl))){
               new_tbl[i, ] <- ''
             }
 
@@ -640,7 +640,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
 
         intersect_num <- config()$server$de_analysis$upset_plot$intersect_num
         if(length(selected) > intersect_num){
-          selected <- selected[1:intersect_num]
+          selected <- selected[seq_len(intersect_num)]
         }
         updateSelectizeInput(session, 'upset_intersections',
                              choices=inter_choices,
