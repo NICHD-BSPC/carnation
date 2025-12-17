@@ -1337,7 +1337,7 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
 #'
 #' # extract counts and metadata
 #' df <- assay(dds)
-#' cdata <- colData(dds)
+#' coldata <- colData(dds)
 #'
 #' df <- add_metadata(df, coldata, exclude.intgroups=NULL)
 #'
