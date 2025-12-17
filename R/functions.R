@@ -42,6 +42,17 @@ create_access_yaml <- function(user, user_group, data_area){
 #' @return return carnation access settings from yaml file
 #'
 #' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
 #' al <- read_access_yaml()
 #'
 #' @export
@@ -70,6 +81,17 @@ read_access_yaml <- function(){
 #' @return save access settings to yaml file
 #'
 #' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
 #' # read access yaml
 #' lst <- read_access_yaml()
 #'
@@ -115,7 +137,18 @@ is_site_admin <- function(u){
 #' @return TRUE/FALSE to indicate if the user is part of the admin group
 #'
 #' @examples
-#' check <- in_admin_group('admin')
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
+#' check <- in_admin_group('user')
 #'
 #' @export
 in_admin_group <- function(u){

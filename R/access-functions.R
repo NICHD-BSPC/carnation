@@ -44,6 +44,17 @@ get_access_path <- function(){
 #' @return list of user groups and data areas
 #'
 #' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
 #' # get current user access details
 #' al <- read_access_yaml()
 #'

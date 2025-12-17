@@ -18,6 +18,17 @@ This function saves access details (user groups
 and data areas) to the designated access yaml file.
 }
 \examples{
+# save access details to file
+home <- Sys.getenv('HOME')
+
+# create carnation data area if it doesn't exist
+carnation_home <- file.path(home, 'carnation/data')
+if(!dir.exists(carnation_home)) dir.create(carnation_home)
+
+create_access_yaml(user = 'admin',
+                   user_group = 'admin',
+                   data_area = carnation_home)
+
 # read access yaml
 lst <- read_access_yaml()
 
