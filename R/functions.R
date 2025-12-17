@@ -1339,7 +1339,11 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
 #' df <- assay(dds)
 #' coldata <- colData(dds)
 #'
-#' df <- add_metadata(df, coldata, exclude.intgroups=NULL)
+#' # melt counts df & rename columns
+#' df_melt <- reshape2::melt(df[1:10, ])
+#' colnames(df_melt) <- c('gene', 'sample', 'count')
+#'
+#' df_melt <- add_metadata(df_melt, coldata, exclude.intgroups=NULL)
 #'
 #' @export
 add_metadata <- function(df, coldata, exclude.intgroups){

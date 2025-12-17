@@ -29,6 +29,10 @@ dds <- makeExampleDESeqDataSet()
 df <- assay(dds)
 coldata <- colData(dds)
 
-df <- add_metadata(df, coldata, exclude.intgroups=NULL)
+# melt counts df & rename columns
+df_melt <- reshape2::melt(df[1:10, ])
+colnames(df_melt) <- c('gene', 'sample', 'count')
+
+df_melt <- add_metadata(df_melt, coldata, exclude.intgroups=NULL)
 
 }
