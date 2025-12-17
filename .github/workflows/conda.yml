@@ -101,5 +101,27 @@ jobs:
           Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation', upgrade='never')"
           Rscript -e "library(carnation)"
 
+      - name: Run BiocCheck
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda activate ../env
+          conda install -y bioconductor-bioccheck
+
+          # create tmp dir for build and check
+          cd .. && mkdir bioccheck && cd bioccheck
+
+          Rscript -e "library(BiocCheck); BiocCheck('../carnation')"
+          tar cvzf bioccheck.tar.gz carnation.BiocCheck/
+          mv bioccheck.tar.gz ${WORKDIR}/bioccheck.tar.gz
+
+      - name: bioccheck log
+        uses: actions/upload-artifact@v4
+        with:
+          name: bioccheck-log
+          path: bioccheck.tar.gz
+
+
+
+
 
 
