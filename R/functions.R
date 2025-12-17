@@ -7,6 +7,21 @@
 #' @param user_group User group
 #' @param data_area Path to data area containing RDS files
 #'
+#' @return Invisibly returns `NULL`. This function is primarily used for
+#'   its side effect of saving a yaml file with access settings
+#'
+#' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
 #' @export
 create_access_yaml <- function(user, user_group, data_area){
   ug <- setNames(as.list(user_group), user)
@@ -23,6 +38,11 @@ create_access_yaml <- function(user, user_group, data_area){
 #' This function reads the access yaml file and
 #' returns user groups and data areas
 #' as a list of data frames.
+#'
+#' @return return carnation access settings from yaml file
+#'
+#' @examples
+#' al <- read_access_yaml()
 #'
 #' @export
 read_access_yaml <- function(){
@@ -47,6 +67,18 @@ read_access_yaml <- function(){
 #' @param lst list of data frames with user_groups and
 #'  data_areas
 #'
+#' @return save access settings to yaml file
+#'
+#' @examples
+#' # read access yaml
+#' lst <- read_access_yaml()
+#'
+#' # add new user
+#' lst$user_group$admin <- c(lst$user_group$admin, 'user1')
+#'
+#' # save to access settings
+#' save_access_yaml(lst)
+#'
 #' @export
 save_access_yaml <- function(lst){
   # get access file
@@ -59,6 +91,12 @@ save_access_yaml <- function(lst){
 #' is user an admin?
 #'
 #' @param u username
+#'
+#' @return boolean to indicate is user is in admin group
+#'
+#' @examples
+#' # check if default user is admin
+#' yy <- is_site_admin(u='admin')
 #'
 #' @export
 is_site_admin <- function(u){
@@ -73,6 +111,11 @@ is_site_admin <- function(u){
 #' is user is in admin group?
 #'
 #' @param u username
+#'
+#' @return TRUE/FALSE to indicate if the user is part of the admin group
+#'
+#' @examples
+#' check <- in_admin_group('admin')
 #'
 #' @export
 in_admin_group <- function(u){
@@ -94,6 +137,9 @@ in_admin_group <- function(u){
 #'
 #' @return list containing config items
 #'
+#' @examples
+#' cfg <- get_config()
+#'
 #' @export
 get_config <- function(){
   cfg_path <- system.file('extdata', 'config.yaml',
@@ -107,17 +153,20 @@ get_config <- function(){
 #' This function takes in a path to an RDS file and returns
 #' a string to be used as project name
 #'
-#' So if the path is: /path/to/project/test/main.*pattern*.rds
-#' and depth=2 & end_offset=0
-#' this returns: project/test
-#'
 #' @param x character path to RDS file
 #' @param depth integer how many levels below path to look?
 #' @param end_offset integer how far from the end of path to end?
 #' @param staging_dir name of staging directory
 #' @param fsep file separator to split path with
 #'
-#' @return project name
+#' @return project name parsed from path to object
+#'
+#' @examples
+#' # path to carnation object
+#' obj_path <- "/path/to/project/test/main.rnaseq.rds"
+#'
+#' # parsed project name
+#' get_project_name_from_path(obj_path, depth = 2, end_offset = 0)
 #'
 #' @export
 get_project_name_from_path <- function(x,
@@ -143,22 +192,6 @@ get_project_name_from_path <- function(x,
   p
 }
 
-#' Return common base path from list of paths
-#'
-#' @param df data frame with two columns: data_area & user_group
-#'
-#' @return vector of base paths
-#'
-#' @export
-get_common_path_from_list <- function(df){
-  patterns <- unlist(unique(lapply(seq_len(nrow(df)), function(i){
-                    substr(df$data_area[i], 1, regexpr(df$user_group[i], df$data_area[i])-1)
-                })))
-  # remove any trailing slashes
-  patterns <- sub('\\/$','',patterns)
-  return(patterns)
-}
-
 #' Get read counts for gene
 #'
 #' This is a simple function to obtain read counts for a
@@ -170,6 +203,13 @@ get_common_path_from_list <- function(df){
 #' @param norm_method normalization method, can be 'libsize' (default) or 'vst'
 #'
 #' @return data.frame with gene counts
+#'
+#' @examples
+#' # make example DESeq data set
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # get counts for gene1
+#' gg <- get_gene_counts(dds, 'gene1')
 #'
 #' @export
 get_gene_counts <- function (dds,
@@ -248,6 +288,20 @@ get_gene_counts <- function (dds,
 #' @param rotate_x_labels angle to rotate x-axis labels (default=30)
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' # make example DESeq dataset
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # get gene counts
+#' df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
+#'
+#' # standard gene plot
+#' p <- getcountplot(df, intgroup = "condition", factor.levels = c("A", "B"))
+#'
+#' # with genes faceted
+#' p1 <- getcountplot(df, intgroup = "condition", factor.levels = c("A", "B"), facet = "gene")
+#'
 #'
 #' @export
 getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
@@ -329,6 +383,18 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
 #' between 0 and 1
 #' @param pseudocount pseudo-count to add to the data.frame
 #'
+#' @return min and max limits for count column, padded for visualization
+#'
+#' @examples
+#' # make example DESeq dataset
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # get gene counts
+#' df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
+#'
+#' # get y axis limits
+#' get_y_init(df, y_delta = 0.01, pseudocount = 1)
+#'
 #' @export
 get_y_init <- function(df, y_delta, pseudocount){
     if(!'count' %in% colnames(df))
@@ -362,6 +428,39 @@ get_y_init <- function(df, y_delta, pseudocount){
 #' @param obj list object containing lists of DE analysis
 #' results, functional enrichment objects, pattern analysis
 #' objects & raw and normalized counts objects.
+#'
+#' @return final carnation object with additional pre-processing
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example DESeq dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#'
+#' # perform VST normalization
+#' rld <- varianceStabilizingTransformation(dds, blind = TRUE)
+#'
+#' # build minimal object
+#' obj <- list(
+#'            res_list = list(
+#'                           comp = list(
+#'                               res = res,
+#'                               dds = "main",
+#'                               label = "A vs B"
+#'                           )
+#'                       ),
+#'            dds_list = list(main = dds),
+#'            rld_list = list(main = rld)
+#'        )
+#'
+#' # final object
+#' final_obj <- make_final_object(obj)
 #'
 #' @export
 make_final_object <- function(obj){
@@ -665,6 +764,58 @@ make_final_object <- function(obj){
 #' @param enrich enrichResult object
 #' @param res data frame with DE analysis results
 #'
+#' @return GeneTonic object
+#'
+#' @examples
+#' library(airway)
+#' library(DESeq2)
+#' library(org.Hs.eg.db)
+#'
+#' # load airway data
+#' data('airway')
+#'
+#' # extract counts and metadata
+#' mat <- assay(airway)
+#' cdata <- colData(airway)
+#'
+#' # get symbol annotations
+#' anno_df <- mapIds(org.Hs.eg.db,
+#'                column='SYMBOL',
+#'                keys=rownames(mat),
+#'                keytype='ENSEMBL')
+#' anno_df <- as.data.frame(anno_df)
+#'
+#' # analyze with DESeq2
+#' dds <- DESeqDataSetFromMatrix(mat,
+#'                               colData=cdata,
+#'                               design=~cell + dex)
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interet
+#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
+#'
+#' # add gene column from rownames
+#' res$gene <- rownames(res)
+#'
+#' # add symbol column from annotations
+#' res$symbol <- anno_df[rownames(res)]
+#'
+#'
+#' # get DE genes with FDR < 0.1
+#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+#'
+#' # functional enrichment using GO BP
+#' eres <- clusterProfiler::enrichGO(
+#'             gene = de_genes,
+#'             keyType = 'ENSEMBL',
+#'             OrgDb=org.Hs.eg.db,
+#'             ont='BP'
+#'         )
+#'
+#' # convert to GeneTonic object
+#' gt <- enrich_to_genetonic(eres, res)
+#'
+#'
 #' @export
 enrich_to_genetonic <- function(enrich, res){
     if(inherits(enrich, 'enrichResult'))
@@ -706,6 +857,24 @@ enrich_to_genetonic <- function(enrich, res){
 #'  lower case
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example DESeq dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#'
+#' # add gene and symbol column
+#' res$gene <- rownames(res)
+#' res$symbol <- rownames(res)
+#'
+#' plotMA.label(res, lab.genes = c("gene1", "gene2"))
 #'
 #' @export
 plotMA.label <- function(res,
@@ -806,6 +975,19 @@ plotMA.label <- function(res,
 #'  are gene sets, with 1 indicating that a gene is present
 #'  is that gene set and vice-versa
 #'
+#' @return data.frame with added set column
+#'
+#' @examples
+#' # list of genes
+#' lst <- list(group1 = c(a = "gene1", b = "gene2", c = "gene3", d = "gene4"),
+#'             group2 = c(c = "gene3", d = "gene4"))
+#'
+#' # binarized matrix with group membership
+#' df <- fromList.with.names(lst)
+#'
+#' # matrix with added set column
+#' ldf <- add.set.column(df)
+#'
 #' @export
 add.set.column <- function(df){
     # save symbol column if any
@@ -870,7 +1052,26 @@ add.set.column <- function(df){
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
-#' @return plot_ly handle
+#' @return plotly handle
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example DESeq dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#'
+#' # add gene and symbol column
+#' res$gene <- rownames(res)
+#' res$symbol <- rownames(res)
+#'
+#' # generate interactive MA plot
+#' plotMA.label_ly(res, lab.genes = c("gene1", "gene2"))
 #'
 #' @export
 plotMA.label_ly <- function(res,
@@ -1062,6 +1263,22 @@ plotMA.label_ly <- function(res,
 #' @param n number of genes to return
 #' @param by metric to determine top genes ('log2FoldChange' or 'padj')
 #'
+#' @return vector of gene symbols
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example DESeq dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#'
+#' g <- top.genes(res)
+#
 #' @export
 top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'){
 
@@ -1110,6 +1327,20 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
 #' @param coldata data.frame with metadata
 #' @param exclude.intgroups metadata columns to ignore
 #'
+#' @return counts data frame with added metadata
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example DESeq data set
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # extract counts and metadata
+#' df <- assay(dds)
+#' cdata <- colData(dds)
+#'
+#' df <- add_metadata(df, coldata, exclude.intgroups=NULL)
+#'
 #' @export
 add_metadata <- function(df, coldata, exclude.intgroups){
   coldata$sample <- rownames(coldata)
@@ -1138,6 +1369,14 @@ add_metadata <- function(df, coldata, exclude.intgroups){
 #' @param g vector of gene names
 #' @param sep gene name separator
 #' @param genes.per.line number of genes to show in a line
+#'
+#' @return vector of gene names prettified for data.table output
+#'
+#' @examples
+#' # string with genes separated by '/'
+#' g <- "gene1/gene2/gene3/gene4/gene5/gene6/gene7"
+#'
+#' gg <- format_genes(g, genes.per.line=3)
 #'
 #' @export
 format_genes <- function(g, sep='\\/', genes.per.line=6){
@@ -1186,6 +1425,14 @@ format_genes <- function(g, sep='\\/', genes.per.line=6){
 #' @param lst List of sets to compare (same input as to UpSetR::fromList)
 #'
 #' @return data.frame of 1 and 0 showing which genes are in which sets
+#'
+#' @examples
+#' # list of genes
+#' lst <- list(group1 = c(a = "gene1", b = "gene2", c = "gene3", d = "gene4"),
+#'             group2 = c(c = "gene3", d = "gene4"))
+#'
+#' # binarized matrix with group membership
+#' df <- fromList.with.names(lst)
 #'
 #' @export
 fromList.with.names <- function(lst){
@@ -1245,6 +1492,36 @@ fromList.with.names <- function(lst){
 #' @param genes_to_label genes to label on plot
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' # load airway dataset
+#' library(airway)
+#' data(airway)
+#'
+#' # extract normalized data & metadata
+#' ma <- assay(airway)
+#' colData.i <- colData(airway)
+#'
+#' # only keep data from first 100 genes
+#' ma.i <- ma[1:100,]
+#'
+#' # remove any genes with 0 variance
+#' ma.i <- ma.i[rowVars(ma.i) != 0, ]
+#'
+#' # run pattern analysis
+#' p <- DEGreport::degPatterns(
+#'         ma.i,
+#'         colData.i,
+#'         time='dex',
+#'         plot=FALSE
+#'         )
+#'
+#' # get pattern plot
+#' all_clusters <- unique(p$normalized$cluster)
+#'
+#' dp <- get_degplot(p, time='dex',
+#'                   cluster_to_show=all_clusters,
+#'                   x_order=c('untrt','trt'))
 #'
 #' @export
 get_degplot <- function(obj, time, color=NULL,
@@ -1499,14 +1776,39 @@ get_degplot <- function(obj, time, color=NULL,
 #' @param lfc.thresh log2FoldChange threshold
 #' @param labels list of descriptions for res.list elements
 #'
-#' NOTE: this is edited to match the structure used in the shiny app. Specifically
-#'       res.list and dds.list both are expected to have the same number and names
-#'       of elements.
-#'
 #' @return Dataframe
 #'
+#' @examples
+#' # make example DESeq data set
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # make dds list
+#' dds_list <- list(main = dds)
+#'
+#' # make comparisons
+#' res1 <- results(dds, contrast=c('condition', 'A', 'B'))
+#' res2 <- results(dds, contrast=c('condition', 'B', 'A'))
+#'
+#' # make list of results
+#' res_list <- list(
+#'         comp1=list(
+#'             res=res1,
+#'             dds='main',
+#'             label='A vs B'),
+#'         comp2=list(
+#'             res=res2,
+#'             dds='main',
+#'             label='B vs A')
+#'         )
+#'
+#' # make dds mapping
+#' dds_mapping <- list(comp1='main', comp2='main')
+#'
+#' # get summary
+#' df <- summarize.res.list(res_list, dds_list, dds_mapping, alpha=0.1, lfc.thresh=0)
+#'
 #' @export
-summarize.res.list <- function(res.list,dds.list, dds_mapping, alpha, lfc.thresh, labels=NULL){
+summarize.res.list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thresh, labels=NULL){
     slist <- list()
     for (name in names(res.list)){
         x <- my.summary(res.list[[name]], dds.list[[ dds_mapping[[name]] ]], alpha, lfc.thresh)
@@ -1531,6 +1833,16 @@ summarize.res.list <- function(res.list,dds.list, dds_mapping, alpha, lfc.thresh
 #' @param lfc.thresh log2FoldChange threshold
 #'
 #' @return Dataframe of summarized results
+#'
+#' @examples
+#' # make example DESeq data set
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # make comparisons
+#' res <- results(dds, contrast=c('condition', 'A', 'B'))
+#'
+#' # get summary
+#' df <- my.summary(res, dds, alpha=0.1)
 #'
 #' @export
 my.summary <- function(res, dds, alpha, lfc.thresh=0){
@@ -1583,6 +1895,16 @@ my.summary <- function(res, dds, alpha, lfc.thresh=0){
 #'
 #' @return Handle to ggplot with added label field in aes_string() for plotting with ggplotly()
 #'
+#' @examples
+#' # make example dds object
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # normalize
+#' rld <- DESeq2::varianceStabilizingTransformation(dds, blind=TRUE)
+#'
+#' # make pca plot
+#' p <- plotPCA.ly(rld, intgroup='condition')
+#'
 #' @export
 plotPCA.ly <- function(rld, intgroup){
   mat <- plotPCA(rld, intgroup, returnData=TRUE)
@@ -1600,14 +1922,66 @@ plotPCA.ly <- function(rld, intgroup){
 #' This is a copy of gs_radar from GeneTonic where the labels of
 #' gene sets are converted to parameters
 #'
-#' @param res_enrich DE results from comparison 1
-#' @param res_enrich2 DE results from comparison 2
+#' @param res_enrich GeneTonic object for comparison 1
+#' @param res_enrich2 GeneTonic object for comparison 2 (default = NULL)
 #' @param label1 label for comparison 1
 #' @param label2 label for comparison 2
 #' @param n_gs number of gene sets (default = 20)
 #' @param p_value_column column to use as p-value (default = 'gs_pvalue')
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' library(airway)
+#' library(DESeq2)
+#' library(org.Hs.eg.db)
+#'
+#' # load airway data
+#' data('airway')
+#'
+#' # extract counts and metadata
+#' mat <- assay(airway)
+#' cdata <- colData(airway)
+#'
+#' # get symbol annotations
+#' anno_df <- mapIds(org.Hs.eg.db,
+#'                column='SYMBOL',
+#'                keys=rownames(mat),
+#'                keytype='ENSEMBL')
+#' #anno_df <- as.data.frame(anno_df)
+#'
+#' # analyze with DESeq2
+#' dds <- DESeqDataSetFromMatrix(mat,
+#'                               colData=cdata,
+#'                               design=~cell + dex)
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interet
+#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
+#'
+#' # add gene column from rownames
+#' res$gene <- rownames(res)
+#'
+#' # add symbol column from annotations
+#' res$symbol <- anno_df[rownames(res)]
+#'
+#'
+#' # get DE genes with FDR < 0.1
+#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+#'
+#' # functional enrichment using GO BP
+#' eres <- clusterProfiler::enrichGO(
+#'             gene = de_genes,
+#'             keyType = 'ENSEMBL',
+#'             OrgDb=org.Hs.eg.db,
+#'             ont='BP'
+#'         )
+#'
+#' # convert to GeneTonic object
+#' gt <- enrich_to_genetonic(eres, res)
+#'
+#' # make radar plot
+#' p <- gs_radar(gt)
 #'
 #' @export
 gs_radar <- function(res_enrich,
@@ -1713,6 +2087,19 @@ gs_radar <- function(res_enrich,
 #' @param samples vector of sample names to show on plot
 #' @param loadings boolean, show gene loadings? Default is FALSE.
 #' @param loadings_ngenes integer, # genes to show loadings for (default=10)
+#'
+#' @return ggplot handle
+#'
+#' @examples
+#' # make example dds object
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # normalize
+#' rld <- DESeq2::varianceStabilizingTransformation(dds, blind=TRUE)
+#'
+#' # make pca plot
+#' p <- plotPCA.san(rld, intgroup='condition', pcx='PC1', pcy='PC2')
+#'
 #'
 #' @export
 plotPCA.san <- function (object, intgroup = "group",
@@ -1902,6 +2289,60 @@ plotPCA.san <- function (object, intgroup = "group",
 #' @param ontology ontology database being used
 #' @param type string, can be 'enrichResult' or 'gseaResult'
 #'
+#' @return enrichResult object
+#'
+#' @examples
+#' library(airway)
+#' library(DESeq2)
+#' library(org.Hs.eg.db)
+#'
+#' # load airway data
+#' data('airway')
+#'
+#' # extract counts and metadata
+#' mat <- assay(airway)
+#' cdata <- colData(airway)
+#'
+#' # get symbol annotations
+#' anno_df <- mapIds(org.Hs.eg.db,
+#'                column='SYMBOL',
+#'                keys=rownames(mat),
+#'                keytype='ENSEMBL')
+#' anno_df <- as.data.frame(anno_df)
+#'
+#' # analyze with DESeq2
+#' dds <- DESeqDataSetFromMatrix(mat,
+#'                               colData=cdata,
+#'                               design=~cell + dex)
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interet
+#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
+#'
+#' # add gene column from rownames
+#' res$gene <- rownames(res)
+#'
+#' # add symbol column from annotations
+#' res$symbol <- anno_df[rownames(res)]
+#'
+#'
+#' # get DE genes with FDR < 0.1
+#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+#'
+#' # functional enrichment using GO BP
+#' eres <- clusterProfiler::enrichGO(
+#'             gene = de_genes,
+#'             keyType = 'ENSEMBL',
+#'             OrgDb=org.Hs.eg.db,
+#'             ont='BP'
+#'         )
+#'
+#' # extract the results
+#' df <- as.data.frame(eres)
+#'
+#' # convert to a stripped down enrichResult object
+#' eres2 <- makeEnrichResult(df)
+#'
 #' @export
 makeEnrichResult <- function(df, split='/',
                              keytype="UNKNOWN",
@@ -1933,8 +2374,8 @@ makeEnrichResult <- function(df, split='/',
 
 #' Plot a scatterplot to compare two contrasts
 #'
-#' @param compare string, what values to plot? can be 'LFC' or 'P-adj'
-#' @param df data frame with LFC & padj values to plot from 2 contrasts
+#' @param compare string, what values to plot? can be 'log2FoldChange' or 'P-adj'
+#' @param df data frame with log2FoldChange & padj values to plot from 2 contrasts
 #' @param label_x string, label for x-axis
 #' @param label_y string, label for y-axis
 #' @param lim.x x-axis limits
@@ -1951,8 +2392,46 @@ makeEnrichResult <- function(df, split='/',
 #' @param alpha float, marker opacity (default=1).
 #' @param size float, marker size (default=4).
 #' @param show.grid string, can be 'yes' (default) or 'no'.
-
+#'
 #' @return ggplot handle
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparisons of interest
+#' res1 <- results(dds, contrast = c("condition", "A", "B"))
+#' res2 <- results(dds, contrast = c("condition", "B", "A"))
+#'
+#' # add geneid column
+#' res1 <- cbind(geneid=rownames(res1), res1)
+#' res2 <- cbind(geneid=rownames(res2), res2)
+#'
+#' # make merged df from the two comparisons
+#' cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+#' df_full <- dplyr::inner_join(
+#'   dplyr::select(res1, all_of(cols.sub)),
+#'   dplyr::select(res2, all_of(cols.sub)),
+#'   by = 'geneid',
+#'   suffix = c('.x', '.y')
+#' )
+#'
+#' # calculate x & y limits for log2FoldChange
+#' xlim <- range(df_full[[ 'log2FoldChange.x' ]])
+#' ylim <- range(df_full[[ 'log2FoldChange.y' ]])
+#'
+#' # generate scatter plot
+#' p <- plotScatter.label(compare = 'log2FoldChange',
+#'                        df = df_full,
+#'                        label_x = 'A vs B',
+#'                        label_y = 'B vs A',
+#'                        lim.x = xlim,
+#'                        lim.y = ylim)
 #'
 #' @export
 plotScatter.label <- function(compare,
@@ -2047,8 +2526,8 @@ plotScatter.label <- function(compare,
 
 #' Plot an interactive scatterplot to compare two contrasts
 #'
-#' @param compare string, what values to plot? can be 'LFC' or 'P-adj'
-#' @param df data frame with LFC & padj values to plot from 2 contrasts
+#' @param compare string, what values to plot? can be 'log2FoldChange' or 'P-adj'
+#' @param df data frame with log2FoldChange & padj values to plot from 2 contrasts
 #' @param label_x string, label for x-axis
 #' @param label_y string, label for y-axis
 #' @param lim.x x-axis limits
@@ -2065,6 +2544,44 @@ plotScatter.label <- function(compare,
 #' @param show.grid string, can be 'yes' (default) or 'no'.
 
 #' @return plotly handle
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparisons of interest
+#' res1 <- results(dds, contrast = c("condition", "A", "B"))
+#' res2 <- results(dds, contrast = c("condition", "B", "A"))
+#'
+#' # add geneid column
+#' res1 <- cbind(geneid=rownames(res1), res1)
+#' res2 <- cbind(geneid=rownames(res2), res2)
+#'
+#' # make merged df from the two comparisons
+#' cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+#' df_full <- dplyr::inner_join(
+#'   dplyr::select(res1, all_of(cols.sub)),
+#'   dplyr::select(res2, all_of(cols.sub)),
+#'   by = 'geneid',
+#'   suffix = c('.x', '.y')
+#' )
+#'
+#' # calculate x & y limits for log2FoldChange
+#' xlim <- range(df_full[[ 'log2FoldChange.x' ]])
+#' ylim <- range(df_full[[ 'log2FoldChange.y' ]])
+#'
+#' # generate scatter plot
+#' p <- plotScatter.label_ly(compare = 'log2FoldChange',
+#'                           df = df_full,
+#'                           label_x = 'A vs B',
+#'                           label_y = 'B vs A',
+#'                           lim.x = xlim,
+#'                           lim.y = ylim)
 #'
 #' @export
 plotScatter.label_ly <- function(compare,

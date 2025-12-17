@@ -10,7 +10,21 @@ save_access_yaml(lst)
 \item{lst}{list of data frames with user_groups and
 data_areas}
 }
+\value{
+save access settings to yaml file
+}
 \description{
 This function saves access details (user groups
 and data areas) to the designated access yaml file.
+}
+\examples{
+# read access yaml
+lst <- read_access_yaml()
+
+# add new user
+lst$user_group$admin <- c(lst$user_group$admin, 'user1')
+
+# save to access settings
+save_access_yaml(lst)
+
 }

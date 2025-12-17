@@ -16,6 +16,17 @@ if credentials have sqlite backend.}
 
 \item{...}{parameters passed to shinyApp() call}
 }
+\value{
+shinyApp object
+}
 \description{
 Interactive shiny dashboard for exploring RNA-Seq analysis.
+}
+\examples{
+if(interactive()){
+    shiny::runApp(
+        run_carnation()
+    )
+}
+
 }

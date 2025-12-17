@@ -11,7 +11,61 @@ enrich_to_genetonic(enrich, res)
 
 \item{res}{data frame with DE analysis results}
 }
+\value{
+GeneTonic object
+}
 \description{
 This function takes an enrichResult object and
 DE analysis results and creates a GeneTonic object.
+}
+\examples{
+library(airway)
+library(DESeq2)
+library(org.Hs.eg.db)
+
+# load airway data
+data('airway')
+
+# extract counts and metadata
+mat <- assay(airway)
+cdata <- colData(airway)
+
+# get symbol annotations
+anno_df <- mapIds(org.Hs.eg.db,
+               column='SYMBOL',
+               keys=rownames(mat),
+               keytype='ENSEMBL')
+anno_df <- as.data.frame(anno_df)
+
+# analyze with DESeq2
+dds <- DESeqDataSetFromMatrix(mat,
+                              colData=cdata,
+                              design=~cell + dex)
+dds <- DESeq(dds)
+
+# extract comparison of interet
+res <- results(dds, contrast = c("dex", "trt", "untrt"))
+
+# add gene column from rownames
+res$gene <- rownames(res)
+
+# add symbol column from annotations
+res$symbol <- anno_df[rownames(res)]
+
+
+# get DE genes with FDR < 0.1
+de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+
+# functional enrichment using GO BP
+eres <- clusterProfiler::enrichGO(
+            gene = de_genes,
+            keyType = 'ENSEMBL',
+            OrgDb=org.Hs.eg.db,
+            ont='BP'
+        )
+
+# convert to GeneTonic object
+gt <- enrich_to_genetonic(eres, res)
+
+
 }

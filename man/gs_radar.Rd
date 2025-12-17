@@ -14,9 +14,9 @@ gs_radar(
 )
 }
 \arguments{
-\item{res_enrich}{DE results from comparison 1}
+\item{res_enrich}{GeneTonic object for comparison 1}
 
-\item{res_enrich2}{DE results from comparison 2}
+\item{res_enrich2}{GeneTonic object for comparison 2 (default = NULL)}
 
 \item{label1}{label for comparison 1}
 
@@ -32,4 +32,57 @@ ggplot handle
 \description{
 This is a copy of gs_radar from GeneTonic where the labels of
 gene sets are converted to parameters
+}
+\examples{
+library(airway)
+library(DESeq2)
+library(org.Hs.eg.db)
+
+# load airway data
+data('airway')
+
+# extract counts and metadata
+mat <- assay(airway)
+cdata <- colData(airway)
+
+# get symbol annotations
+anno_df <- mapIds(org.Hs.eg.db,
+               column='SYMBOL',
+               keys=rownames(mat),
+               keytype='ENSEMBL')
+#anno_df <- as.data.frame(anno_df)
+
+# analyze with DESeq2
+dds <- DESeqDataSetFromMatrix(mat,
+                              colData=cdata,
+                              design=~cell + dex)
+dds <- DESeq(dds)
+
+# extract comparison of interet
+res <- results(dds, contrast = c("dex", "trt", "untrt"))
+
+# add gene column from rownames
+res$gene <- rownames(res)
+
+# add symbol column from annotations
+res$symbol <- anno_df[rownames(res)]
+
+
+# get DE genes with FDR < 0.1
+de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+
+# functional enrichment using GO BP
+eres <- clusterProfiler::enrichGO(
+            gene = de_genes,
+            keyType = 'ENSEMBL',
+            OrgDb=org.Hs.eg.db,
+            ont='BP'
+        )
+
+# convert to GeneTonic object
+gt <- enrich_to_genetonic(eres, res)
+
+# make radar plot
+p <- gs_radar(gt)
+
 }

@@ -9,6 +9,14 @@ is_site_admin(u)
 \arguments{
 \item{u}{username}
 }
+\value{
+boolean to indicate is user is in admin group
+}
 \description{
 is user an admin?
+}
+\examples{
+# check if default user is admin
+yy <- is_site_admin(u='admin')
+
 }

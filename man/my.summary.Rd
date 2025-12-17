@@ -21,3 +21,14 @@ Dataframe of summarized results
 \description{
 summary(res) prints out info; this function captures it into a dataframe
 }
+\examples{
+# make example DESeq data set
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# make comparisons
+res <- results(dds, contrast=c('condition', 'A', 'B'))
+
+# get summary
+df <- my.summary(res, dds, alpha=0.1)
+
+}

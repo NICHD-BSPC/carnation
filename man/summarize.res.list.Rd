@@ -32,15 +32,41 @@ elements}
 
 \item{lfc.thresh}{log2FoldChange threshold}
 
-\item{labels}{list of descriptions for res.list elements
-
-NOTE: this is edited to match the structure used in the shiny app. Specifically
-res.list and dds.list both are expected to have the same number and names
-of elements.}
+\item{labels}{list of descriptions for res.list elements}
 }
 \value{
 Dataframe
 }
 \description{
 Combine everything in the results list into a single table
+}
+\examples{
+# make example DESeq data set
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# make dds list
+dds_list <- list(main = dds)
+
+# make comparisons
+res1 <- results(dds, contrast=c('condition', 'A', 'B'))
+res2 <- results(dds, contrast=c('condition', 'B', 'A'))
+
+# make list of results
+res_list <- list(
+        comp1=list(
+            res=res1,
+            dds='main',
+            label='A vs B'),
+        comp2=list(
+            res=res2,
+            dds='main',
+            label='B vs A')
+        )
+
+# make dds mapping
+dds_mapping <- list(comp1='main', comp2='main')
+
+# get summary
+df <- summarize.res.list(res_list, dds_list, dds_mapping, alpha=0.1, lfc.thresh=0)
+
 }

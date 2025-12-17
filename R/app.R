@@ -8,6 +8,15 @@
 #'        if credentials have sqlite backend.
 #' @param ... parameters passed to shinyApp() call
 #'
+#' @return shinyApp object
+#'
+#' @examples
+#' if(interactive()){
+#'     shiny::runApp(
+#'         run_carnation()
+#'     )
+#' }
+#'
 #' @export
 run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
 

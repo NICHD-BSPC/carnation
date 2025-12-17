@@ -9,6 +9,13 @@ in_admin_group(u)
 \arguments{
 \item{u}{username}
 }
+\value{
+TRUE/FALSE to indicate if the user is part of the admin group
+}
 \description{
 is user is in admin group?
+}
+\examples{
+check <- in_admin_group('admin')
+
 }

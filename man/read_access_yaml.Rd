@@ -6,8 +6,15 @@
 \usage{
 read_access_yaml()
 }
+\value{
+return carnation access settings from yaml file
+}
 \description{
 This function reads the access yaml file and
 returns user groups and data areas
 as a list of data frames.
+}
+\examples{
+al <- read_access_yaml()
+
 }

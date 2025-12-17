@@ -13,7 +13,24 @@ create_access_yaml(user, user_group, data_area)
 
 \item{data_area}{Path to data area containing RDS files}
 }
+\value{
+Invisibly returns \code{NULL}. This function is primarily used for
+its side effect of saving a yaml file with access settings
+}
 \description{
 This function creates an access yaml file.
 This is primarily intended for the first run.
+}
+\examples{
+# save access details to file
+home <- Sys.getenv('HOME')
+
+# create carnation data area if it doesn't exist
+carnation_home <- file.path(home, 'carnation/data')
+if(!dir.exists(carnation_home)) dir.create(carnation_home)
+
+create_access_yaml(user = 'admin',
+                   user_group = 'admin',
+                   data_area = carnation_home)
+
 }

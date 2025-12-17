@@ -54,3 +54,34 @@ ggplot handle
 This function plots a degPatterns object using
 degPlotCluster
 }
+\examples{
+# load airway dataset
+library(airway)
+data(airway)
+
+# extract normalized data & metadata
+ma <- assay(airway)
+colData.i <- colData(airway)
+
+# only keep data from first 100 genes
+ma.i <- ma[1:100,]
+
+# remove any genes with 0 variance
+ma.i <- ma.i[rowVars(ma.i) != 0, ]
+
+# run pattern analysis
+p <- DEGreport::degPatterns(
+        ma.i,
+        colData.i,
+        time='dex',
+        plot=FALSE
+        )
+
+# get pattern plot
+all_clusters <- unique(p$normalized$cluster)
+
+dp <- get_degplot(p, time='dex',
+                  cluster_to_show=all_clusters,
+                  x_order=c('untrt','trt'))
+
+}

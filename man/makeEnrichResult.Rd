@@ -23,7 +23,63 @@ makeEnrichResult(
 
 \item{type}{string, can be 'enrichResult' or 'gseaResult'}
 }
+\value{
+enrichResult object
+}
 \description{
 Most of the parameters are just placeholders and the
 dataframe must contain the columns 'ID' and 'geneID'
+}
+\examples{
+library(airway)
+library(DESeq2)
+library(org.Hs.eg.db)
+
+# load airway data
+data('airway')
+
+# extract counts and metadata
+mat <- assay(airway)
+cdata <- colData(airway)
+
+# get symbol annotations
+anno_df <- mapIds(org.Hs.eg.db,
+               column='SYMBOL',
+               keys=rownames(mat),
+               keytype='ENSEMBL')
+anno_df <- as.data.frame(anno_df)
+
+# analyze with DESeq2
+dds <- DESeqDataSetFromMatrix(mat,
+                              colData=cdata,
+                              design=~cell + dex)
+dds <- DESeq(dds)
+
+# extract comparison of interet
+res <- results(dds, contrast = c("dex", "trt", "untrt"))
+
+# add gene column from rownames
+res$gene <- rownames(res)
+
+# add symbol column from annotations
+res$symbol <- anno_df[rownames(res)]
+
+
+# get DE genes with FDR < 0.1
+de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+
+# functional enrichment using GO BP
+eres <- clusterProfiler::enrichGO(
+            gene = de_genes,
+            keyType = 'ENSEMBL',
+            OrgDb=org.Hs.eg.db,
+            ont='BP'
+        )
+
+# extract the results
+df <- eres@result
+
+# convert to a stripped down enrichResult object
+eres2 <- makeEnrichResult(df)
+
 }

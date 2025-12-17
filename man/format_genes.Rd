@@ -13,10 +13,20 @@ format_genes(g, sep = "\\\\/", genes.per.line = 6)
 
 \item{genes.per.line}{number of genes to show in a line}
 }
+\value{
+vector of gene names prettified for data.table output
+}
 \description{
 This function works by grouping long lists of genes
 into groups of a specified size. Each group is collapsed
 using commas, while groups are separated by spaces
 so that datatable formatting is tricked into separating
 space-separated groups and not comma-separated groups
+}
+\examples{
+# string with genes separated by '/'
+g <- "gene1/gene2/gene3/gene4/gene5/gene6/gene7"
+
+gg <- format_genes(g, genes.per.line=3)
+
 }

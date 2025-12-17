@@ -11,7 +11,16 @@ install_carnation(envname, ...)
 
 \item{...}{parameters passed to reticulate::py_install}
 }
+\value{
+\code{NULL}, invisibly. The function is called for its side effects.
+}
 \description{
 This function installs 'plotly' and 'kaleido' python packages
 in an environment to allow PDF downloads from plotly plots.
+}
+\examples{
+if(interactive()){
+    install_carnation()
+}
+
 }

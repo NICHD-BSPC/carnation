@@ -13,6 +13,9 @@ check_user_access(al, u, admin = "admin")
 
 \item{admin}{Admin user group}
 }
+\value{
+list of user groups and data areas
+}
 \description{
 This function takes a username and returns a
 list with two elements:
@@ -20,4 +23,11 @@ list with two elements:
 \details{
 user_group: one element vector
 data_area: vector of data areas
+}
+\examples{
+# get current user access details
+al <- read_access_yaml()
+
+lst <- check_user_access(al, u='admin')
+
 }
