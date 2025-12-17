@@ -50,7 +50,7 @@ anno_df <- mapIds(org.Hs.eg.db,
                column='SYMBOL',
                keys=rownames(mat),
                keytype='ENSEMBL')
-#anno_df <- as.data.frame(anno_df)
+anno_df <- as.data.frame(anno_df)
 
 # analyze with DESeq2
 dds <- DESeqDataSetFromMatrix(mat,
@@ -58,7 +58,7 @@ dds <- DESeqDataSetFromMatrix(mat,
                               design=~cell + dex)
 dds <- DESeq(dds)
 
-# extract comparison of interet
+# extract comparison of interest
 res <- results(dds, contrast = c("dex", "trt", "untrt"))
 
 # add gene column from rownames

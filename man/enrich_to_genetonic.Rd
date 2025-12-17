@@ -43,7 +43,7 @@ dds <- DESeqDataSetFromMatrix(mat,
                               design=~cell + dex)
 dds <- DESeq(dds)
 
-# extract comparison of interet
+# extract comparison of interest
 res <- results(dds, contrast = c("dex", "trt", "untrt"))
 
 # add gene column from rownames

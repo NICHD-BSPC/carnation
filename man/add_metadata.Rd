@@ -27,7 +27,7 @@ dds <- makeExampleDESeqDataSet()
 
 # extract counts and metadata
 df <- assay(dds)
-cdata <- colData(dds)
+coldata <- colData(dds)
 
 df <- add_metadata(df, coldata, exclude.intgroups=NULL)
 

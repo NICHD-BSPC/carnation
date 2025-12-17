@@ -55,7 +55,7 @@ dds <- DESeqDataSetFromMatrix(mat,
                               design=~cell + dex)
 dds <- DESeq(dds)
 
-# extract comparison of interet
+# extract comparison of interest
 res <- results(dds, contrast = c("dex", "trt", "untrt"))
 
 # add gene column from rownames
@@ -77,7 +77,7 @@ eres <- clusterProfiler::enrichGO(
         )
 
 # extract the results
-df <- eres@result
+df <- as.data.frame(eres)
 
 # convert to a stripped down enrichResult object
 eres2 <- makeEnrichResult(df)
