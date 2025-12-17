@@ -999,7 +999,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
           # if not admin, filter out staged data
           if(!is_admin){
             idx <- grep(staging_dir(), names(tmp_desc))
-            tmp_desc <- tmp_desc[ -idx ]
+            if(length(idx) > 0) tmp_desc <- tmp_desc[ -idx ]
           }
 
           project_descriptions[[ name ]] <- tmp_desc
