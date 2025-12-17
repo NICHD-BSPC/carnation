@@ -791,7 +791,7 @@ make_final_object <- function(obj){
 #'                               design=~cell + dex)
 #' dds <- DESeq(dds)
 #'
-#' # extract comparison of interet
+#' # extract comparison of interest
 #' res <- results(dds, contrast = c("dex", "trt", "untrt"))
 #'
 #' # add gene column from rownames
@@ -1948,7 +1948,7 @@ plotPCA.ly <- function(rld, intgroup){
 #'                column='SYMBOL',
 #'                keys=rownames(mat),
 #'                keytype='ENSEMBL')
-#' #anno_df <- as.data.frame(anno_df)
+#' anno_df <- as.data.frame(anno_df)
 #'
 #' # analyze with DESeq2
 #' dds <- DESeqDataSetFromMatrix(mat,
@@ -1956,7 +1956,7 @@ plotPCA.ly <- function(rld, intgroup){
 #'                               design=~cell + dex)
 #' dds <- DESeq(dds)
 #'
-#' # extract comparison of interet
+#' # extract comparison of interest
 #' res <- results(dds, contrast = c("dex", "trt", "untrt"))
 #'
 #' # add gene column from rownames
@@ -2316,7 +2316,7 @@ plotPCA.san <- function (object, intgroup = "group",
 #'                               design=~cell + dex)
 #' dds <- DESeq(dds)
 #'
-#' # extract comparison of interet
+#' # extract comparison of interest
 #' res <- results(dds, contrast = c("dex", "trt", "untrt"))
 #'
 #' # add gene column from rownames
