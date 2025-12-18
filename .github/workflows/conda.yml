@@ -105,7 +105,7 @@ jobs:
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
           conda activate ../env
-          conda install -y bioconductor-bioccheck
+          conda install -c bioconda -y bioconductor-bioccheck
 
           # create tmp dir for build and check
           cd .. && mkdir bioccheck && cd bioccheck
