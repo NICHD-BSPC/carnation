@@ -24,41 +24,40 @@ genePlotServer(id, obj, coldata, plot_args, config)
 
 \item{config}{reactive list with config settings}
 }
+\value{
+UI returns tagList with gene plot UI.
+Server invisibly returns NULL (used for side effects).
+}
 \description{
 UI & server for module to create gene plot
 }
 \examples{
-library(DESeq2)
 library(shiny)
 
-dds <- makeExampleDESeqDataSet()
-rld <- varianceStabilizingTransformation(dds, blind=TRUE)
-
-dds <- DESeq(dds)
-results <- results(dds, contrast=c('condition', 'A', 'B'))
-
 # Create reactive values to simulate app state
+oobj <- make_example_carnation_object()
+
 obj <- reactiveValues(
-  dds = list(main = dds),
-  rld = list(main = rld),
-  res = list(comp1 = results),
-  all_dds = dds,
-  all_rld = rld,
-  dds_mapping = list(comp1 = 'main')
+   dds = oobj$dds,
+   rld = oobj$rld,
+   res = oobj$res,
+   all_dds = oobj$all_dds,
+   all_rld = oobj$all_rld,
+   dds_mapping = oobj$dds_mapping
 )
 
 # Set up coldata structure that the module expects
 coldata <- reactiveValues(
   curr = list(
-    all_samples = colData(dds),
-    main = colData(dds)
+    all_samples = colData(oobj$dds$main),
+    main = colData(oobj$dds$main)
   )
 )
 
 plot_args <- reactive({
   list(
     gene.to.plot = c("gene1", "gene2"),
-    gene.id = rownames(dds),
+    gene.id = rownames(oobj$dds$main),
     comp_all = "comp1"
   )
 })
