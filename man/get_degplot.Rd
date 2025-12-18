@@ -55,6 +55,8 @@ This function plots a degPatterns object using
 degPlotCluster
 }
 \examples{
+library(DESeq2)
+
 # load airway dataset
 library(airway)
 data(airway)
