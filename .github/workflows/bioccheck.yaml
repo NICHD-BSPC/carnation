@@ -6,7 +6,7 @@
 # See https://github.com/r-lib/actions/tree/master/examples#readme for
 # additional example workflows available for the R community.
 
-name: conda
+name: bioccheck
 
 on:
   push:
@@ -54,6 +54,7 @@ jobs:
           # make the env one above WORKDIR
           echo "  - bioconductor-bioccheck" >> requirements.yaml
           conda env create -p ../env-bioccheck --file requirements.yaml
+          conda activate ../env-bioccheck
 
           # create tmp dir for build and check
           cd .. && mkdir bioccheck && cd bioccheck
