@@ -1,8 +1,65 @@
-#' Scatterplot module UI
+#' Scatterplot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
-#' @param panel string, can be 'sidebar' or 'main'
+#' @description
+#' Module UI + server for generating scatter plots.
 #'
+#' @param id Module id
+#' @param panel string, can be 'sidebar' or 'main' passed to UI
+#' @param obj reactiveValues object containing carnation object passed to server
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
+#' 'gene.to.plot' (genes to be labeled) passed to server
+#' @param config reactive list with config settings passed to server
+#'
+#' @returns
+#' UI returns tagList with scatter plot UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' dds <- makeExampleDESeqDataSet()
+#' rld <- varianceStabilizingTransformation(dds, blind=TRUE)
+#'
+#' dds <- DESeq(dds)
+#' results <- results(dds, contrast=c('condition', 'A', 'B'))
+#'
+#' # Create reactive values to simulate app state
+#' obj <- reactiveValues(
+#'   dds = list(main = dds),
+#'   rld = list(main = rld),
+#'   res = list(comp1 = results),
+#'   all_dds = dds,
+#'   all_rld = rld,
+#'   dds_mapping = list(comp1 = 'main')
+#' )
+#'
+#' plot_args <- reactive({
+#'   list(
+#'     fdr.thres=0.1,
+#'     fc.thres=0,
+#'     gene.to.plot=c('gene1', 'gene2')
+#'   )
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' if(interactive()){
+#'   shiny::shinyApp(
+#'     ui = shiny::fluidPage(
+#'            shiny::sidebarPanel(scatterPlotUI('sp', 'sidebar')),
+#'            shiny::mainPanel(scatterPlotUI('sp', 'sidebar'))
+#'          ),
+#'     server = function(input, output, session){
+#'                scatterPlotServer('scatterplot', obj, plot_args, config)
+#'              }
+#'   )
+#' }
+#'
+#' @name scattermod
+#' @rdname scattermod
+NULL
+
+#' @rdname scattermod
 #' @export
 scatterPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -248,14 +305,7 @@ scatterPlotUI <- function(id, panel){
   } # else if panel='main'
 } # scatterPlotUI
 
-#' Scatterplot module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
-#' 'gene.to.plot' (genes to be labeled)
-#' @param config reactive list with config settings
-#'
+#' @rdname scattermod
 #' @export
 scatterPlotServer <- function(id, obj, plot_args, config){
 
