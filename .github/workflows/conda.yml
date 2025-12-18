@@ -104,8 +104,12 @@ jobs:
       - name: Run BiocCheck
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
-          conda activate ../env
-          conda install -c bioconda -y bioconductor-bioccheck
+          conda config --add channels conda-forge
+          conda config --set channel_priority strict
+
+          # make the env one above WORKDIR
+          echo "  - bioconductor-bioccheck" >> requirements.yaml
+          conda env create -p ../env-bioccheck --file requirements.yaml
 
           # create tmp dir for build and check
           cd .. && mkdir bioccheck && cd bioccheck
