@@ -16,6 +16,7 @@
 #'
 #' @examples
 #' library(DESeq2)
+#' library(shiny)
 #'
 #' dds <- makeExampleDESeqDataSet()
 #' rld <- varianceStabilizingTransformation(dds, blind=TRUE)
@@ -44,13 +45,13 @@
 #' config <- reactiveVal(get_config())
 #'
 #' if(interactive()){
-#'   shiny::shinyApp(
-#'     ui = shiny::fluidPage(
-#'            shiny::sidebarPanel(scatterPlotUI('sp', 'sidebar')),
-#'            shiny::mainPanel(scatterPlotUI('sp', 'sidebar'))
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(scatterPlotUI('p', 'sidebar')),
+#'            mainPanel(scatterPlotUI('p', 'sidebar'))
 #'          ),
 #'     server = function(input, output, session){
-#'                scatterPlotServer('scatterplot', obj, plot_args, config)
+#'                scatterPlotServer('p', obj, plot_args, config)
 #'              }
 #'   )
 #' }
