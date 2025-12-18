@@ -41,8 +41,10 @@ Dataframe
 Combine everything in the results list into a single table
 }
 \examples{
+library(DESeq2)
+
 # make example DESeq data set
-dds <- DESeq2::makeExampleDESeqDataSet()
+dds <- makeExampleDESeqDataSet()
 
 # run DESeq2
 dds <- DESeq(dds)

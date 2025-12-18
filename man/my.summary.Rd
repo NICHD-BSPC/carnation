@@ -22,8 +22,10 @@ Dataframe of summarized results
 summary(res) prints out info; this function captures it into a dataframe
 }
 \examples{
+library(DESeq2)
+
 # make example DESeq data set
-dds <- DESeq2::makeExampleDESeqDataSet()
+dds <- makeExampleDESeqDataSet()
 
 # run DESeq2
 dds <- DESeq(dds)

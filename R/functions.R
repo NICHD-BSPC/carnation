@@ -1827,8 +1827,10 @@ get_degplot <- function(obj, time, color=NULL,
 #' @return Dataframe
 #'
 #' @examples
+#' library(DESeq2)
+#'
 #' # make example DESeq data set
-#' dds <- DESeq2::makeExampleDESeqDataSet()
+#' dds <- makeExampleDESeqDataSet()
 #'
 #' # run DESeq2
 #' dds <- DESeq(dds)
@@ -1880,8 +1882,10 @@ summarize.res.list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thres
 #' @return Dataframe of summarized results
 #'
 #' @examples
+#' library(DESeq2)
+#'
 #' # make example DESeq data set
-#' dds <- DESeq2::makeExampleDESeqDataSet()
+#' dds <- makeExampleDESeqDataSet()
 #'
 #' # run DESeq2
 #' dds <- DESeq(dds)
