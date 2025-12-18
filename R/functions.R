@@ -2842,3 +2842,34 @@ dummy_genetonic <- function(eres){
     list(l_gs=eres2, anno_df=anno_df)
   )
 }
+
+#' Make example carnation object
+#'
+#' Returns example carnation object used in examples & testing
+#'
+#' @return reactiveValues object containing carnation object
+#'
+#' @examples
+#' obj <- make_example_carnation_object()
+#'
+#' @export
+make_example_carnation_object <- function(){
+  dds <- makeExampleDESeqDataSet()
+  rld <- varianceStabilizingTransformation(dds, blind=TRUE)
+
+  dds <- DESeq(dds)
+  results <- results(dds, contrast=c('condition', 'A', 'B'))
+
+  # Create reactive values to simulate app state
+  obj <- list(
+    dds = list(main = dds),
+    rld = list(main = rld),
+    res = list(comp1 = results),
+    all_dds = dds,
+    all_rld = rld,
+    dds_mapping = list(comp1 = 'main')
+  )
+
+  obj
+}
+
