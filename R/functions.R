@@ -2560,7 +2560,7 @@ plotScatter.label <- function(compare,
     p <- p + geom_hline(yintercept=0, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
   }
    if (lines[3] == 'yes') {
-    p <- p + geom_abline(yintercept=0, slope=1, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
+    p <- p + geom_abline(intercept=0, slope=1, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
   }
   # show.grid
   show.grid <- if(show.grid == 'yes') TRUE else FALSE
