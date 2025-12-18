@@ -76,8 +76,8 @@ res2 <- cbind(geneid=rownames(res2), res2)
 # make merged df from the two comparisons
 cols.sub <- c('log2FoldChange', 'padj', 'geneid')
 df_full <- dplyr::inner_join(
-  dplyr::select(res1, all_of(cols.sub)),
-  dplyr::select(res2, all_of(cols.sub)),
+  dplyr::select(as.data.frame(res1), all_of(cols.sub)),
+  dplyr::select(as.data.frame(res2), all_of(cols.sub)),
   by = 'geneid',
   suffix = c('.x', '.y')
 )
@@ -86,12 +86,28 @@ df_full <- dplyr::inner_join(
 xlim <- range(df_full[[ 'log2FoldChange.x' ]])
 ylim <- range(df_full[[ 'log2FoldChange.y' ]])
 
+# get color palette
+color.palette <- RColorBrewer::brewer.pal(n=5, name='Set2')
+
+# add significance column
+sig.x <- df_full$padj.x < 0.1 & !is.na(df_full$padj.x)
+sig.y <- df_full$padj.y < 0.1 & !is.na(df_full$padj.y)
+up.x <- df_full$log2FoldChange.x >= 0
+up.y <- df_full$log2FoldChange.y >= 0
+significance <- rep('None', nrow(df_full))
+significance[ sig.x & sig.y & ((up.x & up.y) | (!up.x & !up.y)) ] <- 'Both - same LFC sign'
+significance[ sig.x & sig.y & ((up.x & !up.y) | (!up.x & up.y)) ] <- 'Both - opposite LFC sign'
+significance[ sig.x & !sig.y ] <- 'A vs B'
+significance[ !sig.x & sig.y ] <- 'B vs A'
+df_full$significance <- significance
+
 # generate scatter plot
 p <- plotScatter.label_ly(compare = 'log2FoldChange',
                           df = df_full,
                           label_x = 'A vs B',
                           label_y = 'B vs A',
                           lim.x = xlim,
-                          lim.y = ylim)
+                          lim.y = ylim,
+                          color.palette = color.palette)
 
 }

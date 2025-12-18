@@ -44,6 +44,9 @@ Combine everything in the results list into a single table
 # make example DESeq data set
 dds <- DESeq2::makeExampleDESeqDataSet()
 
+# run DESeq2
+dds <- DESeq(dds)
+
 # make dds list
 dds_list <- list(main = dds)
 
@@ -53,15 +56,9 @@ res2 <- results(dds, contrast=c('condition', 'B', 'A'))
 
 # make list of results
 res_list <- list(
-        comp1=list(
-            res=res1,
-            dds='main',
-            label='A vs B'),
-        comp2=list(
-            res=res2,
-            dds='main',
-            label='B vs A')
-        )
+              comp1=res1,
+              comp2=res2
+            )
 
 # make dds mapping
 dds_mapping <- list(comp1='main', comp2='main')

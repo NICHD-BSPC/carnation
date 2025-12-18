@@ -816,7 +816,6 @@ make_final_object <- function(obj){
 #'                column='SYMBOL',
 #'                keys=rownames(mat),
 #'                keytype='ENSEMBL')
-#' anno_df <- as.data.frame(anno_df)
 #'
 #' # analyze with DESeq2
 #' dds <- DESeqDataSetFromMatrix(mat,
@@ -837,9 +836,9 @@ make_final_object <- function(obj){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' # functional enrichment using GO BP
+#' # functional enrichment of top genes using GO BP
 #' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes,
+#'             gene = de_genes[1:100],
 #'             keyType = 'ENSEMBL',
 #'             OrgDb=org.Hs.eg.db,
 #'             ont='BP'
@@ -1539,8 +1538,18 @@ fromList.with.names <- function(lst){
 #' ma <- assay(airway)
 #' colData.i <- colData(airway)
 #'
-#' # only keep data from first 100 genes
-#' ma.i <- ma[1:100,]
+#' # analyze with DESeq2
+#' dds <- DESeqDataSetFromMatrix(ma,
+#'                               colData=colData.i,
+#'                               design=~cell + dex)
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
+#'
+#' # only keep data from top 100 DE genes
+#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+#' ma.i <- ma[rownames(ma) %in% de_genes[1:100],]
 #'
 #' # remove any genes with 0 variance
 #' ma.i <- ma.i[rowVars(ma.i) != 0, ]
@@ -1819,6 +1828,9 @@ get_degplot <- function(obj, time, color=NULL,
 #' # make example DESeq data set
 #' dds <- DESeq2::makeExampleDESeqDataSet()
 #'
+#' # run DESeq2
+#' dds <- DESeq(dds)
+#'
 #' # make dds list
 #' dds_list <- list(main = dds)
 #'
@@ -1828,15 +1840,9 @@ get_degplot <- function(obj, time, color=NULL,
 #'
 #' # make list of results
 #' res_list <- list(
-#'         comp1=list(
-#'             res=res1,
-#'             dds='main',
-#'             label='A vs B'),
-#'         comp2=list(
-#'             res=res2,
-#'             dds='main',
-#'             label='B vs A')
-#'         )
+#'               comp1=res1,
+#'               comp2=res2
+#'             )
 #'
 #' # make dds mapping
 #' dds_mapping <- list(comp1='main', comp2='main')
@@ -1874,6 +1880,9 @@ summarize.res.list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thres
 #' @examples
 #' # make example DESeq data set
 #' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # run DESeq2
+#' dds <- DESeq(dds)
 #'
 #' # make comparisons
 #' res <- results(dds, contrast=c('condition', 'A', 'B'))
@@ -1985,7 +1994,6 @@ plotPCA.ly <- function(rld, intgroup){
 #'                column='SYMBOL',
 #'                keys=rownames(mat),
 #'                keytype='ENSEMBL')
-#' anno_df <- as.data.frame(anno_df)
 #'
 #' # analyze with DESeq2
 #' dds <- DESeqDataSetFromMatrix(mat,
@@ -2008,14 +2016,14 @@ plotPCA.ly <- function(rld, intgroup){
 #'
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes,
+#'             gene = de_genes[1:100],
 #'             keyType = 'ENSEMBL',
 #'             OrgDb=org.Hs.eg.db,
 #'             ont='BP'
 #'         )
 #'
 #' # convert to GeneTonic object
-#' gt <- enrich_to_genetonic(eres, res)
+#' gt <- GeneTonic::shake_enrichResult(eres)
 #'
 #' # make radar plot
 #' p <- gs_radar(gt)
@@ -2345,7 +2353,6 @@ plotPCA.san <- function (object, intgroup = "group",
 #'                column='SYMBOL',
 #'                keys=rownames(mat),
 #'                keytype='ENSEMBL')
-#' anno_df <- as.data.frame(anno_df)
 #'
 #' # analyze with DESeq2
 #' dds <- DESeqDataSetFromMatrix(mat,
@@ -2368,7 +2375,7 @@ plotPCA.san <- function (object, intgroup = "group",
 #'
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes,
+#'             gene = de_genes[1:100],
 #'             keyType = 'ENSEMBL',
 #'             OrgDb=org.Hs.eg.db,
 #'             ont='BP'
@@ -2452,8 +2459,8 @@ makeEnrichResult <- function(df, split='/',
 #' # make merged df from the two comparisons
 #' cols.sub <- c('log2FoldChange', 'padj', 'geneid')
 #' df_full <- dplyr::inner_join(
-#'   dplyr::select(res1, all_of(cols.sub)),
-#'   dplyr::select(res2, all_of(cols.sub)),
+#'   dplyr::select(as.data.frame(res1), all_of(cols.sub)),
+#'   dplyr::select(as.data.frame(res2), all_of(cols.sub)),
 #'   by = 'geneid',
 #'   suffix = c('.x', '.y')
 #' )
@@ -2462,13 +2469,29 @@ makeEnrichResult <- function(df, split='/',
 #' xlim <- range(df_full[[ 'log2FoldChange.x' ]])
 #' ylim <- range(df_full[[ 'log2FoldChange.y' ]])
 #'
+#' # get color palette
+#' color.palette <- RColorBrewer::brewer.pal(n=5, name='Set2')
+#'
+#' # add significance column
+#' sig.x <- df_full$padj.x < 0.1 & !is.na(df_full$padj.x)
+#' sig.y <- df_full$padj.y < 0.1 & !is.na(df_full$padj.y)
+#' up.x <- df_full$log2FoldChange.x >= 0
+#' up.y <- df_full$log2FoldChange.y >= 0
+#' significance <- rep('None', nrow(df_full))
+#' significance[ sig.x & sig.y & ((up.x & up.y) | (!up.x & !up.y)) ] <- 'Both - same LFC sign'
+#' significance[ sig.x & sig.y & ((up.x & !up.y) | (!up.x & up.y)) ] <- 'Both - opposite LFC sign'
+#' significance[ sig.x & !sig.y ] <- 'A vs B'
+#' significance[ !sig.x & sig.y ] <- 'B vs A'
+#' df_full$significance <- significance
+#'
 #' # generate scatter plot
 #' p <- plotScatter.label(compare = 'log2FoldChange',
 #'                        df = df_full,
 #'                        label_x = 'A vs B',
 #'                        label_y = 'B vs A',
 #'                        lim.x = xlim,
-#'                        lim.y = ylim)
+#'                        lim.y = ylim,
+#'                        color.palette = color.palette)
 #'
 #' @export
 plotScatter.label <- function(compare,
@@ -2602,8 +2625,8 @@ plotScatter.label <- function(compare,
 #' # make merged df from the two comparisons
 #' cols.sub <- c('log2FoldChange', 'padj', 'geneid')
 #' df_full <- dplyr::inner_join(
-#'   dplyr::select(res1, all_of(cols.sub)),
-#'   dplyr::select(res2, all_of(cols.sub)),
+#'   dplyr::select(as.data.frame(res1), all_of(cols.sub)),
+#'   dplyr::select(as.data.frame(res2), all_of(cols.sub)),
 #'   by = 'geneid',
 #'   suffix = c('.x', '.y')
 #' )
@@ -2612,13 +2635,29 @@ plotScatter.label <- function(compare,
 #' xlim <- range(df_full[[ 'log2FoldChange.x' ]])
 #' ylim <- range(df_full[[ 'log2FoldChange.y' ]])
 #'
+#' # get color palette
+#' color.palette <- RColorBrewer::brewer.pal(n=5, name='Set2')
+#'
+#' # add significance column
+#' sig.x <- df_full$padj.x < 0.1 & !is.na(df_full$padj.x)
+#' sig.y <- df_full$padj.y < 0.1 & !is.na(df_full$padj.y)
+#' up.x <- df_full$log2FoldChange.x >= 0
+#' up.y <- df_full$log2FoldChange.y >= 0
+#' significance <- rep('None', nrow(df_full))
+#' significance[ sig.x & sig.y & ((up.x & up.y) | (!up.x & !up.y)) ] <- 'Both - same LFC sign'
+#' significance[ sig.x & sig.y & ((up.x & !up.y) | (!up.x & up.y)) ] <- 'Both - opposite LFC sign'
+#' significance[ sig.x & !sig.y ] <- 'A vs B'
+#' significance[ !sig.x & sig.y ] <- 'B vs A'
+#' df_full$significance <- significance
+#'
 #' # generate scatter plot
 #' p <- plotScatter.label_ly(compare = 'log2FoldChange',
 #'                           df = df_full,
 #'                           label_x = 'A vs B',
 #'                           label_y = 'B vs A',
 #'                           lim.x = xlim,
-#'                           lim.y = ylim)
+#'                           lim.y = ylim,
+#'                           color.palette = color.palette)
 #'
 #' @export
 plotScatter.label_ly <- function(compare,

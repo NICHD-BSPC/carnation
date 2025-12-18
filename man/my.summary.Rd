@@ -25,6 +25,9 @@ summary(res) prints out info; this function captures it into a dataframe
 # make example DESeq data set
 dds <- DESeq2::makeExampleDESeqDataSet()
 
+# run DESeq2
+dds <- DESeq(dds)
+
 # make comparisons
 res <- results(dds, contrast=c('condition', 'A', 'B'))
 

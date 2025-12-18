@@ -47,7 +47,6 @@ anno_df <- mapIds(org.Hs.eg.db,
                column='SYMBOL',
                keys=rownames(mat),
                keytype='ENSEMBL')
-anno_df <- as.data.frame(anno_df)
 
 # analyze with DESeq2
 dds <- DESeqDataSetFromMatrix(mat,
@@ -70,7 +69,7 @@ de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 
 # functional enrichment using GO BP
 eres <- clusterProfiler::enrichGO(
-            gene = de_genes,
+            gene = de_genes[1:100],
             keyType = 'ENSEMBL',
             OrgDb=org.Hs.eg.db,
             ont='BP'

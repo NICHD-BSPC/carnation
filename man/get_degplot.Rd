@@ -63,8 +63,18 @@ data(airway)
 ma <- assay(airway)
 colData.i <- colData(airway)
 
-# only keep data from first 100 genes
-ma.i <- ma[1:100,]
+# analyze with DESeq2
+dds <- DESeqDataSetFromMatrix(ma,
+                              colData=colData.i,
+                              design=~cell + dex)
+dds <- DESeq(dds)
+
+# extract comparison of interest
+res <- results(dds, contrast = c("dex", "trt", "untrt"))
+
+# only keep data from top 100 DE genes
+de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+ma.i <- ma[rownames(ma) \%in\% de_genes[1:100],]
 
 # remove any genes with 0 variance
 ma.i <- ma.i[rowVars(ma.i) != 0, ]
