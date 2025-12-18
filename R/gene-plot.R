@@ -1,8 +1,73 @@
-#' Gene plot module UI
+#' Gene plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & server for module to create gene plot
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing carnation object
+#' @param coldata reactiveValues object containing object metadata
+#' @param plot_args reactive list with 3 elements: 'gene.id' (all gene IDs) & 'gene_scratchpad'
+#' (genes selected in scratchpad) & 'comp_all' (selected comparison)
+#' @param config reactive list with config settings
 #'
+#'
+#' @examples
+#' library(DESeq2)
+#' library(shiny)
+#'
+#' dds <- makeExampleDESeqDataSet()
+#' rld <- varianceStabilizingTransformation(dds, blind=TRUE)
+#'
+#' dds <- DESeq(dds)
+#' results <- results(dds, contrast=c('condition', 'A', 'B'))
+#'
+#' # Create reactive values to simulate app state
+#' obj <- reactiveValues(
+#'   dds = list(main = dds),
+#'   rld = list(main = rld),
+#'   res = list(comp1 = results),
+#'   all_dds = dds,
+#'   all_rld = rld,
+#'   dds_mapping = list(comp1 = 'main')
+#' )
+#'
+#' # Set up coldata structure that the module expects
+#' coldata <- reactiveValues(
+#'   curr = list(
+#'     all_samples = colData(dds),
+#'     main = colData(dds)
+#'   )
+#' )
+#'
+#' plot_args <- reactive({
+#'   list(
+#'     gene.to.plot = c("gene1", "gene2"),
+#'     gene.id = rownames(dds),
+#'     comp_all = "comp1"
+#'   )
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(genePlotUI('p', 'sidebar')),
+#'            mainPanel(genePlotUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                genePlotServer('p', obj, coldata, plot_args, config)
+#'              }
+#'   )
+#' }
+#'
+#' @name geneplotmod
+#' @rdname geneplotmod
+NULL
+
+
+#' @rdname geneplotmod
 #' @export
 genePlotUI <- function(id, panel){
   ns <- NS(id)
@@ -242,15 +307,7 @@ genePlotUI <- function(id, panel){
   tag
 }
 
-#' Gene plot module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param coldata reactiveValues object containing object metadata
-#' @param plot_args reactive list with 3 elements: 'gene.id' (all gene IDs) & 'gene_scratchpad'
-#' (genes selected in scratchpad) & 'comp_all' (selected comparison)
-#' @param config reactive list with config settings
-#'
+#' @rdname geneplotmod
 #' @export
 genePlotServer <- function(id, obj,
                            coldata,
