@@ -68,4 +68,4 @@ BugReports: https://github.com/NICHD-BSPC/carnation/issues
 biocViews:
     GUI, GeneExpression, Software, ShinyApps, GO, Transcription,
     Transcriptomics, Visualization, DifferentialExpression,
-    Pathways
+    Pathways, GeneSetEnrichment
