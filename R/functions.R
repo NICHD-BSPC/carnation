@@ -1530,6 +1530,8 @@ fromList.with.names <- function(lst){
 #' @return ggplot handle
 #'
 #' @examples
+#' library(DESeq2)
+#'
 #' # load airway dataset
 #' library(airway)
 #' data(airway)
