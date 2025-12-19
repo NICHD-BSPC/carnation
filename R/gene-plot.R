@@ -17,6 +17,7 @@
 #'
 #' @examples
 #' library(shiny)
+#' library(DESeq2)
 #'
 #' # Create reactive values to simulate app state
 #' oobj <- make_example_carnation_object()
