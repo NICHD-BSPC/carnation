@@ -13,6 +13,9 @@ helpModal(mdfile, title = NULL, ...)
 
 \item{...}{other params passed to modalDialog()}
 }
+\value{
+Modal dialog with help documentation.
+}
 \description{
 This generates a modal dialog that includes text
 from a markdown file.
