@@ -55,6 +55,7 @@ res$symbol <- anno_df[rownames(res)]
 # get DE genes with FDR < 0.1
 de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 
+\dontrun{
 # functional enrichment of top genes using GO BP
 eres <- clusterProfiler::enrichGO(
             gene = de_genes[1:100],
@@ -65,6 +66,6 @@ eres <- clusterProfiler::enrichGO(
 
 # convert to GeneTonic object
 gt <- enrich_to_genetonic(eres, res)
-
+}
 
 }

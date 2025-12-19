@@ -836,6 +836,7 @@ make_final_object <- function(obj){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
+#' \dontrun{
 #' # functional enrichment of top genes using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -846,7 +847,7 @@ make_final_object <- function(obj){
 #'
 #' # convert to GeneTonic object
 #' gt <- enrich_to_genetonic(eres, res)
-#'
+#' }
 #'
 #' @export
 enrich_to_genetonic <- function(enrich, res){
@@ -2020,6 +2021,7 @@ plotPCA.ly <- function(rld, intgroup){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
+#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -2033,6 +2035,7 @@ plotPCA.ly <- function(rld, intgroup){
 #'
 #' # make radar plot
 #' p <- gs_radar(gt)
+#' }
 #'
 #' @export
 gs_radar <- function(res_enrich,
@@ -2379,6 +2382,7 @@ plotPCA.san <- function (object, intgroup = "group",
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
+#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -2392,6 +2396,7 @@ plotPCA.san <- function (object, intgroup = "group",
 #'
 #' # convert to a stripped down enrichResult object
 #' eres2 <- makeEnrichResult(df)
+#' }
 #'
 #' @export
 makeEnrichResult <- function(df, split='/',

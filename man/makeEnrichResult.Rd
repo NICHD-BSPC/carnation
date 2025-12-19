@@ -67,6 +67,7 @@ res$symbol <- anno_df[rownames(res)]
 # get DE genes with FDR < 0.1
 de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 
+\dontrun{
 # functional enrichment using GO BP
 eres <- clusterProfiler::enrichGO(
             gene = de_genes[1:100],
@@ -80,5 +81,6 @@ df <- as.data.frame(eres)
 
 # convert to a stripped down enrichResult object
 eres2 <- makeEnrichResult(df)
+}
 
 }
