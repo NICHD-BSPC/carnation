@@ -426,11 +426,100 @@ sumovPlotServer <- function(id, obj, config, type=''){
 
 ######################### Enrichment Map #######################################
 
-#' Enrichment map plot UI
+#' Enrichment map plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate enrichment map plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing GeneTonic object
+#' @param res_obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(airway)
+#' library(DESeq2)
+#' library(org.Hs.eg.db)
+#'
+#' # load airway data
+#' data('airway')
+#'
+#' # extract counts and metadata
+#' mat <- assay(airway)
+#' cdata <- colData(airway)
+#'
+#' # get symbol annotations
+#' anno_df <- mapIds(org.Hs.eg.db,
+#'                column='SYMBOL',
+#'                keys=rownames(mat),
+#'                keytype='ENSEMBL')
+#'
+#' # analyze with DESeq2
+#' dds <- DESeqDataSetFromMatrix(mat,
+#'                               colData=cdata,
+#'                               design=~cell + dex)
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
+#'
+#' # add gene column from rownames
+#' res$gene <- rownames(res)
+#'
+#' # add symbol column from annotations
+#' res$symbol <- anno_df[rownames(res)]
+#'
+#'
+#' # get DE genes with FDR < 0.1
+#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+#'
+#' \dontrun{
+#' # functional enrichment using GO BP
+#' eres <- clusterProfiler::enrichGO(
+#'             gene = de_genes[1:100],
+#'             keyType = 'ENSEMBL',
+#'             OrgDb=org.Hs.eg.db,
+#'             ont='BP'
+#'         )
+#'
+#' # convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres)
+#'
+#' obj <- reactive({
+#'   list(l_gs = gt$l_gs,
+#'        anno_df = gt$anno_df,
+#'        label = 'comp1')
+#' })
+#'
+#' res_obj <- reactive({ res })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(enrichmapUI('p', 'sidebar')),
+#'            mainPanel(enrichmapUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                enrichmapServer('p', obj, res_obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' }
+#
+#' @rdname emapmod
+#' @name enrichplotmod
+NULL
+
+#' @rdname emapmod
 #' @export
 enrichmapUI <- function(id, panel){
   ns <- NS(id)
@@ -481,13 +570,7 @@ enrichmapUI <- function(id, panel){
   }
 }
 
-#' Enrichment map plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing GeneTonic object
-#' @param res_obj reactive, dataframe containing enrichment results
-#' @param config reactive list with config settings
-#'
+#' @rdname emapmod
 #' @export
 enrichmapServer <- function(id, obj, res_obj, config){
 
