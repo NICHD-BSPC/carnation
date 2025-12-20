@@ -1531,6 +1531,7 @@ fromList.with.names <- function(lst){
 #' @return ggplot handle
 #'
 #' @examples
+#' \donttest{
 #' library(DESeq2)
 #'
 #' # load airway dataset
@@ -1571,6 +1572,7 @@ fromList.with.names <- function(lst){
 #' dp <- get_degplot(p, time='dex',
 #'                   cluster_to_show=all_clusters,
 #'                   x_order=c('untrt','trt'))
+#' }
 #'
 #' @export
 get_degplot <- function(obj, time, color=NULL,

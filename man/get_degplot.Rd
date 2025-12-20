@@ -55,6 +55,7 @@ This function plots a degPatterns object using
 degPlotCluster
 }
 \examples{
+\donttest{
 library(DESeq2)
 
 # load airway dataset
@@ -95,5 +96,6 @@ all_clusters <- unique(p$normalized$cluster)
 dp <- get_degplot(p, time='dex',
                   cluster_to_show=all_clusters,
                   x_order=c('untrt','trt'))
+}
 
 }
