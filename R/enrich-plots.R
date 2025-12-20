@@ -76,7 +76,6 @@
 #'
 #' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
-#' @param type string, if 'comp' then show the comparison view
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param config reactive list with config settings
 #' @param type string, if 'comp' then show the comparison view
@@ -134,7 +133,7 @@
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
 #'
-#' genetonic_obj <- reactive({
+#' obj <- reactive({
 #'   list(l_gs = gt$l_gs,
 #'        anno_df = gt$anno_df,
 #'        label = 'comp1')

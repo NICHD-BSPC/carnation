@@ -77,7 +77,7 @@ eres <- clusterProfiler::enrichGO(
 # convert to GeneTonic object
 gt <- GeneTonic::shake_enrichResult(eres)
 
-genetonic_obj <- reactive({
+obj <- reactive({
   list(l_gs = gt$l_gs,
        anno_df = gt$anno_df,
        label = 'comp1')
