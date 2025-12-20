@@ -158,7 +158,7 @@
 #' }
 #
 #' @rdname sumovmod
-#' @name enrichplotmod
+#' @name sumovmod
 NULL
 
 #' @rdname sumovmod
@@ -518,7 +518,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' }
 #
 #' @rdname emapmod
-#' @name enrichplotmod
+#' @name emapmod
 NULL
 
 #' @rdname emapmod
@@ -745,7 +745,7 @@ set_graph_attr <- function(gg){
 #' }
 #
 #' @rdname cnetmod
-#' @name enrichplotmod
+#' @name cnetmod
 NULL
 
 #' @rdname cnetmod
@@ -1009,7 +1009,7 @@ cnetPlotServer <- function(id, obj, config){
 #' }
 #
 #' @rdname radarmod
-#' @name enrichplotmod
+#' @name radarmod
 NULL
 
 #' @rdname radarmod
@@ -1359,7 +1359,7 @@ radarServer <- function(id, obj, config, type=''){
 #' }
 #
 #' @rdname alluvialmod
-#' @name enrichplotmod
+#' @name alluvialmod
 NULL
 
 #' @rdname alluvialmod
@@ -1561,7 +1561,7 @@ alluvialServer <- function(id, obj, res_obj, config){
 #' }
 #
 #' @rdname dendromod
-#' @name enrichplotmod
+#' @name dendromod
 NULL
 
 #' @rdname dendromod
@@ -1819,7 +1819,7 @@ dendrogramServer <- function(id, obj, config){
 #'
 #
 #' @rdname horizonmod
-#' @name enrichplotmod
+#' @name horizonmod
 NULL
 
 #' @rdname horizonmod
@@ -2111,7 +2111,7 @@ horizonServer <- function(id, obj, config){
 #' }
 #
 #' @rdname distillmod
-#' @name enrichplotmod
+#' @name distillmod
 NULL
 
 #' @rdname distillmod
