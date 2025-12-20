@@ -800,6 +800,7 @@ make_final_object <- function(obj){
 #' @return GeneTonic object
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -836,7 +837,6 @@ make_final_object <- function(obj){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment of top genes using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -1985,6 +1985,7 @@ plotPCA.ly <- function(rld, intgroup){
 #' @return ggplot handle
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -2021,7 +2022,6 @@ plotPCA.ly <- function(rld, intgroup){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -2346,6 +2346,7 @@ plotPCA.san <- function (object, intgroup = "group",
 #' @return enrichResult object
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -2382,7 +2383,6 @@ plotPCA.san <- function (object, intgroup = "group",
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],

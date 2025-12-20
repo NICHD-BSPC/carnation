@@ -85,6 +85,7 @@
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -121,7 +122,6 @@
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -442,6 +442,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -478,7 +479,6 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -677,6 +677,7 @@ set_graph_attr <- function(gg){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -713,7 +714,6 @@ set_graph_attr <- function(gg){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -933,6 +933,7 @@ cnetPlotServer <- function(id, obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -969,7 +970,6 @@ cnetPlotServer <- function(id, obj, config){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -1280,6 +1280,7 @@ radarServer <- function(id, obj, config, type=''){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -1316,7 +1317,6 @@ radarServer <- function(id, obj, config, type=''){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -1483,6 +1483,7 @@ alluvialServer <- function(id, obj, res_obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -1519,7 +1520,6 @@ alluvialServer <- function(id, obj, res_obj, config){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -1725,6 +1725,7 @@ dendrogramServer <- function(id, obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' \donttest{
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
@@ -1761,7 +1762,6 @@ dendrogramServer <- function(id, obj, config){
 #' # get DE genes with FDR < 0.1
 #' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 #'
-#' \dontrun{
 #' # functional enrichment using GO BP
 #' eres <- clusterProfiler::enrichGO(
 #'             gene = de_genes[1:100],
@@ -1807,6 +1807,7 @@ dendrogramServer <- function(id, obj, config){
 #'                horizonServer('p', obj, config)
 #'              }
 #'   )
+#' }
 #' }
 #'
 #
