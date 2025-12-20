@@ -31,6 +31,7 @@ UI & module to generate dendrograms.
 library(airway)
 library(DESeq2)
 library(org.Hs.eg.db)
+library(shiny)
 
 # load airway data
 data('airway')

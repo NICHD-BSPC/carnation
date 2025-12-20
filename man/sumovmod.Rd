@@ -33,6 +33,7 @@ UI & module to generate summary overview plots.
 library(airway)
 library(DESeq2)
 library(org.Hs.eg.db)
+library(shiny)
 
 # load airway data
 data('airway')

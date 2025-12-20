@@ -89,6 +89,7 @@
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
+#' library(shiny)
 #'
 #' # load airway data
 #' data('airway')
@@ -446,6 +447,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
+#' library(shiny)
 #'
 #' # load airway data
 #' data('airway')
@@ -681,6 +683,7 @@ set_graph_attr <- function(gg){
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
+#' library(shiny)
 #'
 #' # load airway data
 #' data('airway')
@@ -937,6 +940,7 @@ cnetPlotServer <- function(id, obj, config){
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
+#' library(shiny)
 #'
 #' # load airway data
 #' data('airway')
@@ -1284,6 +1288,7 @@ radarServer <- function(id, obj, config, type=''){
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
+#' library(shiny)
 #'
 #' # load airway data
 #' data('airway')
@@ -1487,6 +1492,7 @@ alluvialServer <- function(id, obj, res_obj, config){
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
+#' library(shiny)
 #'
 #' # load airway data
 #' data('airway')
@@ -1729,6 +1735,7 @@ dendrogramServer <- function(id, obj, config){
 #' library(airway)
 #' library(DESeq2)
 #' library(org.Hs.eg.db)
+#' library(shiny)
 #'
 #' # load airway data
 #' data('airway')
