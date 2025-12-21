@@ -60,7 +60,7 @@ jobs:
           cd .. && mkdir bioccheck && cd bioccheck
 
           Rscript -e "library(BiocCheck); BiocCheck('../carnation')"
-          tar cvzf bioccheck.tar.gz carnation.BiocCheck/
+          tar cvzf bioccheck.tar.gz ../carnation.BiocCheck/
           mv bioccheck.tar.gz ${WORKDIR}/bioccheck.tar.gz
 
       - name: bioccheck log
