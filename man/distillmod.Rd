@@ -42,7 +42,7 @@ eres2 <- GeneTonic::shake_enrichResult(eres_dex)
 gt <- enrich_to_genetonic(eres_dex, res_dex)
 
 # get distilled results
-df <- distill_enrichment(
+df <- GeneTonic::distill_enrichment(
         eres2,
         res_dex,
         gt$anno_df,

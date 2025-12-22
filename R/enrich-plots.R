@@ -1741,7 +1741,7 @@ horizonServer <- function(id, obj, config){
 #' gt <- enrich_to_genetonic(eres_dex, res_dex)
 #'
 #' # get distilled results
-#' df <- distill_enrichment(
+#' df <- GeneTonic::distill_enrichment(
 #'         eres2,
 #'         res_dex,
 #'         gt$anno_df,
@@ -1957,7 +1957,7 @@ distillPlotServer <- function(id, obj, args, config){
 #' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' # get distilled results
-#' df <- gs_fuzzyclustering(gt[seq_len(10),],
+#' df <- GeneTonic::gs_fuzzyclustering(gt[seq_len(10),],
 #'         similarity_threshold = 0.35,
 #'         fuzzy_seeding_initial_neighbors = 3,
 #'         fuzzy_multilinkage_rule = 0.5)

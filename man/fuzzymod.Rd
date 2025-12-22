@@ -38,7 +38,7 @@ data(eres_dex, package='carnation')
 gt <- GeneTonic::shake_enrichResult(eres_dex)
 
 # get distilled results
-df <- gs_fuzzyclustering(gt[seq_len(10),],
+df <- GeneTonic::gs_fuzzyclustering(gt[seq_len(10),],
         similarity_threshold = 0.35,
         fuzzy_seeding_initial_neighbors = 3,
         fuzzy_multilinkage_rule = 0.5)
