@@ -2720,3 +2720,65 @@ make_example_carnation_object <- function(){
   obj
 }
 
+#' Generate upset plot table
+#'
+#' @param gene.lists list with character vectors of gene names
+#' @param comp_split_pattern character used to separate gene set names
+#'
+#' @return list with upset table elements
+#'
+#' @examples
+#' lst <- list(group1 = c(a = "gene1", b = "gene2", c = "gene3", d = "gene4"),
+#'             group2 = c(b = "gene2", d = "gene4", e = "gene5"),
+#'             group3 = c(d = "gene4", e = "gene5", f = "gene6"))
+#'
+#' df <- get_upset_table(lst)
+#' str(df)
+#'
+#' @export
+get_upset_table <- function(gene.lists, comp_split_pattern=';'){
+  # get matrix of intersections, add set column & save
+  df <- fromList.with.names(gene.lists)
+  df <- add.set.column(df)
+
+  # get mapping of set names to intersects
+  df_unique <- unique(df[, setdiff(colnames(df), 'symbol')])
+  rownames(df_unique) <- df_unique$set
+  df_unique <- df_unique[, setdiff(colnames(df_unique), 'set')]
+  if(nrow(df_unique) == 1){
+    set_mapping <- setNames(list(colnames(df_unique)), rownames(df_unique))
+  } else {
+    set_mapping <- apply(df_unique, 1, function(x){
+                     n <- colnames(df_unique)[x == 1]
+                     n
+        })
+  }
+
+  # get columns with degree & comparisons & add to df
+  comps <- unlist(
+             lapply(set_mapping[df$set],
+               function(x) paste(x, collapse=comp_split_pattern)
+             )
+           )
+  degree <- unlist(lapply(set_mapping[df$set], length))
+
+  tbl <- cbind(df, comparisons=comps, degree=degree)
+
+  # get intersection sizes
+  inter_counts <- table(df$set)
+
+  # create named vector of choices & add groups + size to names
+  # e.g. if 'set1' has 150 genes,
+  # then the name is 'set1 (n = 150)'
+  inter_choices <- names(inter_counts)
+  names(inter_choices) <- paste0(inter_choices, ' (',
+                          unlist(
+                            lapply(set_mapping,
+                              function(x)
+                                paste(x, collapse=', ')
+                            )
+                          ), '; n = ', inter_counts, ')')
+
+  list(tbl=tbl, set_mapping=set_mapping, set_labels=inter_choices)
+}
+
