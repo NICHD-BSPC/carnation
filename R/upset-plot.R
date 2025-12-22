@@ -12,7 +12,7 @@
 #' @param config reactive list with config settings
 #'
 #' @returns
-#' UI returns tagList with heatmap UI.
+#' UI returns tagList with upset plot UI.
 #' Server returns reactive with list containing upset table, intersections
 #' & selected genes.
 #'

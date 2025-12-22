@@ -26,7 +26,7 @@ upsetPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes, config)
 \item{config}{reactive list with config settings}
 }
 \value{
-UI returns tagList with heatmap UI.
+UI returns tagList with upset plot UI.
 Server returns reactive with list containing upset table, intersections
 & selected genes.
 }
