@@ -17,6 +17,51 @@
 #' UI returns tagList with heatmap UI.
 #' Server invisibly returns NULL (used for side effects).
 #'
+#' @examples
+#' library(shiny)
+#' library(DESeq2)
+#'
+#' # Create reactive values to simulate app state
+#' oobj <- make_example_carnation_object()
+#'
+#' obj <- reactiveValues(
+#'    dds = oobj$dds,
+#'    rld = oobj$rld,
+#'    res = oobj$res,
+#'    all_dds = oobj$all_dds,
+#'    all_rld = oobj$all_rld,
+#'    dds_mapping = oobj$dds_mapping
+#' )
+#'
+#' cdata <- lapply(oobj$rld, function(x) colData(x))
+#'
+#' coldata <- reactiveValues( all=cdata, curr=cdata )
+#'
+#' plot_args <- reactive({
+#'   list(
+#'     fdr.thres=0.1,
+#'     fc.thres=0,
+#'     upset_data=list(genes=NULL, labels=NULL)
+#'   )
+#' })
+#'
+#' gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(heatmapUI('p', 'sidebar')),
+#'            mainPanel(heatmapUI('p', 'sidebar'))
+#'          ),
+#'     server = function(input, output, session){
+#'                heatmapServer('p', obj, coldata,
+#'                              plot_args, gene_scratchpad, config)
+#'              }
+#'   )
+#' }
+#'
 #' @rdname heatmapmod
 #' @name heatmapmod
 NULL
