@@ -53,6 +53,9 @@ eres_cell <- clusterProfiler::enrichGO(
                qvalueCutoff=1
              )
 
+# rm geneSets slot to reduce obj size
+eres_cell@geneSets <- list()
+
 # save res_cell & enrich objects
 save(res_cell, file = paste0("data/res_cell.RData"), compress="xz")
 save(eres_cell, file = paste0("data/eres_cell.RData"), compress="xz")
@@ -78,6 +81,9 @@ eres_dex <- clusterProfiler::enrichGO(
               pvalueCutoff=1,
               qvalueCutoff=1
             )
+
+# rm geneSets slot to reduce obj size
+eres_dex@geneSets <- list()
 
 # save res_dex & enrich objects
 save(res_dex, file = paste0("data/res_dex.RData"), compress="xz")
