@@ -1,8 +1,25 @@
-#' Upset plot module UI
+#' Upset plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to generate upset plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing carnation object
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold) & 'fc.thres' (log2FC)
+#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad
+#' @param reset_genes reactive to reset gene scratchpad selection
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with heatmap UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @rdname upsetmod
+#' @name upsetmod
+NULL
+
+#' @rdname upsetmod
 #' @export
 upsetPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -189,15 +206,7 @@ upsetPlotUI <- function(id, panel){
 
 }
 
-#' Upset plot module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold) & 'fc.thres' (log2FC)
-#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad
-#' @param reset_genes reactive to reset gene scratchpad selection
-#' @param config reactive list with config settings
-#'
+#' @rdname upsetmod
 #' @export
 upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
 

@@ -1,8 +1,27 @@
-#' Heatmap module UI
+#' Heatmap module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to generate heatmap.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing carnation object
+#' @param coldata reactiveValues object containing object metadata
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
+#' 'upset_data' (list containing data from upset plot module)
+#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad which will
+#' be labeled
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with heatmap UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @rdname heatmapmod
+#' @name heatmapmod
+NULL
+
+#' @rdname heatmapmod
 #' @export
 heatmapUI <- function(id, panel){
   ns <- NS(id)
@@ -218,17 +237,7 @@ heatmapUI <- function(id, panel){
   tag
 }
 
-#' Heatmap module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param coldata reactiveValues object containing object metadata
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
-#' 'upset_data' (list containing data from upset plot module)
-#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad which will
-#' be labeled
-#' @param config reactive list with config settings
-#'
+#' @rdname heatmapmod
 #' @export
 heatmapServer <- function(id, obj,
                           coldata,
