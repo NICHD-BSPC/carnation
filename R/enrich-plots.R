@@ -1728,6 +1728,7 @@ horizonServer <- function(id, obj, config){
 #' server returns reactive with number of plotted terms
 #'
 #' @examples
+#' library(GeneTonic)
 #' library(shiny)
 #'
 #' # get DESeqResults object
@@ -1741,7 +1742,7 @@ horizonServer <- function(id, obj, config){
 #' gt <- enrich_to_genetonic(eres_dex, res_dex)
 #'
 #' # get distilled results
-#' df <- GeneTonic::distill_enrichment(
+#' df <- distill_enrichment(
 #'         eres2,
 #'         res_dex,
 #'         gt$anno_df,

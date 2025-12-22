@@ -29,6 +29,7 @@ server returns reactive with number of plotted terms
 UI & module to generate distill enrichment map plots.
 }
 \examples{
+library(GeneTonic)
 library(shiny)
 
 # get DESeqResults object
@@ -42,7 +43,7 @@ eres2 <- GeneTonic::shake_enrichResult(eres_dex)
 gt <- enrich_to_genetonic(eres_dex, res_dex)
 
 # get distilled results
-df <- GeneTonic::distill_enrichment(
+df <- distill_enrichment(
         eres2,
         res_dex,
         gt$anno_df,
