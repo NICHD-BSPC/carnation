@@ -31,7 +31,6 @@ Most of the parameters are just placeholders and the
 dataframe must contain the columns 'ID' and 'geneID'
 }
 \examples{
-\donttest{
 library(airway)
 library(DESeq2)
 library(org.Hs.eg.db)
@@ -68,6 +67,7 @@ res$symbol <- anno_df[rownames(res)]
 # get DE genes with FDR < 0.1
 de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 
+\donttest{
 # functional enrichment using GO BP
 eres <- clusterProfiler::enrichGO(
             gene = de_genes[1:100],

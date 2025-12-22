@@ -55,7 +55,6 @@ This function plots a degPatterns object using
 degPlotCluster
 }
 \examples{
-\donttest{
 library(DESeq2)
 
 # load airway dataset
@@ -82,6 +81,7 @@ ma.i <- ma[rownames(ma) \%in\% de_genes[1:100],]
 # remove any genes with 0 variance
 ma.i <- ma.i[rowVars(ma.i) != 0, ]
 
+\donttest{
 # run pattern analysis
 p <- DEGreport::degPatterns(
         ma.i,

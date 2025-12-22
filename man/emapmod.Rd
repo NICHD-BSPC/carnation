@@ -29,7 +29,6 @@ server invisibly returns NULL (used for side effects)
 UI & module to generate enrichment map plots.
 }
 \examples{
-\donttest{
 library(airway)
 library(DESeq2)
 library(org.Hs.eg.db)
@@ -67,6 +66,7 @@ res$symbol <- anno_df[rownames(res)]
 # get DE genes with FDR < 0.1
 de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
 
+\donttest{
 # functional enrichment using GO BP
 eres <- clusterProfiler::enrichGO(
             gene = de_genes[1:100],
