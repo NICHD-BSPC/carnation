@@ -1,10 +1,27 @@
-#' Pattern plot module UI
+#' Pattern plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to generate pattern plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param tab string, if 'plot' show plot settings, if 'table' show table settings;
 #' if 'both', show settings for both.
+#' @param obj reactiveValues object containing carnation object
+#' @param coldata reactiveValues object containing object metadata
+#' @param plot_args reactive containing 'gene_scratchpad' (genes selected in scratchpad) &
+#' 'upset_data' (list containing data from upset plot module)
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with module UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @rdname degmod
+#' @name degmod
+NULL
+
+#' @rdname degmod
 #' @export
 patternPlotUI <- function(id, panel, tab){
   ns <- NS(id)
@@ -285,15 +302,7 @@ patternPlotUI <- function(id, panel, tab){
 }
 
 
-#' Pattern plot module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param coldata reactiveValues object containing object metadata
-#' @param plot_args reactive containing 'gene_scratchpad' (genes selected in scratchpad) &
-#' 'upset_data' (list containing data from upset plot module)
-#' @param config reactive list with config settings
-#'
+#' @rdname degmod
 #' @export
 patternPlotServer <- function(id,
                               obj,
