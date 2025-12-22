@@ -27,7 +27,8 @@ upsetPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes, config)
 }
 \value{
 UI returns tagList with heatmap UI.
-Server invisibly returns NULL (used for side effects).
+Server returns reactive with list containing upset table, intersections
+& selected genes.
 }
 \description{
 Module UI & server to generate upset plots.

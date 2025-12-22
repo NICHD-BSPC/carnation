@@ -13,7 +13,8 @@
 #'
 #' @returns
 #' UI returns tagList with heatmap UI.
-#' Server invisibly returns NULL (used for side effects).
+#' Server returns reactive with list containing upset table, intersections
+#' & selected genes.
 #'
 #' @rdname upsetmod
 #' @name upsetmod
