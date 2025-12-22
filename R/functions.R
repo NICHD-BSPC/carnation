@@ -1914,7 +1914,7 @@ plotPCA.ly <- function(rld, intgroup){
 #' @examples
 #'
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres_dex)
