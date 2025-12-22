@@ -51,44 +51,11 @@ get_degplot(
 ggplot handle
 }
 \description{
-This function plots a degPatterns object using
-degPlotCluster
+This function plots a degPatterns object.
 }
 \examples{
-library(DESeq2)
-
-# load airway dataset
-library(airway)
-data(airway)
-
-# extract normalized data & metadata
-ma <- assay(airway)
-colData.i <- colData(airway)
-
-# analyze with DESeq2
-dds <- DESeqDataSetFromMatrix(ma,
-                              colData=colData.i,
-                              design=~cell + dex)
-dds <- DESeq(dds)
-
-# extract comparison of interest
-res <- results(dds, contrast = c("dex", "trt", "untrt"))
-
-# only keep data from top 100 DE genes
-de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-ma.i <- ma[rownames(ma) \%in\% de_genes[1:100],]
-
-# remove any genes with 0 variance
-ma.i <- ma.i[rowVars(ma.i) != 0, ]
-
-\donttest{
-# run pattern analysis
-p <- DEGreport::degPatterns(
-        ma.i,
-        colData.i,
-        time='dex',
-        plot=FALSE
-        )
+# get degpatterns object
+data(degpatterns_dex, package = 'carnation')
 
 # get pattern plot
 all_clusters <- unique(p$normalized$cluster)
@@ -96,6 +63,5 @@ all_clusters <- unique(p$normalized$cluster)
 dp <- get_degplot(p, time='dex',
                   cluster_to_show=all_clusters,
                   x_order=c('untrt','trt'))
-}
 
 }

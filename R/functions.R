@@ -800,54 +800,13 @@ make_final_object <- function(obj){
 #' @return GeneTonic object
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment of top genes using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrich & res objects
+#' data(res_dex, package="carnation")
+#' data(enrich_bp_dex, package="carnation")
 #'
 #' # convert to GeneTonic object
 #' gt <- enrich_to_genetonic(eres, res)
-#' }
+#'
 #'
 #' @export
 enrich_to_genetonic <- function(enrich, res){
@@ -1511,8 +1470,7 @@ fromList.with.names <- function(lst){
 
 #' Plot a degPatterns object
 #'
-#' This function plots a degPatterns object using
-#' degPlotCluster
+#' This function plots a degPatterns object.
 #'
 #' @param obj degPatterns object
 #' @param time metadata variable to plot on x-axis
@@ -1531,40 +1489,8 @@ fromList.with.names <- function(lst){
 #' @return ggplot handle
 #'
 #' @examples
-#' library(DESeq2)
-#'
-#' # load airway dataset
-#' library(airway)
-#' data(airway)
-#'
-#' # extract normalized data & metadata
-#' ma <- assay(airway)
-#' colData.i <- colData(airway)
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(ma,
-#'                               colData=colData.i,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # only keep data from top 100 DE genes
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#' ma.i <- ma[rownames(ma) %in% de_genes[1:100],]
-#'
-#' # remove any genes with 0 variance
-#' ma.i <- ma.i[rowVars(ma.i) != 0, ]
-#'
-#' \donttest{
-#' # run pattern analysis
-#' p <- DEGreport::degPatterns(
-#'         ma.i,
-#'         colData.i,
-#'         time='dex',
-#'         plot=FALSE
-#'         )
+#' # get degpatterns object
+#' data(degpatterns_dex, package = 'carnation')
 #'
 #' # get pattern plot
 #' all_clusters <- unique(p$normalized$cluster)
@@ -1572,7 +1498,6 @@ fromList.with.names <- function(lst){
 #' dp <- get_degplot(p, time='dex',
 #'                   cluster_to_show=all_clusters,
 #'                   x_order=c('untrt','trt'))
-#' }
 #'
 #' @export
 get_degplot <- function(obj, time, color=NULL,
@@ -1987,57 +1912,15 @@ plotPCA.ly <- function(rld, intgroup){
 #' @return ggplot handle
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
 #'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
 #'
 #' # make radar plot
 #' p <- gs_radar(gt)
-#' }
 #'
 #' @export
 gs_radar <- function(res_enrich,
@@ -2348,57 +2231,14 @@ plotPCA.san <- function (object, intgroup = "group",
 #' @return enrichResult object
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # extract the results
 #' df <- as.data.frame(eres)
 #'
 #' # convert to a stripped down enrichResult object
 #' eres2 <- makeEnrichResult(df)
-#' }
 #'
 #' @export
 makeEnrichResult <- function(df, split='/',
