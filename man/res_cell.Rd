@@ -5,8 +5,12 @@
 \alias{res_cell}
 \title{A \code{DESeqResults} object testing the difference between
 two cell lines of smooth muscle cells}
-\description{
+\format{
 A \code{DESeqResults} object, generated in the \code{DESeq2} framework
+}
+\description{
+A \code{DESeqResults} object testing the difference between
+two cell lines of smooth muscle cells
 }
 \details{
 This \code{DESeqResults} object on the data from the \code{airway} package

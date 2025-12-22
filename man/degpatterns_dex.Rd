@@ -5,9 +5,13 @@
 \alias{degpatterns_dex}
 \title{A \code{degPatterns} object for differentially expressed genes in the
 dexamethasone treatment comparison.}
-\description{
-An \code{degPatterns} object, generated with the \code{degPatterns} function
+\format{
+A \code{degPatterns} object, generated with the \code{degPatterns} function
 from the \code{DEGreport} package.
+}
+\description{
+A \code{degPatterns} object for differentially expressed genes in the
+dexamethasone treatment comparison.
 }
 \details{
 This \code{degPatterns} object was created to test for groups of

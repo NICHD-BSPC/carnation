@@ -1,7 +1,7 @@
 #' A `DESeqResults` object testing the effect of dexamethasone
 #' on smooth muscle cells
 #'
-#' A `DESeqResults` object, generated in the `DESeq2` framework
+#' @format A `DESeqResults` object, generated in the `DESeq2` framework
 #'
 #' @details This `DESeqResults` object on the data from the `airway` package
 #' has been created comparing dexamethasone treated vs untreated samples,
@@ -25,7 +25,7 @@ NULL
 #' A `DESeqResults` object testing the difference between
 #' two cell lines of smooth muscle cells
 #'
-#' A `DESeqResults` object, generated in the `DESeq2` framework
+#' @format A `DESeqResults` object, generated in the `DESeq2` framework
 #'
 #' @details This `DESeqResults` object on the data from the `airway` package
 #' has been created comparing two smooth muscle cell lines,
@@ -49,7 +49,7 @@ NULL
 #' An `enrichResult` object for differentially expressed genes in the
 #' dexamethasone treatment comparison.
 #'
-#' An `enrichResult` object, generated with the `enrichGO` function
+#' @format An `enrichResult` object, generated with the `enrichGO` function
 #' from the `clusterProfiler` package.
 #'
 #' @details This `enrichResult` object was created to test for functional
@@ -75,7 +75,7 @@ NULL
 #' An `enrichResult` object for differentially expressed genes in the
 #' cell line comparison.
 #'
-#' An `enrichResult` object, generated with the `enrichGO` function
+#' @format An `enrichResult` object, generated with the `enrichGO` function
 #' from the `clusterProfiler` package.
 #'
 #' @details This `enrichResult` object was created to test for functional
@@ -101,7 +101,7 @@ NULL
 #' A `degPatterns` object for differentially expressed genes in the
 #' dexamethasone treatment comparison.
 #'
-#' An `degPatterns` object, generated with the `degPatterns` function
+#' @format A `degPatterns` object, generated with the `degPatterns` function
 #' from the `DEGreport` package.
 #'
 #' @details This `degPatterns` object was created to test for groups of

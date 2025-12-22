@@ -5,9 +5,13 @@
 \alias{enrich_bp_cell}
 \title{An \code{enrichResult} object for differentially expressed genes in the
 cell line comparison.}
-\description{
+\format{
 An \code{enrichResult} object, generated with the \code{enrichGO} function
 from the \code{clusterProfiler} package.
+}
+\description{
+An \code{enrichResult} object for differentially expressed genes in the
+cell line comparison.
 }
 \details{
 This \code{enrichResult} object was created to test for functional

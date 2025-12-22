@@ -5,8 +5,12 @@
 \alias{res_dex}
 \title{A \code{DESeqResults} object testing the effect of dexamethasone
 on smooth muscle cells}
-\description{
+\format{
 A \code{DESeqResults} object, generated in the \code{DESeq2} framework
+}
+\description{
+A \code{DESeqResults} object testing the effect of dexamethasone
+on smooth muscle cells
 }
 \details{
 This \code{DESeqResults} object on the data from the \code{airway} package
