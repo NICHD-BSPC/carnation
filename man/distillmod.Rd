@@ -29,61 +29,21 @@ server returns reactive with number of plotted terms
 UI & module to generate distill enrichment map plots.
 }
 \examples{
-library(airway)
-library(DESeq2)
-library(org.Hs.eg.db)
-library(GeneTonic)
-library(shiny)
+# get DESeqResults object
+data(res_dex, package='carnation')
 
-# load airway data
-data('airway')
+# get enrichResult object
+data(enrich_bp_dex, package='carnation')
 
-# extract counts and metadata
-mat <- assay(airway)
-cdata <- colData(airway)
-
-# get symbol annotations
-anno_df <- mapIds(org.Hs.eg.db,
-               column='SYMBOL',
-               keys=rownames(mat),
-               keytype='ENSEMBL')
-
-# analyze with DESeq2
-dds <- DESeqDataSetFromMatrix(mat,
-                              colData=cdata,
-                              design=~cell + dex)
-dds <- DESeq(dds)
-
-# extract comparison of interest
-res <- results(dds, contrast = c("dex", "trt", "untrt"))
-
-# add gene column from rownames
-res$gene <- rownames(res)
-
-# add symbol column from annotations
-res$symbol <- anno_df[rownames(res)]
-
-
-# get DE genes with FDR < 0.1
-de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-
-\donttest{
-# functional enrichment using GO BP
-eres <- clusterProfiler::enrichGO(
-            gene = de_genes[1:100],
-            keyType = 'ENSEMBL',
-            OrgDb=org.Hs.eg.db,
-            ont='BP'
-        )
-
-# convert to GeneTonic object
-gt <- GeneTonic::shake_enrichResult(eres)
+# preprocess & convert to GeneTonic object
+eres2 <- GeneTonic::shake_enrichResult(eres)
+gt <- enrich_to_genetonic(eres, res)
 
 # get distilled results
 df <- distill_enrichment(
-        gt,
+        eres2,
         res,
-        ganno_df,
+        gt$anno_df,
         n_gs = 10,
         cluster_fun = "cluster_markov"
       )
@@ -111,5 +71,4 @@ if(interactive()){
   )
 }
 
-}
 }

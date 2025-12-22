@@ -85,51 +85,8 @@
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(shiny)
-#'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
@@ -155,8 +112,6 @@
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname sumovmod
 #' @name sumovmod
 NULL
@@ -443,51 +398,11 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(shiny)
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
 #'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
@@ -515,8 +430,6 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname emapmod
 #' @name emapmod
 NULL
@@ -679,51 +592,11 @@ set_graph_attr <- function(gg){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(shiny)
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
 #'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' obj <- reactive({ res })
 #'
@@ -742,8 +615,6 @@ set_graph_attr <- function(gg){
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname cnetmod
 #' @name cnetmod
 NULL
@@ -936,51 +807,8 @@ cnetPlotServer <- function(id, obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(shiny)
-#'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
@@ -1006,8 +834,6 @@ cnetPlotServer <- function(id, obj, config){
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname radarmod
 #' @name radarmod
 NULL
@@ -1284,53 +1110,14 @@ radarServer <- function(id, obj, config, type=''){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(shiny)
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
 #'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
+#'
 #' gt <- GeneTonic::shake_enrichResult(eres)
 #'
 #' obj <- reactive({
@@ -1356,8 +1143,6 @@ radarServer <- function(id, obj, config, type=''){
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname alluvialmod
 #' @name alluvialmod
 NULL
@@ -1488,51 +1273,8 @@ alluvialServer <- function(id, obj, res_obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(shiny)
-#'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
@@ -1558,8 +1300,6 @@ alluvialServer <- function(id, obj, res_obj, config){
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname dendromod
 #' @name dendromod
 NULL
@@ -1731,65 +1471,18 @@ dendrogramServer <- function(id, obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(shiny)
-#'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
 #'
-#' # second functional enrichment
-#' eres1 <- clusterProfiler::enrichGO(
-#'              gene = de_genes[101:200],
-#'              keyType = 'ENSEMBL',
-#'              OrgDb=org.Hs.eg.db,
-#'              ont='BP'
-#'          )
+#' # get second enrichResult object
+#' data(enrich_bp_cell, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt1 <- GeneTonic::shake_enrichResult(eres1)
+#' gt1 <- GeneTonic::shake_enrichResult(eres)
+#'
 #' obj <- reactive({
 #'   list(
 #'     obj1 = list(l_gs = gt$l_gs,
@@ -1815,9 +1508,7 @@ dendrogramServer <- function(id, obj, config){
 #'              }
 #'   )
 #' }
-#' }
 #'
-#
 #' @rdname horizonmod
 #' @name horizonmod
 NULL
@@ -2026,61 +1717,21 @@ horizonServer <- function(id, obj, config){
 #' server returns reactive with number of plotted terms
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(GeneTonic)
-#' library(shiny)
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
 #'
-#' # load airway data
-#' data('airway')
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
-#'
-#' # convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' # preprocess & convert to GeneTonic object
+#' eres2 <- GeneTonic::shake_enrichResult(eres)
+#' gt <- enrich_to_genetonic(eres, res)
 #'
 #' # get distilled results
 #' df <- distill_enrichment(
-#'         gt,
+#'         eres2,
 #'         res,
-#'         ganno_df,
+#'         gt$anno_df,
 #'         n_gs = 10,
 #'         cluster_fun = "cluster_markov"
 #'       )
@@ -2108,8 +1759,6 @@ horizonServer <- function(id, obj, config){
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname distillmod
 #' @name distillmod
 NULL
@@ -2286,54 +1935,10 @@ distillPlotServer <- function(id, obj, args, config){
 #' server returns reactive with number of plotted terms
 #'
 #' @examples
-#' library(airway)
-#' library(DESeq2)
-#' library(org.Hs.eg.db)
-#' library(GeneTonic)
-#' library(shiny)
+#' # get enrichResult object
+#' data(enrich_bp_dex, package='carnation')
 #'
-#' # load airway data
-#' data('airway')
-#'
-#' # extract counts and metadata
-#' mat <- assay(airway)
-#' cdata <- colData(airway)
-#'
-#' # get symbol annotations
-#' anno_df <- mapIds(org.Hs.eg.db,
-#'                column='SYMBOL',
-#'                keys=rownames(mat),
-#'                keytype='ENSEMBL')
-#'
-#' # analyze with DESeq2
-#' dds <- DESeqDataSetFromMatrix(mat,
-#'                               colData=cdata,
-#'                               design=~cell + dex)
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
-#'
-#' # add gene column from rownames
-#' res$gene <- rownames(res)
-#'
-#' # add symbol column from annotations
-#' res$symbol <- anno_df[rownames(res)]
-#'
-#'
-#' # get DE genes with FDR < 0.1
-#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
-#'
-#' \donttest{
-#' # functional enrichment using GO BP
-#' eres <- clusterProfiler::enrichGO(
-#'             gene = de_genes[1:100],
-#'             keyType = 'ENSEMBL',
-#'             OrgDb=org.Hs.eg.db,
-#'             ont='BP'
-#'         )
-#'
-#' # convert to GeneTonic object
+#' # preprocess & convert to GeneTonic object
 #' gt <- GeneTonic::shake_enrichResult(eres)
 #'
 #' # get distilled results
@@ -2365,8 +1970,6 @@ distillPlotServer <- function(id, obj, args, config){
 #'   )
 #' }
 #'
-#' }
-#
 #' @rdname fuzzymod
 #' @name fuzzymod
 NULL
