@@ -2270,11 +2270,108 @@ distillPlotServer <- function(id, obj, args, config){
 
 ######################## Fuzzy Enrichment ########################
 
-#' Fuzzy enrichment plot UI
+#' Fuzzy enrichment map module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate fuzzy enrichment map plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactive containing 'distilled' enrichment results
+#' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server returns reactive with number of plotted terms
+#'
+#' @examples
+#' library(airway)
+#' library(DESeq2)
+#' library(org.Hs.eg.db)
+#' library(GeneTonic)
+#' library(shiny)
+#'
+#' # load airway data
+#' data('airway')
+#'
+#' # extract counts and metadata
+#' mat <- assay(airway)
+#' cdata <- colData(airway)
+#'
+#' # get symbol annotations
+#' anno_df <- mapIds(org.Hs.eg.db,
+#'                column='SYMBOL',
+#'                keys=rownames(mat),
+#'                keytype='ENSEMBL')
+#'
+#' # analyze with DESeq2
+#' dds <- DESeqDataSetFromMatrix(mat,
+#'                               colData=cdata,
+#'                               design=~cell + dex)
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("dex", "trt", "untrt"))
+#'
+#' # add gene column from rownames
+#' res$gene <- rownames(res)
+#'
+#' # add symbol column from annotations
+#' res$symbol <- anno_df[rownames(res)]
+#'
+#'
+#' # get DE genes with FDR < 0.1
+#' de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+#'
+#' \donttest{
+#' # functional enrichment using GO BP
+#' eres <- clusterProfiler::enrichGO(
+#'             gene = de_genes[1:100],
+#'             keyType = 'ENSEMBL',
+#'             OrgDb=org.Hs.eg.db,
+#'             ont='BP'
+#'         )
+#'
+#' # convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres)
+#'
+#' # get distilled results
+#' df <- gs_fuzzyclustering(gt[seq_len(10),],
+#'         similarity_threshold = 0.35,
+#'         fuzzy_seeding_initial_neighbors = 3,
+#'         fuzzy_multilinkage_rule = 0.5)
+#'
+#' # number of plotted terms
+#' args <- reactive({ list(numcat=10) })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(fuzzyPlotUI('p', 'sidebar')),
+#'            mainPanel(fuzzyPlotUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                numcat <- observe({
+#'                  fuzzyPlotServer('p',
+#'                                  reactive({ df }),
+#'                                  args,
+#'                                  config)
+#'                })
+#'              }
+#'   )
+#' }
+#'
+#' }
+#
+#' @rdname fuzzymod
+#' @name fuzzymod
+NULL
+
+#' @rdname fuzzymod
 #' @export
 fuzzyPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -2322,13 +2419,7 @@ fuzzyPlotUI <- function(id, panel){
   }
 }
 
-#' Fuzzy enrichment plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive containing fuzzy enrichment object
-#' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
-#' @param config reactive list with config settings
-#'
+#' @rdname fuzzymod
 #' @export
 fuzzyPlotServer <- function(id, obj, args, config){
 
