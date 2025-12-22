@@ -68,7 +68,7 @@ NULL
 #' in Airway Smooth Muscle Cells.” PLoS One. 2014 Jun 13;9(6):e99625. PMID:
 #' 24926665. GEO: GSE52778
 #'
-#' @name enrich_bp_dex
+#' @name eres_dex
 #' @docType data
 NULL
 
@@ -94,7 +94,7 @@ NULL
 #' in Airway Smooth Muscle Cells.” PLoS One. 2014 Jun 13;9(6):e99625. PMID:
 #' 24926665. GEO: GSE52778
 #'
-#' @name enrich_bp_cell
+#' @name eres_cell
 #' @docType data
 NULL
 

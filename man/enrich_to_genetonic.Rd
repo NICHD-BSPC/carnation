@@ -21,10 +21,10 @@ DE analysis results and creates a GeneTonic object.
 \examples{
 # get enrich & res objects
 data(res_dex, package="carnation")
-data(enrich_bp_dex, package="carnation")
+data(eres_dex, package="carnation")
 
 # convert to GeneTonic object
-gt <- enrich_to_genetonic(eres, res)
+gt <- enrich_to_genetonic(eres_dex, res_dex)
 
 
 }

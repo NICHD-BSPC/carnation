@@ -30,10 +30,10 @@ UI & module to generate fuzzy enrichment map plots.
 }
 \examples{
 # get enrichResult object
-data(enrich_bp_dex, package='carnation')
+data(eres_dex, package='carnation')
 
 # preprocess & convert to GeneTonic object
-gt <- GeneTonic::shake_enrichResult(eres)
+gt <- GeneTonic::shake_enrichResult(eres_dex)
 
 # get distilled results
 df <- gs_fuzzyclustering(gt[seq_len(10),],

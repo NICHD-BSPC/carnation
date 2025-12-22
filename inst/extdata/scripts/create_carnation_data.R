@@ -31,30 +31,57 @@ res_list <- list(
               dex = results(dds, contrast = c("dex", "trt", "untrt"))
             )
 
-for(comp in names(res_list)){
-  res <- res_list[[ comp ]]
+# cell comparison
+res_cell <- res_list[[ 'cell' ]]
 
-  # add gene column from rownames
-  res$gene <- rownames(res)
+# add gene column from rownames
+res_cell$gene <- rownames(res_cell)
 
-  # add symbol column from annotations
-  res$symbol <- anno_df[rownames(res)]
+# add symbol column from annotations
+res_cell$symbol <- anno_df[rownames(res_cell)]
 
-  # get DE genes with FDR < 0.1
-  de_genes <- rownames(res)[res$padj < 0.1 & !is.na(res$padj)]
+# get DE genes with FDR < 0.1
+de_genes <- rownames(res_cell)[res_cell$padj < 0.1 & !is.na(res_cell$padj)]
 
-  # functional enrichment of top genes using GO BP
-  eres <- clusterProfiler::enrichGO(
+# functional enrichment of top genes using GO BP
+eres_cell <- clusterProfiler::enrichGO(
+               gene = de_genes[1:100],
+               keyType = 'ENSEMBL',
+               OrgDb=org.Hs.eg.db,
+               ont='BP',
+               pvalueCutoff=1,
+               qvalueCutoff=1
+             )
+
+# save res_cell & enrich objects
+save(res_cell, file = paste0("data/res_cell.RData"), compress="xz")
+save(eres_cell, file = paste0("data/eres_cell.RData"), compress="xz")
+
+# dex comparison
+res_dex <- res_list[[ 'dex' ]]
+
+# add gene column from rownames
+res_dex$gene <- rownames(res_dex)
+
+# add symbol column from annotations
+res_dex$symbol <- anno_df[rownames(res_dex)]
+
+# get DE genes with FDR < 0.1
+de_genes <- rownames(res_dex)[res_dex$padj < 0.1 & !is.na(res_dex$padj)]
+
+# functional enrichment of top genes using GO BP
+eres_dex <- clusterProfiler::enrichGO(
               gene = de_genes[1:100],
               keyType = 'ENSEMBL',
               OrgDb=org.Hs.eg.db,
-              ont='BP'
-          )
+              ont='BP',
+              pvalueCutoff=1,
+              qvalueCutoff=1
+            )
 
-  # save res & enrich objects
-  save(res, file = paste0("data/res_", comp, ".RData"), compress="xz")
-  save(eres, file = paste0("data/enrich_bp_", comp, ".RData"), compress="xz")
-}
+# save res_dex & enrich objects
+save(res_dex, file = paste0("data/res_dex.RData"), compress="xz")
+save(eres_dex, file = paste0("data/eres_dex.RData"), compress="xz")
 
 # get degPatterns object
 ma.i <- mat[rownames(mat) %in% de_genes[1:100],]
@@ -63,13 +90,13 @@ ma.i <- mat[rownames(mat) %in% de_genes[1:100],]
 ma.i <- ma.i[rowVars(ma.i) != 0, ]
 
 # run pattern analysis
-p <- DEGreport::degPatterns(
-        ma.i,
-        cdata,
-        time='dex',
-        plot=FALSE
-        )
+degpatterns_dex <- DEGreport::degPatterns(
+                     ma.i,
+                     cdata,
+                     time='dex',
+                     plot=FALSE
+                   )
 
 # save degPatterns object
-save(p, file = paste0("data/degpatterns_dex.RData"), compress="xz")
+save(degpatterns_dex, file = paste0("data/degpatterns_dex.RData"), compress="xz")
 

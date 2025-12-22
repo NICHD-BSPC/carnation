@@ -86,10 +86,10 @@
 #'
 #' @examples
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' obj <- reactive({
 #'   list(l_gs = gt$l_gs,
@@ -402,10 +402,10 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' data(res_dex, package='carnation')
 #'
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' obj <- reactive({
 #'   list(l_gs = gt$l_gs,
@@ -594,9 +594,6 @@ set_graph_attr <- function(gg){
 #' @examples
 #' # get DESeqResults object
 #' data(res_dex, package='carnation')
-#'
-#' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
 #'
 #' obj <- reactive({ res })
 #'
@@ -808,10 +805,10 @@ cnetPlotServer <- function(id, obj, config){
 #'
 #' @examples
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' obj <- reactive({
 #'   list(l_gs = gt$l_gs,
@@ -1114,11 +1111,11 @@ radarServer <- function(id, obj, config, type=''){
 #' data(res_dex, package='carnation')
 #'
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
 #'
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' obj <- reactive({
 #'   list(l_gs = gt$l_gs,
@@ -1274,10 +1271,10 @@ alluvialServer <- function(id, obj, res_obj, config){
 #'
 #' @examples
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' obj <- reactive({
 #'   list(l_gs = gt$l_gs,
@@ -1472,16 +1469,16 @@ dendrogramServer <- function(id, obj, config){
 #'
 #' @examples
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' # get second enrichResult object
-#' data(enrich_bp_cell, package='carnation')
+#' data(eres_cell, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt1 <- GeneTonic::shake_enrichResult(eres)
+#' gt1 <- GeneTonic::shake_enrichResult(eres_cell)
 #'
 #' obj <- reactive({
 #'   list(
@@ -1721,16 +1718,16 @@ horizonServer <- function(id, obj, config){
 #' data(res_dex, package='carnation')
 #'
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # preprocess & convert to GeneTonic object
-#' eres2 <- GeneTonic::shake_enrichResult(eres)
-#' gt <- enrich_to_genetonic(eres, res)
+#' eres2 <- GeneTonic::shake_enrichResult(eres_dex)
+#' gt <- enrich_to_genetonic(eres_dex, res_dex)
 #'
 #' # get distilled results
 #' df <- distill_enrichment(
 #'         eres2,
-#'         res,
+#'         res_dex,
 #'         gt$anno_df,
 #'         n_gs = 10,
 #'         cluster_fun = "cluster_markov"
@@ -1936,10 +1933,10 @@ distillPlotServer <- function(id, obj, args, config){
 #'
 #' @examples
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # preprocess & convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' # get distilled results
 #' df <- gs_fuzzyclustering(gt[seq_len(10),],

@@ -30,9 +30,6 @@ UI & module to generate Cnetplots.
 # get DESeqResults object
 data(res_dex, package='carnation')
 
-# get enrichResult object
-data(enrich_bp_dex, package='carnation')
-
 obj <- reactive({ res })
 
 config <- reactiveVal(get_config())

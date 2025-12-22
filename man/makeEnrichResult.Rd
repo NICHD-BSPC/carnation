@@ -32,10 +32,10 @@ dataframe must contain the columns 'ID' and 'geneID'
 }
 \examples{
 # get enrichResult object
-data(enrich_bp_dex, package='carnation')
+data(eres_dex, package='carnation')
 
 # extract the results
-df <- as.data.frame(eres)
+df <- as.data.frame(eres_dex)
 
 # convert to a stripped down enrichResult object
 eres2 <- makeEnrichResult(df)

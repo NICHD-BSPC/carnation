@@ -33,10 +33,10 @@ UI & module to generate enrichment map plots.
 data(res_dex, package='carnation')
 
 # get enrichResult object
-data(enrich_bp_dex, package='carnation')
+data(eres_dex, package='carnation')
 
 # convert to GeneTonic object
-gt <- GeneTonic::shake_enrichResult(eres)
+gt <- GeneTonic::shake_enrichResult(eres_dex)
 
 obj <- reactive({
   list(l_gs = gt$l_gs,

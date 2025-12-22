@@ -802,10 +802,10 @@ make_final_object <- function(obj){
 #' @examples
 #' # get enrich & res objects
 #' data(res_dex, package="carnation")
-#' data(enrich_bp_dex, package="carnation")
+#' data(eres_dex, package="carnation")
 #'
 #' # convert to GeneTonic object
-#' gt <- enrich_to_genetonic(eres, res)
+#' gt <- enrich_to_genetonic(eres_dex, res_dex)
 #'
 #'
 #' @export
@@ -1493,9 +1493,9 @@ fromList.with.names <- function(lst){
 #' data(degpatterns_dex, package = 'carnation')
 #'
 #' # get pattern plot
-#' all_clusters <- unique(p$normalized$cluster)
+#' all_clusters <- unique(degpatterns_dex$normalized$cluster)
 #'
-#' dp <- get_degplot(p, time='dex',
+#' dp <- get_degplot(degpatterns_dex, time='dex',
 #'                   cluster_to_show=all_clusters,
 #'                   x_order=c('untrt','trt'))
 #'
@@ -1917,7 +1917,7 @@ plotPCA.ly <- function(rld, intgroup){
 #' data(enrich_bp_dex, package='carnation')
 #'
 #' # convert to GeneTonic object
-#' gt <- GeneTonic::shake_enrichResult(eres)
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
 #'
 #' # make radar plot
 #' p <- gs_radar(gt)
@@ -2232,10 +2232,10 @@ plotPCA.san <- function (object, intgroup = "group",
 #'
 #' @examples
 #' # get enrichResult object
-#' data(enrich_bp_dex, package='carnation')
+#' data(eres_dex, package='carnation')
 #'
 #' # extract the results
-#' df <- as.data.frame(eres)
+#' df <- as.data.frame(eres_dex)
 #'
 #' # convert to a stripped down enrichResult object
 #' eres2 <- makeEnrichResult(df)

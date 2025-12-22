@@ -39,7 +39,7 @@ gene sets are converted to parameters
 data(enrich_bp_dex, package='carnation')
 
 # convert to GeneTonic object
-gt <- GeneTonic::shake_enrichResult(eres)
+gt <- GeneTonic::shake_enrichResult(eres_dex)
 
 # make radar plot
 p <- gs_radar(gt)

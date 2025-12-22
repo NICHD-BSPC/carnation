@@ -28,16 +28,16 @@ UI & module to generate horizon plots.
 }
 \examples{
 # get enrichResult object
-data(enrich_bp_dex, package='carnation')
+data(eres_dex, package='carnation')
 
 # convert to GeneTonic object
-gt <- GeneTonic::shake_enrichResult(eres)
+gt <- GeneTonic::shake_enrichResult(eres_dex)
 
 # get second enrichResult object
-data(enrich_bp_cell, package='carnation')
+data(eres_cell, package='carnation')
 
 # convert to GeneTonic object
-gt1 <- GeneTonic::shake_enrichResult(eres)
+gt1 <- GeneTonic::shake_enrichResult(eres_cell)
 
 obj <- reactive({
   list(

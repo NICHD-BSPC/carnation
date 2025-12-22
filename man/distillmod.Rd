@@ -33,16 +33,16 @@ UI & module to generate distill enrichment map plots.
 data(res_dex, package='carnation')
 
 # get enrichResult object
-data(enrich_bp_dex, package='carnation')
+data(eres_dex, package='carnation')
 
 # preprocess & convert to GeneTonic object
-eres2 <- GeneTonic::shake_enrichResult(eres)
-gt <- enrich_to_genetonic(eres, res)
+eres2 <- GeneTonic::shake_enrichResult(eres_dex)
+gt <- enrich_to_genetonic(eres_dex, res_dex)
 
 # get distilled results
 df <- distill_enrichment(
         eres2,
-        res,
+        res_dex,
         gt$anno_df,
         n_gs = 10,
         cluster_fun = "cluster_markov"
