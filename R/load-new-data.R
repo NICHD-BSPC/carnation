@@ -1,7 +1,22 @@
 #' Load data module UI
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to load new data
 #'
+#' @param id Module id
+#' @param username user name
+#' @param config reactive list with config settings
+#' @param rds Object to be edited
+#'
+#' @returns
+#' UI returns tagList with module UI
+#' Server returns reactive with app reload trigger
+#'
+#' @rdname loadmod
+#' @name loadmod
+NULL
+
+#' @rdname loadmod
 #' @export
 loadDataUI <- function(id){
   ns <- NS(id)
@@ -38,13 +53,7 @@ loadDataUI <- function(id){
   ) # tagList
 }
 
-#' Load data module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param username user name
-#' @param config reactive list with config settings
-#' @param rds Object to be edited
-#'
+#' @rdname loadmod
 #' @export
 loadDataServer <- function(id, username, config, rds=NULL){
   moduleServer(
