@@ -1,7 +1,25 @@
 #' Save object module UI
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to save carnation object.
 #'
+#' @param id Module id
+#' @param original original carnation object
+#' @param current current carnation object
+#' @param coldata reactiveValues object containing object metadata
+#' @param pattern regex pattern for finding carnation data
+#' @param username user name
+#' @param config reactive list with config settings
+#'
+#' @returns
+#' UI returns actionButton
+#' Server returns reactive with trigger to refresh the app
+#'
+#' @rdname savemod
+#' @name savemod
+NULL
+
+#' @rdname savemod
 #' @export
 saveUI <- function(id){
   ns <- NS(id)
@@ -11,16 +29,7 @@ saveUI <- function(id){
 
 }
 
-#' Save object module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param original original carnation object
-#' @param current current carnation object
-#' @param coldata reactiveValues object containing object metadata
-#' @param pattern regex pattern for finding carnation data
-#' @param username user name
-#' @param config reactive list with config settings
-#'
+#' @rdname savemod
 #' @export
 saveServer <- function(id, original, current, coldata, pattern, username, config){
   moduleServer(
