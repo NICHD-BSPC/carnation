@@ -1,11 +1,60 @@
-#' Metadata module ui
+#' Metadata module
 #'
-#' This generates the metadata tab that allows users to
-#' view the metadata attached to the objects being viewed.
+#' @description
+#' This module generates the metadata tab that allows users to
+#' view the metadata associated with the loaded carnation object.
 #'
-#' @param id Input id
+#' @param id Module id
 #' @param panel context for generating ui elements ('sidebar' or 'main')
+#' @param obj reactiveValues object containing carnation object
+#' @param cols.to.drop columns to hide from table
 #'
+#' @returns
+#' UI returns tagList with metadata UI.
+#' Server returns reactive object with metadata.
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # Create reactive values to simulate app state
+#' oobj <- make_example_carnation_object()
+#'
+#' obj <- reactiveValues(
+#'    dds = oobj$dds,
+#'    rld = oobj$rld,
+#'    res = oobj$res,
+#'    all_dds = oobj$all_dds,
+#'    all_rld = oobj$all_rld,
+#'    dds_mapping = oobj$dds_mapping
+#' )
+#'
+#' config <- get_config()
+#' cols.to.drop <- config$server$cols.to.drop
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(metadataUI('p', 'sidebar')),
+#'            mainPanel(metadataUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                # reactiveVal to save updates
+#'                saved_data <- reactiveVal()
+#'
+#'                cdata <- metadataServer('p', obj, cols.to.drop)
+#'
+#'                observeEvent(cdata(), {
+#'                  saved_data(cdata())
+#'                })
+#'              }
+#'   )
+#' }
+#'
+#' @name metamod
+#' @rdname metamod
+NULL
+
+#' @rdname metamod
 #' @export
 metadataUI <- function(id, panel){
     ns <- NS(id)
@@ -67,14 +116,7 @@ metadataUI <- function(id, panel){
     return(tag)
 }
 
-#' Metadata module server
-#'
-#' Server code for settings module
-#'
-#' @param id Input id
-#' @param obj internal app object
-#' @param cols.to.drop columns to hide from table
-#'
+#' @rdname metamod
 #' @export
 metadataServer <- function(id, obj, cols.to.drop){
     moduleServer(
@@ -360,7 +402,7 @@ metadataServer <- function(id, obj, cols.to.drop){
               meta_df <- meta_df[, cols.to.keep]
 
               # update values in staged df
-              for(i in 1:nrow(edit_df)){
+              for(i in seq_len(nrow(edit_df))){
                   r <- edit_df$row[i]
                   c <- edit_df$col[i]
                   v <- edit_df$value[i]

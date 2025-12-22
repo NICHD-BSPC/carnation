@@ -69,12 +69,56 @@
 
 ######################### Summary overview #######################################
 
-#' Summary overview plot ui
+#' Summary overview plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate summary overview plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing GeneTonic object
+#' @param config reactive list with config settings
 #' @param type string, if 'comp' then show the comparison view
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
+#'
+#' obj <- reactive({
+#'   list(l_gs = gt$l_gs,
+#'        anno_df = gt$anno_df,
+#'        label = 'comp1')
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(sumovPlotUI('p', 'sidebar')),
+#'            mainPanel(sumovPlotUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                sumovPlotServer('p', obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname sumovmod
+#' @name sumovmod
+NULL
+
+#' @rdname sumovmod
 #' @export
 sumovPlotUI <- function(id, panel, type=''){
   ns <- NS(id)
@@ -156,13 +200,7 @@ sumovPlotUI <- function(id, panel, type=''){
 } # function
 
 
-#' Summary overview plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing GeneTonic object
-#' @param config reactive list with config settings
-#' @param type string, if 'comp' then show the comparison view
-#'
+#' @rdname sumovmod
 #' @export
 sumovPlotServer <- function(id, obj, config, type=''){
 
@@ -229,7 +267,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
           n_gs <- min(nrow(l_gs), numcat)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs)])) == 0,
                    'Duplicate category names after truncation. Please increase max name length')
           )
 
@@ -268,7 +306,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
           n_gs1 <- min(nrow(l_gs), numcat)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs1])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs1)])) == 0,
                    'Duplicate category names for comparison 1 after truncation. Please increase max name length')
           )
 
@@ -280,7 +318,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
           n_gs2 <- min(nrow(l_gs2), numcat)
 
           validate(
-              need(sum(duplicated(l_gs2$gs_description[1:n_gs2])) == 0,
+              need(sum(duplicated(l_gs2$gs_description[seq_len(n_gs2)])) == 0,
                    'Duplicate category names for comparison 2 after truncation. Please increase max name length')
           )
 
@@ -346,11 +384,61 @@ sumovPlotServer <- function(id, obj, config, type=''){
 
 ######################### Enrichment Map #######################################
 
-#' Enrichment map plot UI
+#' Enrichment map plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate enrichment map plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing GeneTonic object
+#' @param res_obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
+#'
+#' obj <- reactive({
+#'   list(l_gs = gt$l_gs,
+#'        anno_df = gt$anno_df,
+#'        label = 'comp1')
+#' })
+#'
+#' res_obj <- reactive({ res })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(enrichmapUI('p', 'sidebar')),
+#'            mainPanel(enrichmapUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                enrichmapServer('p', obj, res_obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname emapmod
+#' @name emapmod
+NULL
+
+#' @rdname emapmod
 #' @export
 enrichmapUI <- function(id, panel){
   ns <- NS(id)
@@ -401,13 +489,7 @@ enrichmapUI <- function(id, panel){
   }
 }
 
-#' Enrichment map plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing GeneTonic object
-#' @param res_obj reactive, dataframe containing enrichment results
-#' @param config reactive list with config settings
-#'
+#' @rdname emapmod
 #' @export
 enrichmapServer <- function(id, obj, res_obj, config){
 
@@ -499,11 +581,48 @@ set_graph_attr <- function(gg){
 
 ######################### Cnetplot #############################################
 
-#' Cnetplot UI
+#' Cnetplot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate Cnetplots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
+#'
+#' obj <- reactive({ res })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(cnetPlotUI('p', 'sidebar')),
+#'            mainPanel(cnetPlotUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                cnetPlotServer('p', obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname cnetmod
+#' @name cnetmod
+NULL
+
+#' @rdname cnetmod
 #' @export
 cnetPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -592,12 +711,7 @@ cnetPlotUI <- function(id, panel){
   }
 }
 
-#' Cnetplot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive, dataframe with enrichment results
-#' @param config reactive list with config settings
-#'
+#' @rdname cnetmod
 #' @export
 cnetPlotServer <- function(id, obj, config){
 
@@ -680,12 +794,56 @@ cnetPlotServer <- function(id, obj, config){
 
 ######################### Radar ################################################
 
-#' Radar plot UI
+#' Radar plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate radar plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing GeneTonic object
+#' @param config reactive list with config settings
 #' @param type string, if 'comp' then show the comparison view
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
+#'
+#' obj <- reactive({
+#'   list(l_gs = gt$l_gs,
+#'        anno_df = gt$anno_df,
+#'        label = 'comp1')
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(radarPlotUI('p', 'sidebar')),
+#'            mainPanel(radarPlotUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                radarPlotServer('p', obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname radarmod
+#' @name radarmod
+NULL
+
+#' @rdname radarmod
 #' @export
 radarUI <- function(id, panel, type=''){
   ns <- NS(id)
@@ -761,13 +919,7 @@ radarUI <- function(id, panel, type=''){
   }
 }
 
-#' Radar plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive containing GeneTonic object
-#' @param type string, if 'comp' then show the comparison view
-#' @param config reactive list with config settings
-#'
+#' @rdname radarmod
 #' @export
 radarServer <- function(id, obj, config, type=''){
 
@@ -829,7 +981,7 @@ radarServer <- function(id, obj, config, type=''){
           l_gs$gs_description <- substr(l_gs$gs_description, 1, catlen)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs)])) == 0,
                    'Duplicate category names after truncation. Please increase max name length')
           )
 
@@ -864,7 +1016,7 @@ radarServer <- function(id, obj, config, type=''){
           l_gs$gs_description <- substr(l_gs$gs_description, 1, catlen)
 
           validate(
-              need(sum(duplicated(l_gs$gs_description[1:n_gs1])) == 0,
+              need(sum(duplicated(l_gs$gs_description[seq_len(n_gs1)])) == 0,
                    'Duplicate category names for comparison 1 after truncation. Please increase max name length')
           )
 
@@ -876,7 +1028,7 @@ radarServer <- function(id, obj, config, type=''){
           l_gs2$gs_description <- substr(l_gs2$gs_description, 1, catlen)
 
           validate(
-              need(sum(duplicated(l_gs2$gs_description[1:n_gs2])) == 0,
+              need(sum(duplicated(l_gs2$gs_description[seq_len(n_gs2)])) == 0,
                    'Duplicate category names for comparison 2 after truncation. Please increase max name length')
           )
 
@@ -947,11 +1099,62 @@ radarServer <- function(id, obj, config, type=''){
 
 ######################## Alluvial ###############################################
 
-#' Alluvial plot UI
+#' Alluvial plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate alluvial plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing GeneTonic object
+#' @param res_obj reactive, dataframe containing enrichment results
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # convert to GeneTonic object
+#'
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
+#'
+#' obj <- reactive({
+#'   list(l_gs = gt$l_gs,
+#'        anno_df = gt$anno_df,
+#'        label = 'comp1')
+#' })
+#'
+#' res_obj <- reactive({ res })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(alluvialUI('p', 'sidebar')),
+#'            mainPanel(alluvialUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                alluvialServer('p', obj, res_obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname alluvialmod
+#' @name alluvialmod
+NULL
+
+#' @rdname alluvialmod
 #' @export
 alluvialUI <- function(id, panel){
   ns <- NS(id)
@@ -1004,13 +1207,7 @@ alluvialUI <- function(id, panel){
   }
 }
 
-#' Alluvial plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive containing GeneTonic object
-#' @param res_obj reactive, dataframe containing enrichment results
-#' @param config reactive list with config settings
-#'
+#' @rdname alluvialmod
 #' @export
 alluvialServer <- function(id, obj, res_obj, config){
 
@@ -1068,11 +1265,55 @@ alluvialServer <- function(id, obj, res_obj, config){
 
 #################### Dendrogram ################################################
 
-#' Dendrogram plot UI
+#' Dendrogram module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate dendrograms.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing GeneTonic object
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
+#'
+#' obj <- reactive({
+#'   list(l_gs = gt$l_gs,
+#'        anno_df = gt$anno_df,
+#'        label = 'comp1')
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(dendrogramUI('p', 'sidebar')),
+#'            mainPanel(dendrogramUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                dendrogramServer('p', obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname dendromod
+#' @name dendromod
+NULL
+
+#' @rdname dendromod
 #' @export
 dendrogramUI <- function(id, panel){
   ns <- NS(id)
@@ -1134,12 +1375,7 @@ dendrogramUI <- function(id, panel){
   }
 }
 
-#' Dendrogram plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive containing GeneTonic object
-#' @param config reactive list with config settings
-#'
+#' @rdname dendromod
 #' @export
 dendrogramServer <- function(id, obj, config){
 
@@ -1229,11 +1465,66 @@ dendrogramServer <- function(id, obj, config){
 
 ######################### Horizon #########################
 
-#' Horizon plot UI
+#' Horizon plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate horizon plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing two GeneTonic objects
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server invisibly returns NULL (used for side effects)
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
+#'
+#' # get second enrichResult object
+#' data(eres_cell, package='carnation')
+#'
+#' # convert to GeneTonic object
+#' gt1 <- GeneTonic::shake_enrichResult(eres_cell)
+#'
+#' obj <- reactive({
+#'   list(
+#'     obj1 = list(l_gs = gt$l_gs,
+#'              anno_df = gt$anno_df,
+#'              label = 'comp1'),
+#'     obj2 = list(l_gs = gt1$l_gs,
+#'              anno_df = gt1$anno_df,
+#'              label = 'comp2')
+#'   )
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(horizonUI('p', 'sidebar')),
+#'            mainPanel(horizonUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                horizonServer('p', obj, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname horizonmod
+#' @name horizonmod
+NULL
+
+#' @rdname horizonmod
 #' @export
 horizonUI <- function(id, panel){
   ns <- NS(id)
@@ -1304,12 +1595,7 @@ horizonUI <- function(id, panel){
   }
 }
 
-#' Horizon plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive containing GeneTonic object
-#' @param config reactive list with config settings
-#'
+#' @rdname horizonmod
 #' @export
 horizonServer <- function(id, obj, config){
 
@@ -1372,7 +1658,7 @@ horizonServer <- function(id, obj, config){
         l_gs1$gs_description <- substr(l_gs1$gs_description, 1, catlen)
 
         validate(
-            need(sum(duplicated(l_gs1$gs_description[1:n_gs1])) == 0,
+            need(sum(duplicated(l_gs1$gs_description[seq_len(n_gs1)])) == 0,
                  'Duplicate category names for comparison 1 after truncation. Please increase max name length')
         )
 
@@ -1384,7 +1670,7 @@ horizonServer <- function(id, obj, config){
         l_gs2$gs_description <- substr(l_gs2$gs_description, 1, catlen)
 
         validate(
-            need(sum(duplicated(l_gs2$gs_description[1:n_gs2])) == 0,
+            need(sum(duplicated(l_gs2$gs_description[seq_len(n_gs2)])) == 0,
                  'Duplicate category names for comparison 2 after truncation. Please increase max name length')
         )
 
@@ -1426,11 +1712,72 @@ horizonServer <- function(id, obj, config){
 
 ######################## Distill Enrichment ####################################
 
-#' Distill enrichment plot UI
+#' Distilled enrichment map module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate distill enrichment map plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactive containing 'distilled' enrichment results
+#' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server returns reactive with number of plotted terms
+#'
+#' @examples
+#' library(GeneTonic)
+#' library(shiny)
+#'
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # preprocess & convert to GeneTonic object
+#' eres2 <- GeneTonic::shake_enrichResult(eres_dex)
+#' gt <- enrich_to_genetonic(eres_dex, res_dex)
+#'
+#' # get distilled results
+#' df <- distill_enrichment(
+#'         eres2,
+#'         res_dex,
+#'         gt$anno_df,
+#'         n_gs = 10,
+#'         cluster_fun = "cluster_markov"
+#'       )
+#'
+#' # number of plotted terms
+#' args <- reactive({ list(numcat=10) })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(distillPlotUI('p', 'sidebar')),
+#'            mainPanel(distillPlotUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                numcat <- observe({
+#'                  distillPlotServer('p',
+#'                                    reactive({ df }),
+#'                                    args,
+#'                                    config)
+#'                })
+#'              }
+#'   )
+#' }
+#'
+#' @rdname distillmod
+#' @name distillmod
+NULL
+
+#' @rdname distillmod
 #' @export
 distillPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -1478,13 +1825,7 @@ distillPlotUI <- function(id, panel){
   }
 }
 
-#' Distill enrichment plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive containing 'distilled' enrichment results
-#' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
-#' @param config reactive list with config settings
-#'
+#' @rdname distillmod
 #' @export
 distillPlotServer <- function(id, obj, args, config){
 
@@ -1592,11 +1933,64 @@ distillPlotServer <- function(id, obj, args, config){
 
 ######################## Fuzzy Enrichment ########################
 
-#' Fuzzy enrichment plot UI
+#' Fuzzy enrichment map module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & module to generate fuzzy enrichment map plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactive containing 'distilled' enrichment results
+#' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server returns reactive with number of plotted terms
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # preprocess & convert to GeneTonic object
+#' gt <- GeneTonic::shake_enrichResult(eres_dex)
+#'
+#' # get distilled results
+#' df <- GeneTonic::gs_fuzzyclustering(gt[seq_len(10),],
+#'         similarity_threshold = 0.35,
+#'         fuzzy_seeding_initial_neighbors = 3,
+#'         fuzzy_multilinkage_rule = 0.5)
+#'
+#' # number of plotted terms
+#' args <- reactive({ list(numcat=10) })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(fuzzyPlotUI('p', 'sidebar')),
+#'            mainPanel(fuzzyPlotUI('p', 'main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                numcat <- observe({
+#'                  fuzzyPlotServer('p',
+#'                                  reactive({ df }),
+#'                                  args,
+#'                                  config)
+#'                })
+#'              }
+#'   )
+#' }
+#'
+#' @rdname fuzzymod
+#' @name fuzzymod
+NULL
+
+#' @rdname fuzzymod
 #' @export
 fuzzyPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -1644,13 +2038,7 @@ fuzzyPlotUI <- function(id, panel){
   }
 }
 
-#' Fuzzy enrichment plot server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactive containing fuzzy enrichment object
-#' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
-#' @param config reactive list with config settings
-#'
+#' @rdname fuzzymod
 #' @export
 fuzzyPlotServer <- function(id, obj, args, config){
 

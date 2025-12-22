@@ -6,8 +6,26 @@
 \usage{
 read_access_yaml()
 }
+\value{
+return carnation access settings from yaml file
+}
 \description{
 This function reads the access yaml file and
 returns user groups and data areas
 as a list of data frames.
+}
+\examples{
+# save access details to file
+home <- Sys.getenv('HOME')
+
+# create carnation data area if it doesn't exist
+carnation_home <- file.path(home, 'carnation/data')
+if(!dir.exists(carnation_home)) dir.create(carnation_home)
+
+create_access_yaml(user = 'admin',
+                   user_group = 'admin',
+                   data_area = carnation_home)
+
+al <- read_access_yaml()
+
 }

@@ -1,10 +1,91 @@
-#' Functional enrichment module UI
+#' Functional enrichment module
+#'
+#' @description
+#' UI & module to show functional enrichment tables & plots.
 #'
 #' @param id ID string used to match the ID used to call the module server function
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param tab string, if 'table' show table settings, if 'plots' show plot settings;
 #' if 'compare_results', show comparison settings.
+#' @param id ID string used to match the ID used to call the module UI function
+#' @param obj reactiveValues object containing carnation object
+#' @param upset_table reactive, data from upset plot module
+#' @param gene_scratchpad reactive, genes selected in gene scratchpad
+#' @param reset_genes reactive to reset genes in scratchpad
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server returns reactive with gene selected from functional enrichment tables.
+#'
+#' @examples
+#' library(shiny)
+#' library(DESeq2)
+#'
+#' # Create reactive values to simulate app state
+#' oobj <- make_example_carnation_object()
+#'
+#' obj <- reactiveValues(
+#'    dds = oobj$dds,
+#'    rld = oobj$rld,
+#'    res = oobj$res,
+#'    all_dds = oobj$all_dds,
+#'    all_rld = oobj$all_rld,
+#'    dds_mapping = oobj$dds_mapping
+#' )
+#'
+#' upset_table <- reactiveValues(tbl=NULL, intersections=NULL, set_labels=NULL)
+#'
+#' gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(
+#'              conditionalPanel(condition = "input.func == 'Table'",
+#'                enrichUI('p', 'sidebar', 'table')
+#'              ),
+#'              conditionalPanel(condition = "input.func == 'Plot'",
+#'                enrichUI('p', 'sidebar', 'plot')
+#'              ),
+#'              conditionalPanel(condition = "input.func == 'Compare results'",
+#'                enrichUI('p', 'sidebar', 'compare_results')
+#'              )
+#'            ),
+#'            mainPanel(
+#'                tabsetPanel(id='func',
+#'                  tabPanel('Table',
+#'                    enrichUI('p', 'main', 'table')
+#'                  ), # tabPanel table
+#'
+#'                  tabPanel('Plot',
+#'                    enrichUI('p', 'main', 'plot')
+#'                  ), # tabPanel plot
+#'
+#'                  tabPanel('Compare results',
+#'                    enrichUI('p', 'main', 'compare_results')
+#'                  ) # tabPanel compare_results
+#'
+#'                ) # tabsetPanel func
+#'              ) # tabPanel
+#'            ),
+#'     server = function(input, output, session){
+#'                enrich_data <- enrichServer('p', obj,
+#'                                            upset_table,
+#'                                            gene_scratchpad,
+#'                                            reactive({ FALSE }),
+#'                                            config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname funenrichmod
+#' @name funenrichmod
+NULL
+
+#' @rdname funenrichmod
 #' @export
 enrichUI <- function(id, panel, tab='none'){
   ns <- NS(id)
@@ -449,15 +530,7 @@ enrichUI <- function(id, panel, tab='none'){
 }
 
 
-#' Functional enrichment module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param upset_table reactive, data from upset plot module
-#' @param gene_scratchpad reactive, genes selected in gene scratchpad
-#' @param reset_genes reactive to reset genes in scratchpad
-#' @param config reactive list with config settings
-#'
+#' @rdname funenrichmod
 #' @export
 enrichServer <- function(id, obj, upset_table,
                          gene_scratchpad, reset_genes, config){
@@ -757,7 +830,7 @@ enrichServer <- function(id, obj, upset_table,
       # with the matches in bold (optional)
       # - can do exact or partial matching
       match_text_tbl <- function(df, search_txt, gene_col, gene_sep, highlight, exact_match){
-        ll <- lapply(1:nrow(df), function(x){
+        ll <- lapply(seq_len(nrow(df)), function(x){
                 tmp <- strsplit(df[x, gene_col], gene_sep)[[1]]
 
                 # case-insensitive search
@@ -932,7 +1005,7 @@ enrichServer <- function(id, obj, upset_table,
       output$func_table <- renderDT({
         df <- get_func_table()
 
-        float_idx <- sapply(df, function(x) typeof(x) %in% c('double', 'float'))
+        float_idx <- vapply(df, function(x) typeof(x) %in% c('double', 'float'), logical(1))
         format_cols <- colnames(df)[float_idx]
         digits <- config()$server$functional_enrichment$table$enrichment$format_significant$digits
 
@@ -947,12 +1020,12 @@ enrichServer <- function(id, obj, upset_table,
           rem.cols <- setdiff(colnames(df), c('Count',
                                               gene.id.col))
           desc.idx <- which(rem.cols == 'Description')
-          col.order <- c(rem.cols[1:desc.idx], gene.id.col,
+          col.order <- c(rem.cols[seq_len(desc.idx)], gene.id.col,
                          'Count', rem.cols[(desc.idx+1):length(rem.cols)])
         } else {
           rem.cols <- setdiff(colnames(df), gene.id.col)
           desc.idx <- which(rem.cols == 'Description')
-          col.order <- c(rem.cols[1:desc.idx], gene.id.col,
+          col.order <- c(rem.cols[seq_len(desc.idx)], gene.id.col,
                          rem.cols[(desc.idx+1): length(rem.cols)])
         }
         cols_to_format <- intersect(colnames(df), format_cols)
@@ -1309,7 +1382,7 @@ enrichServer <- function(id, obj, upset_table,
         subset_rows <- min(nrow(l_gs), numcat)
 
         fuzzy_clusters <- tryCatch(
-                            gs_fuzzyclustering(l_gs[1:subset_rows,],
+                            gs_fuzzyclustering(l_gs[seq_len(subset_rows),],
                               # n_gs = nrow(res_enrich_subset),
                               # gs_ids = NULL,
                               # similarity_matrix = NULL,
@@ -1399,7 +1472,7 @@ enrichServer <- function(id, obj, upset_table,
         subset_rows <- min(nrow(l_gs), numcat)
 
         fuzzy_clusters <- tryCatch(
-                            gs_fuzzyclustering(l_gs[1:subset_rows,],
+                            gs_fuzzyclustering(l_gs[seq_len(subset_rows),],
                               # n_gs = nrow(res_enrich_subset),
                               # gs_ids = NULL,
                               # similarity_matrix = NULL,
@@ -1445,7 +1518,7 @@ enrichServer <- function(id, obj, upset_table,
         )
         colnames(tbl) <- sub('^gs_', '', colnames(tbl))
 
-        float_idx <- sapply(tbl, function(x) typeof(x) %in% c('double', 'float'))
+        float_idx <- vapply(tbl, function(x) typeof(x) %in% c('double', 'float'), logical(1))
         format_cols <- colnames(tbl)[float_idx]
         digits <- config()$server$functional_enrichment$table$fuzzy_tbl$format_significant$digits
 

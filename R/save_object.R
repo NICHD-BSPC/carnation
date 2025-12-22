@@ -1,7 +1,76 @@
 #' Save object module UI
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to save carnation object.
 #'
+#' @param id Module id
+#' @param original original carnation object
+#' @param current current carnation object
+#' @param coldata reactiveValues object containing object metadata
+#' @param pattern regex pattern for finding carnation data
+#' @param username user name
+#' @param config reactive list with config settings
+#'
+#' @returns
+#' UI returns actionButton
+#' Server returns reactive with trigger to refresh the app
+#'
+#' @examples
+#' library(shiny)
+#' library(DESeq2)
+#'
+#' # default username
+#' username <- reactive({ NULL })
+#'
+#' # internal carnation config
+#' config <- reactiveVal(get_config())
+#'
+#' # regex to find carnation files
+#' pattern <- reactive({ config()$server$pattern })
+#'
+#' # get example object
+#' obj <- make_example_carnation_object()
+#'
+#' # make reactive with obj & path
+#' original <- reactiveValues( obj = obj, path = "/path/to/carnation/obj.rds" )
+#'
+#' # extract metadata
+#' coldata <- reactive({ lapply(obj$dds, colData) })
+#'
+#' # edit metadata
+#' coldata_edit <- lapply(coldata, function(x){
+#'                   x$type <- 'new'; x
+#'                 })
+#'
+#' # add to object
+#' edit_obj <- obj
+#' for(name in names(edit_obj$dds)){
+#'   colData(edit_obj$dds[[ name ]]) <- coldata_edit[[ name ]]
+#' }
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            saveUI('p')
+#'          ),
+#'     server = function(input, output, session){
+#'                save_event <- saveServer('save_object',
+#'                                         original=original,
+#'                                         current=reactive({ edit_obj }),
+#'                                         coldata=coldata,
+#'                                         pattern=pattern(),
+#'                                         username=username,
+#'                                         config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname savemod
+#' @name savemod
+NULL
+
+#' @rdname savemod
 #' @export
 saveUI <- function(id){
   ns <- NS(id)
@@ -11,16 +80,7 @@ saveUI <- function(id){
 
 }
 
-#' Save object module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param original original carnation object
-#' @param current current carnation object
-#' @param coldata reactiveValues object containing object metadata
-#' @param pattern regex pattern for finding carnation data
-#' @param username user name
-#' @param config reactive list with config settings
-#'
+#' @rdname savemod
 #' @export
 saveServer <- function(id, original, current, coldata, pattern, username, config){
   moduleServer(

@@ -1,7 +1,45 @@
-#' Load data module UI
+#' Load data module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to load new data
 #'
+#' @param id Module id
+#' @param username user name
+#' @param config reactive list with config settings
+#' @param rds Object to be edited
+#'
+#' @examples
+#' library(shiny)
+#'
+#' username <- 'admin'
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' obj <- make_example_carnation_object()
+#'
+#' rds <- reactive({ obj=obj })
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            loadDataUI('p')
+#'          ),
+#'     server = function(input, output, session){
+#'                loadDataServer('p', username=username, config, rds)
+#'              }
+#'   )
+#' }
+#'
+#'
+#' @returns
+#' UI returns tagList with module UI
+#' Server returns reactive with app reload trigger
+#'
+#' @rdname loadmod
+#' @name loadmod
+NULL
+
+#' @rdname loadmod
 #' @export
 loadDataUI <- function(id){
   ns <- NS(id)
@@ -38,13 +76,7 @@ loadDataUI <- function(id){
   ) # tagList
 }
 
-#' Load data module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param username user name
-#' @param config reactive list with config settings
-#' @param rds Object to be edited
-#'
+#' @rdname loadmod
 #' @export
 loadDataServer <- function(id, username, config, rds=NULL){
   moduleServer(
@@ -354,7 +386,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
                  ) # fluidRow
                ) # tagList
 
-        for(i in 1:nrow(input$res_file)){
+        for(i in seq_len(nrow(input$res_file))){
           # get placeholder
           tmp_id <- tools::file_path_sans_ext(basename(input$res_file$name[i]))
 
@@ -411,7 +443,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
 
         # get number of uploaded DE results
         nres <- nrow(input$res_file)
-        all_names <- paste0(c('res_id', 'res_label'), 1:nres)
+        all_names <- paste0(c('res_id', 'res_label'), seq_len(nres))
 
         # check that counts name & label are not empty
         for(name in c(all_names)){
@@ -428,7 +460,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
         }
 
         # read DE files & build res_list
-        for(i in 1:nres){
+        for(i in seq_len(nres)){
           res <- read.table(input$res_file$datapath[i],
                             sep='\t', header=TRUE)
 
@@ -617,7 +649,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
                  ) # fluidRow
                ) # tagList
 
-        for(i in 1:nrow(input$func_file)){
+        for(i in seq_len(nrow(input$func_file))){
 
           # get placeholder names
           tmp_id <- tools::file_path_sans_ext(basename(input$func_file$name[i]))
@@ -704,7 +736,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
         req(input$func_file)
 
         neres <- nrow(input$func_file)
-        all_names <- paste0(c('func_id', 'func_res_id', 'func_pathway'), 1:neres)
+        all_names <- paste0(c('func_id', 'func_res_id', 'func_pathway'), seq_len(neres))
 
         # check that FE name, DE comp name & pathway names are not empty
         for(name in all_names){
@@ -720,7 +752,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
           )
         }
 
-        for(i in 1:neres){
+        for(i in seq_len(neres)){
           # read FE table
           eres <- read.table(input$func_file$datapath[i],
                             sep='\t', header=TRUE)

@@ -13,6 +13,26 @@ add_metadata(df, coldata, exclude.intgroups)
 
 \item{exclude.intgroups}{metadata columns to ignore}
 }
+\value{
+counts data frame with added metadata
+}
 \description{
 Add metadata to counts data frame
+}
+\examples{
+library(DESeq2)
+
+# make example DESeq data set
+dds <- makeExampleDESeqDataSet()
+
+# extract counts and metadata
+df <- assay(dds)
+coldata <- colData(dds)
+
+# get gene counts df
+counts_df <- get_gene_counts(dds, paste0('gene', seq_len(10)))
+
+# add metadata
+counts_df <- add_metadata(counts_df, coldata, exclude.intgroups=NULL)
+
 }

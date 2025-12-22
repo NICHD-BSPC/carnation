@@ -1,8 +1,72 @@
-#' Heatmap module UI
+#' Heatmap module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to generate heatmap.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing carnation object
+#' @param coldata reactiveValues object containing object metadata
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
+#' 'upset_data' (list containing data from upset plot module)
+#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad which will
+#' be labeled
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with heatmap UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @examples
+#' library(shiny)
+#' library(DESeq2)
+#'
+#' # Create reactive values to simulate app state
+#' oobj <- make_example_carnation_object()
+#'
+#' obj <- reactiveValues(
+#'    dds = oobj$dds,
+#'    rld = oobj$rld,
+#'    res = oobj$res,
+#'    all_dds = oobj$all_dds,
+#'    all_rld = oobj$all_rld,
+#'    dds_mapping = oobj$dds_mapping
+#' )
+#'
+#' cdata <- lapply(oobj$rld, function(x) colData(x))
+#'
+#' coldata <- reactiveValues( all=cdata, curr=cdata )
+#'
+#' plot_args <- reactive({
+#'   list(
+#'     fdr.thres=0.1,
+#'     fc.thres=0,
+#'     upset_data=list(genes=NULL, labels=NULL)
+#'   )
+#' })
+#'
+#' gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(heatmapUI('p', 'sidebar')),
+#'            mainPanel(heatmapUI('p', 'sidebar'))
+#'          ),
+#'     server = function(input, output, session){
+#'                heatmapServer('p', obj, coldata,
+#'                              plot_args, gene_scratchpad, config)
+#'              }
+#'   )
+#' }
+#'
+#' @rdname heatmapmod
+#' @name heatmapmod
+NULL
+
+#' @rdname heatmapmod
 #' @export
 heatmapUI <- function(id, panel){
   ns <- NS(id)
@@ -218,17 +282,7 @@ heatmapUI <- function(id, panel){
   tag
 }
 
-#' Heatmap module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param coldata reactiveValues object containing object metadata
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
-#' 'upset_data' (list containing data from upset plot module)
-#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad which will
-#' be labeled
-#' @param config reactive list with config settings
-#'
+#' @rdname heatmapmod
 #' @export
 heatmapServer <- function(id, obj,
                           coldata,
@@ -470,7 +524,7 @@ heatmapServer <- function(id, obj,
                 paste('Too many genes to plot. Showing top',
                       max_ngenes, 'genes based on', input$hmap_rank)
             )
-            s <- s[1:max_ngenes]
+            s <- s[seq_len(max_ngenes)]
           }
 
         } else if(input$geneset_type == 'upset_intersections'){
@@ -605,7 +659,7 @@ heatmapServer <- function(id, obj,
           )
 
           mat <- mat[order(rowVars(mat), decreasing=TRUE),]
-          mat <- mat[1:input$max_gene_num,]
+          mat <- mat[seq_len(input$max_gene_num),]
         }
 
         validate(

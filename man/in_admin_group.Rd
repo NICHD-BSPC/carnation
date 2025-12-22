@@ -9,6 +9,24 @@ in_admin_group(u)
 \arguments{
 \item{u}{username}
 }
+\value{
+TRUE/FALSE to indicate if the user is part of the admin group
+}
 \description{
 is user is in admin group?
+}
+\examples{
+# save access details to file
+home <- Sys.getenv('HOME')
+
+# create carnation data area if it doesn't exist
+carnation_home <- file.path(home, 'carnation/data')
+if(!dir.exists(carnation_home)) dir.create(carnation_home)
+
+create_access_yaml(user = 'admin',
+                   user_group = 'admin',
+                   data_area = carnation_home)
+
+check <- in_admin_group('user')
+
 }

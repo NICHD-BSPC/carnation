@@ -1,12 +1,74 @@
-#' Settings module ui
+#' Settings module
 #'
-#' This generates the settings tab that allows users to
-#' add data areas and app user/user groups.
+#' @description
+#' Module UI & server for user access details interface.
 #'
-#' @param id Input id
+#' @param id Module id
 #' @param panel context for generating ui elements ('sidebar' or 'main')
 #' @param username user name
+#' @param details reactive list with user name & app location details
+#' @param depth project name depth
+#' @param end_offset project name end offset
+#' @param assay_fun function to parse assay names from file path
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with module UI
+#' Server returns reactive with list containing user access details
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # default username
+#' username <- reactive({ NULL })
+#'
+#' # internal carnation config
+#' config <- reactiveVal(get_config())
+#'
+#' # regex to find carnation files
+#' pattern <- reactive({ config()$server$pattern })
+#'
+#' # access permissions
+#' assay.list <- reactiveValues(l=read_access_yaml())
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(uiOutput('settings_sidebar')),
+#'            mainPanel(uiOutput('settings_main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                output$settings_main <- renderUI({
+#'                  settingsUI('settings', panel='main', username=username)
+#'                })
+#'
+#'                output$settings_sidebar <- renderUI({
+#'                  settingsUI('settings', panel='sidebar', username=username)
+#'                })
+#'
+#'                settings <- settingsServer('p',
+#'                                           details=reactive({
+#'                                                     list(username=username,
+#'                                                          where=NULL)
+#'                                                   }),
+#'                                           depth=2,
+#'                                           end_offset=0,
+#'                                           assay_fun=function(x)
+#'                                             sub(paste0(pattern(), '\\.rds$'), '',
+#'                                                 basename(x),
+#'                                                 ignore.case=TRUE),
+#'                                           config
+#'                                           )
+#'              }
+#'   )
+#' }
+#'
+#'
+#' @rdname settingsmod
+#' @name settingsmod
+NULL
+
+#' @rdname settingsmod
 #' @export
 settingsUI <- function(id, panel, username){
   ns <- NS(id)
@@ -128,13 +190,7 @@ settingsUI <- function(id, panel, username){
 #'
 #' Server code for settings module
 #'
-#' @param id Input id
-#' @param details reactive list with user name & app location details
-#' @param depth project name depth
-#' @param end_offset project name end offset
-#' @param assay_fun function to parse assay names from file path
-#' @param config reactive list with config settings
-#'
+#' @rdname settingsmod
 #' @export
 settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
   moduleServer(
@@ -192,7 +248,16 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
             ) # modalDialog
           ) # showModal
         } else {
-          stop('Error loading access yaml: ', p$message)
+          showModal(
+            modalDialog(
+              tags$b('Error loading access settings', style='color: red;'),
+              br(), br(),
+              span(p$message),
+              br(),
+              span('Please check file permissions of "', get_access_path(), '" and try again'),
+              footer=NULL
+            ) # modalDialog
+          ) # showModal
         }
       } else {
         access_yaml$l <- p
@@ -990,7 +1055,7 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
           # if not admin, filter out staged data
           if(!is_admin){
             idx <- grep(staging_dir(), names(tmp_desc))
-            tmp_desc <- tmp_desc[ -idx ]
+            if(length(idx) > 0) tmp_desc <- tmp_desc[ -idx ]
           }
 
           project_descriptions[[ name ]] <- tmp_desc
