@@ -33,3 +33,45 @@ Server returns reactive with list containing upset table, intersections
 \description{
 Module UI & server to generate upset plots.
 }
+\examples{
+library(shiny)
+
+oobj <- make_example_carnation_object()
+
+obj <- reactiveValues(
+   dds = oobj$dds,
+   rld = oobj$rld,
+   res = oobj$res,
+   all_dds = oobj$all_dds,
+   all_rld = oobj$all_rld,
+   dds_mapping = oobj$dds_mapping
+)
+
+plot_args <- reactive({
+  list(
+    fdr.thres=0.1,
+    fc.thres=0
+  )
+})
+
+gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+
+reset_genes <- reactiveVal()
+
+config <- reactiveVal(get_config())
+
+if(interactive()){
+  shinyApp(
+    ui = fluidPage(
+           sidebarPanel(upsetPlotUI('p', 'sidebar')),
+           mainPanel(upsetPlotUI('p', 'sidebar'))
+         ),
+    server = function(input, output, session){
+               upset_data <- upsetPlotServer('p', obj, plot_args,
+                                             gene_scratchpad,
+                                             reset_genes, config)
+             }
+  )
+}
+
+}
