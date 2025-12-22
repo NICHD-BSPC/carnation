@@ -29,6 +29,8 @@ server returns reactive with number of plotted terms
 UI & module to generate fuzzy enrichment map plots.
 }
 \examples{
+library(shiny)
+
 # get enrichResult object
 data(eres_dex, package='carnation')
 

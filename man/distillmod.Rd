@@ -29,6 +29,8 @@ server returns reactive with number of plotted terms
 UI & module to generate distill enrichment map plots.
 }
 \examples{
+library(shiny)
+
 # get DESeqResults object
 data(res_dex, package='carnation')
 

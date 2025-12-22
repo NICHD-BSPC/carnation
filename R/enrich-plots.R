@@ -85,6 +85,8 @@
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get enrichResult object
 #' data(eres_dex, package='carnation')
 #'
@@ -398,6 +400,8 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get DESeqResults object
 #' data(res_dex, package='carnation')
 #'
@@ -592,6 +596,8 @@ set_graph_attr <- function(gg){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get DESeqResults object
 #' data(res_dex, package='carnation')
 #'
@@ -804,6 +810,8 @@ cnetPlotServer <- function(id, obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get enrichResult object
 #' data(eres_dex, package='carnation')
 #'
@@ -1107,6 +1115,8 @@ radarServer <- function(id, obj, config, type=''){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get DESeqResults object
 #' data(res_dex, package='carnation')
 #'
@@ -1270,6 +1280,8 @@ alluvialServer <- function(id, obj, res_obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get enrichResult object
 #' data(eres_dex, package='carnation')
 #'
@@ -1468,6 +1480,8 @@ dendrogramServer <- function(id, obj, config){
 #' server invisibly returns NULL (used for side effects)
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get enrichResult object
 #' data(eres_dex, package='carnation')
 #'
@@ -1714,6 +1728,8 @@ horizonServer <- function(id, obj, config){
 #' server returns reactive with number of plotted terms
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get DESeqResults object
 #' data(res_dex, package='carnation')
 #'
@@ -1932,6 +1948,8 @@ distillPlotServer <- function(id, obj, args, config){
 #' server returns reactive with number of plotted terms
 #'
 #' @examples
+#' library(shiny)
+#'
 #' # get enrichResult object
 #' data(eres_dex, package='carnation')
 #'

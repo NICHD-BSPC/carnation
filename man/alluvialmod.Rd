@@ -29,6 +29,8 @@ server invisibly returns NULL (used for side effects)
 UI & module to generate alluvial plots.
 }
 \examples{
+library(shiny)
+
 # get DESeqResults object
 data(res_dex, package='carnation')
 

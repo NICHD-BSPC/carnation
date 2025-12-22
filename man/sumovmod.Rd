@@ -29,6 +29,8 @@ server invisibly returns NULL (used for side effects)
 UI & module to generate summary overview plots.
 }
 \examples{
+library(shiny)
+
 # get enrichResult object
 data(eres_dex, package='carnation')
 

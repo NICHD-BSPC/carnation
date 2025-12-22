@@ -29,6 +29,8 @@ server invisibly returns NULL (used for side effects)
 UI & module to generate enrichment map plots.
 }
 \examples{
+library(shiny)
+
 # get DESeqResults object
 data(res_dex, package='carnation')
 

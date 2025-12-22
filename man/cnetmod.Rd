@@ -27,6 +27,8 @@ server invisibly returns NULL (used for side effects)
 UI & module to generate Cnetplots.
 }
 \examples{
+library(shiny)
+
 # get DESeqResults object
 data(res_dex, package='carnation')
 
