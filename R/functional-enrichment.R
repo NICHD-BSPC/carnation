@@ -1,10 +1,28 @@
-#' Functional enrichment module UI
+#' Functional enrichment module
+#'
+#' @description
+#' UI & module to show functional enrichment tables & plots.
 #'
 #' @param id ID string used to match the ID used to call the module server function
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param tab string, if 'table' show table settings, if 'plots' show plot settings;
 #' if 'compare_results', show comparison settings.
+#' @param id ID string used to match the ID used to call the module UI function
+#' @param obj reactiveValues object containing carnation object
+#' @param upset_table reactive, data from upset plot module
+#' @param gene_scratchpad reactive, genes selected in gene scratchpad
+#' @param reset_genes reactive to reset genes in scratchpad
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with plot UI
+#' server returns reactive with gene selected from functional enrichment tables.
+#'
+#' @rdname funenrichmod
+#' @name funenrichmod
+NULL
+
+#' @rdname funenrichmod
 #' @export
 enrichUI <- function(id, panel, tab='none'){
   ns <- NS(id)
@@ -449,15 +467,7 @@ enrichUI <- function(id, panel, tab='none'){
 }
 
 
-#' Functional enrichment module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param upset_table reactive, data from upset plot module
-#' @param gene_scratchpad reactive, genes selected in gene scratchpad
-#' @param reset_genes reactive to reset genes in scratchpad
-#' @param config reactive list with config settings
-#'
+#' @rdname funenrichmod
 #' @export
 enrichServer <- function(id, obj, upset_table,
                          gene_scratchpad, reset_genes, config){
