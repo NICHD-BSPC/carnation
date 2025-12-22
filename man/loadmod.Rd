@@ -4,7 +4,7 @@
 \alias{loadmod}
 \alias{loadDataUI}
 \alias{loadDataServer}
-\title{Load data module UI}
+\title{Load data module}
 \usage{
 loadDataUI(id)
 
@@ -25,4 +25,28 @@ Server returns reactive with app reload trigger
 }
 \description{
 Module UI & server to load new data
+}
+\examples{
+library(shiny)
+
+username <- 'admin'
+
+config <- reactiveVal(get_config())
+
+obj <- make_example_carnation_object()
+
+rds <- reactive({ obj=obj })
+
+if(interactive()){
+  shinyApp(
+    ui = fluidPage(
+           loadDataUI('p')
+         ),
+    server = function(input, output, session){
+               loadDataServer('p', username=username, config, rds)
+             }
+  )
+}
+
+
 }

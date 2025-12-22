@@ -16,6 +16,54 @@
 #' UI returns tagList with module UI
 #' Server returns reactive with list containing user access details
 #'
+#' @examples
+#' library(shiny)
+#'
+#' # default username
+#' username <- reactive({ NULL })
+#'
+#' # internal carnation config
+#' config <- reactiveVal(get_config())
+#'
+#' # regex to find carnation files
+#' pattern <- reactive({ config()$server$pattern })
+#'
+#' # access permissions
+#' assay.list <- reactiveValues(l=read_access_yaml())
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            sidebarPanel(uiOutput('settings_sidebar')),
+#'            mainPanel(uiOutput('settings_main'))
+#'          ),
+#'     server = function(input, output, session){
+#'                output$settings_main <- renderUI({
+#'                  settingsUI('settings', panel='main', username=username)
+#'                })
+#'
+#'                output$settings_sidebar <- renderUI({
+#'                  settingsUI('settings', panel='sidebar', username=username)
+#'                })
+#'
+#'                settings <- settingsServer('p',
+#'                                           details=reactive({
+#'                                                     list(username=username,
+#'                                                          where=NULL)
+#'                                                   }),
+#'                                           depth=2,
+#'                                           end_offset=0,
+#'                                           assay_fun=function(x)
+#'                                             sub(paste0(pattern(), '\\.rds$'), '',
+#'                                                 basename(x),
+#'                                                 ignore.case=TRUE),
+#'                                           config
+#'                                           )
+#'              }
+#'   )
+#' }
+#'
+#'
 #' @rdname settingsmod
 #' @name settingsmod
 NULL

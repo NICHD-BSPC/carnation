@@ -15,6 +15,57 @@
 #' UI returns actionButton
 #' Server returns reactive with trigger to refresh the app
 #'
+#' @examples
+#' library(shiny)
+#' library(DESeq2)
+#'
+#' # default username
+#' username <- reactive({ NULL })
+#'
+#' # internal carnation config
+#' config <- reactiveVal(get_config())
+#'
+#' # regex to find carnation files
+#' pattern <- reactive({ config()$server$pattern })
+#'
+#' # get example object
+#' obj <- make_example_carnation_object()
+#'
+#' # make reactive with obj & path
+#' original <- reactiveValues( obj = obj, path = "/path/to/carnation/obj.rds" )
+#'
+#' # extract metadata
+#' coldata <- reactive({ lapply(obj$dds, colData) })
+#'
+#' # edit metadata
+#' coldata_edit <- lapply(coldata, function(x){
+#'                   x$type <- 'new'; x
+#'                 })
+#'
+#' # add to object
+#' edit_obj <- obj
+#' for(name in names(edit_obj$dds)){
+#'   colData(edit_obj$dds[[ name ]]) <- coldata_edit[[ name ]]
+#' }
+#'
+#' # run simple shiny app with plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            saveUI('p')
+#'          ),
+#'     server = function(input, output, session){
+#'                save_event <- saveServer('save_object',
+#'                                         original=original,
+#'                                         current=reactive({ edit_obj }),
+#'                                         coldata=coldata,
+#'                                         pattern=pattern(),
+#'                                         username=username,
+#'                                         config)
+#'              }
+#'   )
+#' }
+#'
 #' @rdname savemod
 #' @name savemod
 NULL

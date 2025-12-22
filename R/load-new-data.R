@@ -1,4 +1,4 @@
-#' Load data module UI
+#' Load data module
 #'
 #' @description
 #' Module UI & server to load new data
@@ -7,6 +7,29 @@
 #' @param username user name
 #' @param config reactive list with config settings
 #' @param rds Object to be edited
+#'
+#' @examples
+#' library(shiny)
+#'
+#' username <- 'admin'
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' obj <- make_example_carnation_object()
+#'
+#' rds <- reactive({ obj=obj })
+#'
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            loadDataUI('p')
+#'          ),
+#'     server = function(input, output, session){
+#'                loadDataServer('p', username=username, config, rds)
+#'              }
+#'   )
+#' }
+#'
 #'
 #' @returns
 #' UI returns tagList with module UI
