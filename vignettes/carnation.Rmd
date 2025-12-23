@@ -257,7 +257,7 @@ which carnation uses for several plots from the `GeneTonic` package.
 Since, this is a time-consuming step, we will use the pre-computed
 enrichment results included with carnation.
 
-```{r enrich, eval=FALSE}
+```{r enrich}
 # fe results from dex comparison
 data(eres_dex, package='carnation')
 
