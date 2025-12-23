@@ -19,7 +19,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Depends:
-    R (>= 4.5.0)
+    R (>= 4.3.0)
 Imports:
     BiocParallel,
     colorspace,
@@ -57,8 +57,6 @@ Imports:
     yaml
 Suggests:
     airway,
-    clusterProfiler,
-    DEGreport,
     knitr,
     org.Hs.eg.db,
     rmarkdown,
