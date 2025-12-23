@@ -40,12 +40,12 @@ res_cell$gene <- rownames(res_cell)
 # add symbol column from annotations
 res_cell$symbol <- anno_df[rownames(res_cell)]
 
-# get DE genes with FDR < 0.1
-de_genes <- rownames(res_cell)[res_cell$padj < 0.1 & !is.na(res_cell$padj)]
+# get DE genes with FDR < 0.01 & |log2FoldChange| >= 1
+de_genes <- rownames(res_cell)[res_cell$padj < 0.01 & abs(res_cell$log2FoldChange) >= 1 & !is.na(res_cell$padj)]
 
 # functional enrichment of top genes using GO BP
 eres_cell <- clusterProfiler::enrichGO(
-               gene = de_genes[1:100],
+               gene = de_genes,
                keyType = 'ENSEMBL',
                OrgDb=org.Hs.eg.db,
                ont='BP',
@@ -69,8 +69,8 @@ res_dex$gene <- rownames(res_dex)
 # add symbol column from annotations
 res_dex$symbol <- anno_df[rownames(res_dex)]
 
-# get DE genes with FDR < 0.1
-de_genes <- rownames(res_dex)[res_dex$padj < 0.1 & !is.na(res_dex$padj)]
+# get DE genes with FDR < 0.01 & |log2FoldChange| >= 1
+de_genes <- rownames(res_dex)[res_dex$padj < 0.01 & abs(res_dex$log2FoldChange) >= 1 & !is.na(res_dex$padj)]
 
 # functional enrichment of top genes using GO BP
 eres_dex <- clusterProfiler::enrichGO(
@@ -90,7 +90,7 @@ save(res_dex, file = paste0("data/res_dex.RData"), compress="xz")
 save(eres_dex, file = paste0("data/eres_dex.RData"), compress="xz")
 
 # get degPatterns object
-ma.i <- mat[rownames(mat) %in% de_genes[1:100],]
+ma.i <- mat[rownames(mat) %in% de_genes,]
 
 # remove any genes with 0 variance
 ma.i <- ma.i[rowVars(ma.i) != 0, ]
@@ -99,7 +99,9 @@ ma.i <- ma.i[rowVars(ma.i) != 0, ]
 degpatterns_dex <- DEGreport::degPatterns(
                      ma.i,
                      cdata,
-                     time='dex',
+                     time='cell',
+                     col='dex',
+                     reduce=TRUE,
                      plot=FALSE
                    )
 
