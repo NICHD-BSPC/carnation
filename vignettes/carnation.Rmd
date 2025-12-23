@@ -265,7 +265,7 @@ data(eres_dex, package='carnation')
 data(eres_cell, package='carnation')
 
 # compile into a list
-go_list <- list(dex=eres_dex, cell=eres_cell)
+go_list <- list(dex_trt_vs_untrt=eres_dex, cell_N61311_vs_N052611=eres_cell)
 
 # list to save functional enrichment results
 enrich_list <- list()
