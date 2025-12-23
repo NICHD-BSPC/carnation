@@ -43,4 +43,5 @@ dependencies:
   - qpdf
 
   - bioconductor-airway
+  - bioxonductor-degreport
   - bioconductor-org.hs.eg.db
