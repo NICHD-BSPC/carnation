@@ -9,7 +9,7 @@ DE analysis results and creates a GeneTonic object."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,8 +19,10 @@ DE analysis results and creates a GeneTonic object."></head><body>
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/carnation.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/NICHD-BSPC/carnation/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -30,7 +32,7 @@ DE analysis results and creates a GeneTonic object."></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Convert enrichResult to GeneTonic object</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/NICHD-BSPC/carnation/blob/main/R/functions.R" class="external-link"><code>R/functions.R</code></a></small>
       <div class="d-none name"><code>enrich_to_genetonic.Rd</code></div>
     </div>
 
@@ -56,7 +58,25 @@ DE analysis results and creates a GeneTonic object.</p>
 <dd><p>data frame with DE analysis results</p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>GeneTonic object</p>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># get enrich &amp; res objects</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">res_dex</span>, package<span class="op">=</span><span class="st">"carnation"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eres_dex</span>, package<span class="op">=</span><span class="st">"carnation"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># convert to GeneTonic object</span></span></span>
+<span class="r-in"><span><span class="va">gt</span> <span class="op">&lt;-</span> <span class="fu">enrich_to_genetonic</span><span class="op">(</span><span class="va">eres_dex</span>, <span class="va">res_dex</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Found 2186 gene sets in `enrichResult` object, of which 2186 are significant.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Converting for usage in GeneTonic...</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

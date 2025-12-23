@@ -47,10 +47,43 @@ summarize.res.list(
 
   list of descriptions for res.list elements
 
-  NOTE: this is edited to match the structure used in the shiny app.
-  Specifically res.list and dds.list both are expected to have the same
-  number and names of elements.
-
 ## Value
 
 Dataframe
+
+## Examples
+
+``` r
+library(DESeq2)
+
+# make example DESeq data set
+dds <- makeExampleDESeqDataSet()
+
+# run DESeq2
+dds <- DESeq(dds)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+
+# make dds list
+dds_list <- list(main = dds)
+
+# make comparisons
+res1 <- results(dds, contrast=c('condition', 'A', 'B'))
+res2 <- results(dds, contrast=c('condition', 'B', 'A'))
+
+# make list of results
+res_list <- list(
+              comp1=res1,
+              comp2=res2
+            )
+
+# make dds mapping
+dds_mapping <- list(comp1='main', comp2='main')
+
+# get summary
+df <- summarize.res.list(res_list, dds_list, dds_mapping, alpha=0.1, lfc.thresh=0)
+```

@@ -21,3 +21,7 @@ helpModal(mdfile, title = NULL, ...)
 - ...:
 
   other params passed to modalDialog()
+
+## Value
+
+Modal dialog with help documentation.

@@ -24,3 +24,16 @@ format_genes(g, sep = "\\/", genes.per.line = 6)
 - genes.per.line:
 
   number of genes to show in a line
+
+## Value
+
+vector of gene names prettified for data.table output
+
+## Examples
+
+``` r
+# string with genes separated by '/'
+g <- "gene1/gene2/gene3/gene4/gene5/gene6/gene7"
+
+gg <- format_genes(g, genes.per.line=3)
+```

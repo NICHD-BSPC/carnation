@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,8 +17,10 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/carnation.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/NICHD-BSPC/carnation/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -28,7 +30,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Plot an interactive scatterplot to compare two contrasts</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/NICHD-BSPC/carnation/blob/main/R/functions.R" class="external-link"><code>R/functions.R</code></a></small>
       <div class="d-none name"><code>plotScatter.label_ly.Rd</code></div>
     </div>
 
@@ -60,11 +62,11 @@
 
 
 <dl><dt id="arg-compare">compare<a class="anchor" aria-label="anchor" href="#arg-compare"></a></dt>
-<dd><p>string, what values to plot? can be 'LFC' or 'P-adj'</p></dd>
+<dd><p>string, what values to plot? can be 'log2FoldChange' or 'P-adj'</p></dd>
 
 
 <dt id="arg-df">df<a class="anchor" aria-label="anchor" href="#arg-df"></a></dt>
-<dd><p>data frame with LFC &amp; padj values to plot from 2 contrasts</p></dd>
+<dd><p>data frame with log2FoldChange &amp; padj values to plot from 2 contrasts</p></dd>
 
 
 <dt id="arg-label-x">label_x<a class="anchor" aria-label="anchor" href="#arg-label-x"></a></dt>
@@ -119,6 +121,69 @@ x = 0 &amp; y = 0, but not the x = y diagonal.</p></dd>
     <p>plotly handle</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thelovelab/DESeq2" class="external-link">DESeq2</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># make example dataset</span></span></span>
+<span class="r-in"><span><span class="va">dds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/makeExampleDESeqDataSet.html" class="external-link">makeExampleDESeqDataSet</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># run DE analysis</span></span></span>
+<span class="r-in"><span><span class="va">dds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/DESeq.html" class="external-link">DESeq</a></span><span class="op">(</span><span class="va">dds</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> estimating size factors</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> estimating dispersions</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> gene-wise dispersion estimates</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> mean-dispersion relationship</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> final dispersion estimates</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> fitting model and testing</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># extract comparisons of interest</span></span></span>
+<span class="r-in"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/results.html" class="external-link">results</a></span><span class="op">(</span><span class="va">dds</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"condition"</span>, <span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/DESeq2/man/results.html" class="external-link">results</a></span><span class="op">(</span><span class="va">dds</span>, contrast <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"condition"</span>, <span class="st">"B"</span>, <span class="st">"A"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># add geneid column</span></span></span>
+<span class="r-in"><span><span class="va">res1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>geneid<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">res1</span><span class="op">)</span>, <span class="va">res1</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">res2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span>geneid<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span>, <span class="va">res2</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># make merged df from the two comparisons</span></span></span>
+<span class="r-in"><span><span class="va">cols.sub</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'log2FoldChange'</span>, <span class="st">'padj'</span>, <span class="st">'geneid'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">df_full</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate-joins.html" class="external-link">inner_join</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">res1</span><span class="op">)</span>, <span class="fu">all_of</span><span class="op">(</span><span class="va">cols.sub</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.data.frame.html" class="external-link">as.data.frame</a></span><span class="op">(</span><span class="va">res2</span><span class="op">)</span>, <span class="fu">all_of</span><span class="op">(</span><span class="va">cols.sub</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  by <span class="op">=</span> <span class="st">'geneid'</span>,</span></span>
+<span class="r-in"><span>  suffix <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'.x'</span>, <span class="st">'.y'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># calculate x &amp; y limits for log2FoldChange</span></span></span>
+<span class="r-in"><span><span class="va">xlim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">df_full</span><span class="op">[[</span> <span class="st">'log2FoldChange.x'</span> <span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ylim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/range.html" class="external-link">range</a></span><span class="op">(</span><span class="va">df_full</span><span class="op">[[</span> <span class="st">'log2FoldChange.y'</span> <span class="op">]</span><span class="op">]</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># get color palette</span></span></span>
+<span class="r-in"><span><span class="va">color.palette</span> <span class="op">&lt;-</span> <span class="fu">RColorBrewer</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RColorBrewer/man/ColorBrewer.html" class="external-link">brewer.pal</a></span><span class="op">(</span>n<span class="op">=</span><span class="fl">5</span>, name<span class="op">=</span><span class="st">'Set2'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># add significance column</span></span></span>
+<span class="r-in"><span><span class="va">sig.x</span> <span class="op">&lt;-</span> <span class="va">df_full</span><span class="op">$</span><span class="va">padj.x</span> <span class="op">&lt;</span> <span class="fl">0.1</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">df_full</span><span class="op">$</span><span class="va">padj.x</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">sig.y</span> <span class="op">&lt;-</span> <span class="va">df_full</span><span class="op">$</span><span class="va">padj.y</span> <span class="op">&lt;</span> <span class="fl">0.1</span> <span class="op">&amp;</span> <span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NA.html" class="external-link">is.na</a></span><span class="op">(</span><span class="va">df_full</span><span class="op">$</span><span class="va">padj.y</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">up.x</span> <span class="op">&lt;-</span> <span class="va">df_full</span><span class="op">$</span><span class="va">log2FoldChange.x</span> <span class="op">&gt;=</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span><span class="va">up.y</span> <span class="op">&lt;-</span> <span class="va">df_full</span><span class="op">$</span><span class="va">log2FoldChange.y</span> <span class="op">&gt;=</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span><span class="va">significance</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="st">'None'</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_full</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">significance</span><span class="op">[</span> <span class="va">sig.x</span> <span class="op">&amp;</span> <span class="va">sig.y</span> <span class="op">&amp;</span> <span class="op">(</span><span class="op">(</span><span class="va">up.x</span> <span class="op">&amp;</span> <span class="va">up.y</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="op">!</span><span class="va">up.x</span> <span class="op">&amp;</span> <span class="op">!</span><span class="va">up.y</span><span class="op">)</span><span class="op">)</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="st">'Both - same LFC sign'</span></span></span>
+<span class="r-in"><span><span class="va">significance</span><span class="op">[</span> <span class="va">sig.x</span> <span class="op">&amp;</span> <span class="va">sig.y</span> <span class="op">&amp;</span> <span class="op">(</span><span class="op">(</span><span class="va">up.x</span> <span class="op">&amp;</span> <span class="op">!</span><span class="va">up.y</span><span class="op">)</span> <span class="op">|</span> <span class="op">(</span><span class="op">!</span><span class="va">up.x</span> <span class="op">&amp;</span> <span class="va">up.y</span><span class="op">)</span><span class="op">)</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="st">'Both - opposite LFC sign'</span></span></span>
+<span class="r-in"><span><span class="va">significance</span><span class="op">[</span> <span class="va">sig.x</span> <span class="op">&amp;</span> <span class="op">!</span><span class="va">sig.y</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="st">'A vs B'</span></span></span>
+<span class="r-in"><span><span class="va">significance</span><span class="op">[</span> <span class="op">!</span><span class="va">sig.x</span> <span class="op">&amp;</span> <span class="va">sig.y</span> <span class="op">]</span> <span class="op">&lt;-</span> <span class="st">'B vs A'</span></span></span>
+<span class="r-in"><span><span class="va">df_full</span><span class="op">$</span><span class="va">significance</span> <span class="op">&lt;-</span> <span class="va">significance</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># generate scatter plot</span></span></span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">plotScatter.label_ly</span><span class="op">(</span>compare <span class="op">=</span> <span class="st">'log2FoldChange'</span>,</span></span>
+<span class="r-in"><span>                          df <span class="op">=</span> <span class="va">df_full</span>,</span></span>
+<span class="r-in"><span>                          label_x <span class="op">=</span> <span class="st">'A vs B'</span>,</span></span>
+<span class="r-in"><span>                          label_y <span class="op">=</span> <span class="st">'B vs A'</span>,</span></span>
+<span class="r-in"><span>                          lim.x <span class="op">=</span> <span class="va">xlim</span>,</span></span>
+<span class="r-in"><span>                          lim.y <span class="op">=</span> <span class="va">ylim</span>,</span></span>
+<span class="r-in"><span>                          color.palette <span class="op">=</span> <span class="va">color.palette</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

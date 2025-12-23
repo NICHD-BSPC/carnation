@@ -13,3 +13,14 @@ is_site_admin(u)
 - u:
 
   username
+
+## Value
+
+boolean to indicate is user is in admin group
+
+## Examples
+
+``` r
+# check if default user is admin
+yy <- is_site_admin(u='admin')
+```

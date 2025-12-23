@@ -36,3 +36,20 @@ makeEnrichResult(
 - type:
 
   string, can be 'enrichResult' or 'gseaResult'
+
+## Value
+
+enrichResult object
+
+## Examples
+
+``` r
+# get enrichResult object
+data(eres_dex, package='carnation')
+
+# extract the results
+df <- as.data.frame(eres_dex)
+
+# convert to a stripped down enrichResult object
+eres2 <- makeEnrichResult(df)
+```

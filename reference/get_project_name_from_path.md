@@ -39,9 +39,15 @@ get_project_name_from_path(
 
 ## Value
 
-project name
+project name parsed from path to object
 
-## Details
+## Examples
 
-So if the path is: /path/to/project/test/main.*pattern*.rds and depth=2
-& end_offset=0 this returns: project/test
+``` r
+# path to carnation object
+obj_path <- "/path/to/project/test/main.rnaseq.rds"
+
+# parsed project name
+get_project_name_from_path(obj_path, depth = 2, end_offset = 0)
+#> [1] "project/test"
+```

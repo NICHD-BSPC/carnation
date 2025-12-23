@@ -1,6 +1,6 @@
 # Plot a degPatterns object
 
-This function plots a degPatterns object using degPlotCluster
+This function plots a degPatterns object.
 
 ## Usage
 
@@ -79,3 +79,17 @@ get_degplot(
 ## Value
 
 ggplot handle
+
+## Examples
+
+``` r
+# get degpatterns object
+data(degpatterns_dex, package = 'carnation')
+
+# get pattern plot
+all_clusters <- unique(degpatterns_dex$normalized$cluster)
+
+dp <- get_degplot(degpatterns_dex, time='dex',
+                  cluster_to_show=all_clusters,
+                  x_order=c('untrt','trt'))
+```

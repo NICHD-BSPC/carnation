@@ -20,11 +20,11 @@ gs_radar(
 
 - res_enrich:
 
-  DE results from comparison 1
+  GeneTonic object for comparison 1
 
 - res_enrich2:
 
-  DE results from comparison 2
+  GeneTonic object for comparison 2 (default = NULL)
 
 - label1:
 
@@ -45,3 +45,31 @@ gs_radar(
 ## Value
 
 ggplot handle
+
+## Examples
+
+``` r
+library(GeneTonic)
+
+# get DESeqResults object
+data(res_dex, package='carnation')
+
+# get enrichResult object
+data(eres_dex, package='carnation')
+
+# convert to GeneTonic object
+gt <- shake_enrichResult(eres_dex)
+#> Found 2186 gene sets in `enrichResult` object, of which 2186 are significant.
+#> Converting for usage in GeneTonic...
+
+# get annotation df
+idx <- match(c('gene','symbol'), tolower(colnames(res_dex)))
+anno_df <- res_dex[,idx]
+colnames(anno_df) <- c('gene_id', 'gene_name')
+
+# add aggregate score columns
+gt <- get_aggrscores(gt, res_dex, anno_df)
+
+# make radar plot
+p <- gs_radar(gt)
+```

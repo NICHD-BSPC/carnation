@@ -18,3 +18,15 @@ install_carnation(envname, ...)
 - ...:
 
   parameters passed to reticulate::py_install
+
+## Value
+
+`NULL`, invisibly. The function is called for its side effects.
+
+## Examples
+
+``` r
+if(interactive()){
+    install_carnation()
+}
+```

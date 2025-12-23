@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,8 +17,10 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/carnation.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/NICHD-BSPC/carnation/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -56,17 +58,10 @@
 
         <dt>
 
-          <code><a href="alluvialServer.html">alluvialServer()</a></code>
+          <code><a href="alluvialmod.html">alluvialUI()</a></code> <code><a href="alluvialmod.html">alluvialServer()</a></code>
 
         </dt>
-        <dd>Alluvial plot server function</dd>
-
-        <dt>
-
-          <code><a href="alluvialUI.html">alluvialUI()</a></code>
-
-        </dt>
-        <dd>Alluvial plot UI</dd>
+        <dd>Alluvial plot module</dd>
 
         <dt>
 
@@ -77,17 +72,10 @@
 
         <dt>
 
-          <code><a href="cnetPlotServer.html">cnetPlotServer()</a></code>
+          <code><a href="cnetmod.html">cnetPlotUI()</a></code> <code><a href="cnetmod.html">cnetPlotServer()</a></code>
 
         </dt>
-        <dd>Cnetplot server function</dd>
-
-        <dt>
-
-          <code><a href="cnetPlotUI.html">cnetPlotUI()</a></code>
-
-        </dt>
-        <dd>Cnetplot UI</dd>
+        <dd>Cnetplot module</dd>
 
         <dt>
 
@@ -98,45 +86,38 @@
 
         <dt>
 
-          <code><a href="dendrogramServer.html">dendrogramServer()</a></code>
+          <code><a href="degmod.html">patternPlotUI()</a></code> <code><a href="degmod.html">patternPlotServer()</a></code>
 
         </dt>
-        <dd>Dendrogram plot server function</dd>
+        <dd>Pattern plot module</dd>
 
         <dt>
 
-          <code><a href="dendrogramUI.html">dendrogramUI()</a></code>
+          <code><a href="degpatterns_dex.html">degpatterns_dex</a></code>
 
         </dt>
-        <dd>Dendrogram plot UI</dd>
+        <dd>A <code>degPatterns</code> object for differentially expressed genes in the dexamethasone treatment comparison.</dd>
 
         <dt>
 
-          <code><a href="distillPlotServer.html">distillPlotServer()</a></code>
+          <code><a href="dendromod.html">dendrogramUI()</a></code> <code><a href="dendromod.html">dendrogramServer()</a></code>
 
         </dt>
-        <dd>Distill enrichment plot server function</dd>
+        <dd>Dendrogram module</dd>
 
         <dt>
 
-          <code><a href="distillPlotUI.html">distillPlotUI()</a></code>
+          <code><a href="distillmod.html">distillPlotUI()</a></code> <code><a href="distillmod.html">distillPlotServer()</a></code>
 
         </dt>
-        <dd>Distill enrichment plot UI</dd>
+        <dd>Distilled enrichment map module</dd>
 
         <dt>
 
-          <code><a href="downloadButtonServer.html">downloadButtonServer()</a></code>
+          <code><a href="dlmod.html">downloadButtonUI()</a></code> <code><a href="dlmod.html">downloadButtonServer()</a></code>
 
         </dt>
-        <dd>Download button module server</dd>
-
-        <dt>
-
-          <code><a href="downloadButtonUI.html">downloadButtonUI()</a></code>
-
-        </dt>
-        <dd>Download button module ui</dd>
+        <dd>Download button module</dd>
 
         <dt>
 
@@ -147,17 +128,10 @@
 
         <dt>
 
-          <code><a href="enrichServer.html">enrichServer()</a></code>
+          <code><a href="emapmod.html">enrichmapUI()</a></code> <code><a href="emapmod.html">enrichmapServer()</a></code>
 
         </dt>
-        <dd>Functional enrichment module server function</dd>
-
-        <dt>
-
-          <code><a href="enrichUI.html">enrichUI()</a></code>
-
-        </dt>
-        <dd>Functional enrichment module UI</dd>
+        <dd>Enrichment map plot module</dd>
 
         <dt>
 
@@ -168,17 +142,17 @@
 
         <dt>
 
-          <code><a href="enrichmapServer.html">enrichmapServer()</a></code>
+          <code><a href="eres_cell.html">eres_cell</a></code>
 
         </dt>
-        <dd>Enrichment map plot server function</dd>
+        <dd>An <code>enrichResult</code> object for differentially expressed genes in the cell line comparison.</dd>
 
         <dt>
 
-          <code><a href="enrichmapUI.html">enrichmapUI()</a></code>
+          <code><a href="eres_dex.html">eres_dex</a></code>
 
         </dt>
-        <dd>Enrichment map plot UI</dd>
+        <dd>An <code>enrichResult</code> object for differentially expressed genes in the dexamethasone treatment comparison.</dd>
 
         <dt>
 
@@ -196,31 +170,24 @@
 
         <dt>
 
-          <code><a href="fuzzyPlotServer.html">fuzzyPlotServer()</a></code>
+          <code><a href="funenrichmod.html">enrichUI()</a></code> <code><a href="funenrichmod.html">enrichServer()</a></code>
 
         </dt>
-        <dd>Fuzzy enrichment plot server function</dd>
+        <dd>Functional enrichment module</dd>
 
         <dt>
 
-          <code><a href="fuzzyPlotUI.html">fuzzyPlotUI()</a></code>
+          <code><a href="fuzzymod.html">fuzzyPlotUI()</a></code> <code><a href="fuzzymod.html">fuzzyPlotServer()</a></code>
 
         </dt>
-        <dd>Fuzzy enrichment plot UI</dd>
+        <dd>Fuzzy enrichment map module</dd>
 
         <dt>
 
-          <code><a href="genePlotServer.html">genePlotServer()</a></code>
+          <code><a href="geneplotmod.html">genePlotUI()</a></code> <code><a href="geneplotmod.html">genePlotServer()</a></code>
 
         </dt>
-        <dd>Gene plot module server function</dd>
-
-        <dt>
-
-          <code><a href="genePlotUI.html">genePlotUI()</a></code>
-
-        </dt>
-        <dd>Gene plot module UI</dd>
+        <dd>Gene plot module</dd>
 
         <dt>
 
@@ -228,13 +195,6 @@
 
         </dt>
         <dd>Get path to access yaml file</dd>
-
-        <dt>
-
-          <code><a href="get_common_path_from_list.html">get_common_path_from_list()</a></code>
-
-        </dt>
-        <dd>Return common base path from list of paths</dd>
 
         <dt>
 
@@ -266,6 +226,13 @@
 
         <dt>
 
+          <code><a href="get_upset_table.html">get_upset_table()</a></code>
+
+        </dt>
+        <dd>Generate upset plot table</dd>
+
+        <dt>
+
           <code><a href="get_y_init.html">get_y_init()</a></code>
 
         </dt>
@@ -287,31 +254,10 @@
 
         <dt>
 
-          <code><a href="heatmapServer.html">heatmapServer()</a></code>
+          <code><a href="heatmapmod.html">heatmapUI()</a></code> <code><a href="heatmapmod.html">heatmapServer()</a></code>
 
         </dt>
-        <dd>Heatmap module server function</dd>
-
-        <dt>
-
-          <code><a href="heatmapUI.html">heatmapUI()</a></code>
-
-        </dt>
-        <dd>Heatmap module UI</dd>
-
-        <dt>
-
-          <code><a href="helpButtonServer.html">helpButtonServer()</a></code>
-
-        </dt>
-        <dd>Help button module server</dd>
-
-        <dt>
-
-          <code><a href="helpButtonUI.html">helpButtonUI()</a></code>
-
-        </dt>
-        <dd>Help button module ui</dd>
+        <dd>Heatmap module</dd>
 
         <dt>
 
@@ -322,17 +268,17 @@
 
         <dt>
 
-          <code><a href="horizonServer.html">horizonServer()</a></code>
+          <code><a href="helpmod.html">helpButtonUI()</a></code> <code><a href="helpmod.html">helpButtonServer()</a></code>
 
         </dt>
-        <dd>Horizon plot server function</dd>
+        <dd>Help button module</dd>
 
         <dt>
 
-          <code><a href="horizonUI.html">horizonUI()</a></code>
+          <code><a href="horizonmod.html">horizonUI()</a></code> <code><a href="horizonmod.html">horizonServer()</a></code>
 
         </dt>
-        <dd>Horizon plot UI</dd>
+        <dd>Horizon plot module</dd>
 
         <dt>
 
@@ -357,31 +303,10 @@
 
         <dt>
 
-          <code><a href="loadDataServer.html">loadDataServer()</a></code>
+          <code><a href="loadmod.html">loadDataUI()</a></code> <code><a href="loadmod.html">loadDataServer()</a></code>
 
         </dt>
-        <dd>Load data module server function</dd>
-
-        <dt>
-
-          <code><a href="loadDataUI.html">loadDataUI()</a></code>
-
-        </dt>
-        <dd>Load data module UI</dd>
-
-        <dt>
-
-          <code><a href="maPlotServer.html">maPlotServer()</a></code>
-
-        </dt>
-        <dd>MA plot module server function</dd>
-
-        <dt>
-
-          <code><a href="maPlotUI.html">maPlotUI()</a></code>
-
-        </dt>
-        <dd>MA plot module UI</dd>
+        <dd>Load data module</dd>
 
         <dt>
 
@@ -392,6 +317,13 @@
 
         <dt>
 
+          <code><a href="make_example_carnation_object.html">make_example_carnation_object()</a></code>
+
+        </dt>
+        <dd>Make example carnation object</dd>
+
+        <dt>
+
           <code><a href="make_final_object.html">make_final_object()</a></code>
 
         </dt>
@@ -399,17 +331,17 @@
 
         <dt>
 
-          <code><a href="metadataServer.html">metadataServer()</a></code>
+          <code><a href="maplotmod.html">maPlotUI()</a></code> <code><a href="maplotmod.html">maPlotServer()</a></code>
 
         </dt>
-        <dd>Metadata module server</dd>
+        <dd>MA plot module</dd>
 
         <dt>
 
-          <code><a href="metadataUI.html">metadataUI()</a></code>
+          <code><a href="metamod.html">metadataUI()</a></code> <code><a href="metamod.html">metadataServer()</a></code>
 
         </dt>
-        <dd>Metadata module ui</dd>
+        <dd>Metadata module</dd>
 
         <dt>
 
@@ -420,31 +352,10 @@
 
         <dt>
 
-          <code><a href="patternPlotServer.html">patternPlotServer()</a></code>
+          <code><a href="pcamod.html">pcaPlotUI()</a></code> <code><a href="pcamod.html">pcaPlotServer()</a></code>
 
         </dt>
-        <dd>Pattern plot module server function</dd>
-
-        <dt>
-
-          <code><a href="patternPlotUI.html">patternPlotUI()</a></code>
-
-        </dt>
-        <dd>Pattern plot module UI</dd>
-
-        <dt>
-
-          <code><a href="pcaPlotServer.html">pcaPlotServer()</a></code>
-
-        </dt>
-        <dd>PCA plot module server function</dd>
-
-        <dt>
-
-          <code><a href="pcaPlotUI.html">pcaPlotUI()</a></code>
-
-        </dt>
-        <dd>PCA plot module UI</dd>
+        <dd>PCA plot module</dd>
 
         <dt>
 
@@ -490,17 +401,10 @@
 
         <dt>
 
-          <code><a href="radarServer.html">radarServer()</a></code>
+          <code><a href="radarmod.html">radarUI()</a></code> <code><a href="radarmod.html">radarServer()</a></code>
 
         </dt>
-        <dd>Radar plot server function</dd>
-
-        <dt>
-
-          <code><a href="radarUI.html">radarUI()</a></code>
-
-        </dt>
-        <dd>Radar plot UI</dd>
+        <dd>Radar plot module</dd>
 
         <dt>
 
@@ -511,24 +415,24 @@
 
         <dt>
 
+          <code><a href="res_cell.html">res_cell</a></code>
+
+        </dt>
+        <dd>A <code>DESeqResults</code> object testing the difference between two cell lines of smooth muscle cells</dd>
+
+        <dt>
+
+          <code><a href="res_dex.html">res_dex</a></code>
+
+        </dt>
+        <dd>A <code>DESeqResults</code> object testing the effect of dexamethasone on smooth muscle cells</dd>
+
+        <dt>
+
           <code><a href="run_carnation.html">run_carnation()</a></code>
 
         </dt>
         <dd>Carnation</dd>
-
-        <dt>
-
-          <code><a href="saveServer.html">saveServer()</a></code>
-
-        </dt>
-        <dd>Save object module server function</dd>
-
-        <dt>
-
-          <code><a href="saveUI.html">saveUI()</a></code>
-
-        </dt>
-        <dd>Save object module UI</dd>
 
         <dt>
 
@@ -539,31 +443,24 @@
 
         <dt>
 
-          <code><a href="scatterPlotServer.html">scatterPlotServer()</a></code>
+          <code><a href="savemod.html">saveUI()</a></code> <code><a href="savemod.html">saveServer()</a></code>
 
         </dt>
-        <dd>Scatterplot module server function</dd>
+        <dd>Save object module UI</dd>
 
         <dt>
 
-          <code><a href="scatterPlotUI.html">scatterPlotUI()</a></code>
+          <code><a href="scattermod.html">scatterPlotUI()</a></code> <code><a href="scattermod.html">scatterPlotServer()</a></code>
 
         </dt>
-        <dd>Scatterplot module UI</dd>
+        <dd>Scatterplot module</dd>
 
         <dt>
 
-          <code><a href="settingsServer.html">settingsServer()</a></code>
+          <code><a href="settingsmod.html">settingsUI()</a></code> <code><a href="settingsmod.html">settingsServer()</a></code>
 
         </dt>
-        <dd>Settings module server</dd>
-
-        <dt>
-
-          <code><a href="settingsUI.html">settingsUI()</a></code>
-
-        </dt>
-        <dd>Settings module ui</dd>
+        <dd>Settings module</dd>
 
         <dt>
 
@@ -574,17 +471,10 @@
 
         <dt>
 
-          <code><a href="sumovPlotServer.html">sumovPlotServer()</a></code>
+          <code><a href="sumovmod.html">sumovPlotUI()</a></code> <code><a href="sumovmod.html">sumovPlotServer()</a></code>
 
         </dt>
-        <dd>Summary overview plot server function</dd>
-
-        <dt>
-
-          <code><a href="sumovPlotUI.html">sumovPlotUI()</a></code>
-
-        </dt>
-        <dd>Summary overview plot ui</dd>
+        <dd>Summary overview plot module</dd>
 
         <dt>
 
@@ -595,17 +485,10 @@
 
         <dt>
 
-          <code><a href="upsetPlotServer.html">upsetPlotServer()</a></code>
+          <code><a href="upsetmod.html">upsetPlotUI()</a></code> <code><a href="upsetmod.html">upsetPlotServer()</a></code>
 
         </dt>
-        <dd>Upset plot module server function</dd>
-
-        <dt>
-
-          <code><a href="upsetPlotUI.html">upsetPlotUI()</a></code>
-
-        </dt>
-        <dd>Upset plot module UI</dd>
+        <dd>Upset plot module</dd>
       </dl></div>
   </main></div>
 

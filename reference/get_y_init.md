@@ -21,3 +21,21 @@ get_y_init(df, y_delta, pseudocount)
 - pseudocount:
 
   pseudo-count to add to the data.frame
+
+## Value
+
+min and max limits for count column, padded for visualization
+
+## Examples
+
+``` r
+# make example DESeq dataset
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# get gene counts
+df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
+
+# get y axis limits
+get_y_init(df, y_delta = 0.01, pseudocount = 1)
+#> [1]   2 120
+```

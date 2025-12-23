@@ -30,3 +30,13 @@ get_gene_counts(dds, gene, intgroup = "condition", norm_method = "libsize")
 ## Value
 
 data.frame with gene counts
+
+## Examples
+
+``` r
+# make example DESeq data set
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# get counts for gene1
+gg <- get_gene_counts(dds, 'gene1')
+```

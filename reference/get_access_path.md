@@ -13,3 +13,10 @@ get_access_path()
 ## Value
 
 path to access yaml
+
+## Examples
+
+``` r
+p <- get_access_path()
+#> Environment variable "CARNATION_ACCESS_YAML" not found.Using default location to save access yaml:/home/runner
+```

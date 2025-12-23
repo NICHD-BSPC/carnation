@@ -26,3 +26,17 @@ run_carnation(credentials = NULL, passphrase = NULL, enable_admin = TRUE, ...)
 - ...:
 
   parameters passed to shinyApp() call
+
+## Value
+
+shinyApp object
+
+## Examples
+
+``` r
+if(interactive()){
+    shiny::runApp(
+        run_carnation()
+    )
+}
+```

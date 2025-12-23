@@ -9,7 +9,7 @@ a string to be used as project name"></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -19,8 +19,10 @@ a string to be used as project name"></head><body>
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="nav-item"><a class="nav-link" href="../articles/carnation.html">Get started</a></li>
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/NICHD-BSPC/carnation/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul></div>
 
 
@@ -30,7 +32,7 @@ a string to be used as project name"></head><body>
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Get project name from path</h1>
-
+      <small class="dont-index">Source: <a href="https://github.com/NICHD-BSPC/carnation/blob/main/R/functions.R" class="external-link"><code>R/functions.R</code></a></small>
       <div class="d-none name"><code>get_project_name_from_path.Rd</code></div>
     </div>
 
@@ -76,15 +78,20 @@ a string to be used as project name</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>project name</p>
-    </div>
-    <div class="section level2">
-    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>So if the path is: /path/to/project/test/main.<em>pattern</em>.rds
-and depth=2 &amp; end_offset=0
-this returns: project/test</p>
+    <p>project name parsed from path to object</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># path to carnation object</span></span></span>
+<span class="r-in"><span><span class="va">obj_path</span> <span class="op">&lt;-</span> <span class="st">"/path/to/project/test/main.rnaseq.rds"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># parsed project name</span></span></span>
+<span class="r-in"><span><span class="fu">get_project_name_from_path</span><span class="op">(</span><span class="va">obj_path</span>, depth <span class="op">=</span> <span class="fl">2</span>, end_offset <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "project/test"</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 

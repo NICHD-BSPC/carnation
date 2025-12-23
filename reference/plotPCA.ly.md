@@ -23,3 +23,17 @@ plotPCA.ly(rld, intgroup)
 
 Handle to ggplot with added label field in aes_string() for plotting
 with ggplotly()
+
+## Examples
+
+``` r
+# make example dds object
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# normalize
+rld <- DESeq2::varianceStabilizingTransformation(dds, blind=TRUE)
+
+# make pca plot
+p <- plotPCA.ly(rld, intgroup='condition')
+#> using ntop=500 top features by variance
+```

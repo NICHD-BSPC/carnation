@@ -94,3 +94,20 @@ getcountplot(
 ## Value
 
 ggplot handle
+
+## Examples
+
+``` r
+# make example DESeq dataset
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# get gene counts
+df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
+
+# standard gene plot
+p <- getcountplot(df, intgroup = "condition", factor.levels = c("A", "B"))
+
+# with genes faceted
+p1 <- getcountplot(df, intgroup = "condition", factor.levels = c("A", "B"), facet = "gene")
+
+```

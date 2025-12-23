@@ -11,3 +11,9 @@ get_config()
 ## Value
 
 list containing config items
+
+## Examples
+
+``` r
+cfg <- get_config()
+```
