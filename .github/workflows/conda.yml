@@ -76,7 +76,7 @@ jobs:
       - name: Check, install & load library
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
-          conda activate ../env
+          conda activate ../env-unpinned
 
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp

@@ -34,7 +34,7 @@ First check for and load some libraries that we will need for this tutorial.
 
 ```{r presetup, eval=FALSE}
 # install optional packages if not present
-pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'clusterProfiler', 'DEGreport')
+pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'DEGreport')
 for(pkg in pkgs_to_check){
   setRepositories(ind=c(1,2,3,4,5))
   if(!requireNamespace(pkg, quietly=TRUE)){
@@ -49,8 +49,6 @@ library(DESeq2)
 library(dplyr)
 library(GeneTonic)
 library(org.Hs.eg.db)
-library(clusterProfiler)
-library(DEGreport)
 ```
 
 We will be using the 'airway' dataset. First, we load this dataset.
@@ -254,7 +252,19 @@ Next, we run functional enrichment and save the results in a list
 called `enrich_list`. We also save a converted list called `genetonic`
 which carnation uses for several plots from the `GeneTonic` package.
 
+Since, this is a time-consuming step, we will use the pre-computed
+enrichment results included with carnation.
+
 ```{r enrich}
+# fe results from dex comparison
+data(eres_dex, package='carnation')
+
+# fe results from dex comparison
+data(eres_cell, package='carnation')
+
+# compile into a list
+go_list <- list(dex_trt_vs_untrt=eres_dex, cell_N61311_vs_N052611=eres_cell)
+
 # list to save functional enrichment results
 enrich_list <- list()
 
@@ -262,13 +272,18 @@ enrich_list <- list()
 genetonic <- list()
 
 for(comp in names(res_list)){
-    go.res <- clusterProfiler::enrichGO(
-            gene=de.genes[[comp]][['ENTREZID']],
-            keyType='ENTREZID',
-            OrgDb=org.Hs.eg.db,
-            ont='BP',
-            pvalueCutoff=1, qvalueCutoff=1,
-            readable = TRUE)
+    # NOTE: this is the command used to generate the functional
+    # enrichment results
+    #go.res <- clusterProfiler::enrichGO(
+    #        gene=de.genes[[comp]][['ENTREZID']],
+    #        keyType='ENTREZID',
+    #        OrgDb=org.Hs.eg.db,
+    #        ont='BP',
+    #        pvalueCutoff=1, qvalueCutoff=1,
+    #        readable = TRUE)
+
+    # we use the precomputed results here instead
+    go.res <- go_list[[ comp ]]
 
     enrich_list[[ comp ]] <- list(
                                res=comp,
@@ -334,30 +349,35 @@ ma.i <- ma.i[rowVars(ma.i) != 0, ]
 Then, we run the pattern analysis, using `cell` as the *time*
 variable and `dex` as the *color* variable.
 
+Again, since this is a time-consuming step, we will use the pre-computed
+pattern analysis results included with carnation.
+
 ```{r degpatterns}
-p <- DEGreport::degPatterns(
-        ma.i,
-        colData.i,
+# NOTE: This is the command used to perform pattern analysis
+# degpatterns_dex <- DEGreport::degPatterns(
+#                      ma.i,
+#                      colData.i,
+#
+#                      time='cell',
+#                      col='dex',
+#
+#                      # NOTE: reduce and merge cutoff----------------------------------------
+#                      #   Reduce will merge clusters that are similar; similarity determined
+#                      #   by cutoff
+#                      reduce=TRUE,
+#
+#                      plot=FALSE
+#                    )
 
-        time='cell',
-        col='dex',
-
-        # NOTE: reduce and merge cutoff----------------------------------------
-        #   Reduce will merge clusters that are similar; similarity determined
-        #   by cutoff
-        reduce=TRUE,
-
-        # NOTE: set minimum cluster size to 1
-        minc=1,
-        plot=FALSE
-        )
+# We use the pre-computed results here instead
+data(degpatterns_dex, package='carnation')
 ```
 
 Next, we extract the `normalized` slot from this object and save as a list.
 
 ```{r deg_extract}
 # extract normalized slot and add symbol column
-p_norm <- p$normalized
+p_norm <- degpatterns_dex$normalized
 p_norm[[ 'SYMBOL' ]] <- anno_df[p_norm[['genes']], 'SYMBOL']
 
 # save pattern analysis results
