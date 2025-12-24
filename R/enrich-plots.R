@@ -830,11 +830,11 @@ cnetPlotServer <- function(id, obj, config){
 #' if(interactive()){
 #'   shinyApp(
 #'     ui = fluidPage(
-#'            sidebarPanel(radarPlotUI('p', 'sidebar')),
-#'            mainPanel(radarPlotUI('p', 'main'))
+#'            sidebarPanel(radarUI('p', 'sidebar')),
+#'            mainPanel(radarUI('p', 'main'))
 #'          ),
 #'     server = function(input, output, session){
-#'                radarPlotServer('p', obj, config)
+#'                radarServer('p', obj, config)
 #'              }
 #'   )
 #' }
