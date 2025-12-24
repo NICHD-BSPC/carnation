@@ -13,6 +13,8 @@ reactiveValues object containing carnation object
 Returns example carnation object used in examples & testing
 }
 \examples{
+\donttest{
 obj <- make_example_carnation_object()
+}
 
 }

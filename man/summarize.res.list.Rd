@@ -41,20 +41,18 @@ Dataframe
 Combine everything in the results list into a single table
 }
 \examples{
-library(DESeq2)
-
 # make example DESeq data set
-dds <- makeExampleDESeqDataSet()
+dds <- DESeq2::makeExampleDESeqDataSet()
 
 # run DESeq2
-dds <- DESeq(dds)
+dds <- DESeq2::DESeq(dds)
 
 # make dds list
 dds_list <- list(main = dds)
 
 # make comparisons
-res1 <- results(dds, contrast=c('condition', 'A', 'B'))
-res2 <- results(dds, contrast=c('condition', 'B', 'A'))
+res1 <- DESeq2::results(dds, contrast=c('condition', 'A', 'B'))
+res2 <- DESeq2::results(dds, contrast=c('condition', 'B', 'A'))
 
 # make list of results
 res_list <- list(
