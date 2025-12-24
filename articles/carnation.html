@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@
                         <h4 data-toc-skip class="author">Apratim
 Mitra</h4>
             
-            <h4 data-toc-skip class="date">12/23/2025</h4>
+            <h4 data-toc-skip class="date">12/24/2025</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/NICHD-BSPC/carnation/blob/main/vignettes/carnation.Rmd" class="external-link"><code>vignettes/carnation.Rmd</code></a></small>
       <div class="d-none name"><code>carnation.Rmd</code></div>
@@ -70,7 +70,7 @@ Mitra</h4>
       exploring differential expression analysis, functional enrichment,
       and pattern analysis intuitive and exciting. In this vignette, we
       will describe some of its functionality using the
-      <code>airway</code> dataset. Carnation package version: 0.99.3</p>
+      <code>airway</code> dataset. Carnation package version: 0.99.4</p>
     </div>
     
 <div class="section level3">
@@ -80,7 +80,7 @@ Mitra</h4>
 tutorial.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install optional packages if not present</span></span>
-<span><span class="va">pkgs_to_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'airway'</span>, <span class="st">'org.Hs.eg.db'</span>, <span class="st">'clusterProfiler'</span>, <span class="st">'DEGreport'</span><span class="op">)</span></span>
+<span><span class="va">pkgs_to_check</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'airway'</span>, <span class="st">'org.Hs.eg.db'</span>, <span class="st">'DEGreport'</span><span class="op">)</span></span>
 <span><span class="kw">for</span><span class="op">(</span><span class="va">pkg</span> <span class="kw">in</span> <span class="va">pkgs_to_check</span><span class="op">)</span><span class="op">{</span></span>
 <span>  <span class="fu"><a href="https://rdrr.io/r/utils/setRepositories.html" class="external-link">setRepositories</a></span><span class="op">(</span>ind<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">2</span>,<span class="fl">3</span>,<span class="fl">4</span>,<span class="fl">5</span><span class="op">)</span><span class="op">)</span></span>
 <span>  <span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="va">pkg</span>, quietly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
@@ -92,9 +92,7 @@ tutorial.</p>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thelovelab/DESeq2" class="external-link">DESeq2</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/federicomarini/GeneTonic" class="external-link">GeneTonic</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://yulab-smu.top/contribution-knowledge-mining/" class="external-link">clusterProfiler</a></span><span class="op">)</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://lpantano.github.io/DEGreport/" class="external-link">DEGreport</a></span><span class="op">)</span></span></code></pre></div>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">org.Hs.eg.db</span><span class="op">)</span></span></code></pre></div>
 <p>We will be using the ‘airway’ dataset. First, we load this
 dataset.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -340,21 +338,37 @@ extract the DE genes and save as a list.</p>
 called <code>enrich_list</code>. We also save a converted list called
 <code>genetonic</code> which carnation uses for several plots from the
 <code>GeneTonic</code> package.</p>
+<p>Since, this is a time-consuming step, we will use the pre-computed
+enrichment results included with carnation.</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># list to save functional enrichment results</span></span>
+<code class="sourceCode R"><span><span class="co"># fe results from dex comparison</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eres_dex</span>, package<span class="op">=</span><span class="st">'carnation'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># fe results from dex comparison</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">eres_cell</span>, package<span class="op">=</span><span class="st">'carnation'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># compile into a list</span></span>
+<span><span class="va">go_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dex_trt_vs_untrt<span class="op">=</span><span class="va">eres_dex</span>, cell_N61311_vs_N052611<span class="op">=</span><span class="va">eres_cell</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># list to save functional enrichment results</span></span>
 <span><span class="va">enrich_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># list to save a converted object for GeneTonic plots</span></span>
 <span><span class="va">genetonic</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
 <span><span class="kw">for</span><span class="op">(</span><span class="va">comp</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">res_list</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>    <span class="va">go.res</span> <span class="op">&lt;-</span> <span class="fu">clusterProfiler</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/clusterProfiler/man/enrichGO.html" class="external-link">enrichGO</a></span><span class="op">(</span></span>
-<span>            gene<span class="op">=</span><span class="va">de.genes</span><span class="op">[[</span><span class="va">comp</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">'ENTREZID'</span><span class="op">]</span><span class="op">]</span>,</span>
-<span>            keyType<span class="op">=</span><span class="st">'ENTREZID'</span>,</span>
-<span>            OrgDb<span class="op">=</span><span class="va">org.Hs.eg.db</span>,</span>
-<span>            ont<span class="op">=</span><span class="st">'BP'</span>,</span>
-<span>            pvalueCutoff<span class="op">=</span><span class="fl">1</span>, qvalueCutoff<span class="op">=</span><span class="fl">1</span>,</span>
-<span>            readable <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span>    <span class="co"># NOTE: this is the command used to generate the functional</span></span>
+<span>    <span class="co"># enrichment results</span></span>
+<span>    <span class="co">#go.res &lt;- clusterProfiler::enrichGO(</span></span>
+<span>    <span class="co">#        gene=de.genes[[comp]][['ENTREZID']],</span></span>
+<span>    <span class="co">#        keyType='ENTREZID',</span></span>
+<span>    <span class="co">#        OrgDb=org.Hs.eg.db,</span></span>
+<span>    <span class="co">#        ont='BP',</span></span>
+<span>    <span class="co">#        pvalueCutoff=1, qvalueCutoff=1,</span></span>
+<span>    <span class="co">#        readable = TRUE)</span></span>
+<span></span>
+<span>    <span class="co"># we use the precomputed results here instead</span></span>
+<span>    <span class="va">go.res</span> <span class="op">&lt;-</span> <span class="va">go_list</span><span class="op">[[</span> <span class="va">comp</span> <span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span>    <span class="va">enrich_list</span><span class="op">[[</span> <span class="va">comp</span> <span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>                               res<span class="op">=</span><span class="va">comp</span>,</span>
@@ -369,9 +383,9 @@ called <code>enrich_list</code>. We also save a converted list called
 <span>                           <span class="op">)</span></span>
 <span></span>
 <span><span class="op">}</span></span>
-<span><span class="co">#&gt; Found 4643 gene sets in `enrichResult` object, of which 4643 are significant.</span></span>
+<span><span class="co">#&gt; Found 2483 gene sets in `enrichResult` object, of which 2483 are significant.</span></span>
 <span><span class="co">#&gt; Converting for usage in GeneTonic...</span></span>
-<span><span class="co">#&gt; Found 2405 gene sets in `enrichResult` object, of which 2405 are significant.</span></span>
+<span><span class="co">#&gt; Found 3706 gene sets in `enrichResult` object, of which 3706 are significant.</span></span>
 <span><span class="co">#&gt; Converting for usage in GeneTonic...</span></span></code></pre></div>
 <p><code>enrich_list</code> is a nested list where:</p>
 <ul>
@@ -420,32 +434,32 @@ the 755 DE genes from this comparison.</p>
 <p>Then, we run the pattern analysis, using <code>cell</code> as the
 <em>time</em> variable and <code>dex</code> as the <em>color</em>
 variable.</p>
+<p>Again, since this is a time-consuming step, we will use the
+pre-computed pattern analysis results included with carnation.</p>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">DEGreport</span><span class="fu">::</span><span class="fu"><a href="http://lpantano.github.io/DEGreport/reference/degPatterns.html" class="external-link">degPatterns</a></span><span class="op">(</span></span>
-<span>        <span class="va">ma.i</span>,</span>
-<span>        <span class="va">colData.i</span>,</span>
+<code class="sourceCode R"><span><span class="co"># NOTE: This is the command used to perform pattern analysis</span></span>
+<span><span class="co"># degpatterns_dex &lt;- DEGreport::degPatterns(</span></span>
+<span><span class="co">#                      ma.i,</span></span>
+<span><span class="co">#                      colData.i,</span></span>
+<span><span class="co">#</span></span>
+<span><span class="co">#                      time='cell',</span></span>
+<span><span class="co">#                      col='dex',</span></span>
+<span><span class="co">#</span></span>
+<span><span class="co">#                      # NOTE: reduce and merge cutoff----------------------------------------</span></span>
+<span><span class="co">#                      #   Reduce will merge clusters that are similar; similarity determined</span></span>
+<span><span class="co">#                      #   by cutoff</span></span>
+<span><span class="co">#                      reduce=TRUE,</span></span>
+<span><span class="co">#</span></span>
+<span><span class="co">#                      plot=FALSE</span></span>
+<span><span class="co">#                    )</span></span>
 <span></span>
-<span>        time<span class="op">=</span><span class="st">'cell'</span>,</span>
-<span>        col<span class="op">=</span><span class="st">'dex'</span>,</span>
-<span></span>
-<span>        <span class="co"># NOTE: reduce and merge cutoff----------------------------------------</span></span>
-<span>        <span class="co">#   Reduce will merge clusters that are similar; similarity determined</span></span>
-<span>        <span class="co">#   by cutoff</span></span>
-<span>        reduce<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span></span>
-<span>        <span class="co"># NOTE: set minimum cluster size to 1</span></span>
-<span>        minc<span class="op">=</span><span class="fl">1</span>,</span>
-<span>        plot<span class="op">=</span><span class="cn">FALSE</span></span>
-<span>        <span class="op">)</span></span>
-<span><span class="co">#&gt; Working with 754 genes.</span></span>
-<span><span class="co">#&gt; Working with 650 genes after filtering: minc &gt; 1</span></span>
-<span><span class="co">#&gt; Joining with `by = join_by(merge)`</span></span>
-<span><span class="co">#&gt; Joining with `by = join_by(merge)`</span></span></code></pre></div>
+<span><span class="co"># We use the pre-computed results here instead</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">degpatterns_dex</span>, package<span class="op">=</span><span class="st">'carnation'</span><span class="op">)</span></span></code></pre></div>
 <p>Next, we extract the <code>normalized</code> slot from this object
 and save as a list.</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># extract normalized slot and add symbol column</span></span>
-<span><span class="va">p_norm</span> <span class="op">&lt;-</span> <span class="va">p</span><span class="op">$</span><span class="va">normalized</span></span>
+<span><span class="va">p_norm</span> <span class="op">&lt;-</span> <span class="va">degpatterns_dex</span><span class="op">$</span><span class="va">normalized</span></span>
 <span><span class="va">p_norm</span><span class="op">[[</span> <span class="st">'SYMBOL'</span> <span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">anno_df</span><span class="op">[</span><span class="va">p_norm</span><span class="op">[[</span><span class="st">'genes'</span><span class="op">]</span><span class="op">]</span>, <span class="st">'SYMBOL'</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># save pattern analysis results</span></span>
@@ -738,20 +752,19 @@ label plots as shown above.</p>
 <span><span class="co">#&gt; [8] base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] carnation_0.99.3            DEGreport_1.42.0           </span></span>
-<span><span class="co">#&gt;  [3] clusterProfiler_4.14.0      org.Hs.eg.db_3.20.0        </span></span>
-<span><span class="co">#&gt;  [5] AnnotationDbi_1.68.0        GeneTonic_3.0.0            </span></span>
-<span><span class="co">#&gt;  [7] dplyr_1.1.4                 DESeq2_1.46.0              </span></span>
-<span><span class="co">#&gt;  [9] airway_1.26.0               SummarizedExperiment_1.36.0</span></span>
-<span><span class="co">#&gt; [11] Biobase_2.66.0              GenomicRanges_1.58.0       </span></span>
-<span><span class="co">#&gt; [13] GenomeInfoDb_1.42.0         IRanges_2.40.0             </span></span>
-<span><span class="co">#&gt; [15] S4Vectors_0.44.0            BiocGenerics_0.52.0        </span></span>
-<span><span class="co">#&gt; [17] MatrixGenerics_1.18.0       matrixStats_1.5.0          </span></span>
+<span><span class="co">#&gt;  [1] carnation_0.99.4            org.Hs.eg.db_3.20.0        </span></span>
+<span><span class="co">#&gt;  [3] AnnotationDbi_1.68.0        GeneTonic_3.0.0            </span></span>
+<span><span class="co">#&gt;  [5] dplyr_1.1.4                 DESeq2_1.46.0              </span></span>
+<span><span class="co">#&gt;  [7] airway_1.26.0               SummarizedExperiment_1.36.0</span></span>
+<span><span class="co">#&gt;  [9] Biobase_2.66.0              GenomicRanges_1.58.0       </span></span>
+<span><span class="co">#&gt; [11] GenomeInfoDb_1.42.0         IRanges_2.40.0             </span></span>
+<span><span class="co">#&gt; [13] S4Vectors_0.44.0            BiocGenerics_0.52.0        </span></span>
+<span><span class="co">#&gt; [15] MatrixGenerics_1.18.0       matrixStats_1.5.0          </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
 <span><span class="co">#&gt;   [1] fs_1.6.6                    bitops_1.0-9               </span></span>
-<span><span class="co">#&gt;   [3] enrichplot_1.26.1           webshot_0.5.5              </span></span>
-<span><span class="co">#&gt;   [5] httr_1.4.7                  RColorBrewer_1.1-3         </span></span>
+<span><span class="co">#&gt;   [3] enrichplot_1.26.1           httr_1.4.7                 </span></span>
+<span><span class="co">#&gt;   [5] webshot_0.5.5               RColorBrewer_1.1-3         </span></span>
 <span><span class="co">#&gt;   [7] doParallel_1.0.17           dynamicTreeCut_1.63-1      </span></span>
 <span><span class="co">#&gt;   [9] backports_1.5.0             tippy_0.1.0                </span></span>
 <span><span class="co">#&gt;  [11] tools_4.4.3                 R6_2.6.1                   </span></span>
@@ -760,76 +773,76 @@ label plots as shown above.</p>
 <span><span class="co">#&gt;  [17] withr_3.0.2                 prettyunits_1.2.0          </span></span>
 <span><span class="co">#&gt;  [19] gridExtra_2.3               cli_3.6.5                  </span></span>
 <span><span class="co">#&gt;  [21] textshaping_1.0.4           logging_0.10-108           </span></span>
-<span><span class="co">#&gt;  [23] TSP_1.2.6                   labeling_0.4.3             </span></span>
-<span><span class="co">#&gt;  [25] sass_0.4.10                 topGO_2.58.0               </span></span>
-<span><span class="co">#&gt;  [27] bs4Dash_2.3.5               askpass_1.2.1              </span></span>
-<span><span class="co">#&gt;  [29] ggridges_0.5.7              goseq_1.58.0               </span></span>
-<span><span class="co">#&gt;  [31] pkgdown_2.2.0               Rsamtools_2.22.0           </span></span>
-<span><span class="co">#&gt;  [33] systemfonts_1.3.1           yulab.utils_0.2.3          </span></span>
-<span><span class="co">#&gt;  [35] gson_0.1.0                  txdbmaker_1.2.0            </span></span>
-<span><span class="co">#&gt;  [37] DOSE_4.0.0                  R.utils_2.13.0             </span></span>
-<span><span class="co">#&gt;  [39] limma_3.62.1                RSQLite_2.4.5              </span></span>
-<span><span class="co">#&gt;  [41] visNetwork_2.1.4            generics_0.1.4             </span></span>
-<span><span class="co">#&gt;  [43] gridGraphics_0.5-1          shape_1.4.6.1              </span></span>
-<span><span class="co">#&gt;  [45] BiocIO_1.16.0               dendextend_1.19.1          </span></span>
-<span><span class="co">#&gt;  [47] GO.db_3.20.0                Matrix_1.7-4               </span></span>
-<span><span class="co">#&gt;  [49] abind_1.4-8                 R.methodsS3_1.8.2          </span></span>
-<span><span class="co">#&gt;  [51] lifecycle_1.0.4             yaml_2.3.12                </span></span>
-<span><span class="co">#&gt;  [53] edgeR_4.4.0                 qvalue_2.38.0              </span></span>
-<span><span class="co">#&gt;  [55] SparseArray_1.6.0           BiocFileCache_2.14.0       </span></span>
-<span><span class="co">#&gt;  [57] grid_4.4.3                  blob_1.2.4                 </span></span>
-<span><span class="co">#&gt;  [59] promises_1.5.0              crayon_1.5.3               </span></span>
-<span><span class="co">#&gt;  [61] miniUI_0.1.2                ggtangle_0.0.9             </span></span>
-<span><span class="co">#&gt;  [63] lattice_0.22-7              billboarder_0.5.0          </span></span>
-<span><span class="co">#&gt;  [65] ComplexUpset_1.3.3          cowplot_1.2.0              </span></span>
-<span><span class="co">#&gt;  [67] GenomicFeatures_1.58.0      KEGGREST_1.46.0            </span></span>
-<span><span class="co">#&gt;  [69] pillar_1.11.1               knitr_1.51                 </span></span>
-<span><span class="co">#&gt;  [71] ComplexHeatmap_2.22.0       fgsea_1.32.2               </span></span>
-<span><span class="co">#&gt;  [73] rjson_0.2.23                codetools_0.2-20           </span></span>
-<span><span class="co">#&gt;  [75] fastmatch_1.1-6             glue_1.8.0                 </span></span>
-<span><span class="co">#&gt;  [77] ggfun_0.2.0                 data.table_1.17.8          </span></span>
-<span><span class="co">#&gt;  [79] vctrs_0.6.5                 png_0.1-8                  </span></span>
-<span><span class="co">#&gt;  [81] treeio_1.30.0               gtable_0.3.6               </span></span>
-<span><span class="co">#&gt;  [83] assertthat_0.2.1            cachem_1.1.0               </span></span>
-<span><span class="co">#&gt;  [85] xfun_0.55                   S4Arrays_1.6.0             </span></span>
-<span><span class="co">#&gt;  [87] mime_0.13                   ConsensusClusterPlus_1.70.0</span></span>
-<span><span class="co">#&gt;  [89] seriation_1.5.8             shinythemes_1.2.0          </span></span>
-<span><span class="co">#&gt;  [91] iterators_1.0.14            statmod_1.5.1              </span></span>
-<span><span class="co">#&gt;  [93] nlme_3.1-168                ggtree_3.14.0              </span></span>
-<span><span class="co">#&gt;  [95] bit64_4.6.0-1               progress_1.2.3             </span></span>
-<span><span class="co">#&gt;  [97] filelock_1.0.3              rprojroot_2.1.1            </span></span>
-<span><span class="co">#&gt;  [99] bslib_0.9.0                 otel_0.2.0                 </span></span>
-<span><span class="co">#&gt; [101] colorspace_2.1-2            DBI_1.2.3                  </span></span>
-<span><span class="co">#&gt; [103] mnormt_2.1.1                tidyselect_1.2.1           </span></span>
-<span><span class="co">#&gt; [105] bit_4.6.0                   compiler_4.4.3             </span></span>
-<span><span class="co">#&gt; [107] curl_7.0.0                  httr2_1.2.2                </span></span>
-<span><span class="co">#&gt; [109] graph_1.84.0                BiasedUrn_2.0.12           </span></span>
-<span><span class="co">#&gt; [111] SparseM_1.84-2              expm_1.0-0                 </span></span>
-<span><span class="co">#&gt; [113] xml2_1.5.0                  ggdendro_0.2.0             </span></span>
-<span><span class="co">#&gt; [115] desc_1.4.3                  DelayedArray_0.32.0        </span></span>
-<span><span class="co">#&gt; [117] plotly_4.11.0               scrypt_0.1.6               </span></span>
-<span><span class="co">#&gt; [119] colourpicker_1.3.0          rtracklayer_1.66.0         </span></span>
-<span><span class="co">#&gt; [121] scales_1.4.0                psych_2.5.6                </span></span>
-<span><span class="co">#&gt; [123] mosdef_1.2.0                rappdirs_0.3.3             </span></span>
-<span><span class="co">#&gt; [125] stringr_1.6.0               digest_0.6.39              </span></span>
-<span><span class="co">#&gt; [127] shinyBS_0.63.0              rmarkdown_2.30             </span></span>
-<span><span class="co">#&gt; [129] ca_0.71.1                   XVector_0.46.0             </span></span>
-<span><span class="co">#&gt; [131] htmltools_0.5.9             pkgconfig_2.0.3            </span></span>
-<span><span class="co">#&gt; [133] learnr_0.11.6               dbplyr_2.5.1               </span></span>
-<span><span class="co">#&gt; [135] fastmap_1.2.0               rlang_1.1.6                </span></span>
-<span><span class="co">#&gt; [137] GlobalOptions_0.1.3         htmlwidgets_1.6.4          </span></span>
-<span><span class="co">#&gt; [139] UCSC.utils_1.2.0            shiny_1.12.1               </span></span>
-<span><span class="co">#&gt; [141] shinymanager_1.0.410        farver_2.1.2               </span></span>
-<span><span class="co">#&gt; [143] jquerylib_0.1.4             jsonlite_2.0.0             </span></span>
-<span><span class="co">#&gt; [145] BiocParallel_1.40.0         GOSemSim_2.32.0            </span></span>
-<span><span class="co">#&gt; [147] R.oo_1.27.1                 RCurl_1.98-1.17            </span></span>
-<span><span class="co">#&gt; [149] magrittr_2.0.4              GenomeInfoDbData_1.2.13    </span></span>
-<span><span class="co">#&gt; [151] ggplotify_0.1.3             patchwork_1.3.2            </span></span>
-<span><span class="co">#&gt; [153] Rcpp_1.1.0                  reticulate_1.44.1          </span></span>
-<span><span class="co">#&gt; [155] ape_5.8-1                   shinycssloaders_1.1.0      </span></span>
-<span><span class="co">#&gt; [157] viridis_0.6.5               stringi_1.8.7              </span></span>
-<span><span class="co">#&gt; [159] rintrojs_0.3.4              zlibbioc_1.52.0            </span></span>
-<span><span class="co">#&gt; [161] MASS_7.3-65                 plyr_1.8.9                 </span></span>
+<span><span class="co">#&gt;  [23] TSP_1.2.6                   sass_0.4.10                </span></span>
+<span><span class="co">#&gt;  [25] topGO_2.58.0                bs4Dash_2.3.5              </span></span>
+<span><span class="co">#&gt;  [27] askpass_1.2.1               ggridges_0.5.7             </span></span>
+<span><span class="co">#&gt;  [29] goseq_1.58.0                pkgdown_2.2.0              </span></span>
+<span><span class="co">#&gt;  [31] Rsamtools_2.22.0            systemfonts_1.3.1          </span></span>
+<span><span class="co">#&gt;  [33] yulab.utils_0.2.3           gson_0.1.0                 </span></span>
+<span><span class="co">#&gt;  [35] txdbmaker_1.2.0             DOSE_4.0.0                 </span></span>
+<span><span class="co">#&gt;  [37] R.utils_2.13.0              limma_3.62.1               </span></span>
+<span><span class="co">#&gt;  [39] RSQLite_2.4.5               visNetwork_2.1.4           </span></span>
+<span><span class="co">#&gt;  [41] generics_0.1.4              gridGraphics_0.5-1         </span></span>
+<span><span class="co">#&gt;  [43] shape_1.4.6.1               BiocIO_1.16.0              </span></span>
+<span><span class="co">#&gt;  [45] dendextend_1.19.1           GO.db_3.20.0               </span></span>
+<span><span class="co">#&gt;  [47] Matrix_1.7-4                abind_1.4-8                </span></span>
+<span><span class="co">#&gt;  [49] R.methodsS3_1.8.2           lifecycle_1.0.4            </span></span>
+<span><span class="co">#&gt;  [51] edgeR_4.4.0                 yaml_2.3.12                </span></span>
+<span><span class="co">#&gt;  [53] qvalue_2.38.0               SparseArray_1.6.0          </span></span>
+<span><span class="co">#&gt;  [55] BiocFileCache_2.14.0        grid_4.4.3                 </span></span>
+<span><span class="co">#&gt;  [57] blob_1.2.4                  promises_1.5.0             </span></span>
+<span><span class="co">#&gt;  [59] crayon_1.5.3                miniUI_0.1.2               </span></span>
+<span><span class="co">#&gt;  [61] ggtangle_0.0.9              lattice_0.22-7             </span></span>
+<span><span class="co">#&gt;  [63] billboarder_0.5.0           ComplexUpset_1.3.3         </span></span>
+<span><span class="co">#&gt;  [65] cowplot_1.2.0               GenomicFeatures_1.58.0     </span></span>
+<span><span class="co">#&gt;  [67] KEGGREST_1.46.0             pillar_1.11.1              </span></span>
+<span><span class="co">#&gt;  [69] knitr_1.51                  ComplexHeatmap_2.22.0      </span></span>
+<span><span class="co">#&gt;  [71] fgsea_1.32.2                rjson_0.2.23               </span></span>
+<span><span class="co">#&gt;  [73] codetools_0.2-20            fastmatch_1.1-6            </span></span>
+<span><span class="co">#&gt;  [75] glue_1.8.0                  ggfun_0.2.0                </span></span>
+<span><span class="co">#&gt;  [77] data.table_1.17.8           vctrs_0.6.5                </span></span>
+<span><span class="co">#&gt;  [79] png_0.1-8                   treeio_1.30.0              </span></span>
+<span><span class="co">#&gt;  [81] gtable_0.3.6                assertthat_0.2.1           </span></span>
+<span><span class="co">#&gt;  [83] cachem_1.1.0                xfun_0.55                  </span></span>
+<span><span class="co">#&gt;  [85] S4Arrays_1.6.0              mime_0.13                  </span></span>
+<span><span class="co">#&gt;  [87] ConsensusClusterPlus_1.70.0 seriation_1.5.8            </span></span>
+<span><span class="co">#&gt;  [89] shinythemes_1.2.0           iterators_1.0.14           </span></span>
+<span><span class="co">#&gt;  [91] statmod_1.5.1               nlme_3.1-168               </span></span>
+<span><span class="co">#&gt;  [93] ggtree_3.14.0               bit64_4.6.0-1              </span></span>
+<span><span class="co">#&gt;  [95] progress_1.2.3              filelock_1.0.3             </span></span>
+<span><span class="co">#&gt;  [97] rprojroot_2.1.1             bslib_0.9.0                </span></span>
+<span><span class="co">#&gt;  [99] otel_0.2.0                  colorspace_2.1-2           </span></span>
+<span><span class="co">#&gt; [101] DBI_1.2.3                   mnormt_2.1.1               </span></span>
+<span><span class="co">#&gt; [103] tidyselect_1.2.1            bit_4.6.0                  </span></span>
+<span><span class="co">#&gt; [105] compiler_4.4.3              curl_7.0.0                 </span></span>
+<span><span class="co">#&gt; [107] httr2_1.2.2                 graph_1.84.0               </span></span>
+<span><span class="co">#&gt; [109] BiasedUrn_2.0.12            SparseM_1.84-2             </span></span>
+<span><span class="co">#&gt; [111] expm_1.0-0                  xml2_1.5.1                 </span></span>
+<span><span class="co">#&gt; [113] ggdendro_0.2.0              desc_1.4.3                 </span></span>
+<span><span class="co">#&gt; [115] DelayedArray_0.32.0         plotly_4.11.0              </span></span>
+<span><span class="co">#&gt; [117] scrypt_0.1.6                colourpicker_1.3.0         </span></span>
+<span><span class="co">#&gt; [119] rtracklayer_1.66.0          scales_1.4.0               </span></span>
+<span><span class="co">#&gt; [121] psych_2.5.6                 mosdef_1.2.0               </span></span>
+<span><span class="co">#&gt; [123] rappdirs_0.3.3              stringr_1.6.0              </span></span>
+<span><span class="co">#&gt; [125] digest_0.6.39               shinyBS_0.63.0             </span></span>
+<span><span class="co">#&gt; [127] rmarkdown_2.30              ca_0.71.1                  </span></span>
+<span><span class="co">#&gt; [129] XVector_0.46.0              htmltools_0.5.9            </span></span>
+<span><span class="co">#&gt; [131] pkgconfig_2.0.3             learnr_0.11.6              </span></span>
+<span><span class="co">#&gt; [133] dbplyr_2.5.1                fastmap_1.2.0              </span></span>
+<span><span class="co">#&gt; [135] rlang_1.1.6                 GlobalOptions_0.1.3        </span></span>
+<span><span class="co">#&gt; [137] htmlwidgets_1.6.4           UCSC.utils_1.2.0           </span></span>
+<span><span class="co">#&gt; [139] shiny_1.12.1                shinymanager_1.0.410       </span></span>
+<span><span class="co">#&gt; [141] farver_2.1.2                jquerylib_0.1.4            </span></span>
+<span><span class="co">#&gt; [143] jsonlite_2.0.0              BiocParallel_1.40.0        </span></span>
+<span><span class="co">#&gt; [145] GOSemSim_2.32.0             R.oo_1.27.1                </span></span>
+<span><span class="co">#&gt; [147] RCurl_1.98-1.17             magrittr_2.0.4             </span></span>
+<span><span class="co">#&gt; [149] GenomeInfoDbData_1.2.13     ggplotify_0.1.3            </span></span>
+<span><span class="co">#&gt; [151] patchwork_1.3.2             Rcpp_1.1.0                 </span></span>
+<span><span class="co">#&gt; [153] reticulate_1.44.1           ape_5.8-1                  </span></span>
+<span><span class="co">#&gt; [155] shinycssloaders_1.1.0       viridis_0.6.5              </span></span>
+<span><span class="co">#&gt; [157] stringi_1.8.7               rintrojs_0.3.4             </span></span>
+<span><span class="co">#&gt; [159] zlibbioc_1.52.0             MASS_7.3-65                </span></span>
+<span><span class="co">#&gt; [161] DEGreport_1.42.0            plyr_1.8.9                 </span></span>
 <span><span class="co">#&gt; [163] parallel_4.4.3              ggrepel_0.9.6              </span></span>
 <span><span class="co">#&gt; [165] Biostrings_2.74.0           splines_4.4.3              </span></span>
 <span><span class="co">#&gt; [167] hms_1.1.4                   geneLenDataBase_1.42.0     </span></span>
@@ -840,17 +853,18 @@ label plots as shown above.</p>
 <span><span class="co">#&gt; [177] tweenr_2.0.3                httpuv_1.6.16              </span></span>
 <span><span class="co">#&gt; [179] backbone_2.1.5              openssl_2.3.4              </span></span>
 <span><span class="co">#&gt; [181] tidyr_1.3.2                 purrr_1.2.0                </span></span>
-<span><span class="co">#&gt; [183] polyclip_1.10-7             heatmaply_1.6.0            </span></span>
-<span><span class="co">#&gt; [185] reshape_0.8.10              clue_0.3-66                </span></span>
+<span><span class="co">#&gt; [183] polyclip_1.10-7             reshape_0.8.10             </span></span>
+<span><span class="co">#&gt; [185] heatmaply_1.6.0             clue_0.3-66                </span></span>
 <span><span class="co">#&gt; [187] ggplot2_3.5.2               ggforce_0.5.0              </span></span>
 <span><span class="co">#&gt; [189] broom_1.0.11                xtable_1.8-4               </span></span>
 <span><span class="co">#&gt; [191] restfulr_0.0.16             tidytree_0.4.6             </span></span>
 <span><span class="co">#&gt; [193] later_1.4.4                 viridisLite_0.4.2          </span></span>
 <span><span class="co">#&gt; [195] ragg_1.5.0                  tibble_3.3.0               </span></span>
-<span><span class="co">#&gt; [197] aplot_0.2.9                 registry_0.5-1             </span></span>
-<span><span class="co">#&gt; [199] memoise_2.0.1               GenomicAlignments_1.42.0   </span></span>
-<span><span class="co">#&gt; [201] cluster_2.1.8.1             sortable_0.5.0             </span></span>
-<span><span class="co">#&gt; [203] shinyWidgets_0.9.0          shinyAce_0.4.4</span></span></code></pre></div>
+<span><span class="co">#&gt; [197] clusterProfiler_4.14.0      aplot_0.2.9                </span></span>
+<span><span class="co">#&gt; [199] registry_0.5-1              memoise_2.0.1              </span></span>
+<span><span class="co">#&gt; [201] GenomicAlignments_1.42.0    cluster_2.1.8.1            </span></span>
+<span><span class="co">#&gt; [203] sortable_0.5.0              shinyWidgets_0.9.0         </span></span>
+<span><span class="co">#&gt; [205] shinyAce_0.4.4</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

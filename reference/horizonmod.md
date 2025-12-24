@@ -43,7 +43,7 @@ data(eres_dex, package='carnation')
 
 # convert to GeneTonic object
 gt <- GeneTonic::shake_enrichResult(eres_dex)
-#> Found 2186 gene sets in `enrichResult` object, of which 2186 are significant.
+#> Found 2483 gene sets in `enrichResult` object, of which 2483 are significant.
 #> Converting for usage in GeneTonic...
 
 # get second enrichResult object
@@ -51,7 +51,7 @@ data(eres_cell, package='carnation')
 
 # convert to GeneTonic object
 gt1 <- GeneTonic::shake_enrichResult(eres_cell)
-#> Found 2020 gene sets in `enrichResult` object, of which 2020 are significant.
+#> Found 3706 gene sets in `enrichResult` object, of which 3706 are significant.
 #> Converting for usage in GeneTonic...
 
 obj <- reactive({

@@ -48,7 +48,7 @@ data(eres_dex, package='carnation')
 
 # preprocess & convert to GeneTonic object
 gt <- GeneTonic::shake_enrichResult(eres_dex)
-#> Found 2186 gene sets in `enrichResult` object, of which 2186 are significant.
+#> Found 2483 gene sets in `enrichResult` object, of which 2483 are significant.
 #> Converting for usage in GeneTonic...
 
 # get distilled results

@@ -32,7 +32,7 @@ data(eres_dex, package="carnation")
 
 # convert to GeneTonic object
 gt <- enrich_to_genetonic(eres_dex, res_dex)
-#> Found 2186 gene sets in `enrichResult` object, of which 2186 are significant.
+#> Found 2483 gene sets in `enrichResult` object, of which 2483 are significant.
 #> Converting for usage in GeneTonic...
 
 ```
