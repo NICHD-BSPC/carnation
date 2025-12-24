@@ -15,6 +15,7 @@ reactiveValues object containing carnation object
 ## Examples
 
 ``` r
+# \donttest{
 obj <- make_example_carnation_object()
 #> estimating size factors
 #> estimating dispersions
@@ -22,4 +23,5 @@ obj <- make_example_carnation_object()
 #> mean-dispersion relationship
 #> final dispersion estimates
 #> fitting model and testing
+# }
 ```

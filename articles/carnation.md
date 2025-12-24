@@ -9,7 +9,7 @@ experimental biologists, Carnation makes exploring differential
 expression analysis, functional enrichment, and pattern analysis
 intuitive and exciting. In this vignette, we will describe some of its
 functionality using the `airway` dataset. Carnation package version:
-0.99.4
+0.99.5
 
 ### Load libraries & airway dataset
 
@@ -793,7 +793,7 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] carnation_0.99.4            org.Hs.eg.db_3.20.0        
+#>  [1] carnation_0.99.5            org.Hs.eg.db_3.20.0        
 #>  [3] AnnotationDbi_1.68.0        GeneTonic_3.0.0            
 #>  [5] dplyr_1.1.4                 DESeq2_1.46.0              
 #>  [7] airway_1.26.0               SummarizedExperiment_1.36.0

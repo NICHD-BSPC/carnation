@@ -37,5 +37,5 @@ df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
 
 # get y axis limits
 get_y_init(df, y_delta = 0.01, pseudocount = 1)
-#> [1]   2 120
+#> [1]  0.1 40.0
 ```

@@ -37,22 +37,8 @@ vector of gene symbols
 ## Examples
 
 ``` r
-library(DESeq2)
+# get DE results
+data(res_dex, package='carnation')
 
-# make example DESeq dataset
-dds <- makeExampleDESeqDataSet()
-
-# run DE analysis
-dds <- DESeq(dds)
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
-
-# extract comparison of interest
-res <- results(dds, contrast = c("condition", "A", "B"))
-
-g <- top.genes(res)
+g <- top.genes(res_dex)
 ```

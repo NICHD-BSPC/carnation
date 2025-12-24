@@ -54,13 +54,11 @@ Dataframe
 ## Examples
 
 ``` r
-library(DESeq2)
-
 # make example DESeq data set
-dds <- makeExampleDESeqDataSet()
+dds <- DESeq2::makeExampleDESeqDataSet()
 
 # run DESeq2
-dds <- DESeq(dds)
+dds <- DESeq2::DESeq(dds)
 #> estimating size factors
 #> estimating dispersions
 #> gene-wise dispersion estimates
@@ -72,8 +70,8 @@ dds <- DESeq(dds)
 dds_list <- list(main = dds)
 
 # make comparisons
-res1 <- results(dds, contrast=c('condition', 'A', 'B'))
-res2 <- results(dds, contrast=c('condition', 'B', 'A'))
+res1 <- DESeq2::results(dds, contrast=c('condition', 'A', 'B'))
+res2 <- DESeq2::results(dds, contrast=c('condition', 'B', 'A'))
 
 # make list of results
 res_list <- list(

@@ -30,6 +30,7 @@ final carnation object with additional pre-processing
 ## Examples
 
 ``` r
+# \donttest{
 library(DESeq2)
 
 # make example DESeq dataset
@@ -65,4 +66,5 @@ obj <- list(
 
 # final object
 final_obj <- make_final_object(obj)
+# }
 ```
