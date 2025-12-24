@@ -465,6 +465,7 @@ get_y_init <- function(df, y_delta, pseudocount){
 #' @return final carnation object with additional pre-processing
 #'
 #' @examples
+#' \donttest{
 #' library(DESeq2)
 #'
 #' # make example DESeq dataset
@@ -494,6 +495,7 @@ get_y_init <- function(df, y_delta, pseudocount){
 #'
 #' # final object
 #' final_obj <- make_final_object(obj)
+#' }
 #'
 #' @export
 make_final_object <- function(obj){
@@ -851,22 +853,10 @@ enrich_to_genetonic <- function(enrich, res){
 #' @return ggplot handle
 #'
 #' @examples
-#' library(DESeq2)
+#' # get DE results
+#' data(res_dex, package='carnation')
 #'
-#' # make example DESeq dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("condition", "A", "B"))
-#'
-#' # add gene and symbol column
-#' res$gene <- rownames(res)
-#' res$symbol <- rownames(res)
-#'
-#' plotMA.label(res, lab.genes = c("gene1", "gene2"))
+#' plotMA.label(res_dex, lab.genes = c("SPARCL1", "CACNB2"))
 #'
 #' @export
 plotMA.label <- function(res,
@@ -1047,23 +1037,11 @@ add.set.column <- function(df){
 #' @return plotly handle
 #'
 #' @examples
-#' library(DESeq2)
-#'
-#' # make example DESeq dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("condition", "A", "B"))
-#'
-#' # add gene and symbol column
-#' res$gene <- rownames(res)
-#' res$symbol <- rownames(res)
+#' # get DE results
+#' data(res_dex, package='carnation')
 #'
 #' # generate interactive MA plot
-#' plotMA.label_ly(res, lab.genes = c("gene1", "gene2"))
+#' plotMA.label_ly(res_dex, lab.genes = c("SPARCL1", "CACNB2"))
 #'
 #' @export
 plotMA.label_ly <- function(res,
@@ -1258,18 +1236,10 @@ plotMA.label_ly <- function(res,
 #' @return vector of gene symbols
 #'
 #' @examples
-#' library(DESeq2)
+#' # get DE results
+#' data(res_dex, package='carnation')
 #'
-#' # make example DESeq dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("condition", "A", "B"))
-#'
-#' g <- top.genes(res)
+#' g <- top.genes(res_dex)
 #
 #' @export
 top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'){
@@ -1755,20 +1725,18 @@ get_degplot <- function(obj, time, color=NULL,
 #' @return Dataframe
 #'
 #' @examples
-#' library(DESeq2)
-#'
 #' # make example DESeq data set
-#' dds <- makeExampleDESeqDataSet()
+#' dds <- DESeq2::makeExampleDESeqDataSet()
 #'
 #' # run DESeq2
-#' dds <- DESeq(dds)
+#' dds <- DESeq2::DESeq(dds)
 #'
 #' # make dds list
 #' dds_list <- list(main = dds)
 #'
 #' # make comparisons
-#' res1 <- results(dds, contrast=c('condition', 'A', 'B'))
-#' res2 <- results(dds, contrast=c('condition', 'B', 'A'))
+#' res1 <- DESeq2::results(dds, contrast=c('condition', 'A', 'B'))
+#' res2 <- DESeq2::results(dds, contrast=c('condition', 'B', 'A'))
 #'
 #' # make list of results
 #' res_list <- list(
@@ -2305,17 +2273,11 @@ makeEnrichResult <- function(df, split='/',
 #' @return ggplot handle
 #'
 #' @examples
-#' library(DESeq2)
-#'
-#' # make example dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
 #' # extract comparisons of interest
-#' res1 <- results(dds, contrast = c("condition", "A", "B"))
-#' res2 <- results(dds, contrast = c("condition", "B", "A"))
+#' data(res_dex, package='carnation')
+#' data(res_cell, package='carnation')
+#' res1 <- res_dex
+#' res2 <- res_cell
 #'
 #' # add geneid column
 #' res1 <- cbind(geneid=rownames(res1), res1)
@@ -2471,17 +2433,11 @@ plotScatter.label <- function(compare,
 #' @return plotly handle
 #'
 #' @examples
-#' library(DESeq2)
-#'
-#' # make example dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
 #' # extract comparisons of interest
-#' res1 <- results(dds, contrast = c("condition", "A", "B"))
-#' res2 <- results(dds, contrast = c("condition", "B", "A"))
+#' data(res_dex, package='carnation')
+#' data(res_cell, package='carnation')
+#' res1 <- res_dex
+#' res2 <- res_cell
 #'
 #' # add geneid column
 #' res1 <- cbind(geneid=rownames(res1), res1)
@@ -2709,7 +2665,9 @@ dummy_genetonic <- function(eres){
 #' @return reactiveValues object containing carnation object
 #'
 #' @examples
+#' \donttest{
 #' obj <- make_example_carnation_object()
+#' }
 #'
 #' @export
 make_example_carnation_object <- function(){

@@ -24,16 +24,8 @@ vector of gene symbols
 Get top DE genes by log2FoldChange or adjusted p-value
 }
 \examples{
-library(DESeq2)
+# get DE results
+data(res_dex, package='carnation')
 
-# make example DESeq dataset
-dds <- makeExampleDESeqDataSet()
-
-# run DE analysis
-dds <- DESeq(dds)
-
-# extract comparison of interest
-res <- results(dds, contrast = c("condition", "A", "B"))
-
-g <- top.genes(res)
+g <- top.genes(res_dex)
 }

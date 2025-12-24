@@ -29,8 +29,8 @@ library(shiny)
 library(ggplot2)
 
 # get example object
-obj <- make_example_carnation_object()
-res <- as.data.frame(obj$res[[1]])
+data(res_dex, package='carnation')
+res <- as.data.frame(res_dex)
 
 # make MA plot
 p <- ggplot(res, aes(x=baseMean, y=log2foldChange)) +
