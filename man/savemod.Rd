@@ -33,6 +33,7 @@ Server returns reactive with trigger to refresh the app
 Module UI & server to save carnation object.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 library(DESeq2)
 
@@ -66,21 +67,19 @@ for(name in names(edit_obj$dds)){
 }
 
 # run simple shiny app with plot
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           saveUI('p')
-         ),
-    server = function(input, output, session){
-               save_event <- saveServer('save_object',
-                                        original=original,
-                                        current=reactive({ edit_obj }),
-                                        coldata=coldata,
-                                        pattern=pattern(),
-                                        username=username,
-                                        config)
-             }
-  )
-}
-
+shinyApp(
+  ui = fluidPage(
+         saveUI('p')
+       ),
+  server = function(input, output, session){
+             save_event <- saveServer('save_object',
+                                      original=original,
+                                      current=reactive({ edit_obj }),
+                                      coldata=coldata,
+                                      pattern=pattern(),
+                                      username=username,
+                                      config)
+           }
+)
+\dontshow{\}) # examplesIf}
 }

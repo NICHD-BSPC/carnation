@@ -30,6 +30,7 @@ Server invisibly returns NULL (used for side effects).
 UI & server for module to create MA plot
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 library(DESeq2)
 
@@ -63,16 +64,14 @@ plot_args <- reactive({
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(maPlotUI('p', 'sidebar')),
-           mainPanel(maPlotUI('p', 'main'))
-         ),
-    server = function(input, output, session){
-               maPlotServer('p', obj, plot_args, config)
-             }
-  )
-}
-
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(maPlotUI('p', 'sidebar')),
+         mainPanel(maPlotUI('p', 'main'))
+       ),
+  server = function(input, output, session){
+             maPlotServer('p', obj, plot_args, config)
+           }
+)
+\dontshow{\}) # examplesIf}
 }

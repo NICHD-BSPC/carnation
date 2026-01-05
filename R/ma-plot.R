@@ -14,7 +14,7 @@
 #' UI returns tagList with MA plot UI.
 #' Server invisibly returns NULL (used for side effects).
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #' library(DESeq2)
 #'
@@ -48,17 +48,15 @@
 #'
 #' config <- reactiveVal(get_config())
 #'
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            sidebarPanel(maPlotUI('p', 'sidebar')),
-#'            mainPanel(maPlotUI('p', 'main'))
-#'          ),
-#'     server = function(input, output, session){
-#'                maPlotServer('p', obj, plot_args, config)
-#'              }
-#'   )
-#' }
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(maPlotUI('p', 'sidebar')),
+#'          mainPanel(maPlotUI('p', 'main'))
+#'        ),
+#'   server = function(input, output, session){
+#'              maPlotServer('p', obj, plot_args, config)
+#'            }
+#' )
 #'
 #' @name maplotmod
 #' @rdname maplotmod

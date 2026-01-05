@@ -27,6 +27,7 @@ Server returns reactive with app reload trigger
 Module UI & server to load new data
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 
 username <- 'admin'
@@ -37,16 +38,14 @@ obj <- make_example_carnation_object()
 
 rds <- reactive({ obj=obj })
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           loadDataUI('p')
-         ),
-    server = function(input, output, session){
-               loadDataServer('p', username=username, config, rds)
-             }
-  )
-}
+shinyApp(
+  ui = fluidPage(
+         loadDataUI('p')
+       ),
+  server = function(input, output, session){
+             loadDataServer('p', username=username, config, rds)
+           }
+)
 
-
+\dontshow{\}) # examplesIf}
 }

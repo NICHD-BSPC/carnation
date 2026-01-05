@@ -17,7 +17,7 @@
 #' UI returns tagList with heatmap UI.
 #' Server invisibly returns NULL (used for side effects).
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #' library(DESeq2)
 #'
@@ -49,18 +49,16 @@
 #'
 #' config <- reactiveVal(get_config())
 #'
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            sidebarPanel(heatmapUI('p', 'sidebar')),
-#'            mainPanel(heatmapUI('p', 'sidebar'))
-#'          ),
-#'     server = function(input, output, session){
-#'                heatmapServer('p', obj, coldata,
-#'                              plot_args, gene_scratchpad, config)
-#'              }
-#'   )
-#' }
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(heatmapUI('p', 'sidebar')),
+#'          mainPanel(heatmapUI('p', 'sidebar'))
+#'        ),
+#'   server = function(input, output, session){
+#'              heatmapServer('p', obj, coldata,
+#'                            plot_args, gene_scratchpad, config)
+#'            }
+#' )
 #'
 #' @rdname heatmapmod
 #' @name heatmapmod

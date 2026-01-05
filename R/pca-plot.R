@@ -13,7 +13,7 @@
 #' UI returns tagList with PCA plot UI.
 #' Server invisibly returns NULL (used for side effects).
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #' library(DESeq2)
 #'
@@ -39,17 +39,15 @@
 #'
 #' config <- reactiveVal(get_config())
 #'
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            sidebarPanel(pcaPlotUI('p', 'sidebar')),
-#'            mainPanel(pcaPlotUI('p', 'main'))
-#'          ),
-#'     server = function(input, output, session){
-#'                pcaPlotServer('p', obj, coldata, config)
-#'              }
-#'   )
-#' }
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(pcaPlotUI('p', 'sidebar')),
+#'          mainPanel(pcaPlotUI('p', 'main'))
+#'        ),
+#'   server = function(input, output, session){
+#'              pcaPlotServer('p', obj, coldata, config)
+#'            }
+#' )
 #'
 #' @rdname pcamod
 #' @name pcamod

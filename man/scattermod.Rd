@@ -30,6 +30,7 @@ Server invisibly returns NULL (used for side effects).
 Module UI + server for generating scatter plots.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 
 # Create reactive values to simulate app state
@@ -54,16 +55,14 @@ plot_args <- reactive({
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(scatterPlotUI('p', 'sidebar')),
-           mainPanel(scatterPlotUI('p', 'sidebar'))
-         ),
-    server = function(input, output, session){
-               scatterPlotServer('p', obj, plot_args, config)
-             }
-  )
-}
-
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(scatterPlotUI('p', 'sidebar')),
+         mainPanel(scatterPlotUI('p', 'sidebar'))
+       ),
+  server = function(input, output, session){
+             scatterPlotServer('p', obj, plot_args, config)
+           }
+)
+\dontshow{\}) # examplesIf}
 }

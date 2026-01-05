@@ -34,6 +34,7 @@ Server returns reactive with list containing upset table, intersections
 Module UI & server to generate upset plots.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 
 oobj <- make_example_carnation_object()
@@ -60,18 +61,16 @@ reset_genes <- reactiveVal()
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(upsetPlotUI('p', 'sidebar')),
-           mainPanel(upsetPlotUI('p', 'sidebar'))
-         ),
-    server = function(input, output, session){
-               upset_data <- upsetPlotServer('p', obj, plot_args,
-                                             gene_scratchpad,
-                                             reset_genes, config)
-             }
-  )
-}
-
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(upsetPlotUI('p', 'sidebar')),
+         mainPanel(upsetPlotUI('p', 'sidebar'))
+       ),
+  server = function(input, output, session){
+             upset_data <- upsetPlotServer('p', obj, plot_args,
+                                           gene_scratchpad,
+                                           reset_genes, config)
+           }
+)
+\dontshow{\}) # examplesIf}
 }
