@@ -41,16 +41,11 @@ UI returns tagList with scatter plot UI. Server invisibly returns NULL
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 
 # Create reactive values to simulate app state
 oobj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 obj <- reactiveValues(
    dds = oobj$dds,
@@ -71,15 +66,14 @@ plot_args <- reactive({
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(scatterPlotUI('p', 'sidebar')),
-           mainPanel(scatterPlotUI('p', 'sidebar'))
-         ),
-    server = function(input, output, session){
-               scatterPlotServer('p', obj, plot_args, config)
-             }
-  )
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(scatterPlotUI('p', 'sidebar')),
+         mainPanel(scatterPlotUI('p', 'sidebar'))
+       ),
+  server = function(input, output, session){
+             scatterPlotServer('p', obj, plot_args, config)
+           }
+)
 }
 ```

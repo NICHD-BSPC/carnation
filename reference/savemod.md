@@ -48,6 +48,7 @@ the app
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 library(DESeq2)
 
@@ -62,12 +63,6 @@ pattern <- reactive({ config()$server$pattern })
 
 # get example object
 obj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 # make reactive with obj & path
 original <- reactiveValues( obj = obj, path = "/path/to/carnation/obj.rds" )
@@ -87,20 +82,19 @@ for(name in names(edit_obj$dds)){
 }
 
 # run simple shiny app with plot
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           saveUI('p')
-         ),
-    server = function(input, output, session){
-               save_event <- saveServer('save_object',
-                                        original=original,
-                                        current=reactive({ edit_obj }),
-                                        coldata=coldata,
-                                        pattern=pattern(),
-                                        username=username,
-                                        config)
-             }
-  )
+shinyApp(
+  ui = fluidPage(
+         saveUI('p')
+       ),
+  server = function(input, output, session){
+             save_event <- saveServer('save_object',
+                                      original=original,
+                                      current=reactive({ edit_obj }),
+                                      coldata=coldata,
+                                      pattern=pattern(),
+                                      username=username,
+                                      config)
+           }
+)
 }
 ```

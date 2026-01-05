@@ -50,17 +50,12 @@ for side effects)
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 library(DESeq2)
 
 # Create reactive values to simulate app state
 oobj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 obj <- reactiveValues(
    dds = oobj$dds,
@@ -84,35 +79,34 @@ plot_args <- reactive({
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(
-             patternPlotUI('p', 'sidebar', 'both'),
-             conditionalPanel(condition = "input.pattern_mode == 'Plot'",
-               patternPlotUI('p', 'sidebar', 'plot')
-             ),
-             conditionalPanel(condition = "input.pattern_mode == 'Table'",
-               patternPlotUI('p', 'sidebar', 'table')
-             )
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(
+           patternPlotUI('p', 'sidebar', 'both'),
+           conditionalPanel(condition = "input.pattern_mode == 'Plot'",
+             patternPlotUI('p', 'sidebar', 'plot')
            ),
-           mainPanel(
-             tabsetPanel(id='pattern_mode',
-               tabPanel('Plot',
-                 patternPlotUI('p', 'plot')
-               ), # tabPanel plot
-
-               tabPanel('Cluster membership',
-                 patternPlotUI('p', 'table')
-               ) # tabPanel cluster_membership
-
-             ) # tabsetPanel pattern_mode
-           ) # tabPanel pattern_analysis
+           conditionalPanel(condition = "input.pattern_mode == 'Table'",
+             patternPlotUI('p', 'sidebar', 'table')
+           )
          ),
-    server = function(input, output, session){
-               patternPlotServer('deg_plot', obj, coldata,
-                                 plot_args, config)
-             }
-  )
+         mainPanel(
+           tabsetPanel(id='pattern_mode',
+             tabPanel('Plot',
+               patternPlotUI('p', 'plot')
+             ), # tabPanel plot
+
+             tabPanel('Cluster membership',
+               patternPlotUI('p', 'table')
+             ) # tabPanel cluster_membership
+
+           ) # tabsetPanel pattern_mode
+         ) # tabPanel pattern_analysis
+       ),
+  server = function(input, output, session){
+             patternPlotServer('deg_plot', obj, coldata,
+                               plot_args, config)
+           }
+)
 }
 ```

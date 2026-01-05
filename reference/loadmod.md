@@ -36,6 +36,7 @@ reload trigger
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 
 username <- 'admin'
@@ -43,24 +44,17 @@ username <- 'admin'
 config <- reactiveVal(get_config())
 
 obj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 rds <- reactive({ obj=obj })
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           loadDataUI('p')
-         ),
-    server = function(input, output, session){
-               loadDataServer('p', username=username, config, rds)
-             }
-  )
-}
+shinyApp(
+  ui = fluidPage(
+         loadDataUI('p')
+       ),
+  server = function(input, output, session){
+             loadDataServer('p', username=username, config, rds)
+           }
+)
 
+}
 ```

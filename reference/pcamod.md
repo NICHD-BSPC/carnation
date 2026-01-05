@@ -40,17 +40,12 @@ for side effects).
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 library(DESeq2)
 
 # Create reactive values to simulate app state
 oobj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 obj <- reactiveValues(
    dds = oobj$dds,
@@ -71,15 +66,14 @@ coldata <- reactiveValues(
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(pcaPlotUI('p', 'sidebar')),
-           mainPanel(pcaPlotUI('p', 'main'))
-         ),
-    server = function(input, output, session){
-               pcaPlotServer('p', obj, coldata, config)
-             }
-  )
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(pcaPlotUI('p', 'sidebar')),
+         mainPanel(pcaPlotUI('p', 'main'))
+       ),
+  server = function(input, output, session){
+             pcaPlotServer('p', obj, coldata, config)
+           }
+)
 }
 ```

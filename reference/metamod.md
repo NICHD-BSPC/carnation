@@ -37,16 +37,11 @@ metadata.
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 
 # Create reactive values to simulate app state
 oobj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 obj <- reactiveValues(
    dds = oobj$dds,
@@ -60,22 +55,21 @@ obj <- reactiveValues(
 config <- get_config()
 cols.to.drop <- config$server$cols.to.drop
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(metadataUI('p', 'sidebar')),
-           mainPanel(metadataUI('p', 'main'))
-         ),
-    server = function(input, output, session){
-               # reactiveVal to save updates
-               saved_data <- reactiveVal()
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(metadataUI('p', 'sidebar')),
+         mainPanel(metadataUI('p', 'main'))
+       ),
+  server = function(input, output, session){
+             # reactiveVal to save updates
+             saved_data <- reactiveVal()
 
-               cdata <- metadataServer('p', obj, cols.to.drop)
+             cdata <- metadataServer('p', obj, cols.to.drop)
 
-               observeEvent(cdata(), {
-                 saved_data(cdata())
-               })
-             }
-  )
+             observeEvent(cdata(), {
+               saved_data(cdata())
+             })
+           }
+)
 }
 ```

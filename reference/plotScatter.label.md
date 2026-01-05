@@ -92,11 +92,23 @@ ggplot handle
 ## Examples
 
 ``` r
+library(DESeq2)
+
+# make example dataset
+dds <- makeExampleDESeqDataSet()
+
+# run DE analysis
+dds <- DESeq(dds)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+
 # extract comparisons of interest
-data(res_dex, package='carnation')
-data(res_cell, package='carnation')
-res1 <- res_dex
-res2 <- res_cell
+res1 <- results(dds, contrast = c("condition", "A", "B"))
+res2 <- results(dds, contrast = c("condition", "B", "A"))
 
 # add geneid column
 res1 <- cbind(geneid=rownames(res1), res1)

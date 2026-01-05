@@ -50,9 +50,28 @@ ggplot handle
 ## Examples
 
 ``` r
-# get DE results
-data(res_dex, package='carnation')
+library(DESeq2)
 
-plotMA.label(res_dex, lab.genes = c("SPARCL1", "CACNB2"))
+# make example DESeq dataset
+dds <- makeExampleDESeqDataSet()
+
+# run DE analysis
+dds <- DESeq(dds)
+#> estimating size factors
+#> estimating dispersions
+#> gene-wise dispersion estimates
+#> mean-dispersion relationship
+#> final dispersion estimates
+#> fitting model and testing
+
+# extract comparison of interest
+res <- results(dds, contrast = c("condition", "A", "B"))
+
+# add gene and symbol column
+res$gene <- rownames(res)
+res$symbol <- rownames(res)
+
+plotMA.label(res, lab.genes = c("gene1", "gene2"))
+#> Warning: log-10 transformation introduced infinite values.
 
 ```

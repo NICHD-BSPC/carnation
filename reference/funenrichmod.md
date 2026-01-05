@@ -53,17 +53,12 @@ selected from functional enrichment tables.
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 library(DESeq2)
 
 # Create reactive values to simulate app state
 oobj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 obj <- reactiveValues(
    dds = oobj$dds,
@@ -80,44 +75,43 @@ gene_scratchpad <- reactive({ c('gene1', 'gene2') })
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(
-             conditionalPanel(condition = "input.func == 'Table'",
-               enrichUI('p', 'sidebar', 'table')
-             ),
-             conditionalPanel(condition = "input.func == 'Plot'",
-               enrichUI('p', 'sidebar', 'plot')
-             ),
-             conditionalPanel(condition = "input.func == 'Compare results'",
-               enrichUI('p', 'sidebar', 'compare_results')
-             )
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(
+           conditionalPanel(condition = "input.func == 'Table'",
+             enrichUI('p', 'sidebar', 'table')
            ),
-           mainPanel(
-               tabsetPanel(id='func',
-                 tabPanel('Table',
-                   enrichUI('p', 'main', 'table')
-                 ), # tabPanel table
-
-                 tabPanel('Plot',
-                   enrichUI('p', 'main', 'plot')
-                 ), # tabPanel plot
-
-                 tabPanel('Compare results',
-                   enrichUI('p', 'main', 'compare_results')
-                 ) # tabPanel compare_results
-
-               ) # tabsetPanel func
-             ) # tabPanel
+           conditionalPanel(condition = "input.func == 'Plot'",
+             enrichUI('p', 'sidebar', 'plot')
            ),
-    server = function(input, output, session){
-               enrich_data <- enrichServer('p', obj,
-                                           upset_table,
-                                           gene_scratchpad,
-                                           reactive({ FALSE }),
-                                           config)
-             }
-  )
+           conditionalPanel(condition = "input.func == 'Compare results'",
+             enrichUI('p', 'sidebar', 'compare_results')
+           )
+         ),
+         mainPanel(
+             tabsetPanel(id='func',
+               tabPanel('Table',
+                 enrichUI('p', 'main', 'table')
+               ), # tabPanel table
+
+               tabPanel('Plot',
+                 enrichUI('p', 'main', 'plot')
+               ), # tabPanel plot
+
+               tabPanel('Compare results',
+                 enrichUI('p', 'main', 'compare_results')
+               ) # tabPanel compare_results
+
+             ) # tabsetPanel func
+           ) # tabPanel
+         ),
+  server = function(input, output, session){
+             enrich_data <- enrichServer('p', obj,
+                                         upset_table,
+                                         gene_scratchpad,
+                                         reactive({ FALSE }),
+                                         config)
+           }
+)
 }
 ```

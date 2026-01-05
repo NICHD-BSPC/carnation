@@ -50,17 +50,12 @@ for side effects).
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 library(DESeq2)
 
 # Create reactive values to simulate app state
 oobj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 obj <- reactiveValues(
    dds = oobj$dds,
@@ -87,16 +82,15 @@ gene_scratchpad <- reactive({ c('gene1', 'gene2') })
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(heatmapUI('p', 'sidebar')),
-           mainPanel(heatmapUI('p', 'sidebar'))
-         ),
-    server = function(input, output, session){
-               heatmapServer('p', obj, coldata,
-                             plot_args, gene_scratchpad, config)
-             }
-  )
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(heatmapUI('p', 'sidebar')),
+         mainPanel(heatmapUI('p', 'sidebar'))
+       ),
+  server = function(input, output, session){
+             heatmapServer('p', obj, coldata,
+                           plot_args, gene_scratchpad, config)
+           }
+)
 }
 ```

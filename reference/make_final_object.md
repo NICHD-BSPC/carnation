@@ -30,7 +30,7 @@ final carnation object with additional pre-processing
 ## Examples
 
 ``` r
-# \donttest{
+if (FALSE) { # interactive()
 library(DESeq2)
 
 # make example DESeq dataset
@@ -38,12 +38,6 @@ dds <- makeExampleDESeqDataSet()
 
 # run DE analysis
 dds <- DESeq(dds)
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 # extract comparison of interest
 res <- results(dds, contrast = c("condition", "A", "B"))
@@ -66,5 +60,5 @@ obj <- list(
 
 # final object
 final_obj <- make_final_object(obj)
-# }
+}
 ```

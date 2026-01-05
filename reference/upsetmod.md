@@ -48,15 +48,10 @@ containing upset table, intersections & selected genes.
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 
 oobj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 
 obj <- reactiveValues(
    dds = oobj$dds,
@@ -80,17 +75,16 @@ reset_genes <- reactiveVal()
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(upsetPlotUI('p', 'sidebar')),
-           mainPanel(upsetPlotUI('p', 'sidebar'))
-         ),
-    server = function(input, output, session){
-               upset_data <- upsetPlotServer('p', obj, plot_args,
-                                             gene_scratchpad,
-                                             reset_genes, config)
-             }
-  )
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(upsetPlotUI('p', 'sidebar')),
+         mainPanel(upsetPlotUI('p', 'sidebar'))
+       ),
+  server = function(input, output, session){
+             upset_data <- upsetPlotServer('p', obj, plot_args,
+                                           gene_scratchpad,
+                                           reset_genes, config)
+           }
+)
 }
 ```
