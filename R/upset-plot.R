@@ -16,7 +16,7 @@
 #' Server returns reactive with list containing upset table, intersections
 #' & selected genes.
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #'
 #' oobj <- make_example_carnation_object()
@@ -43,19 +43,17 @@
 #'
 #' config <- reactiveVal(get_config())
 #'
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            sidebarPanel(upsetPlotUI('p', 'sidebar')),
-#'            mainPanel(upsetPlotUI('p', 'sidebar'))
-#'          ),
-#'     server = function(input, output, session){
-#'                upset_data <- upsetPlotServer('p', obj, plot_args,
-#'                                              gene_scratchpad,
-#'                                              reset_genes, config)
-#'              }
-#'   )
-#' }
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(upsetPlotUI('p', 'sidebar')),
+#'          mainPanel(upsetPlotUI('p', 'sidebar'))
+#'        ),
+#'   server = function(input, output, session){
+#'              upset_data <- upsetPlotServer('p', obj, plot_args,
+#'                                            gene_scratchpad,
+#'                                            reset_genes, config)
+#'            }
+#' )
 #'
 #' @rdname upsetmod
 #' @name upsetmod

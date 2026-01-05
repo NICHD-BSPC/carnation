@@ -35,6 +35,7 @@ server invisibly returns NULL (used for side effects)
 Module UI & server to generate pattern plots.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 library(DESeq2)
 
@@ -63,36 +64,34 @@ plot_args <- reactive({
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(
-             patternPlotUI('p', 'sidebar', 'both'),
-             conditionalPanel(condition = "input.pattern_mode == 'Plot'",
-               patternPlotUI('p', 'sidebar', 'plot')
-             ),
-             conditionalPanel(condition = "input.pattern_mode == 'Table'",
-               patternPlotUI('p', 'sidebar', 'table')
-             )
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(
+           patternPlotUI('p', 'sidebar', 'both'),
+           conditionalPanel(condition = "input.pattern_mode == 'Plot'",
+             patternPlotUI('p', 'sidebar', 'plot')
            ),
-           mainPanel(
-             tabsetPanel(id='pattern_mode',
-               tabPanel('Plot',
-                 patternPlotUI('p', 'plot')
-               ), # tabPanel plot
-
-               tabPanel('Cluster membership',
-                 patternPlotUI('p', 'table')
-               ) # tabPanel cluster_membership
-
-             ) # tabsetPanel pattern_mode
-           ) # tabPanel pattern_analysis
+           conditionalPanel(condition = "input.pattern_mode == 'Table'",
+             patternPlotUI('p', 'sidebar', 'table')
+           )
          ),
-    server = function(input, output, session){
-               patternPlotServer('deg_plot', obj, coldata,
-                                 plot_args, config)
-             }
-  )
-}
+         mainPanel(
+           tabsetPanel(id='pattern_mode',
+             tabPanel('Plot',
+               patternPlotUI('p', 'plot')
+             ), # tabPanel plot
 
+             tabPanel('Cluster membership',
+               patternPlotUI('p', 'table')
+             ) # tabPanel cluster_membership
+
+           ) # tabsetPanel pattern_mode
+         ) # tabPanel pattern_analysis
+       ),
+  server = function(input, output, session){
+             patternPlotServer('deg_plot', obj, coldata,
+                               plot_args, config)
+           }
+)
+\dontshow{\}) # examplesIf}
 }

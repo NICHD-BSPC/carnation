@@ -35,6 +35,7 @@ Server invisibly returns NULL (used for side effects).
 Module UI & server to generate heatmap.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 library(DESeq2)
 
@@ -66,17 +67,15 @@ gene_scratchpad <- reactive({ c('gene1', 'gene2') })
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(heatmapUI('p', 'sidebar')),
-           mainPanel(heatmapUI('p', 'sidebar'))
-         ),
-    server = function(input, output, session){
-               heatmapServer('p', obj, coldata,
-                             plot_args, gene_scratchpad, config)
-             }
-  )
-}
-
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(heatmapUI('p', 'sidebar')),
+         mainPanel(heatmapUI('p', 'sidebar'))
+       ),
+  server = function(input, output, session){
+             heatmapServer('p', obj, coldata,
+                           plot_args, gene_scratchpad, config)
+           }
+)
+\dontshow{\}) # examplesIf}
 }

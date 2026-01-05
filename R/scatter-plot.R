@@ -14,7 +14,7 @@
 #' UI returns tagList with scatter plot UI.
 #' Server invisibly returns NULL (used for side effects).
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #'
 #' # Create reactive values to simulate app state
@@ -39,17 +39,15 @@
 #'
 #' config <- reactiveVal(get_config())
 #'
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            sidebarPanel(scatterPlotUI('p', 'sidebar')),
-#'            mainPanel(scatterPlotUI('p', 'sidebar'))
-#'          ),
-#'     server = function(input, output, session){
-#'                scatterPlotServer('p', obj, plot_args, config)
-#'              }
-#'   )
-#' }
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(scatterPlotUI('p', 'sidebar')),
+#'          mainPanel(scatterPlotUI('p', 'sidebar'))
+#'        ),
+#'   server = function(input, output, session){
+#'              scatterPlotServer('p', obj, plot_args, config)
+#'            }
+#' )
 #'
 #' @name scattermod
 #' @rdname scattermod

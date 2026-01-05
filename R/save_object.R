@@ -15,7 +15,7 @@
 #' UI returns actionButton
 #' Server returns reactive with trigger to refresh the app
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #' library(DESeq2)
 #'
@@ -49,22 +49,20 @@
 #' }
 #'
 #' # run simple shiny app with plot
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            saveUI('p')
-#'          ),
-#'     server = function(input, output, session){
-#'                save_event <- saveServer('save_object',
-#'                                         original=original,
-#'                                         current=reactive({ edit_obj }),
-#'                                         coldata=coldata,
-#'                                         pattern=pattern(),
-#'                                         username=username,
-#'                                         config)
-#'              }
-#'   )
-#' }
+#' shinyApp(
+#'   ui = fluidPage(
+#'          saveUI('p')
+#'        ),
+#'   server = function(input, output, session){
+#'              save_event <- saveServer('save_object',
+#'                                       original=original,
+#'                                       current=reactive({ edit_obj }),
+#'                                       coldata=coldata,
+#'                                       pattern=pattern(),
+#'                                       username=username,
+#'                                       config)
+#'            }
+#' )
 #'
 #' @rdname savemod
 #' @name savemod

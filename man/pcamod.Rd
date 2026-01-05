@@ -29,6 +29,7 @@ Server invisibly returns NULL (used for side effects).
 Module UI + server to generate a pca plot.
 }
 \examples{
+\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 library(shiny)
 library(DESeq2)
 
@@ -54,16 +55,14 @@ coldata <- reactiveValues(
 
 config <- reactiveVal(get_config())
 
-if(interactive()){
-  shinyApp(
-    ui = fluidPage(
-           sidebarPanel(pcaPlotUI('p', 'sidebar')),
-           mainPanel(pcaPlotUI('p', 'main'))
-         ),
-    server = function(input, output, session){
-               pcaPlotServer('p', obj, coldata, config)
-             }
-  )
-}
-
+shinyApp(
+  ui = fluidPage(
+         sidebarPanel(pcaPlotUI('p', 'sidebar')),
+         mainPanel(pcaPlotUI('p', 'main'))
+       ),
+  server = function(input, output, session){
+             pcaPlotServer('p', obj, coldata, config)
+           }
+)
+\dontshow{\}) # examplesIf}
 }

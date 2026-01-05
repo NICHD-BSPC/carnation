@@ -8,7 +8,7 @@
 #' @param config reactive list with config settings
 #' @param rds Object to be edited
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #'
 #' username <- 'admin'
@@ -19,16 +19,14 @@
 #'
 #' rds <- reactive({ obj=obj })
 #'
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            loadDataUI('p')
-#'          ),
-#'     server = function(input, output, session){
-#'                loadDataServer('p', username=username, config, rds)
-#'              }
-#'   )
-#' }
+#' shinyApp(
+#'   ui = fluidPage(
+#'          loadDataUI('p')
+#'        ),
+#'   server = function(input, output, session){
+#'              loadDataServer('p', username=username, config, rds)
+#'            }
+#' )
 #'
 #'
 #' @returns

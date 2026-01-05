@@ -13,7 +13,7 @@
 #' UI returns tagList with metadata UI.
 #' Server returns reactive object with metadata.
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #'
 #' # Create reactive values to simulate app state
@@ -31,24 +31,22 @@
 #' config <- get_config()
 #' cols.to.drop <- config$server$cols.to.drop
 #'
-#' if(interactive()){
-#'   shinyApp(
-#'     ui = fluidPage(
-#'            sidebarPanel(metadataUI('p', 'sidebar')),
-#'            mainPanel(metadataUI('p', 'main'))
-#'          ),
-#'     server = function(input, output, session){
-#'                # reactiveVal to save updates
-#'                saved_data <- reactiveVal()
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(metadataUI('p', 'sidebar')),
+#'          mainPanel(metadataUI('p', 'main'))
+#'        ),
+#'   server = function(input, output, session){
+#'              # reactiveVal to save updates
+#'              saved_data <- reactiveVal()
 #'
-#'                cdata <- metadataServer('p', obj, cols.to.drop)
+#'              cdata <- metadataServer('p', obj, cols.to.drop)
 #'
-#'                observeEvent(cdata(), {
-#'                  saved_data(cdata())
-#'                })
-#'              }
-#'   )
-#' }
+#'              observeEvent(cdata(), {
+#'                saved_data(cdata())
+#'              })
+#'            }
+#' )
 #'
 #' @name metamod
 #' @rdname metamod
