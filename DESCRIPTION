@@ -1,6 +1,6 @@
 Package: carnation
 Title: Shiny App to Explore RNA-Seq Analysis
-Version: 0.99.5
+Version: 0.99.6
 Authors@R:
     person("Apratim", "Mitra", , "apratim.mitra@nih.gov", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0003-3279-0054"))
