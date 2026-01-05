@@ -108,8 +108,8 @@ helpModal <- function(mdfile, title=NULL, ...){
 #' library(ggplot2)
 #'
 #' # get example object
-#' data(res_dex, package='carnation')
-#' res <- as.data.frame(res_dex)
+#' obj <- make_example_carnation_object()
+#' res <- as.data.frame(obj$res[[1]])
 #'
 #' # make MA plot
 #' p <- ggplot(res, aes(x=baseMean, y=log2foldChange)) +

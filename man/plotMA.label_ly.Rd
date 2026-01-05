@@ -36,10 +36,21 @@ This function creates an MA plot from a data.frame
 containing DE analysis results using plot_ly
 }
 \examples{
-# get DE results
-data(res_dex, package='carnation')
+library(DESeq2)
 
-# generate interactive MA plot
-plotMA.label_ly(res_dex, lab.genes = c("SPARCL1", "CACNB2"))
+# make example DESeq dataset
+dds <- makeExampleDESeqDataSet()
+
+# run DE analysis
+dds <- DESeq(dds)
+
+# extract comparison of interest
+res <- results(dds, contrast = c("condition", "A", "B"))
+
+# add gene and symbol column
+res$gene <- rownames(res)
+res$symbol <- rownames(res)
+
+plotMA.label(res, lab.genes = c("gene1", "gene2"))
 
 }

@@ -853,10 +853,22 @@ enrich_to_genetonic <- function(enrich, res){
 #' @return ggplot handle
 #'
 #' @examples
-#' # get DE results
-#' data(res_dex, package='carnation')
+#' library(DESeq2)
 #'
-#' plotMA.label(res_dex, lab.genes = c("SPARCL1", "CACNB2"))
+#' # make example DESeq dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#'
+#' # add gene and symbol column
+#' res$gene <- rownames(res)
+#' res$symbol <- rownames(res)
+#'
+#' plotMA.label(res, lab.genes = c("gene1", "gene2"))
 #'
 #' @export
 plotMA.label <- function(res,
@@ -1037,11 +1049,22 @@ add.set.column <- function(df){
 #' @return plotly handle
 #'
 #' @examples
-#' # get DE results
-#' data(res_dex, package='carnation')
+#' library(DESeq2)
 #'
-#' # generate interactive MA plot
-#' plotMA.label_ly(res_dex, lab.genes = c("SPARCL1", "CACNB2"))
+#' # make example DESeq dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#'
+#' # add gene and symbol column
+#' res$gene <- rownames(res)
+#' res$symbol <- rownames(res)
+#'
+#' plotMA.label(res, lab.genes = c("gene1", "gene2"))
 #'
 #' @export
 plotMA.label_ly <- function(res,
@@ -2273,11 +2296,17 @@ makeEnrichResult <- function(df, split='/',
 #' @return ggplot handle
 #'
 #' @examples
+#' library(DESeq2)
+#'
+#' # make example dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
 #' # extract comparisons of interest
-#' data(res_dex, package='carnation')
-#' data(res_cell, package='carnation')
-#' res1 <- res_dex
-#' res2 <- res_cell
+#' res1 <- results(dds, contrast = c("condition", "A", "B"))
+#' res2 <- results(dds, contrast = c("condition", "B", "A"))
 #'
 #' # add geneid column
 #' res1 <- cbind(geneid=rownames(res1), res1)
@@ -2433,11 +2462,17 @@ plotScatter.label <- function(compare,
 #' @return plotly handle
 #'
 #' @examples
+#' library(DESeq2)
+#'
+#' # make example dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
 #' # extract comparisons of interest
-#' data(res_dex, package='carnation')
-#' data(res_cell, package='carnation')
-#' res1 <- res_dex
-#' res2 <- res_cell
+#' res1 <- results(dds, contrast = c("condition", "A", "B"))
+#' res2 <- results(dds, contrast = c("condition", "B", "A"))
 #'
 #' # add geneid column
 #' res1 <- cbind(geneid=rownames(res1), res1)
