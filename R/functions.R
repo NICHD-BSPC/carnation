@@ -464,8 +464,7 @@ get_y_init <- function(df, y_delta, pseudocount){
 #'
 #' @return final carnation object with additional pre-processing
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' library(DESeq2)
 #'
 #' # make example DESeq dataset
@@ -495,7 +494,6 @@ get_y_init <- function(df, y_delta, pseudocount){
 #'
 #' # final object
 #' final_obj <- make_final_object(obj)
-#' }
 #'
 #' @export
 make_final_object <- function(obj){
@@ -2699,10 +2697,8 @@ dummy_genetonic <- function(eres){
 #'
 #' @return reactiveValues object containing carnation object
 #'
-#' @examples
-#' \donttest{
+#' @examplesIf interactive()
 #' obj <- make_example_carnation_object()
-#' }
 #'
 #' @export
 make_example_carnation_object <- function(){
