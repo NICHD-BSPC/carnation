@@ -74,7 +74,7 @@ jobs:
 
           # build, check
           R CMD build --no-manual ../carnation
-          R CMD check --no-manual --no-vignettes --timings carnation_${VERSION}.tar.gz
+          R CMD check --no-manual --no-vignettes --timings --as-cran carnation_${VERSION}.tar.gz
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
 
