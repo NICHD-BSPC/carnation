@@ -21,9 +21,9 @@ plotScatter.label_ly(
 )
 }
 \arguments{
-\item{compare}{string, what values to plot? can be 'LFC' or 'P-adj'}
+\item{compare}{string, what values to plot? can be 'log2FoldChange' or 'P-adj'}
 
-\item{df}{data frame with LFC & padj values to plot from 2 contrasts}
+\item{df}{data frame with log2FoldChange & padj values to plot from 2 contrasts}
 
 \item{label_x}{string, label for x-axis}
 
@@ -55,4 +55,59 @@ plotly handle
 }
 \description{
 Plot an interactive scatterplot to compare two contrasts
+}
+\examples{
+library(DESeq2)
+
+# make example dataset
+dds <- makeExampleDESeqDataSet()
+
+# run DE analysis
+dds <- DESeq(dds)
+
+# extract comparisons of interest
+res1 <- results(dds, contrast = c("condition", "A", "B"))
+res2 <- results(dds, contrast = c("condition", "B", "A"))
+
+# add geneid column
+res1 <- cbind(geneid=rownames(res1), res1)
+res2 <- cbind(geneid=rownames(res2), res2)
+
+# make merged df from the two comparisons
+cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+df_full <- dplyr::inner_join(
+  dplyr::select(as.data.frame(res1), all_of(cols.sub)),
+  dplyr::select(as.data.frame(res2), all_of(cols.sub)),
+  by = 'geneid',
+  suffix = c('.x', '.y')
+)
+
+# calculate x & y limits for log2FoldChange
+xlim <- range(df_full[[ 'log2FoldChange.x' ]])
+ylim <- range(df_full[[ 'log2FoldChange.y' ]])
+
+# get color palette
+color.palette <- RColorBrewer::brewer.pal(n=5, name='Set2')
+
+# add significance column
+sig.x <- df_full$padj.x < 0.1 & !is.na(df_full$padj.x)
+sig.y <- df_full$padj.y < 0.1 & !is.na(df_full$padj.y)
+up.x <- df_full$log2FoldChange.x >= 0
+up.y <- df_full$log2FoldChange.y >= 0
+significance <- rep('None', nrow(df_full))
+significance[ sig.x & sig.y & ((up.x & up.y) | (!up.x & !up.y)) ] <- 'Both - same LFC sign'
+significance[ sig.x & sig.y & ((up.x & !up.y) | (!up.x & up.y)) ] <- 'Both - opposite LFC sign'
+significance[ sig.x & !sig.y ] <- 'A vs B'
+significance[ !sig.x & sig.y ] <- 'B vs A'
+df_full$significance <- significance
+
+# generate scatter plot
+p <- plotScatter.label_ly(compare = 'log2FoldChange',
+                          df = df_full,
+                          label_x = 'A vs B',
+                          label_y = 'B vs A',
+                          lim.x = xlim,
+                          lim.y = ylim,
+                          color.palette = color.palette)
+
 }

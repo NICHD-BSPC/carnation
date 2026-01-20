@@ -1,13 +1,27 @@
 ---
 title: "carnation - airway tutorial"
-output: rmarkdown::html_vignette
+author: "Apratim Mitra"
+date: "`r format(Sys.Date(), '%m/%d/%Y')`"
+abstract: >
+  Carnation is an interactive Shiny dashboard that simplifies and transforms
+  complex bulk RNA-Seq data using insightful visualizations and numerous
+  interactive features. Designed for both computational and experimental
+  biologists, Carnation makes exploring differential expression analysis,
+  functional enrichment, and pattern analysis intuitive and exciting.
+  In this vignette, we will describe some of its functionality using the `airway`
+  dataset.
+
+  Carnation package version: `r packageVersion("carnation")`
+output:
+  rmarkdown::html_document:
+    toc: true
 vignette: >
   %\VignetteIndexEntry{carnation - airway tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
+```{r opts, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -16,46 +30,43 @@ knitr::opts_chunk$set(
 
 ## Load libraries & airway dataset
 
-Load carnation.
+First check for and load some libraries that we will need for this tutorial.
 
-```{r setup}
-library(carnation)
-```
-
-First load some libraries that we will need for this tutorial.
-
-```{r message=FALSE}
-library(DESeq2)
-library(dplyr)
-library(GeneTonic)
-
+```{r presetup, eval=FALSE}
 # install optional packages if not present
-pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'clusterProfiler', 'DEGreport')
+pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'DEGreport')
 for(pkg in pkgs_to_check){
   setRepositories(ind=c(1,2,3,4,5))
   if(!requireNamespace(pkg, quietly=TRUE)){
     install.packages(pkg, repos='http://cran.us.r-project.org')
   }
-  library(pkg, character.only=TRUE)
 }
+```
+
+```{r lib, message=FALSE}
+library(airway)
+library(DESeq2)
+library(dplyr)
+library(GeneTonic)
+library(org.Hs.eg.db)
 ```
 
 We will be using the 'airway' dataset. First, we load this dataset.
 
-```{r}
+```{r airway_load}
 data('airway')
 ```
 
 Next, we extract the counts matrix and and metadata.
 
-```{r}
+```{r extract}
 mat <- assay(airway)
 cdata <- colData(airway)
 ```
 
 Now let's see what these look like.
 
-```{r}
+```{r view}
 dim(mat)
 ```
 
@@ -64,7 +75,7 @@ corresponds to a single gene and each column corresponds to a
 single sample. As you will notice, the rownames of `mat` contains
 gene IDs and column names have the sample IDs.
 
-```{r}
+```{r view_cnts}
 head(mat)
 ```
 
@@ -72,7 +83,7 @@ head(mat)
 but notice the `cell` and `dex` columns, as we will be using this for the
 differential expression analysis later.
 
-```{r}
+```{r view_cdata}
 cdata
 ```
 
@@ -82,7 +93,7 @@ The gene IDs that come with the dataset are from ENSEMBL and are not human-reada
 So, next we will extract gene symbols and `ENTREZID` for these genes from
 the `org.Hs.eg.db` package.
 
-```{r message=FALSE}
+```{r annot, message=FALSE}
 keytypes <- list('SYMBOL'='SYMBOL', 'ENTREZID'='ENTREZID')
 
 anno_df <- do.call('cbind',
@@ -101,7 +112,7 @@ anno_df <- as.data.frame(anno_df)
 Now, we have human readable gene names in the `SYMBOL` column and Entrez IDs in the
 `ENTREZ` column.
 
-```{r}
+```{r view_annot}
 head(anno_df)
 ```
 
@@ -109,7 +120,7 @@ head(anno_df)
 
 Next, we create a new `DESeqDataSet` using `mat` and `cdata`.
 
-```{r}
+```{r dds}
 dds <- DESeqDataSetFromMatrix(mat,
                               colData=cdata,
                               design=~cell + dex)
@@ -117,19 +128,19 @@ dds <- DESeqDataSetFromMatrix(mat,
 
 Let's check to make sure that everything looks okay:
 
-```{r}
+```{r view_dds}
 dds
 ```
 
 Then we save `dds` in a list.
 
-```{r}
+```{r save_dds}
 dds_list <- list(main=dds)
 ```
 
 We also normalize the counts data and save it in a list.
 
-```{r}
+```{r vst}
 rld_list <- lapply(dds_list, function(x) varianceStabilizingTransformation(x, blind=TRUE))
 ```
 
@@ -137,14 +148,14 @@ rld_list <- lapply(dds_list, function(x) varianceStabilizingTransformation(x, bl
 
 Now, the object `dds` is ready for differential expression (DE) analysis.
 
-```{r}
+```{r deseq}
 dds <- DESeq(dds)
 ```
 
 Since, we used `design=~cell + dex` while creating `dds`, the above step
 will automatically calculate some comparisons.
 
-```{r}
+```{r results}
 resultsNames(dds)
 ```
 
@@ -154,7 +165,7 @@ two of these results and run `lfcShrink` on them.
 
 For the `cell` comparison, we choose a precomputed results using the `coef` parameter.
 
-```{r message=FALSE}
+```{r contrast1, message=FALSE}
 cell_comparison <- lfcShrink(dds,
                              coef='cell_N61311_vs_N052611',
                              type='normal')
@@ -163,7 +174,7 @@ cell_comparison <- lfcShrink(dds,
 For the `dex` comparison, we use `contrast` to specify the direction of the comparison,
 since we want to use `untrt` as control.
 
-```{r message=FALSE}
+```{r contrast2, message=FALSE}
 dex_comparison <- lfcShrink(dds,
                             contrast=c('dex', 'trt', 'untrt'),
                             type='normal')
@@ -171,7 +182,7 @@ dex_comparison <- lfcShrink(dds,
 
 Now, each of these comparisons, contain the DE analysis results. For example,
 
-```{r}
+```{r view_contrast}
 head(dex_comparison)
 ```
 
@@ -183,7 +194,7 @@ Here,
   should map to `dds_list` names
 - `label` is a description of the comparison
 
-```{r}
+```{r res}
 res_list <- list(
         dex_trt_vs_untrt=list(
             res=dex_comparison,
@@ -199,7 +210,7 @@ res_list <- list(
 Finally, we add `SYMBOL` and `ENTREZID` columns to the DE results from the `anno_df`
 data frame.
 
-```{r}
+```{r bld_res}
 res_list <- lapply(res_list, function(x){
               # save the rownames as a new 'gene' column
               x$res[[ 'gene' ]] <- rownames(x$res)
@@ -218,7 +229,7 @@ Now we run functional enrichment on the DE genes from the two comparisons.
 For this, we first set significance thresholds and then extract the DE genes
 and save as a list.
 
-```{r}
+```{r alpha}
 # padj cutoff
 alpha <- 0.01
 
@@ -241,7 +252,19 @@ Next, we run functional enrichment and save the results in a list
 called `enrich_list`. We also save a converted list called `genetonic`
 which carnation uses for several plots from the `GeneTonic` package.
 
-```{r}
+Since, this is a time-consuming step, we will use the pre-computed
+enrichment results included with carnation.
+
+```{r enrich}
+# fe results from dex comparison
+data(eres_dex, package='carnation')
+
+# fe results from dex comparison
+data(eres_cell, package='carnation')
+
+# compile into a list
+go_list <- list(dex_trt_vs_untrt=eres_dex, cell_N61311_vs_N052611=eres_cell)
+
 # list to save functional enrichment results
 enrich_list <- list()
 
@@ -249,13 +272,18 @@ enrich_list <- list()
 genetonic <- list()
 
 for(comp in names(res_list)){
-    go.res <- clusterProfiler::enrichGO(
-            gene=de.genes[[comp]][['ENTREZID']],
-            keyType='ENTREZID',
-            OrgDb=org.Hs.eg.db,
-            ont='BP',
-            pvalueCutoff=1, qvalueCutoff=1,
-            readable = TRUE)
+    # NOTE: this is the command used to generate the functional
+    # enrichment results
+    #go.res <- clusterProfiler::enrichGO(
+    #        gene=de.genes[[comp]][['ENTREZID']],
+    #        keyType='ENTREZID',
+    #        OrgDb=org.Hs.eg.db,
+    #        ont='BP',
+    #        pvalueCutoff=1, qvalueCutoff=1,
+    #        readable = TRUE)
+
+    # we use the precomputed results here instead
+    go.res <- go_list[[ comp ]]
 
     enrich_list[[ comp ]] <- list(
                                res=comp,
@@ -265,7 +293,7 @@ for(comp in names(res_list)){
     genetonic[[ comp ]] <- list(
                              res=comp,
                              changed=list(
-                               BP=enrich_to_genetonic(go.res, res_list[[comp]]$res)
+                               BP=carnation::enrich_to_genetonic(go.res, res_list[[comp]]$res)
                              )
                            )
 
@@ -305,7 +333,7 @@ Finally, we add some pattern analysis for the `dex_trt_vs_untrt` comparison usin
 the `DEGreport` package. First, we extract normalized data for the 755 DE genes from
 this comparison.
 
-```{r}
+```{r deg_metadata}
 # extract normalized data & metadata
 ma <- assay(rld_list[['main']])
 colData.i <- colData(rld_list[['main']])
@@ -321,30 +349,35 @@ ma.i <- ma.i[rowVars(ma.i) != 0, ]
 Then, we run the pattern analysis, using `cell` as the *time*
 variable and `dex` as the *color* variable.
 
-```{r}
-p <- DEGreport::degPatterns(
-        ma.i,
-        colData.i,
+Again, since this is a time-consuming step, we will use the pre-computed
+pattern analysis results included with carnation.
 
-        time='cell',
-        col='dex',
+```{r degpatterns}
+# NOTE: This is the command used to perform pattern analysis
+# degpatterns_dex <- DEGreport::degPatterns(
+#                      ma.i,
+#                      colData.i,
+#
+#                      time='cell',
+#                      col='dex',
+#
+#                      # NOTE: reduce and merge cutoff----------------------------------------
+#                      #   Reduce will merge clusters that are similar; similarity determined
+#                      #   by cutoff
+#                      reduce=TRUE,
+#
+#                      plot=FALSE
+#                    )
 
-        # NOTE: reduce and merge cutoff----------------------------------------
-        #   Reduce will merge clusters that are similar; similarity determined
-        #   by cutoff
-        reduce=TRUE,
-
-        # NOTE: set minimum cluster size to 1
-        minc=1,
-        plot=FALSE
-        )
+# We use the pre-computed results here instead
+data(degpatterns_dex, package='carnation')
 ```
 
 Next, we extract the `normalized` slot from this object and save as a list.
 
-```{r}
+```{r deg_extract}
 # extract normalized slot and add symbol column
-p_norm <- p$normalized
+p_norm <- degpatterns_dex$normalized
 p_norm[[ 'SYMBOL' ]] <- anno_df[p_norm[['genes']], 'SYMBOL']
 
 # save pattern analysis results
@@ -355,7 +388,7 @@ degpatterns <- list(dex_by_cell=p_norm)
 
 Now we have all the pieces to build the carnation object.
 
-```{r}
+```{r compose}
 combined <- list(res_list=res_list,
                  dds_list=dds_list,
                  rld_list=rld_list,
@@ -365,8 +398,257 @@ combined <- list(res_list=res_list,
 saveRDS(combined, 'carnation_vignette.rds', compress=FALSE)
 ```
 
+## Data Organization
+
+Organize your data in a directory structure that Carnation can easily navigate,
+e.g. in a folder `carnation/data` in your home directory. Here, we make
+a subfolder `airway` in this folder and copy the `RDS` file we created above.
+
+```
+~/carnation/data/
+  └─ airway
+     └─ carnation-vignette.rds
+```
+
+Now, we're ready for the first run.
+
+## First Run
+
+Load the carnation package.
+
+```{r first_load}
+library(carnation)
+```
+
+Carnation allows you to download interactive plots as PDF. To use
+this functionality you need to install some required Python dependencies:
+
+```{r install, eval=FALSE}
+install_carnation()  # Installs plotly and kaleido for PDF export
+```
+
+Now, run the app:
+
+```{r run_app, eval=FALSE}
+run_carnation()
+```
+
+To run on a fixed port, e.g. when using remote servers with SSH port forwarding,
+specify `port` within a list of options.
+
+```{r run_app2, eval=FALSE}
+run_carnation(options=list(port=12345, launch.browser=FALSE))
+```
+
+Then access Carnation by opening the URL: `http://127.0.0.1:12345`
+
+### Initial setup
+
+- The first time you run carnation, you will be asked to specify where your data is located
+  with a modal dialog.
+
+  Enter the folder where you saved the RDS file, `~/carnation/data`, then click 'OK'.
+
+  ![ ](images/01_first_run.png){width=600px}
+
+- Now carnation will automatically refresh and you will see `data/airway` in the "Available Projects"
+  menu, and `carnation_vignette` in the "Available Datasets".
+
+  Since this is the only dataset we have, these options are automatically selected.
+  Now click 'Go' to load the data.
+
+  ![ ](images/02_pre_load.png){width=600px}
+
+  Now carnation will load the airway data and switch to the "Summary" tab.
+
+### General layout
+
+The interface of Carnation consists of a main central panel for content, a sidebar
+containing settings and 'Gene scratchpad' buttons and context-specific help buttons.
+
+![ ](images/03_layout.png){width=700px}
+
+## Feature overview
+
+Carnation is organized into three major sections each with
+its own set of subtabs to organize different portions of the RNA-Seq analysis.
+
+### DE analysis
+
+Here you can analyze differential expression through different tables and
+visualizations:
+
+- *Summary*: Get a quick overview of your differential expression results
+
+  ![ ](images/04_data_loaded.png){width=600px}
+
+- *Metadata*: Explore sample metadata and experimental design. You can also add
+  metadata columns.
+
+  ![ ](images/05_metadata.png){width=600px}
+
+- *PCA Plot*: Visualize sample relationships with PCA plot.
+
+  ![ ](images/06a_pca_analysis_cell_2d.png){width=600px}
+
+  You can also view the plot in 3D
+
+  ![ ](images/06b_pca_analysis_dex_3d.png){width=600px}
+
+  or with gene loadings overlaid.
+
+  ![ ](images/06c_pca_analysis_loadings.png){width=600px}
+
+- *MA Plot*: Identify differentially expressed genes with statistical significance
+
+  ![ ](images/07_ma_plot.png){width=600px}
+
+- *Scatter Plot*: Compare fold-changes of genes across different comparisons
+
+  ![ ](images/08_scatter.png){width=600px}
+
+- *Gene Plot*: Create customizable expression visualizations for genes of interest
+
+  ![ ](images/09_geneplot_facet.png){width=600px}
+
+- *UpSet Plot*: Discover overlapping gene sets across multiple comparisons
+
+  ![ ](images/10_upset.png){width=600px}
+
+- *Heatmap*: Examine expression patterns across samples and conditions
+
+  ![ ](images/11_heatmap.png){width=600px}
+
+### Functional enrichment
+
+Explore functional enrichment analysis results using this module:
+
+- **Table**: Interactive tables with powerful search capabilities
+
+  ![ ](images/12_functable.png){width=650px}
+
+- **Plots**: Seven different visualizations including network plots and dendrograms
+  from the GeneTonic and clusterProfiler packages:
+
+  - Summary overview to view top enriched terms
+    ![ ](images/13a_sumov.png){width=600px}
+
+  - Three flavors of enrichment map including one with similar terms grouped together
+    ![ ](images/13b_emap_distill.png){width=600px}
+
+  - Cnetplot: network plot highlighting genes connecting functional terms
+    ![ ](images/13c_cnetplot.png){width=600px}
+
+  - Radar plot: top enriched terms shown in a circular view
+    ![ ](images/13d_radar.png){width=600px}
+
+  - Alluvial plot: flow diagram highlighting genes connecting functional terms
+    ![ ](images/13e_alluvial.png){width=600px}
+
+  - Dendrogram: hierarchical tree view of top enriched terms
+    ![ ](images/13f_dendrogram.png){width=600px}
+
+- **Compare Results**: Directly compare enrichment results between conditions using
+  three different visualizations.
+
+  - Summary overview comparing contrasts
+    ![ ](images/14a_comp_sumov.png){width=600px}
+
+  - Radar plot for two comparisons
+
+    ![ ](images/14b_comp_radar.png){width=600px}
+
+  - Horizon plot for top terms connected by comparison
+    ![ ](images/14c_comp_horizon.png){width=600px}
+
+### Pattern analysis
+
+Identify co-regulated gene clusters across conditions
+
+- **Plot**: Visualize expression patterns of gene clusters
+
+![ ](images/15_pattern_plot.png){width=600px}
+
+- **Cluster Membership**: Explore which genes belong to which clusters
+  using an interactive table
+
+![ ](images/15a_pattern_tbl.png){width=600px}
+
+### Gene scratchpad
+
+You can keep track of genes of interest across Carnation using the gene scratchpad.
+
+- To use this feature, click on the "Gene scratchpad" button in the sidebar.
+- To start you can add top differentially expressed genes from a specific comparison
+  by using the "Top genes settings" and clicking "Add top genes".
+
+    ![ ](images/11a_gene_scratchpad.png){width=300px}
+
+  Now several plots in the "DE analysis" section will have these genes labeled, e.g.
+  the MA plot, scatter plot, and others.
+
+  Labeled MA plot
+
+  ![ ](images/11b_ma_plot_label.png){width=600px}
+
+  Labeled scatter plot
+
+  ![ ](images/11c_scatter_plot_label.png){width=600px}
+
+  These genes can also be used to label the pattern analysis plot. Set
+  "label" to "gene_scratchpad" and click "Refresh plot".
+
+  ![ ](images/11d_pattern_plt_label.png){width=400px}
+
+  Now the genes are labeled on the plot. You will also see a table below summarizing
+  the clusters where these genes were found.
+
+  ![ ](images/11e_pattern_plt_label2.png){width=600px}
+
+- You can also quickly add genes to the scratchpad from functional enrichment tables
+
+  First, select your term of interest from the enrichment table
+
+  ![ ](images/11f_functbl_click.png){width=700px}
+
+  then, click the 'Add to scratchpad' button at the bottom of the page.
+
+  ![ ](images/11g_functbl_add.png){width=700px}
+
+  Now, these genes will be added to the scratchpad and can be used to label
+  plots as shown above.
+
+  ![ ](images/11h_functbl_scratch_show.png){width=300px}
+
+### Server Mode
+
+Carnation supports multi-user environments with authentication:
+
+```{r server, eval=FALSE}
+# Create user database
+credentials <- data.frame(
+  user = c('shinymanager'),
+  password = c('12345'),
+  admin = c(TRUE),
+  stringsAsFactors = FALSE
+)
+
+# Initialize the database
+shinymanager::create_db(
+  credentials_data = credentials,
+  sqlite_path = 'credentials.sqlite',
+  passphrase = 'admin_passphrase'
+)
+```
+
+Now run carnation with authentication
+
+```{r run_server, eval=FALSE}
+run_carnation(credentials='credentials.sqlite', passphrase='admin_passphrase')
+```
+
 # sessionInfo
 
-```{r}
+```{r sessionInfo}
 sessionInfo()
 ```

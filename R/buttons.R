@@ -1,9 +1,35 @@
-#' Help button module ui
+#' Help button module
 #'
-#' UI for help button module
+#' @description
+#' Module UI & server for help buttons.
 #'
-#' @param id Input id
+#' @param id Module id. This also doubles as prefixes for help text files.
+#' @param ... other params passed to helpModal()
 #'
+#' @returns
+#' UI returns tagList with help button UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @examples
+#' library(shiny)
+#'
+#' # app with a single help button to show DE summary table details
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            helpButtonUI('de_summary_help')
+#'          ),
+#'     server = function(input, output, session){
+#'                helpButtonServer('de_summary_help')
+#'              }
+#'   )
+#' }
+#'
+#' @rdname helpmod
+#' @name helpmod
+NULL
+
+#' @rdname helpmod
 #' @export
 helpButtonUI <- function(id){
   ns <- NS(id)
@@ -16,13 +42,7 @@ helpButtonUI <- function(id){
                style=config$style$help_buttons)
 }
 
-#' Help button module server
-#'
-#' Server for help button module
-#'
-#' @param id Input id
-#' @param ... other params passed to helpModal()
-#'
+#' @rdname helpmod
 #' @export
 helpButtonServer <- function(id, ...){
   moduleServer(
@@ -47,7 +67,6 @@ helpButtonServer <- function(id, ...){
   ) # moduleServer
 }
 
-
 #' Help modal
 #'
 #' This generates a modal dialog that includes text
@@ -57,7 +76,8 @@ helpButtonServer <- function(id, ...){
 #' @param title Title of modal dialog
 #' @param ... other params passed to modalDialog()
 #'
-#' @export
+#' @return Modal dialog with help documentation.
+#'
 helpModal <- function(mdfile, title=NULL, ...){
   modalDialog(
       title=title,
@@ -70,12 +90,50 @@ helpModal <- function(mdfile, title=NULL, ...){
   )
 }
 
-#' Download button module ui
+#' Download button module
 #'
-#' UI for download button module
+#' @description
+#' Module UI & server for download buttons.
 #'
-#' @param id Input id
+#' @param id Module id
+#' @param outplot reactive plot handle
+#' @param plot_type reactive/static value used for output filename
 #'
+#' @returns
+#' UI returns tagList with download button UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @examples
+#' library(shiny)
+#' library(ggplot2)
+#'
+#' # get example object
+#' obj <- make_example_carnation_object()
+#' res <- as.data.frame(obj$res[[1]])
+#'
+#' # make MA plot
+#' p <- ggplot(res, aes(x=baseMean, y=log2foldChange)) +
+#'        geom_point(color='black', alpha=0.5)
+#'
+#' outplot <- reactive({ p })
+#'
+#' # app with a single button to download a plot
+#' if(interactive()){
+#'   shinyApp(
+#'     ui = fluidPage(
+#'            downloadButtonUI('p')
+#'          ),
+#'     server = function(input, output, session){
+#'                downloadButtonServer('p', outplot, 'maplot')
+#'              }
+#'   )
+#' }
+#'
+#' @rdname dlmod
+#' @name dlmod
+NULL
+
+#' @rdname dlmod
 #' @export
 downloadButtonUI <- function(id){
   ns <- NS(id)
@@ -88,14 +146,7 @@ downloadButtonUI <- function(id){
                style=config$style$dload_buttons)
 }
 
-#' Download button module server
-#'
-#' Server for download button module
-#'
-#' @param id Input id
-#' @param outplot reactive plot handle
-#' @param plot_type reactive/static value used for output filename
-#'
+#' @rdname dlmod
 #' @export
 downloadButtonServer <- function(id, outplot, plot_type){
   moduleServer(

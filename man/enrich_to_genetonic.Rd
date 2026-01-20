@@ -11,7 +11,20 @@ enrich_to_genetonic(enrich, res)
 
 \item{res}{data frame with DE analysis results}
 }
+\value{
+GeneTonic object
+}
 \description{
 This function takes an enrichResult object and
 DE analysis results and creates a GeneTonic object.
+}
+\examples{
+# get enrich & res objects
+data(res_dex, package="carnation")
+data(eres_dex, package="carnation")
+
+# convert to GeneTonic object
+gt <- enrich_to_genetonic(eres_dex, res_dex)
+
+
 }

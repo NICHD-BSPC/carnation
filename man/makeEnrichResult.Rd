@@ -23,7 +23,21 @@ makeEnrichResult(
 
 \item{type}{string, can be 'enrichResult' or 'gseaResult'}
 }
+\value{
+enrichResult object
+}
 \description{
 Most of the parameters are just placeholders and the
 dataframe must contain the columns 'ID' and 'geneID'
+}
+\examples{
+# get enrichResult object
+data(eres_dex, package='carnation')
+
+# extract the results
+df <- as.data.frame(eres_dex)
+
+# convert to a stripped down enrichResult object
+eres2 <- makeEnrichResult(df)
+
 }

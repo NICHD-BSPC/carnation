@@ -1,8 +1,68 @@
-#' MA plot module UI
+#' MA plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' UI & server for module to create MA plot
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing carnation object
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
+#' & 'gene.to.plot' (genes selected in scratchpad)
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with MA plot UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @examplesIf interactive()
+#' library(shiny)
+#' library(DESeq2)
+#'
+#' # Create reactive values to simulate app state
+#' oobj <- make_example_carnation_object()
+#'
+#' obj <- reactiveValues(
+#'    dds = oobj$dds,
+#'    rld = oobj$rld,
+#'    res = oobj$res,
+#'    all_dds = oobj$all_dds,
+#'    all_rld = oobj$all_rld,
+#'    dds_mapping = oobj$dds_mapping
+#' )
+#'
+#' # Set up coldata structure that the module expects
+#' coldata <- reactiveValues(
+#'   curr = list(
+#'     all_samples = colData(oobj$dds$main),
+#'     main = colData(oobj$dds$main)
+#'   )
+#' )
+#'
+#' plot_args <- reactive({
+#'   list(
+#'     fdr.thres=0.1,
+#'     fc.thres=0,
+#'     gene.to.plot=c('gene1', 'gene2')
+#'   )
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(maPlotUI('p', 'sidebar')),
+#'          mainPanel(maPlotUI('p', 'main'))
+#'        ),
+#'   server = function(input, output, session){
+#'              maPlotServer('p', obj, plot_args, config)
+#'            }
+#' )
+#'
+#' @name maplotmod
+#' @rdname maplotmod
+NULL
+
+#' @rdname maplotmod
 #' @export
 maPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -88,14 +148,7 @@ maPlotUI <- function(id, panel){
   }
 }
 
-#' MA plot module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
-#' & 'gene.to.plot' (genes selected in scratchpad)
-#' @param config reactive list with config settings
-#'
+#' @rdname maplotmod
 #' @export
 maPlotServer <- function(id, obj, plot_args, config){
 
@@ -188,9 +241,9 @@ maPlotServer <- function(id, obj, plot_args, config){
         df <- app_object()$res[[input$comp_all]]
 
         # add a 5% buffer and round to 3 significant digits
-        df.max <- round(max(df$log2FoldChange, na.rm=T)*1.05,
+        df.max <- round(max(df$log2FoldChange, na.rm=TRUE)*1.05,
                         digits=3)
-        df.min <- round(min(df$log2FoldChange, na.rm=T)*1.05,
+        df.min <- round(min(df$log2FoldChange, na.rm=TRUE)*1.05,
                         digits=3)
 
         updateNumericInput(session, 'ma_ymin', value=df.min)

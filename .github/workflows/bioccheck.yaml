@@ -1,0 +1,73 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+#
+# See https://github.com/r-lib/actions/tree/master/examples#readme for
+# additional example workflows available for the R community.
+
+name: bioccheck
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: git setup
+        # Set up git and export env vars to be used in later steps.
+        #   Note the unconventional mechanism for exporting envs by appending to
+        #   $GITHUB_ENV.
+        id: git-setup
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          echo "BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+          echo "WORKDIR=$(pwd)" >> $GITHUB_ENV
+          echo "VERSION=$( cat DESCRIPTION | grep Version | awk '{print $2}')" >> $GITHUB_ENV
+
+      - name: install miniforge
+        run: |
+          wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
+          bash Miniforge3.sh -b -p "${HOME}/conda"
+          rm Miniforge3.sh
+
+      - name: Run BiocCheck
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --add channels conda-forge
+          conda config --set channel_priority strict
+
+          # make the env one above WORKDIR
+          echo "  - bioconductor-bioccheck" >> requirements.yaml
+          conda env create -p ../env-bioccheck --file requirements.yaml
+          conda activate ../env-bioccheck
+
+          # create tmp dir for build and check
+          cd .. && mkdir bioccheck && cd bioccheck
+
+          Rscript -e "library(BiocCheck); BiocCheck('../carnation')"
+          tar cvzf bioccheck.tar.gz ../carnation.BiocCheck/
+          mv bioccheck.tar.gz ${WORKDIR}/bioccheck.tar.gz
+
+      - name: bioccheck log
+        uses: actions/upload-artifact@v4
+        with:
+          name: bioccheck-log
+          path: bioccheck.tar.gz
+
+
+

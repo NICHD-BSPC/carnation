@@ -45,15 +45,6 @@ jobs:
           bash Miniforge3.sh -b -p "${HOME}/conda"
           echo "^Miniforge3\.sh$" >> .Rbuildignore
 
-      - name: conda env pinned
-        run: |
-          source "${HOME}/conda/etc/profile.d/conda.sh"
-          conda config --add channels conda-forge
-          conda config --set channel_priority strict
-
-          # make env one above WORKDIR
-          conda env create -p ../env --file requirements-pinned.yaml
-
       - name: conda env unpinned
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
@@ -76,14 +67,14 @@ jobs:
       - name: Check, install & load library
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
-          conda activate ../env
+          conda activate ../env-unpinned
 
           # create tmp dir for build and check
           cd .. && mkdir tmp && cd tmp
 
           # build, check
-          R CMD build --no-build-vignettes --no-manual ../carnation
-          R CMD check --as-cran --no-manual --no-vignettes carnation_${VERSION}.tar.gz
+          R CMD build --no-manual ../carnation
+          R CMD check --no-manual --no-vignettes --timings --as-cran carnation_${VERSION}.tar.gz
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
 
@@ -93,6 +84,15 @@ jobs:
           name: carnation-bundle
           path: carnation.tar.gz
 
+      - name: conda env pinned
+        run: |
+          source "${HOME}/conda/etc/profile.d/conda.sh"
+          conda config --add channels conda-forge
+          conda config --set channel_priority strict
+
+          # make env one above WORKDIR
+          conda env create -p ../env --file requirements-pinned.yaml
+
       - name: remotes install
         run: |
           source "${HOME}/conda/etc/profile.d/conda.sh"
@@ -100,6 +100,8 @@ jobs:
 
           Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation', upgrade='never')"
           Rscript -e "library(carnation)"
+
+
 
 
 

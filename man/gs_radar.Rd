@@ -14,9 +14,9 @@ gs_radar(
 )
 }
 \arguments{
-\item{res_enrich}{DE results from comparison 1}
+\item{res_enrich}{GeneTonic object for comparison 1}
 
-\item{res_enrich2}{DE results from comparison 2}
+\item{res_enrich2}{GeneTonic object for comparison 2 (default = NULL)}
 
 \item{label1}{label for comparison 1}
 
@@ -32,4 +32,28 @@ ggplot handle
 \description{
 This is a copy of gs_radar from GeneTonic where the labels of
 gene sets are converted to parameters
+}
+\examples{
+library(GeneTonic)
+
+# get DESeqResults object
+data(res_dex, package='carnation')
+
+# get enrichResult object
+data(eres_dex, package='carnation')
+
+# convert to GeneTonic object
+gt <- shake_enrichResult(eres_dex)
+
+# get annotation df
+idx <- match(c('gene','symbol'), tolower(colnames(res_dex)))
+anno_df <- res_dex[,idx]
+colnames(anno_df) <- c('gene_id', 'gene_name')
+
+# add aggregate score columns
+gt <- get_aggrscores(gt, res_dex, anno_df)
+
+# make radar plot
+p <- gs_radar(gt)
+
 }

@@ -23,6 +23,13 @@ carnation <- "r-carnation"
 #' @param envname name of the python environment
 #' @param ... parameters passed to reticulate::py_install
 #'
+#' @return \code{NULL}, invisibly. The function is called for its side effects.
+#'
+#' @examples
+#' if(interactive()){
+#'     install_carnation()
+#' }
+#'
 #' @export
 install_carnation <- function(envname, ...) {
   if(missing(envname)) envname <- carnation

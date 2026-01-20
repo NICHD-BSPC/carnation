@@ -17,6 +17,15 @@ top.genes(res, fdr.thres = 0.01, fc.thres = 0, n = 10, by = "log2FoldChange")
 
 \item{by}{metric to determine top genes ('log2FoldChange' or 'padj')}
 }
+\value{
+vector of gene symbols
+}
 \description{
 Get top DE genes by log2FoldChange or adjusted p-value
+}
+\examples{
+# get DE results
+data(res_dex, package='carnation')
+
+g <- top.genes(res_dex)
 }

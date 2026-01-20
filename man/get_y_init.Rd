@@ -14,6 +14,20 @@ between 0 and 1}
 
 \item{pseudocount}{pseudo-count to add to the data.frame}
 }
+\value{
+min and max limits for count column, padded for visualization
+}
 \description{
 Get initial y-axis limits
+}
+\examples{
+# make example DESeq dataset
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# get gene counts
+df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
+
+# get y axis limits
+get_y_init(df, y_delta = 0.01, pseudocount = 1)
+
 }

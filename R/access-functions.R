@@ -6,21 +6,24 @@
 #'
 #' @return path to access yaml
 #'
+#' @examples
+#' p <- get_access_path()
+#'
 #' @export
 get_access_path <- function(){
   if(Sys.getenv('CARNATION_ACCESS_YAML') != ''){
     path <- Sys.getenv('CARNATION_ACCESS_YAML')
     if(!dir.exists(path)){
       stop(
-        paste('Environment variable "CARNATION_ACCESS_YAML" exists',
-              'but specified location does not exist on disk:', path)
+        'Environment variable "CARNATION_ACCESS_YAML" exists',
+        'but specified location does not exist on disk:', path
       )
     }
   } else {
     path <- path.expand('~')
     message(
-      paste('Environment variable "CARNATION_ACCESS_YAML" not found.',
-            'Using default location to save access yaml:', path)
+      'Environment variable "CARNATION_ACCESS_YAML" not found.',
+      'Using default location to save access yaml:', path
     )
   }
   file.path(path, '.carnation-access.yaml')
@@ -37,6 +40,25 @@ get_access_path <- function(){
 #' @param al list with access settings; should have two elements - user_group & data_area
 #' @param u user name
 #' @param admin Admin user group
+#'
+#' @return list of user groups and data areas
+#'
+#' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
+#' # get current user access details
+#' al <- read_access_yaml()
+#'
+#' lst <- check_user_access(al, u='admin')
 #'
 #' @export
 check_user_access <- function(al, u, admin='admin'){

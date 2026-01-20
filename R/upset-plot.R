@@ -1,8 +1,65 @@
-#' Upset plot module UI
+#' Upset plot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
+#' @description
+#' Module UI & server to generate upset plots.
+#'
+#' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
+#' @param obj reactiveValues object containing carnation object
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold) & 'fc.thres' (log2FC)
+#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad
+#' @param reset_genes reactive to reset gene scratchpad selection
+#' @param config reactive list with config settings
 #'
+#' @returns
+#' UI returns tagList with upset plot UI.
+#' Server returns reactive with list containing upset table, intersections
+#' & selected genes.
+#'
+#' @examplesIf interactive()
+#' library(shiny)
+#'
+#' oobj <- make_example_carnation_object()
+#'
+#' obj <- reactiveValues(
+#'    dds = oobj$dds,
+#'    rld = oobj$rld,
+#'    res = oobj$res,
+#'    all_dds = oobj$all_dds,
+#'    all_rld = oobj$all_rld,
+#'    dds_mapping = oobj$dds_mapping
+#' )
+#'
+#' plot_args <- reactive({
+#'   list(
+#'     fdr.thres=0.1,
+#'     fc.thres=0
+#'   )
+#' })
+#'
+#' gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+#'
+#' reset_genes <- reactiveVal()
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(upsetPlotUI('p', 'sidebar')),
+#'          mainPanel(upsetPlotUI('p', 'sidebar'))
+#'        ),
+#'   server = function(input, output, session){
+#'              upset_data <- upsetPlotServer('p', obj, plot_args,
+#'                                            gene_scratchpad,
+#'                                            reset_genes, config)
+#'            }
+#' )
+#'
+#' @rdname upsetmod
+#' @name upsetmod
+NULL
+
+#' @rdname upsetmod
 #' @export
 upsetPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -189,15 +246,7 @@ upsetPlotUI <- function(id, panel){
 
 }
 
-#' Upset plot module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold) & 'fc.thres' (log2FC)
-#' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad
-#' @param reset_genes reactive to reset gene scratchpad selection
-#' @param config reactive list with config settings
-#'
+#' @rdname upsetmod
 #' @export
 upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
 
@@ -264,7 +313,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
 
         comp_num <- config()$server$de_analysis$upset_plot$comp_num
         if(length(choices) > comp_num){
-          choices <- choices[1:comp_num]
+          choices <- choices[seq_len(comp_num)]
         }
 
         upset_choices$current <- choices
@@ -393,7 +442,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
       })
 
       observeEvent(input$custom_reset, {
-        for(i in 1:nrow(upset_choices$tbl)){
+        for(i in seq_len(nrow(upset_choices$tbl))){
           upset_choices$tbl[i, ] <- ''
         }
         custom_tbl_proxy %>% selectCells(NULL)
@@ -450,7 +499,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
 
             # empty tbl
             new_tbl <- upset_choices$tbl
-            for(i in 1:nrow(upset_choices$tbl)){
+            for(i in seq_len(nrow(upset_choices$tbl))){
               new_tbl[i, ] <- ''
             }
 
@@ -640,7 +689,7 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
 
         intersect_num <- config()$server$de_analysis$upset_plot$intersect_num
         if(length(selected) > intersect_num){
-          selected <- selected[1:intersect_num]
+          selected <- selected[seq_len(intersect_num)]
         }
         updateSelectizeInput(session, 'upset_intersections',
                              choices=inter_choices,

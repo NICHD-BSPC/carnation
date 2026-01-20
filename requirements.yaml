@@ -8,7 +8,7 @@ dependencies:
   - bioconductor-genetonic
   - bioconductor-matrixgenerics
   - bioconductor-summarizedexperiment
-  - r-base>=4.0
+  - r-base>=4.3.0
   - r-backbone<3.0.0
   - r-colorspace
   - r-complexupset
@@ -43,3 +43,6 @@ dependencies:
   - python-kaleido
   - qpdf
 
+  - bioconductor-airway
+  - bioconductor-degreport
+  - bioconductor-org.hs.eg.db
