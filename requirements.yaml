@@ -9,6 +9,7 @@ dependencies:
   - bioconductor-matrixgenerics
   - bioconductor-summarizedexperiment
   - r-base>=4.3.0
+  - r-backbone<3.0.0
   - r-colorspace
   - r-complexupset
   - r-dendextend
