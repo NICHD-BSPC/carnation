@@ -10,3 +10,7 @@
 ^docs$
 ^pkgdown$
 ^\.github$
+^run-tests\.R$
+^application-map\.md$
+^carnation_application_note\.md$
+^testing*.md$
