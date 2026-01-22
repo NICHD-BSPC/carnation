@@ -69,4 +69,45 @@ mock_carnation_obj <- function(){
   )
 }
 
+# Helper function to create mock degpatterns data
+create_mock_degpatterns <- function(n_genes = 50, n_samples = 6) {
+  # Create sample metadata
+  coldata <- data.frame(
+    condition = factor(rep(c("control", "treatment"), each = n_samples/2)),
+    group = factor(rep(c("A", "B", "C"), length.out = n_samples)),
+    samplename = paste0("sample", 1:n_samples),
+    row.names = paste0("sample", 1:n_samples)
+  )
+
+  # Create normalized expression data
+  genes <- paste0("gene", 1:n_genes)
+  symbols <- paste0("GENE", 1:n_genes)
+
+  # Create clusters (3 clusters)
+  clusters <- sample(1:3, n_genes, replace = TRUE)
+
+  # Create expression data for each gene across samples
+  expr_data <- lapply(1:n_genes, function(i) {
+    # Base expression with cluster-specific pattern
+    base_expr <- rnorm(n_samples, mean = 5 + clusters[i], sd = 0.5)
+
+    data.frame(
+      genes = genes[i],
+      symbol = symbols[i],
+      value = base_expr,
+      cluster = clusters[i],
+      condition = coldata$condition,
+      group = coldata$group,
+      samplename = coldata$samplename,
+      stringsAsFactors = FALSE
+    )
+  })
+
+  # Combine all genes into one data frame
+  normalized <- do.call(rbind, expr_data)
+
+  # Return in degPatterns format
+  list(normalized = normalized)
+}
+
 
