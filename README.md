@@ -23,9 +23,21 @@ Carnation is an interactive Shiny dashboard that transforms complex bulk RNA-Seq
 
 ## 🚀 Installation
 
-### conda (recommended)
+### remotes
 
-The easiest way to get started with Carnation is through conda, which handles all dependencies automatically:
+You can install the developmental version of carnation from github using the `remotes`
+package:
+
+```r
+install.packages('remotes')
+remotes::install_github('NICHD-BSPC/carnation',
+                        dependencies=TRUE, build_vignettes=TRUE)
+```
+
+
+### conda
+
+An alternative way to get started with Carnation is through conda, which handles all dependencies automatically:
 
 ```bash
 # Create environment outside the carnation directory
@@ -39,16 +51,6 @@ to make sure the conda-installed package versions remain unchanged.
 
 ```r
 remotes::install_github('NICHD-BSPC/carnation', upgrade='never')
-```
-
-### remotes
-
-Alternatively, you can install directly with `remotes`:
-
-```r
-install.packages('remotes')
-setRepositories(ind=c(1,2,3,4,5))  # Get both CRAN and Bioconductor packages
-remotes::install_github('NICHD-BSPC/carnation')
 ```
 
 ## 🏁 Getting Started
