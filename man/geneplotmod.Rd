@@ -32,7 +32,7 @@ Server invisibly returns NULL (used for side effects).
 UI & server for module to create gene plot
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 library(shiny)
 library(DESeq2)
 

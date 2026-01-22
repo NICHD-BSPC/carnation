@@ -36,7 +36,7 @@ server returns reactive with gene selected from functional enrichment tables.
 UI & module to show functional enrichment tables & plots.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 library(shiny)
 library(DESeq2)
 

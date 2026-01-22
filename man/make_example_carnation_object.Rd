@@ -13,7 +13,7 @@ reactiveValues object containing carnation object
 Returns example carnation object used in examples & testing
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 obj <- make_example_carnation_object()
 \dontshow{\}) # examplesIf}
 }
