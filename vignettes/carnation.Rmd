@@ -3,17 +3,16 @@ title: "carnation - airway tutorial"
 author: "Apratim Mitra"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 abstract: >
-  Carnation is an interactive Shiny dashboard that simplifies and transforms
+  `carnation` is an interactive Shiny dashboard that simplifies and transforms
   complex bulk RNA-Seq data using insightful visualizations and numerous
   interactive features. Designed for both computational and experimental
-  biologists, Carnation makes exploring differential expression analysis,
-  functional enrichment, and pattern analysis intuitive and exciting.
-  In this vignette, we will describe some of its functionality using the `airway`
-  dataset.
-
-  Carnation package version: `r packageVersion("carnation")`
+  biologists, `carnation` makes exploring differential expression analysis,
+  functional enrichment, and pattern analysis intuitive and accessible, while
+  providing a platform to manage multiple complex RNA-Seq datasets either
+  locally or on a server to share with collaborators (package version:
+  `r packageVersion("carnation")`).
 output:
-  rmarkdown::html_document:
+  BiocStyle::html_document:
     toc: true
 vignette: >
   %\VignetteIndexEntry{carnation - airway tutorial}
@@ -28,6 +27,22 @@ knitr::opts_chunk$set(
 )
 ```
 
+Now, we will use the `airway` dataset to explore some of
+`carnation's` functionality.
+
+## Install carnation
+
+Install carnation from Bioconductor using `BiocManager::install`.
+
+```{r pkg_install, eval=FALSE}
+# first check to see if BiocManager is available
+if(!requireNamespace('BiocManager', quietly=TRUE)){
+  install.packages('BiocManager')
+}
+
+BiocManager::install('carnation')
+```
+
 ## Load libraries & airway dataset
 
 First check for and load some libraries that we will need for this tutorial.
@@ -36,9 +51,8 @@ First check for and load some libraries that we will need for this tutorial.
 # install optional packages if not present
 pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'DEGreport')
 for(pkg in pkgs_to_check){
-  setRepositories(ind=c(1,2,3,4,5))
   if(!requireNamespace(pkg, quietly=TRUE)){
-    install.packages(pkg, repos='http://cran.us.r-project.org')
+    BiocManager::install(pkg)
   }
 }
 ```
@@ -646,6 +660,35 @@ Now run carnation with authentication
 ```{r run_server, eval=FALSE}
 run_carnation(credentials='credentials.sqlite', passphrase='admin_passphrase')
 ```
+
+# Summary
+
+In summary, `carnation` adds to the rich Bioconductor ecosystem providing
+a sophisticated interactive tool that makes it easier to ask complex questions
+of the data and accelerate the process of scientific discovery for biologists
+and computational scientists alike. Other packages with comparable
+functionality include `r BiocStyle::Biocpkg('pcaExplorer')`, `r BiocStyle::Biocpkg('iSEE')`
+& `r BiocStyle::Biocpkg('RFLOMICS')`. However, `carnation's` unique combination
+of thoughtful features, e.g. fuzzy search & gene scratchpad, in-built access
+management system and deployment flexibility to single or multi-user
+environments, makes it ideal as a platform for managing and sharing complex
+bulk RNA-Seq projects with collaborators.
+
+`carnation` currently supports the following widely-used tools:
+
+- Differential expression analysis: `r BiocStyle::Biocpkg('DESeq2')`
+- Functional enrichment analysis: `r BiocStyle::Biocpkg('clusterProfiler')`
+  (both overrepresentation & gene set enrichment analysis).
+- Pattern analysis: `r BiocStyle::Biocpkg('DEGreport')`
+
+The functional enrichment module incorporates plots from the `r BiocStyle::Biocpkg('GeneTonic')`
+and `r BiocStyle::Biocpkg('enrichplot')` packages.
+
+Future plans include extending functionality to include support for other
+differential expression frameworks, e.g. `r BiocStyle::Biocpkg('edgeR')` &
+`r BiocStyle::Biocpkg('limma')`, functional enrichment tools, e.g.
+`r BiocStyle::Biocpkg('topGO')` and coexpression analysis methods, e.g.
+`r BiocStyle::CRANpkg('WGCNA')`.
 
 # sessionInfo
 
