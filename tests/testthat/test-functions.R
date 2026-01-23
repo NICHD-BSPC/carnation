@@ -508,7 +508,7 @@ test_that("getcountplot creates correct gene count plots", {
   )
 
   # Test that a ggplot object is returned
-  expect_true(is.ggplot(p))
+  expect_true(is_ggplot(p))
 
   # Test that the plot has the expected layers
   expect_true(length(p$layers) > 0)
@@ -526,7 +526,7 @@ test_that("getcountplot creates correct gene count plots", {
     title = "Test Gene Plot"
   )
 
-  expect_true(is.ggplot(p_custom))
+  expect_true(is_ggplot(p_custom))
   expect_equal(p_custom$labels$title, "Test Gene Plot")
 })
 
@@ -542,7 +542,7 @@ test_that("getcountplot handles different plot options correctly", {
     color = "gene",
     log = TRUE
   )
-  expect_true(is.ggplot(p_log))
+  expect_true(is_ggplot(p_log))
 
   # Test without log transformation
   p_linear <- getcountplot(
@@ -552,7 +552,7 @@ test_that("getcountplot handles different plot options correctly", {
     color = "gene",
     log = FALSE
   )
-  expect_true(is.ggplot(p_linear))
+  expect_true(is_ggplot(p_linear))
 
   # Test with boxes disabled
   p_no_boxes <- getcountplot(
@@ -562,7 +562,7 @@ test_that("getcountplot handles different plot options correctly", {
     color = "gene",
     boxes = FALSE
   )
-  expect_true(is.ggplot(p_no_boxes))
+  expect_true(is_ggplot(p_no_boxes))
 
   # Test with legend disabled
   p_no_legend <- getcountplot(
@@ -572,7 +572,7 @@ test_that("getcountplot handles different plot options correctly", {
     color = "gene",
     legend = FALSE
   )
-  expect_true(is.ggplot(p_no_legend))
+  expect_true(is_ggplot(p_no_legend))
 })
 
 test_that("getcountplot handles faceting correctly", {
@@ -587,7 +587,7 @@ test_that("getcountplot handles faceting correctly", {
     color = "gene",
     facet = "batch"
   )
-  expect_true(is.ggplot(p_facet))
+  expect_true(is_ggplot(p_facet))
 
   # Test with multiple facet variables
   p_multi_facet <- getcountplot(
@@ -598,7 +598,7 @@ test_that("getcountplot handles faceting correctly", {
     facet = c("batch", "gene"),
     nrow = 2
   )
-  expect_true(is.ggplot(p_multi_facet))
+  expect_true(is_ggplot(p_multi_facet))
 
   # Test with free y-axis scales
   p_freey <- getcountplot(
@@ -609,7 +609,7 @@ test_that("getcountplot handles faceting correctly", {
     facet = "batch",
     freey = TRUE
   )
-  expect_true(is.ggplot(p_freey))
+  expect_true(is_ggplot(p_freey))
 })
 
 test_that("getcountplot handles trendlines correctly", {
@@ -624,7 +624,7 @@ test_that("getcountplot handles trendlines correctly", {
     color = "gene",
     trendline = "smooth"
   )
-  expect_true(is.ggplot(p_smooth))
+  expect_true(is_ggplot(p_smooth))
 
   # Test with line trendline (median)
   p_line <- getcountplot(
@@ -634,7 +634,7 @@ test_that("getcountplot handles trendlines correctly", {
     color = "gene",
     trendline = "line"
   )
-  expect_true(is.ggplot(p_line))
+  expect_true(is_ggplot(p_line))
 
   # Test with no trendline
   p_no_trend <- getcountplot(
@@ -644,7 +644,7 @@ test_that("getcountplot handles trendlines correctly", {
     color = "gene",
     trendline = "none"
   )
-  expect_true(is.ggplot(p_no_trend))
+  expect_true(is_ggplot(p_no_trend))
 })
 
 test_that("getcountplot handles axis limits and scaling correctly", {
@@ -661,7 +661,7 @@ test_that("getcountplot handles axis limits and scaling correctly", {
     ymax = 300,
     log = FALSE
   )
-  expect_true(is.ggplot(p_limits))
+  expect_true(is_ggplot(p_limits))
 
   # Test with log scale and limits
   p_log_limits <- getcountplot(
@@ -673,7 +673,7 @@ test_that("getcountplot handles axis limits and scaling correctly", {
     ymax = 1000,
     log = TRUE
   )
-  expect_true(is.ggplot(p_log_limits))
+  expect_true(is_ggplot(p_log_limits))
 
   # Test with custom y-axis label
   p_custom_ylab <- getcountplot(
@@ -683,7 +683,7 @@ test_that("getcountplot handles axis limits and scaling correctly", {
     color = "gene",
     ylab = "Custom Y Label"
   )
-  expect_true(is.ggplot(p_custom_ylab))
+  expect_true(is_ggplot(p_custom_ylab))
   expect_equal(p_custom_ylab$labels$y, "Custom Y Label")
 })
 
@@ -704,7 +704,7 @@ test_that("getcountplot handles factor level filtering correctly", {
     factor.levels = c("control", "treatment"),  # Exclude "high_dose"
     color = "gene"
   )
-  expect_true(is.ggplot(p_filtered))
+  expect_true(is_ggplot(p_filtered))
 
   # Test with single factor level
   p_single <- getcountplot(
@@ -713,7 +713,7 @@ test_that("getcountplot handles factor level filtering correctly", {
     factor.levels = c("control"),
     color = "gene"
   )
-  expect_true(is.ggplot(p_single))
+  expect_true(is_ggplot(p_single))
 })
 
 test_that("getcountplot handles edge cases correctly", {
@@ -732,7 +732,7 @@ test_that("getcountplot handles edge cases correctly", {
     factor.levels = c("control", "treatment"),
     color = "gene"
   )
-  expect_true(is.ggplot(p_minimal))
+  expect_true(is_ggplot(p_minimal))
 
   # Test with single gene
   single_gene <- create_mock_gene_counts(n_samples = 4, genes = "gene1")
@@ -743,7 +743,7 @@ test_that("getcountplot handles edge cases correctly", {
     factor.levels = c("control", "treatment"),
     color = "gene"
   )
-  expect_true(is.ggplot(p_single_gene))
+  expect_true(is_ggplot(p_single_gene))
 })
 
 # Test get_gene_counts function (used to generate data for getcountplot)
@@ -871,7 +871,7 @@ test_that("get_gene_counts and getcountplot work together correctly", {
   )
 
   # Test that the workflow produces a valid plot
-  expect_true(is.ggplot(p))
+  expect_true(is_ggplot(p))
   expect_equal(p$labels$title, "Gene Expression Plot")
   expect_equal(p$labels$y, "Normalized counts")
 
@@ -908,7 +908,7 @@ test_that("getcountplot works with DESeq2 transformed data", {
     ylab = "VST-transformed counts"
   )
 
-  expect_true(is.ggplot(p_vst))
+  expect_true(is_ggplot(p_vst))
   expect_equal(p_vst$labels$y, "VST-transformed counts")
 })
 
