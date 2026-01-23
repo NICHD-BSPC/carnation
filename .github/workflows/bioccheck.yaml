@@ -39,6 +39,9 @@ jobs:
           echo "WORKDIR=$(pwd)" >> $GITHUB_ENV
           echo "VERSION=$( cat DESCRIPTION | grep Version | awk '{print $2}')" >> $GITHUB_ENV
 
+          # NOTE: setting R version here to lower than Bioc requirements
+          echo "RVERSION=4.3.0" >> $GITHUB_ENV
+
       - name: install miniforge
         run: |
           wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
@@ -55,6 +58,10 @@ jobs:
           echo "  - bioconductor-bioccheck" >> requirements.yaml
           conda env create -p ../env-bioccheck --file requirements.yaml
           conda activate ../env-bioccheck
+
+          # set R version in DESCRIPTION *before* bioccheck
+          cat ../carnation/DESCRIPTION | \
+            awk -v vers=$RVERSION '{if($0 ~ /R \(/){sub(/\(>=.+\)/, "(>= "vers")", $0);} print $0}' > ../carnation/DESCRIPTION
 
           # create tmp dir for build and check
           cd .. && mkdir bioccheck && cd bioccheck
