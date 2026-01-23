@@ -667,9 +667,9 @@ In summary, `carnation` adds to the rich Bioconductor ecosystem providing
 a sophisticated interactive tool that makes it easier to ask complex questions
 of the data and accelerate the process of scientific discovery for biologists
 and computational scientists alike. Other packages with comparable
-functionality include `r BiocStyle::Biocpkg('pcaExplorer')`, `r BiocStyle::Biocpkg('iSEE')`
-& `r BiocStyle::Biocpkg('RFLOMICS')`. However, `carnation's` unique combination
-of thoughtful features, e.g. fuzzy search & gene scratchpad, in-built access
+functionality include `r BiocStyle::Biocpkg('pcaExplorer')` &
+`r BiocStyle::Biocpkg('iSEE')`. However, `carnation's` unique combination of
+thoughtful features, e.g. fuzzy search & gene scratchpad, in-built access
 management system and deployment flexibility to single or multi-user
 environments, makes it ideal as a platform for managing and sharing complex
 bulk RNA-Seq projects with collaborators.
