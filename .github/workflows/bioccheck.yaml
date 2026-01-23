@@ -60,8 +60,7 @@ jobs:
           conda activate ../env-bioccheck
 
           # set R version in DESCRIPTION *before* bioccheck
-          cat ../carnation/DESCRIPTION | \
-            awk -v vers=$RVERSION '{if($0 ~ /R \(/){sub(/\(>=.+\)/, "(>= "vers")", $0);} print $0}' > ../carnation/DESCRIPTION
+          cat ../carnation/DESCRIPTION | awk -v vers=$RVERSION '{if($0 ~ /R \(/){sub(/\(>=.+\)/, "(>= "vers")", $0);} print $0}' > ../carnation/DESCRIPTION
 
           # create tmp dir for build and check
           cd .. && mkdir bioccheck && cd bioccheck
