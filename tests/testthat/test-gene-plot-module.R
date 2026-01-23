@@ -61,7 +61,6 @@ test_that("genePlotServer handles gene selection correctly", {
       gene_nrow = 1,
       legend = TRUE,
       txt_scale = 1,
-      #ylab
       facet = "none",           # Set to 'none' to avoid faceting issues
       facet_vars = "",          # Empty string to avoid NULL issues
       facet_var_levels = character(0)  # Empty character vector

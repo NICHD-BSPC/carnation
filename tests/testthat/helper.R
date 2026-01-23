@@ -110,4 +110,66 @@ create_mock_degpatterns <- function(n_genes = 50, n_samples = 6) {
   list(normalized = normalized)
 }
 
+# Helper function to create mock enrichment data
+create_mock_enrichment <- function(n_terms = 10, n_genes = 20) {
+  genes <- paste0("gene", 1:n_genes)
+
+  # make geneID list & get lenth
+  geneID <- sapply(1:n_terms, function(i) sample(genes, sample(5:10, 1)))
+  len <- unlist(lapply(geneID, length))
+
+  # get background distribution
+  bg <- sample(50:150, n_terms, replace = TRUE)
+  nbg <- 1000
+
+  # hypergeometric p-values
+  pval <- phyper(len, bg, nbg - bg, n_genes, lower.tail=FALSE)
+  padj <- p.adjust(pval, method='fdr')
+
+  # Create enrichment result data frame
+  df <- data.frame(
+    ID = paste0("GO:", sprintf("%07d", 1:n_terms)),
+    Description = paste("Biological Process", 1:n_terms),
+    GeneRatio = paste0(len, "/", n_genes),
+    BgRatio = paste0(bg, "/", nbg),
+    pvalue = pval,
+    p.adjust = padj,
+    qvalue = padj,
+    geneID = sapply(geneID, function(x) paste(x, collapse='/')),
+    #pvalue = runif(n_terms, 0.0001, 0.05),
+    #p.adjust = runif(n_terms, 0.001, 0.1),
+    #qvalue = runif(n_terms, 0.001, 0.1),
+    #geneID = sapply(1:n_terms, function(i) paste(geneID, collapse = "/")),
+    Count = len,
+    stringsAsFactors = FALSE
+  )
+
+  df
+}
+
+# Helper function to create mock genetonic data
+create_mock_genetonic <- function(enrich_df, res_df) {
+  # Convert geneID from "/" to ","
+  l_gs <- enrich_df
+  l_gs$gs_id <- l_gs$ID
+  l_gs$gs_description <- l_gs$Description
+  l_gs$gs_pvalue <- l_gs$pvalue
+  l_gs$gs_genes <- gsub("/", ",", l_gs$geneID)
+  l_gs$gs_de_count <- l_gs$Count
+  l_gs$gs_bg_count <- as.numeric(sapply(strsplit(l_gs$BgRatio, "/"), `[`, 1))
+  l_gs$z_score <- rnorm(nrow(l_gs), 0, 1)
+  l_gs$aggr_score <- runif(nrow(l_gs), 0, 1)
+
+  # Create annotation data frame
+  all_genes <- unique(unlist(strsplit(l_gs$gs_genes, ",")))
+  anno_df <- data.frame(
+    gene_id = all_genes,
+    gene_name = toupper(all_genes),
+    row.names = all_genes,
+    stringsAsFactors = FALSE
+  )
+
+  list(l_gs = l_gs, anno_df = anno_df)
+}
+
 
