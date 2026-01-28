@@ -3,8 +3,7 @@
 #' `carnation` is an interactive Shiny dashboard that makes complex bulk RNA-Seq
 #' data more accessible and intuitive, integrating all facets of bulk RNA-Seq
 #' analysis using three modules - differential expression analysis, functional
-#' enrichment and pattern analysis. Here are some of the ways you can use
-#' `carnation`:
+#' enrichment and pattern analysis.
 #'
 #' - Deeply explore analysis results from complex experiments using interactive plots.
 #' - Easily keep track of genes of interest using the 'Gene scratchpad'.

@@ -9,8 +9,7 @@
 \code{carnation} is an interactive Shiny dashboard that makes complex bulk RNA-Seq
 data more accessible and intuitive, integrating all facets of bulk RNA-Seq
 analysis using three modules - differential expression analysis, functional
-enrichment and pattern analysis. Here are some of the ways you can use
-\code{carnation}:
+enrichment and pattern analysis.
 }
 \details{
 \itemize{
@@ -21,6 +20,8 @@ enrichment and pattern analysis. Here are some of the ways you can use
 \item Manage local data in single-user mode or deploy on a server to share with
 collaborators using in-built user management system.
 }
+
+Main function to run the app: \code{\link[=run_carnation]{run_carnation()}}
 }
 \seealso{
 Useful links:
