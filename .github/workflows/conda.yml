@@ -77,12 +77,19 @@ jobs:
           time R CMD check --no-manual --no-vignettes --timings --as-cran carnation_${VERSION}.tar.gz
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
+          mv carnation.Rcheck/00check.log ${WORKDIR}/check.log
 
       - name: env tarball
         uses: actions/upload-artifact@v4
         with:
           name: carnation-bundle
           path: carnation.tar.gz
+
+      - name: R CMD check log
+        uses: actions/upload-artifact@v4
+        with:
+          name: carnation-rcmdcheck-log
+          path: check.log
 
       - name: conda env pinned
         run: |
