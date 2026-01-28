@@ -2512,7 +2512,7 @@ plotScatter.label <- function(compare,
 #'           symbol = paste0("GENE", 1:n_genes),
 #'           row.names = paste0("gene", 1:n_genes)
 #'         )
-#'         `
+#'
 #' # add geneid column
 #' res1 <- cbind(geneid=rownames(res1), res1)
 #' res2 <- cbind(geneid=rownames(res2), res2)
