@@ -24,14 +24,17 @@ get_project_name_from_path(
 \item{fsep}{file separator to split path with}
 }
 \value{
-project name
+project name parsed from path to object
 }
 \description{
 This function takes in a path to an RDS file and returns
 a string to be used as project name
 }
-\details{
-So if the path is: /path/to/project/test/main.\emph{pattern}.rds
-and depth=2 & end_offset=0
-this returns: project/test
+\examples{
+# path to carnation object
+obj_path <- "/path/to/project/test/main.rnaseq.rds"
+
+# parsed project name
+get_project_name_from_path(obj_path, depth = 2, end_offset = 0)
+
 }

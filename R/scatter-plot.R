@@ -1,8 +1,59 @@
-#' Scatterplot module UI
+#' Scatterplot module
 #'
-#' @param id ID string used to match the ID used to call the module server function
-#' @param panel string, can be 'sidebar' or 'main'
+#' @description
+#' Module UI + server for generating scatter plots.
 #'
+#' @param id Module id
+#' @param panel string, can be 'sidebar' or 'main' passed to UI
+#' @param obj reactiveValues object containing carnation object passed to server
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
+#' 'gene.to.plot' (genes to be labeled) passed to server
+#' @param config reactive list with config settings passed to server
+#'
+#' @returns
+#' UI returns tagList with scatter plot UI.
+#' Server invisibly returns NULL (used for side effects).
+#'
+#' @examplesIf interactive()
+#' library(shiny)
+#'
+#' # Create reactive values to simulate app state
+#' oobj <- make_example_carnation_object()
+#'
+#' obj <- reactiveValues(
+#'    dds = oobj$dds,
+#'    rld = oobj$rld,
+#'    res = oobj$res,
+#'    all_dds = oobj$all_dds,
+#'    all_rld = oobj$all_rld,
+#'    dds_mapping = oobj$dds_mapping
+#' )
+#'
+#' plot_args <- reactive({
+#'   list(
+#'     fdr.thres=0.1,
+#'     fc.thres=0,
+#'     gene.to.plot=c('gene1', 'gene2')
+#'   )
+#' })
+#'
+#' config <- reactiveVal(get_config())
+#'
+#' shinyApp(
+#'   ui = fluidPage(
+#'          sidebarPanel(scatterPlotUI('p', 'sidebar')),
+#'          mainPanel(scatterPlotUI('p', 'sidebar'))
+#'        ),
+#'   server = function(input, output, session){
+#'              scatterPlotServer('p', obj, plot_args, config)
+#'            }
+#' )
+#'
+#' @name scattermod
+#' @rdname scattermod
+NULL
+
+#' @rdname scattermod
 #' @export
 scatterPlotUI <- function(id, panel){
   ns <- NS(id)
@@ -248,14 +299,7 @@ scatterPlotUI <- function(id, panel){
   } # else if panel='main'
 } # scatterPlotUI
 
-#' Scatterplot module server function
-#'
-#' @param id ID string used to match the ID used to call the module UI function
-#' @param obj reactiveValues object containing carnation object
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
-#' 'gene.to.plot' (genes to be labeled)
-#' @param config reactive list with config settings
-#'
+#' @rdname scattermod
 #' @export
 scatterPlotServer <- function(id, obj, plot_args, config){
 
@@ -395,7 +439,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         )))
 
         if (length(diff.genes) > 0) {
-            warning(paste0(length(diff.genes), ' genes were discarded because found in one res but not the other'))
+            warning(length(diff.genes), ' genes were discarded because found in one res but not the other')
         }
 
         # Lowercase specified column names in both dataframes
@@ -807,7 +851,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
                       container=sketch,
                       options=list(autoWidth=TRUE,
                                    columnDefs=list(list(className='dt-center',
-                                                        targets=1:(ncol(df)-1))))) %>%
+                                                        targets=seq_len((ncol(df)-1)))))) %>%
             formatStyle(columns=border_cols,
                         'border-right'='solid 1px') %>%
             formatSignif(columns=which_cols, digits=5)

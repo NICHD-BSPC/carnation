@@ -1,2 +1,9 @@
+.DS_Store
 inst/doc
 docs
+debug*
+run_*.R
+test_*.R
+application*.md
+carnation_application_note.md
+testing*.md

@@ -44,6 +44,7 @@ dependencies:
 
   - r-pkgdown
   - bioconductor-airway
+  - bioconductor-biocstyle
   - bioconductor-org.hs.eg.db
   - bioconductor-degreport
 

@@ -7,6 +7,21 @@
 #' @param user_group User group
 #' @param data_area Path to data area containing RDS files
 #'
+#' @return Invisibly returns `NULL`. This function is primarily used for
+#'   its side effect of saving a yaml file with access settings
+#'
+#' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
 #' @export
 create_access_yaml <- function(user, user_group, data_area){
   ug <- setNames(as.list(user_group), user)
@@ -23,6 +38,22 @@ create_access_yaml <- function(user, user_group, data_area){
 #' This function reads the access yaml file and
 #' returns user groups and data areas
 #' as a list of data frames.
+#'
+#' @return return carnation access settings from yaml file
+#'
+#' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
+#' al <- read_access_yaml()
 #'
 #' @export
 read_access_yaml <- function(){
@@ -47,6 +78,29 @@ read_access_yaml <- function(){
 #' @param lst list of data frames with user_groups and
 #'  data_areas
 #'
+#' @return save access settings to yaml file
+#'
+#' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
+#' # read access yaml
+#' lst <- read_access_yaml()
+#'
+#' # add new user
+#' lst$user_group$admin <- c(lst$user_group$admin, 'user1')
+#'
+#' # save to access settings
+#' save_access_yaml(lst)
+#'
 #' @export
 save_access_yaml <- function(lst){
   # get access file
@@ -59,6 +113,12 @@ save_access_yaml <- function(lst){
 #' is user an admin?
 #'
 #' @param u username
+#'
+#' @return boolean to indicate is user is in admin group
+#'
+#' @examples
+#' # check if default user is admin
+#' yy <- is_site_admin(u='admin')
 #'
 #' @export
 is_site_admin <- function(u){
@@ -73,6 +133,22 @@ is_site_admin <- function(u){
 #' is user is in admin group?
 #'
 #' @param u username
+#'
+#' @return TRUE/FALSE to indicate if the user is part of the admin group
+#'
+#' @examples
+#' # save access details to file
+#' home <- Sys.getenv('HOME')
+#'
+#' # create carnation data area if it doesn't exist
+#' carnation_home <- file.path(home, 'carnation/data')
+#' if(!dir.exists(carnation_home)) dir.create(carnation_home)
+#'
+#' create_access_yaml(user = 'admin',
+#'                    user_group = 'admin',
+#'                    data_area = carnation_home)
+#'
+#' check <- in_admin_group('user')
 #'
 #' @export
 in_admin_group <- function(u){
@@ -94,6 +170,9 @@ in_admin_group <- function(u){
 #'
 #' @return list containing config items
 #'
+#' @examples
+#' cfg <- get_config()
+#'
 #' @export
 get_config <- function(){
   cfg_path <- system.file('extdata', 'config.yaml',
@@ -107,17 +186,20 @@ get_config <- function(){
 #' This function takes in a path to an RDS file and returns
 #' a string to be used as project name
 #'
-#' So if the path is: /path/to/project/test/main.*pattern*.rds
-#' and depth=2 & end_offset=0
-#' this returns: project/test
-#'
 #' @param x character path to RDS file
 #' @param depth integer how many levels below path to look?
 #' @param end_offset integer how far from the end of path to end?
 #' @param staging_dir name of staging directory
 #' @param fsep file separator to split path with
 #'
-#' @return project name
+#' @return project name parsed from path to object
+#'
+#' @examples
+#' # path to carnation object
+#' obj_path <- "/path/to/project/test/main.rnaseq.rds"
+#'
+#' # parsed project name
+#' get_project_name_from_path(obj_path, depth = 2, end_offset = 0)
 #'
 #' @export
 get_project_name_from_path <- function(x,
@@ -143,22 +225,6 @@ get_project_name_from_path <- function(x,
   p
 }
 
-#' Return common base path from list of paths
-#'
-#' @param df data frame with two columns: data_area & user_group
-#'
-#' @return vector of base paths
-#'
-#' @export
-get_common_path_from_list <- function(df){
-  patterns <- unlist(unique(lapply(1:nrow(df), function(i){
-                    substr(df$data_area[i], 1, regexpr(df$user_group[i], df$data_area[i])-1)
-                })))
-  # remove any trailing slashes
-  patterns <- sub('\\/$','',patterns)
-  return(patterns)
-}
-
 #' Get read counts for gene
 #'
 #' This is a simple function to obtain read counts for a
@@ -170,6 +236,13 @@ get_common_path_from_list <- function(df){
 #' @param norm_method normalization method, can be 'libsize' (default) or 'vst'
 #'
 #' @return data.frame with gene counts
+#'
+#' @examples
+#' # make example DESeq data set
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # get counts for gene1
+#' gg <- get_gene_counts(dds, 'gene1')
 #'
 #' @export
 get_gene_counts <- function (dds,
@@ -200,8 +273,8 @@ get_gene_counts <- function (dds,
 
   if(!all(gene %in% rownames(cnts))){
     num.to.skip <- sum(!gene %in% rownames(cnts))
-    cat('Skipping ', num.to.skip,
-        ' genes not found in data\n')
+    message('Skipping ', num.to.skip,
+            ' genes not found in data\n')
     gene <- gene[gene %in% rownames(cnts)]
   }
 
@@ -248,6 +321,20 @@ get_gene_counts <- function (dds,
 #' @param rotate_x_labels angle to rotate x-axis labels (default=30)
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' # make example DESeq dataset
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # get gene counts
+#' df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
+#'
+#' # standard gene plot
+#' p <- getcountplot(df, intgroup = "condition", factor.levels = c("A", "B"))
+#'
+#' # with genes faceted
+#' p1 <- getcountplot(df, intgroup = "condition", factor.levels = c("A", "B"), facet = "gene")
+#'
 #'
 #' @export
 getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
@@ -329,6 +416,18 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
 #' between 0 and 1
 #' @param pseudocount pseudo-count to add to the data.frame
 #'
+#' @return min and max limits for count column, padded for visualization
+#'
+#' @examples
+#' # make example DESeq dataset
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # get gene counts
+#' df <- get_gene_counts(dds, gene = c('gene1', 'gene2'))
+#'
+#' # get y axis limits
+#' get_y_init(df, y_delta = 0.01, pseudocount = 1)
+#'
 #' @export
 get_y_init <- function(df, y_delta, pseudocount){
     if(!'count' %in% colnames(df))
@@ -362,6 +461,39 @@ get_y_init <- function(df, y_delta, pseudocount){
 #' @param obj list object containing lists of DE analysis
 #' results, functional enrichment objects, pattern analysis
 #' objects & raw and normalized counts objects.
+#'
+#' @return final carnation object with additional pre-processing
+#'
+#' @examplesIf interactive()
+#' library(DESeq2)
+#'
+#' # make example DESeq dataset
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # run DE analysis
+#' dds <- DESeq(dds)
+#'
+#' # extract comparison of interest
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#'
+#' # perform VST normalization
+#' rld <- varianceStabilizingTransformation(dds, blind = TRUE)
+#'
+#' # build minimal object
+#' obj <- list(
+#'            res_list = list(
+#'                           comp = list(
+#'                               res = res,
+#'                               dds = "main",
+#'                               label = "A vs B"
+#'                           )
+#'                       ),
+#'            dds_list = list(main = dds),
+#'            rld_list = list(main = rld)
+#'        )
+#'
+#' # final object
+#' final_obj <- make_final_object(obj)
 #'
 #' @export
 make_final_object <- function(obj){
@@ -459,7 +591,7 @@ make_final_object <- function(obj){
         } else if(name %in% names(obj[[res.name]])){
           res <- obj[[res.name]][[name]]
         } else {
-          cat('no matching dds object found for ', name, ', skipping\n')
+          message('no matching dds object found for ', name, ', skipping\n')
           obj[[dds.name]] <- obj[[dds.name]][!names(obj[[dds.name]]) %in% name]
           obj[[rld.name]] <- obj[[rld.name]][!names(obj[[rld.name]]) %in% name]
           next
@@ -483,8 +615,8 @@ make_final_object <- function(obj){
               idmap_names <- rownames(res)
           } else {
               message(
-                paste0('No gene column or row names found in ',
-                       'res object: ', name, '. Skipping\n')
+                'No gene column or row names found in ',
+                'res object: ', name, '. Skipping\n'
               )
               next
           }
@@ -628,7 +760,7 @@ make_final_object <- function(obj){
             obj$all_rld <- varianceStabilizingTransformation(all_dds, blind=TRUE)
             colData(obj$all_rld)$sample <- rownames(colData(obj$all_rld))
           } else {
-            cat('No shared samples in dds objects ...\n')
+            message('No shared samples in dds objects ...\n')
 
             obj$all_dds <- NULL
             obj$all_rld <- NULL
@@ -665,14 +797,23 @@ make_final_object <- function(obj){
 #' @param enrich enrichResult object
 #' @param res data frame with DE analysis results
 #'
+#' @return GeneTonic object
+#'
+#' @examples
+#' # get enrich & res objects
+#' data(res_dex, package="carnation")
+#' data(eres_dex, package="carnation")
+#'
+#' # convert to GeneTonic object
+#' gt <- enrich_to_genetonic(eres_dex, res_dex)
+#'
+#'
 #' @export
 enrich_to_genetonic <- function(enrich, res){
-    suppressMessages({
-      if(inherits(enrich, 'enrichResult'))
-        l_gs <- shake_enrichResult(enrich)
-      else if(inherits(enrich, 'gseaResult'))
-        l_gs <- shake_gsenrichResult(enrich)
-    })
+    if(inherits(enrich, 'enrichResult'))
+      l_gs <- shake_enrichResult(enrich)
+    else if(inherits(enrich, 'gseaResult'))
+      l_gs <- shake_gsenrichResult(enrich)
 
     if(!'gene' %in% colnames(res)){
       if(!is.null(rownames(res))){
@@ -708,6 +849,22 @@ enrich_to_genetonic <- function(enrich, res){
 #'  lower case
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' # make mock results df
+#' n_genes <- 100
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
+#'
+#' plotMA.label(res, lab.genes = c("gene1", "gene2"))
 #'
 #' @export
 plotMA.label <- function(res,
@@ -808,6 +965,19 @@ plotMA.label <- function(res,
 #'  are gene sets, with 1 indicating that a gene is present
 #'  is that gene set and vice-versa
 #'
+#' @return data.frame with added set column
+#'
+#' @examples
+#' # list of genes
+#' lst <- list(group1 = c(a = "gene1", b = "gene2", c = "gene3", d = "gene4"),
+#'             group2 = c(c = "gene3", d = "gene4"))
+#'
+#' # binarized matrix with group membership
+#' df <- fromList.with.names(lst)
+#'
+#' # matrix with added set column
+#' ldf <- add.set.column(df)
+#'
 #' @export
 add.set.column <- function(df){
     # save symbol column if any
@@ -838,7 +1008,7 @@ add.set.column <- function(df){
     # - set numbers are padded with 0 to have the same number of digits
     #   e.g. if there are 10 sets, sets are numbered 'set01' ... 'set10'
     max.digits <- nchar(length(set.counts))
-    set.names <- unlist(sapply(1:length(set.counts),
+    set.names <- unlist(lapply(seq_len(length(set.counts)),
                                function(x){
                                    paste0('set', paste(rep(0, max.digits-nchar(x)), collapse=''), x)
                                }))
@@ -872,7 +1042,23 @@ add.set.column <- function(df){
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
-#' @return plot_ly handle
+#' @return plotly handle
+#'
+#' @examples
+#' # make mock results df
+#' n_genes <- 100
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
+#'
+#' plotMA.label_ly(res, lab.genes = c("gene1", "gene2"))
 #'
 #' @export
 plotMA.label_ly <- function(res,
@@ -1064,6 +1250,14 @@ plotMA.label_ly <- function(res,
 #' @param n number of genes to return
 #' @param by metric to determine top genes ('log2FoldChange' or 'padj')
 #'
+#' @return vector of gene symbols
+#'
+#' @examples
+#' # get DE results
+#' data(res_dex, package='carnation')
+#'
+#' g <- top.genes(res_dex)
+#
 #' @export
 top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'){
 
@@ -1097,9 +1291,9 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
     n.up <- ceiling(n/2)
 
     # get top upregulated & downregulated genes
-    top.idx <- c(1:n.up, (nrow(res.de) - (n - n.up) + 1):nrow(res.de))
+    top.idx <- c(seq_len(n.up), (nrow(res.de) - (n - n.up) + 1):nrow(res.de))
   } else if(by == 'padj'){
-    top.idx <- 1:n
+    top.idx <- seq_len(n)
   }
 
   if(is.null(sidx)) return( unique(rownames(res.de)[top.idx]) )
@@ -1111,6 +1305,24 @@ top.genes <- function(res, fdr.thres=0.01, fc.thres=0, n=10, by='log2FoldChange'
 #' @param df data.frame with gene counts
 #' @param coldata data.frame with metadata
 #' @param exclude.intgroups metadata columns to ignore
+#'
+#' @return counts data frame with added metadata
+#'
+#' @examples
+#' library(DESeq2)
+#'
+#' # make example DESeq data set
+#' dds <- makeExampleDESeqDataSet()
+#'
+#' # extract counts and metadata
+#' df <- assay(dds)
+#' coldata <- colData(dds)
+#'
+#' # get gene counts df
+#' counts_df <- get_gene_counts(dds, paste0('gene', seq_len(10)))
+#'
+#' # add metadata
+#' counts_df <- add_metadata(counts_df, coldata, exclude.intgroups=NULL)
 #'
 #' @export
 add_metadata <- function(df, coldata, exclude.intgroups){
@@ -1141,6 +1353,14 @@ add_metadata <- function(df, coldata, exclude.intgroups){
 #' @param sep gene name separator
 #' @param genes.per.line number of genes to show in a line
 #'
+#' @return vector of gene names prettified for data.table output
+#'
+#' @examples
+#' # string with genes separated by '/'
+#' g <- "gene1/gene2/gene3/gene4/gene5/gene6/gene7"
+#'
+#' gg <- format_genes(g, genes.per.line=3)
+#'
 #' @export
 format_genes <- function(g, sep='\\/', genes.per.line=6){
   # get number of genes associated with each functional term
@@ -1166,12 +1386,12 @@ format_genes <- function(g, sep='\\/', genes.per.line=6){
 
                       if(rem == 0){
                         start.idx <- (0:(nsets-1))*genes.per.line + 1
-                        end.idx <- (1:nsets)*genes.per.line
+                        end.idx <- (seq_len(nsets))*genes.per.line
                       } else {
                         start.idx <- (0:nsets)*genes.per.line + 1
-                        end.idx <- c((1:nsets)*genes.per.line, length(g.tmp))
+                        end.idx <- c((seq_len(nsets))*genes.per.line, length(g.tmp))
                       }
-                      gg <- unlist(lapply(1:length(start.idx),
+                      gg <- unlist(lapply(seq_len(length(start.idx)),
                                 function(x){
                                     tmp <- paste(g.tmp[start.idx[x]:end.idx[x]],
                                                  collapse=',')
@@ -1189,6 +1409,14 @@ format_genes <- function(g, sep='\\/', genes.per.line=6){
 #'
 #' @return data.frame of 1 and 0 showing which genes are in which sets
 #'
+#' @examples
+#' # list of genes
+#' lst <- list(group1 = c(a = "gene1", b = "gene2", c = "gene3", d = "gene4"),
+#'             group2 = c(c = "gene3", d = "gene4"))
+#'
+#' # binarized matrix with group membership
+#' df <- fromList.with.names(lst)
+#'
 #' @export
 fromList.with.names <- function(lst){
   element_names <- unique(do.call('rbind',
@@ -1204,7 +1432,7 @@ fromList.with.names <- function(lst){
   }))
   data[is.na(data)] <- as.integer(0)
   data[data != 0] <- as.integer(1)
-  data <- data.frame(matrix(data, ncol = length(lst), byrow = F))
+  data <- data.frame(matrix(data, ncol = length(lst), byrow = FALSE))
 
   # This is the only way in which this function differs from UpSetR::fromList
   # NOTE: here we use the unique column as rownames
@@ -1229,8 +1457,7 @@ fromList.with.names <- function(lst){
 
 #' Plot a degPatterns object
 #'
-#' This function plots a degPatterns object using
-#' degPlotCluster
+#' This function plots a degPatterns object.
 #'
 #' @param obj degPatterns object
 #' @param time metadata variable to plot on x-axis
@@ -1247,6 +1474,17 @@ fromList.with.names <- function(lst){
 #' @param genes_to_label genes to label on plot
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' # get degpatterns object
+#' data(degpatterns_dex, package = 'carnation')
+#'
+#' # get pattern plot
+#' all_clusters <- unique(degpatterns_dex$normalized$cluster)
+#'
+#' dp <- get_degplot(degpatterns_dex, time='dex',
+#'                   cluster_to_show=all_clusters,
+#'                   x_order=c('untrt','trt'))
 #'
 #' @export
 get_degplot <- function(obj, time, color=NULL,
@@ -1286,15 +1524,15 @@ get_degplot <- function(obj, time, color=NULL,
   }
 
   if (is.null(color)){
-      color = "dummy"
-      table[[color]] = "one_group"
+      color <- "dummy"
+      table[[color]] <- "one_group"
   }
 
   if("symbol" %in% colnames(table)){
-    table[["line_group"]] = paste(table[["symbol"]],
+    table[["line_group"]] <- paste(table[["symbol"]],
                                 table[[color]])
   } else {
-    table[["line_group"]] = paste(table[["genes"]],
+    table[["line_group"]] <- paste(table[["genes"]],
                                   table[[color]])
   }
 
@@ -1501,14 +1739,51 @@ get_degplot <- function(obj, time, color=NULL,
 #' @param lfc.thresh log2FoldChange threshold
 #' @param labels list of descriptions for res.list elements
 #'
-#' NOTE: this is edited to match the structure used in the shiny app. Specifically
-#'       res.list and dds.list both are expected to have the same number and names
-#'       of elements.
-#'
 #' @return Dataframe
 #'
+#' @examples
+#' n_genes <- 100
+#'
+#' #  make mock dds list
+#' dds_list <- list(main=DESeq2::makeExampleDESeqDataSet(n=n_genes))
+#'
+#' # make mock results df
+#' res1 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
+#'
+#' res2 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
+#'
+#' # make list of results
+#' res_list <- list(
+#'               comp1=res1,
+#'               comp2=res2
+#'             )
+#'
+#' # make dds mapping
+#' dds_mapping <- list(comp1='main', comp2='main')
+#'
+#' # get summary
+#' df <- summarize.res.list(res_list, dds_list, dds_mapping, alpha=0.1, lfc.thresh=0)
+#'
 #' @export
-summarize.res.list <- function(res.list,dds.list, dds_mapping, alpha, lfc.thresh, labels=NULL){
+summarize.res.list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thresh, labels=NULL){
     slist <- list()
     for (name in names(res.list)){
         x <- my.summary(res.list[[name]], dds.list[[ dds_mapping[[name]] ]], alpha, lfc.thresh)
@@ -1533,6 +1808,27 @@ summarize.res.list <- function(res.list,dds.list, dds_mapping, alpha, lfc.thresh
 #' @param lfc.thresh log2FoldChange threshold
 #'
 #' @return Dataframe of summarized results
+#'
+#' @examples
+#' n_genes <- 100
+#'
+#' #  make mock dds list
+#' dds <- DESeq2::makeExampleDESeqDataSet(n=n_genes)
+#'
+#' # make mock results df
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
+#'
+#' # get summary
+#' df <- my.summary(res, dds, alpha=0.1)
 #'
 #' @export
 my.summary <- function(res, dds, alpha, lfc.thresh=0){
@@ -1585,6 +1881,16 @@ my.summary <- function(res, dds, alpha, lfc.thresh=0){
 #'
 #' @return Handle to ggplot with added label field in aes_string() for plotting with ggplotly()
 #'
+#' @examples
+#' # make example dds object
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # normalize
+#' rld <- DESeq2::varianceStabilizingTransformation(dds, blind=TRUE)
+#'
+#' # make pca plot
+#' p <- plotPCA.ly(rld, intgroup='condition')
+#'
 #' @export
 plotPCA.ly <- function(rld, intgroup){
   mat <- plotPCA(rld, intgroup, returnData=TRUE)
@@ -1602,14 +1908,37 @@ plotPCA.ly <- function(rld, intgroup){
 #' This is a copy of gs_radar from GeneTonic where the labels of
 #' gene sets are converted to parameters
 #'
-#' @param res_enrich DE results from comparison 1
-#' @param res_enrich2 DE results from comparison 2
+#' @param res_enrich GeneTonic object for comparison 1
+#' @param res_enrich2 GeneTonic object for comparison 2 (default = NULL)
 #' @param label1 label for comparison 1
 #' @param label2 label for comparison 2
 #' @param n_gs number of gene sets (default = 20)
 #' @param p_value_column column to use as p-value (default = 'gs_pvalue')
 #'
 #' @return ggplot handle
+#'
+#' @examples
+#' library(GeneTonic)
+#'
+#' # get DESeqResults object
+#' data(res_dex, package='carnation')
+#'
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # convert to GeneTonic object
+#' gt <- shake_enrichResult(eres_dex)
+#'
+#' # get annotation df
+#' idx <- match(c('gene','symbol'), tolower(colnames(res_dex)))
+#' anno_df <- res_dex[,idx]
+#' colnames(anno_df) <- c('gene_id', 'gene_name')
+#'
+#' # add aggregate score columns
+#' gt <- get_aggrscores(gt, res_dex, anno_df)
+#'
+#' # make radar plot
+#' p <- gs_radar(gt)
 #'
 #' @export
 gs_radar <- function(res_enrich,
@@ -1716,6 +2045,19 @@ gs_radar <- function(res_enrich,
 #' @param loadings boolean, show gene loadings? Default is FALSE.
 #' @param loadings_ngenes integer, # genes to show loadings for (default=10)
 #'
+#' @return ggplot handle
+#'
+#' @examples
+#' # make example dds object
+#' dds <- DESeq2::makeExampleDESeqDataSet()
+#'
+#' # normalize
+#' rld <- DESeq2::varianceStabilizingTransformation(dds, blind=TRUE)
+#'
+#' # make pca plot
+#' p <- plotPCA.san(rld, intgroup='condition', pcx='PC1', pcy='PC2')
+#'
+#'
 #' @export
 plotPCA.san <- function (object, intgroup = "group",
                          pcx, pcy, pcz=NULL,
@@ -1821,9 +2163,9 @@ plotPCA.san <- function (object, intgroup = "group",
     if(!is.null(pcz)) ssq <- ssq + rot[, pcz]**2
 
     # order SS to get top genes
-    ssq <- ssq[order(ssq, decreasing=T)]
+    ssq <- ssq[order(ssq, decreasing=TRUE)]
 
-    top_genes <- names(ssq)[1:loadings_ngenes]
+    top_genes <- names(ssq)[seq_len(loadings_ngenes)]
 
     # double up a single gene to avoid single-row df effects
     if(length(top_genes) == 1) top_genes <- c(top_genes, top_genes)
@@ -1838,7 +2180,7 @@ plotPCA.san <- function (object, intgroup = "group",
     scaleratio <- round(mean(unlist(all_ratios)))
 
     # build text
-    tt2 <- lapply(1:nrow(rot_df), function(x){
+    tt2 <- lapply(seq_len(nrow(rot_df)), function(x){
              ll <- list(x=rot_df[x, pcx]*scaleratio*1.1,
                         y=rot_df[x, pcy]*scaleratio*1.1,
                         showarrow=FALSE,
@@ -1904,6 +2246,18 @@ plotPCA.san <- function (object, intgroup = "group",
 #' @param ontology ontology database being used
 #' @param type string, can be 'enrichResult' or 'gseaResult'
 #'
+#' @return enrichResult object
+#'
+#' @examples
+#' # get enrichResult object
+#' data(eres_dex, package='carnation')
+#'
+#' # extract the results
+#' df <- as.data.frame(eres_dex)
+#'
+#' # convert to a stripped down enrichResult object
+#' eres2 <- makeEnrichResult(df)
+#'
 #' @export
 makeEnrichResult <- function(df, split='/',
                              keytype="UNKNOWN",
@@ -1935,8 +2289,8 @@ makeEnrichResult <- function(df, split='/',
 
 #' Plot a scatterplot to compare two contrasts
 #'
-#' @param compare string, what values to plot? can be 'LFC' or 'P-adj'
-#' @param df data frame with LFC & padj values to plot from 2 contrasts
+#' @param compare string, what values to plot? can be 'log2FoldChange' or 'P-adj'
+#' @param df data frame with log2FoldChange & padj values to plot from 2 contrasts
 #' @param label_x string, label for x-axis
 #' @param label_y string, label for y-axis
 #' @param lim.x x-axis limits
@@ -1953,8 +2307,74 @@ makeEnrichResult <- function(df, split='/',
 #' @param alpha float, marker opacity (default=1).
 #' @param size float, marker size (default=4).
 #' @param show.grid string, can be 'yes' (default) or 'no'.
-
+#'
 #' @return ggplot handle
+#'
+#' @examples
+#' # make mock results df
+#' n_genes <- 100
+#' res1 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
+#'
+#' res2 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
+#'
+#' # add geneid column
+#' res1 <- cbind(geneid=rownames(res1), res1)
+#' res2 <- cbind(geneid=rownames(res2), res2)
+#'
+#' # make merged df from the two comparisons
+#' cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+#' df_full <- dplyr::inner_join(
+#'   dplyr::select(as.data.frame(res1), all_of(cols.sub)),
+#'   dplyr::select(as.data.frame(res2), all_of(cols.sub)),
+#'   by = 'geneid',
+#'   suffix = c('.x', '.y')
+#' )
+#'
+#' # calculate x & y limits for log2FoldChange
+#' xlim <- range(df_full[[ 'log2FoldChange.x' ]])
+#' ylim <- range(df_full[[ 'log2FoldChange.y' ]])
+#'
+#' # get color palette
+#' color.palette <- RColorBrewer::brewer.pal(n=5, name='Set2')
+#'
+#' # add significance column
+#' sig.x <- df_full$padj.x < 0.1 & !is.na(df_full$padj.x)
+#' sig.y <- df_full$padj.y < 0.1 & !is.na(df_full$padj.y)
+#' up.x <- df_full$log2FoldChange.x >= 0
+#' up.y <- df_full$log2FoldChange.y >= 0
+#' significance <- rep('None', nrow(df_full))
+#' significance[ sig.x & sig.y & ((up.x & up.y) | (!up.x & !up.y)) ] <- 'Both - same LFC sign'
+#' significance[ sig.x & sig.y & ((up.x & !up.y) | (!up.x & up.y)) ] <- 'Both - opposite LFC sign'
+#' significance[ sig.x & !sig.y ] <- 'A vs B'
+#' significance[ !sig.x & sig.y ] <- 'B vs A'
+#' df_full$significance <- significance
+#'
+#' # generate scatter plot
+#' p <- plotScatter.label(compare = 'log2FoldChange',
+#'                        df = df_full,
+#'                        label_x = 'A vs B',
+#'                        label_y = 'B vs A',
+#'                        lim.x = xlim,
+#'                        lim.y = ylim,
+#'                        color.palette = color.palette)
 #'
 #' @export
 plotScatter.label <- function(compare,
@@ -2023,7 +2443,7 @@ plotScatter.label <- function(compare,
     p <- p + geom_hline(yintercept=0, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
   }
    if (lines[3] == 'yes') {
-    p <- p + geom_abline(yintercept=0, slope=1, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
+    p <- p + geom_abline(intercept=0, slope=1, color="#333333", linetype="dashed", linewidth=0.5, alpha=0.7)
   }
   # show.grid
   show.grid <- if(show.grid == 'yes') TRUE else FALSE
@@ -2049,8 +2469,8 @@ plotScatter.label <- function(compare,
 
 #' Plot an interactive scatterplot to compare two contrasts
 #'
-#' @param compare string, what values to plot? can be 'LFC' or 'P-adj'
-#' @param df data frame with LFC & padj values to plot from 2 contrasts
+#' @param compare string, what values to plot? can be 'log2FoldChange' or 'P-adj'
+#' @param df data frame with log2FoldChange & padj values to plot from 2 contrasts
 #' @param label_x string, label for x-axis
 #' @param label_y string, label for y-axis
 #' @param lim.x x-axis limits
@@ -2067,6 +2487,72 @@ plotScatter.label <- function(compare,
 #' @param show.grid string, can be 'yes' (default) or 'no'.
 
 #' @return plotly handle
+#'
+#' @examples
+#' # make mock results df
+#' n_genes <- 100
+#' res1 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
+#'
+#' res2 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
+#'
+#' # add geneid column
+#' res1 <- cbind(geneid=rownames(res1), res1)
+#' res2 <- cbind(geneid=rownames(res2), res2)
+#'
+#' # make merged df from the two comparisons
+#' cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+#' df_full <- dplyr::inner_join(
+#'   dplyr::select(as.data.frame(res1), all_of(cols.sub)),
+#'   dplyr::select(as.data.frame(res2), all_of(cols.sub)),
+#'   by = 'geneid',
+#'   suffix = c('.x', '.y')
+#' )
+#'
+#' # calculate x & y limits for log2FoldChange
+#' xlim <- range(df_full[[ 'log2FoldChange.x' ]])
+#' ylim <- range(df_full[[ 'log2FoldChange.y' ]])
+#'
+#' # get color palette
+#' color.palette <- RColorBrewer::brewer.pal(n=5, name='Set2')
+#'
+#' # add significance column
+#' sig.x <- df_full$padj.x < 0.1 & !is.na(df_full$padj.x)
+#' sig.y <- df_full$padj.y < 0.1 & !is.na(df_full$padj.y)
+#' up.x <- df_full$log2FoldChange.x >= 0
+#' up.y <- df_full$log2FoldChange.y >= 0
+#' significance <- rep('None', nrow(df_full))
+#' significance[ sig.x & sig.y & ((up.x & up.y) | (!up.x & !up.y)) ] <- 'Both - same LFC sign'
+#' significance[ sig.x & sig.y & ((up.x & !up.y) | (!up.x & up.y)) ] <- 'Both - opposite LFC sign'
+#' significance[ sig.x & !sig.y ] <- 'A vs B'
+#' significance[ !sig.x & sig.y ] <- 'B vs A'
+#' df_full$significance <- significance
+#'
+#' # generate scatter plot
+#' p <- plotScatter.label_ly(compare = 'log2FoldChange',
+#'                           df = df_full,
+#'                           label_x = 'A vs B',
+#'                           label_y = 'B vs A',
+#'                           lim.x = xlim,
+#'                           lim.y = ylim,
+#'                           color.palette = color.palette)
 #'
 #' @export
 plotScatter.label_ly <- function(compare,
@@ -2245,3 +2731,96 @@ dummy_genetonic <- function(eres){
     list(l_gs=eres2, anno_df=anno_df)
   )
 }
+
+#' Make example carnation object
+#'
+#' Returns example carnation object used in examples & testing
+#'
+#' @return reactiveValues object containing carnation object
+#'
+#' @examplesIf interactive()
+#' obj <- make_example_carnation_object()
+#'
+#' @export
+make_example_carnation_object <- function(){
+  dds <- makeExampleDESeqDataSet()
+  rld <- varianceStabilizingTransformation(dds, blind=TRUE)
+
+  dds <- DESeq(dds)
+  results <- results(dds, contrast=c('condition', 'A', 'B'))
+
+  # Create reactive values to simulate app state
+  obj <- list(
+    dds = list(main = dds),
+    rld = list(main = rld),
+    res = list(comp1 = results),
+    all_dds = dds,
+    all_rld = rld,
+    dds_mapping = list(comp1 = 'main')
+  )
+
+  obj
+}
+
+#' Generate upset plot table
+#'
+#' @param gene.lists list with character vectors of gene names
+#' @param comp_split_pattern character used to separate gene set names
+#'
+#' @return list with upset table elements
+#'
+#' @examples
+#' lst <- list(group1 = c(a = "gene1", b = "gene2", c = "gene3", d = "gene4"),
+#'             group2 = c(b = "gene2", d = "gene4", e = "gene5"),
+#'             group3 = c(d = "gene4", e = "gene5", f = "gene6"))
+#'
+#' df <- get_upset_table(lst)
+#' str(df)
+#'
+#' @export
+get_upset_table <- function(gene.lists, comp_split_pattern=';'){
+  # get matrix of intersections, add set column & save
+  df <- fromList.with.names(gene.lists)
+  df <- add.set.column(df)
+
+  # get mapping of set names to intersects
+  df_unique <- unique(df[, setdiff(colnames(df), 'symbol')])
+  rownames(df_unique) <- df_unique$set
+  df_unique <- df_unique[, setdiff(colnames(df_unique), 'set')]
+  if(nrow(df_unique) == 1){
+    set_mapping <- setNames(list(colnames(df_unique)), rownames(df_unique))
+  } else {
+    set_mapping <- apply(df_unique, 1, function(x){
+                     n <- colnames(df_unique)[x == 1]
+                     n
+        })
+  }
+
+  # get columns with degree & comparisons & add to df
+  comps <- unlist(
+             lapply(set_mapping[df$set],
+               function(x) paste(x, collapse=comp_split_pattern)
+             )
+           )
+  degree <- unlist(lapply(set_mapping[df$set], length))
+
+  tbl <- cbind(df, comparisons=comps, degree=degree)
+
+  # get intersection sizes
+  inter_counts <- table(df$set)
+
+  # create named vector of choices & add groups + size to names
+  # e.g. if 'set1' has 150 genes,
+  # then the name is 'set1 (n = 150)'
+  inter_choices <- names(inter_counts)
+  names(inter_choices) <- paste0(inter_choices, ' (',
+                          unlist(
+                            lapply(set_mapping,
+                              function(x)
+                                paste(x, collapse=', ')
+                            )
+                          ), '; n = ', inter_counts, ')')
+
+  list(tbl=tbl, set_mapping=set_mapping, set_labels=inter_choices)
+}
+

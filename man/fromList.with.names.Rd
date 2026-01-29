@@ -15,3 +15,12 @@ data.frame of 1 and 0 showing which genes are in which sets
 \description{
 Prepare list for UpSet plots, but include rownames
 }
+\examples{
+# list of genes
+lst <- list(group1 = c(a = "gene1", b = "gene2", c = "gene3", d = "gene4"),
+            group2 = c(c = "gene3", d = "gene4"))
+
+# binarized matrix with group membership
+df <- fromList.with.names(lst)
+
+}

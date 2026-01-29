@@ -8,6 +8,15 @@
 #'        if credentials have sqlite backend.
 #' @param ... parameters passed to shinyApp() call
 #'
+#' @return shinyApp object
+#'
+#' @examples
+#' if(interactive()){
+#'     shiny::runApp(
+#'         run_carnation()
+#'     )
+#' }
+#'
 #' @export
 run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
 
@@ -26,14 +35,14 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     # check to see if shinymanager is available
     if(!requireNamespace('shinymanager', quietly=TRUE)){
       stop(
-        paste('Login functionality using SQL/sqlite credentials requires "shinymanager".',
-              'Please install using "install.packages(\'shinymanager\')"'),
+        'Login functionality using SQL/sqlite credentials requires "shinymanager".',
+        'Please install using "install.packages(\'shinymanager\')"',
         .call=FALSE
       )
     } else if(!file.exists(credentials)){
       stop(
-        paste0('Credentials specified, but file not found: "',
-               credentials, '"')
+        'Credentials specified, but file not found: "',
+        credentials, '"'
       )
     }
   }
@@ -127,6 +136,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
               icon = icon("sliders-h"), width = "400px",
               size='sm',
+              inputId="global_settings",
 
               tooltip = tooltipOptions(title = "Global settings")
 
@@ -307,6 +317,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
               icon = icon("gear"), width = "400px",
               size='sm',
+              inputId="tab_settings",
 
               tooltip = tooltipOptions(title = "Settings")
 
@@ -391,6 +402,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
               icon = icon("clipboard"), width = "400px",
               size='sm',
+              inputId="scratchpad",
 
               tooltip = tooltipOptions(title = "Gene scratchpad")
 
@@ -433,7 +445,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 ) # conditionalPanel
               ), # column
               column(9, style='margin-top: 20px',
-                DTOutput('analysis_desc')
+                conditionalPanel('input.data_type == "Existing"',
+                  DTOutput('analysis_desc')
+                ) # conditionalPanel
               )
             ), # fluidRow
 
@@ -1493,7 +1507,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       tbl <- res_data$tbl
 
-      float_idx <- sapply(tbl, function(x) typeof(x) %in% c('double', 'float'))
+      float_idx <- vapply(tbl, function(x) typeof(x) %in% c('double', 'float'), logical(1))
       format_cols <- colnames(tbl)[float_idx]
 
       tbl %>%

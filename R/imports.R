@@ -3,7 +3,7 @@
 #' @importFrom ComplexUpset upset upset_modify_themes intersection_size upset_query
 #' @importFrom dendextend as.ggdend get_branches_heights
 #' @importFrom DESeq2 normalizationFactors sizeFactors design counts DESeqDataSetFromMatrix
-#' estimateSizeFactors plotPCA varianceStabilizingTransformation
+#' estimateSizeFactors plotPCA varianceStabilizingTransformation makeExampleDESeqDataSet DESeq results
 #' @importFrom dplyr mutate relocate select filter any_of "%>%" rename inner_join case_when all_of
 #' arrange everything
 #' @importFrom DT renderDT DTOutput datatable formatStyle formatSignif dataTableProxy selectRows selectCells

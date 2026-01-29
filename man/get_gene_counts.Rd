@@ -22,3 +22,11 @@ data.frame with gene counts
 This is a simple function to obtain read counts for a
 specified gene, based on the DESeq2::plotCounts function.
 }
+\examples{
+# make example DESeq data set
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# get counts for gene1
+gg <- get_gene_counts(dds, 'gene1')
+
+}

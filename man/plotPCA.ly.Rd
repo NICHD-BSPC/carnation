@@ -17,3 +17,14 @@ Handle to ggplot with added label field in aes_string() for plotting with ggplot
 \description{
 Plot an interactive PCA plot
 }
+\examples{
+# make example dds object
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# normalize
+rld <- DESeq2::varianceStabilizingTransformation(dds, blind=TRUE)
+
+# make pca plot
+p <- plotPCA.ly(rld, intgroup='condition')
+
+}

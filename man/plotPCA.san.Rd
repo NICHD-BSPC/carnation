@@ -36,6 +36,21 @@ function returns a 3-D PCA plot.}
 
 \item{loadings_ngenes}{integer, # genes to show loadings for (default=10)}
 }
+\value{
+ggplot handle
+}
 \description{
 Create a PCA plot with specified PCs on x- and y-axis
+}
+\examples{
+# make example dds object
+dds <- DESeq2::makeExampleDESeqDataSet()
+
+# normalize
+rld <- DESeq2::varianceStabilizingTransformation(dds, blind=TRUE)
+
+# make pca plot
+p <- plotPCA.san(rld, intgroup='condition', pcx='PC1', pcy='PC2')
+
+
 }
