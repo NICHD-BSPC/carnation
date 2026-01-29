@@ -1,6 +1,6 @@
 Package: carnation
 Title: Shiny App to Explore RNA-Seq Analysis
-Version: 0.99.6
+Version: 0.99.7
 Authors@R:
     c(
         person("Apratim", "Mitra", , "apratim.mitra@nih.gov",
