@@ -22,16 +22,22 @@ Dataframe of summarized results
 summary(res) prints out info; this function captures it into a dataframe
 }
 \examples{
-library(DESeq2)
+n_genes <- 100
 
-# make example DESeq data set
-dds <- makeExampleDESeqDataSet()
+#  make mock dds list
+dds <- DESeq2::makeExampleDESeqDataSet(n=n_genes)
 
-# run DESeq2
-dds <- DESeq(dds)
-
-# make comparisons
-res <- results(dds, contrast=c('condition', 'A', 'B'))
+# make mock results df
+res <- data.frame(
+         baseMean = runif(n_genes, 10, 1000),
+         log2FoldChange = rnorm(n_genes, 0, 2),
+         lfcSE = runif(n_genes, 0.1, 0.5),
+         stat = rnorm(n_genes, 0, 3),
+         pvalue = runif(n_genes, 0, 1),
+         padj = runif(n_genes, 0, 1),
+         symbol = paste0("GENE", 1:n_genes),
+         row.names = paste0("gene", 1:n_genes)
+       )
 
 # get summary
 df <- my.summary(res, dds, alpha=0.1)

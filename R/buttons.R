@@ -103,7 +103,7 @@ helpModal <- function(mdfile, title=NULL, ...){
 #' UI returns tagList with download button UI.
 #' Server invisibly returns NULL (used for side effects).
 #'
-#' @examples
+#' @examplesIf interactive()
 #' library(shiny)
 #' library(ggplot2)
 #'

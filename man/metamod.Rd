@@ -28,7 +28,7 @@ This module generates the metadata tab that allows users to
 view the metadata associated with the loaded carnation object.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 library(shiny)
 
 # Create reactive values to simulate app state

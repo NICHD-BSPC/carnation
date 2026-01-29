@@ -27,7 +27,7 @@ Server returns reactive with app reload trigger
 Module UI & server to load new data
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 library(shiny)
 
 username <- 'admin'

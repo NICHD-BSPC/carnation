@@ -34,7 +34,7 @@ Server returns reactive with list containing upset table, intersections
 Module UI & server to generate upset plots.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 library(shiny)
 
 oobj <- make_example_carnation_object()

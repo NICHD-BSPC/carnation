@@ -10,7 +10,7 @@ name: conda
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "devel" ]
   pull_request:
     types:
       - opened
@@ -73,16 +73,24 @@ jobs:
           cd .. && mkdir tmp && cd tmp
 
           # build, check
-          R CMD build --no-manual ../carnation
-          R CMD check --no-manual --no-vignettes --timings --as-cran carnation_${VERSION}.tar.gz
+          time R CMD build --no-manual ../carnation
+          time R CMD check --no-manual --no-vignettes --timings --as-cran carnation_${VERSION}.tar.gz
 
           mv carnation_${VERSION}.tar.gz ${WORKDIR}/carnation.tar.gz
+          tar cvf rcmdcheck.tar.gz carnation.Rcheck
+          mv rcmdcheck.tar.gz ${WORKDIR}/rcmdcheck.tar.gz
 
       - name: env tarball
         uses: actions/upload-artifact@v4
         with:
           name: carnation-bundle
           path: carnation.tar.gz
+
+      - name: R CMD check log
+        uses: actions/upload-artifact@v4
+        with:
+          name: carnation-rcmdcheck
+          path: rcmdcheck.tar.gz
 
       - name: conda env pinned
         run: |

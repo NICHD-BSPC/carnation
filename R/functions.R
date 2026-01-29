@@ -851,20 +851,18 @@ enrich_to_genetonic <- function(enrich, res){
 #' @return ggplot handle
 #'
 #' @examples
-#' library(DESeq2)
-#'
-#' # make example DESeq dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("condition", "A", "B"))
-#'
-#' # add gene and symbol column
-#' res$gene <- rownames(res)
-#' res$symbol <- rownames(res)
+#' # make mock results df
+#' n_genes <- 100
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
 #'
 #' plotMA.label(res, lab.genes = c("gene1", "gene2"))
 #'
@@ -1047,22 +1045,20 @@ add.set.column <- function(df){
 #' @return plotly handle
 #'
 #' @examples
-#' library(DESeq2)
+#' # make mock results df
+#' n_genes <- 100
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
 #'
-#' # make example DESeq dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
-#' # extract comparison of interest
-#' res <- results(dds, contrast = c("condition", "A", "B"))
-#'
-#' # add gene and symbol column
-#' res$gene <- rownames(res)
-#' res$symbol <- rownames(res)
-#'
-#' plotMA.label(res, lab.genes = c("gene1", "gene2"))
+#' plotMA.label_ly(res, lab.genes = c("gene1", "gene2"))
 #'
 #' @export
 plotMA.label_ly <- function(res,
@@ -1746,18 +1742,33 @@ get_degplot <- function(obj, time, color=NULL,
 #' @return Dataframe
 #'
 #' @examples
-#' # make example DESeq data set
-#' dds <- DESeq2::makeExampleDESeqDataSet()
+#' n_genes <- 100
 #'
-#' # run DESeq2
-#' dds <- DESeq2::DESeq(dds)
+#' #  make mock dds list
+#' dds_list <- list(main=DESeq2::makeExampleDESeqDataSet(n=n_genes))
 #'
-#' # make dds list
-#' dds_list <- list(main = dds)
+#' # make mock results df
+#' res1 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
 #'
-#' # make comparisons
-#' res1 <- DESeq2::results(dds, contrast=c('condition', 'A', 'B'))
-#' res2 <- DESeq2::results(dds, contrast=c('condition', 'B', 'A'))
+#' res2 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
 #'
 #' # make list of results
 #' res_list <- list(
@@ -1799,16 +1810,22 @@ summarize.res.list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thres
 #' @return Dataframe of summarized results
 #'
 #' @examples
-#' library(DESeq2)
+#' n_genes <- 100
 #'
-#' # make example DESeq data set
-#' dds <- makeExampleDESeqDataSet()
+#' #  make mock dds list
+#' dds <- DESeq2::makeExampleDESeqDataSet(n=n_genes)
 #'
-#' # run DESeq2
-#' dds <- DESeq(dds)
-#'
-#' # make comparisons
-#' res <- results(dds, contrast=c('condition', 'A', 'B'))
+#' # make mock results df
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
 #'
 #' # get summary
 #' df <- my.summary(res, dds, alpha=0.1)
@@ -2294,17 +2311,29 @@ makeEnrichResult <- function(df, split='/',
 #' @return ggplot handle
 #'
 #' @examples
-#' library(DESeq2)
+#' # make mock results df
+#' n_genes <- 100
+#' res1 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
 #'
-#' # make example dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
-#' # extract comparisons of interest
-#' res1 <- results(dds, contrast = c("condition", "A", "B"))
-#' res2 <- results(dds, contrast = c("condition", "B", "A"))
+#' res2 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
 #'
 #' # add geneid column
 #' res1 <- cbind(geneid=rownames(res1), res1)
@@ -2460,17 +2489,29 @@ plotScatter.label <- function(compare,
 #' @return plotly handle
 #'
 #' @examples
-#' library(DESeq2)
+#' # make mock results df
+#' n_genes <- 100
+#' res1 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
 #'
-#' # make example dataset
-#' dds <- makeExampleDESeqDataSet()
-#'
-#' # run DE analysis
-#' dds <- DESeq(dds)
-#'
-#' # extract comparisons of interest
-#' res1 <- results(dds, contrast = c("condition", "A", "B"))
-#' res2 <- results(dds, contrast = c("condition", "B", "A"))
+#' res2 <- data.frame(
+#'           baseMean = runif(n_genes, 10, 1000),
+#'           log2FoldChange = rnorm(n_genes, 0, 2),
+#'           lfcSE = runif(n_genes, 0.1, 0.5),
+#'           stat = rnorm(n_genes, 0, 3),
+#'           pvalue = runif(n_genes, 0, 1),
+#'           padj = runif(n_genes, 0, 1),
+#'           symbol = paste0("GENE", 1:n_genes),
+#'           row.names = paste0("gene", 1:n_genes)
+#'         )
 #'
 #' # add geneid column
 #' res1 <- cbind(geneid=rownames(res1), res1)

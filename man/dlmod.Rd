@@ -25,6 +25,7 @@ Server invisibly returns NULL (used for side effects).
 Module UI & server for download buttons.
 }
 \examples{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 library(shiny)
 library(ggplot2)
 
@@ -49,5 +50,5 @@ if(interactive()){
              }
   )
 }
-
+\dontshow{\}) # examplesIf}
 }

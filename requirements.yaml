@@ -32,6 +32,7 @@ dependencies:
   - r-shinythemes
   - r-shinywidgets
   - r-sortable
+  - r-testthat
   - r-viridis
   - r-viridislite
   - r-visnetwork
@@ -43,5 +44,6 @@ dependencies:
   - qpdf
 
   - bioconductor-airway
+  - bioconductor-biocstyle
   - bioconductor-degreport
   - bioconductor-org.hs.eg.db

@@ -30,7 +30,7 @@ Server invisibly returns NULL (used for side effects).
 Module UI + server for generating scatter plots.
 }
 \examples{
-\dontshow{if (interactive()) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 library(shiny)
 
 # Create reactive values to simulate app state

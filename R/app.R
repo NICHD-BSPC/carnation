@@ -136,6 +136,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
               icon = icon("sliders-h"), width = "400px",
               size='sm',
+              inputId="global_settings",
 
               tooltip = tooltipOptions(title = "Global settings")
 
@@ -316,6 +317,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
               icon = icon("gear"), width = "400px",
               size='sm',
+              inputId="tab_settings",
 
               tooltip = tooltipOptions(title = "Settings")
 
@@ -400,6 +402,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
               icon = icon("clipboard"), width = "400px",
               size='sm',
+              inputId="scratchpad",
 
               tooltip = tooltipOptions(title = "Gene scratchpad")
 
@@ -442,7 +445,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 ) # conditionalPanel
               ), # column
               column(9, style='margin-top: 20px',
-                DTOutput('analysis_desc')
+                conditionalPanel('input.data_type == "Existing"',
+                  DTOutput('analysis_desc')
+                ) # conditionalPanel
               )
             ), # fluidRow
 

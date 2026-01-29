@@ -287,11 +287,13 @@ dependencies:
   - r-permute=0.9_8
   - r-pillar=1.11.1
   - r-pkgconfig=2.0.3
+  - r-pkgload=1.4.1
   - r-plogr=0.2.0
   - r-plotly=4.11.0
   - r-plyr=1.8.9
   - r-png=0.1_8
   - r-polyclip=1.10_7
+  - r-praise=1.0.0
   - r-prettyunits=1.2.0
   - r-processx=3.8.6
   - r-progress=1.2.3
@@ -313,6 +315,7 @@ dependencies:
   - r-rcurl=1.98_1.17
   - r-readr=2.1.6
   - r-registry=0.5_1
+  - r-rematch2=2.1.2
   - r-remotes=2.5.0
   - r-renv=1.1.5
   - r-reshape=0.8.10

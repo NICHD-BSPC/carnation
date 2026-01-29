@@ -57,17 +57,29 @@ plotly handle
 Plot an interactive scatterplot to compare two contrasts
 }
 \examples{
-library(DESeq2)
+# make mock results df
+n_genes <- 100
+res1 <- data.frame(
+          baseMean = runif(n_genes, 10, 1000),
+          log2FoldChange = rnorm(n_genes, 0, 2),
+          lfcSE = runif(n_genes, 0.1, 0.5),
+          stat = rnorm(n_genes, 0, 3),
+          pvalue = runif(n_genes, 0, 1),
+          padj = runif(n_genes, 0, 1),
+          symbol = paste0("GENE", 1:n_genes),
+          row.names = paste0("gene", 1:n_genes)
+        )
 
-# make example dataset
-dds <- makeExampleDESeqDataSet()
-
-# run DE analysis
-dds <- DESeq(dds)
-
-# extract comparisons of interest
-res1 <- results(dds, contrast = c("condition", "A", "B"))
-res2 <- results(dds, contrast = c("condition", "B", "A"))
+res2 <- data.frame(
+          baseMean = runif(n_genes, 10, 1000),
+          log2FoldChange = rnorm(n_genes, 0, 2),
+          lfcSE = runif(n_genes, 0.1, 0.5),
+          stat = rnorm(n_genes, 0, 3),
+          pvalue = runif(n_genes, 0, 1),
+          padj = runif(n_genes, 0, 1),
+          symbol = paste0("GENE", 1:n_genes),
+          row.names = paste0("gene", 1:n_genes)
+        )
 
 # add geneid column
 res1 <- cbind(geneid=rownames(res1), res1)
