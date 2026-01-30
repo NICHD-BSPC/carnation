@@ -62,9 +62,11 @@ Imports:
 Suggests:
     airway,
     BiocStyle,
+    DEGreport,
+    GenomicFeatures,
+    goseq,
     knitr,
     org.Hs.eg.db,
-    DEGreport,
     rmarkdown,
     testthat
 VignetteBuilder: knitr
