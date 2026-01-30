@@ -1,5 +1,9 @@
 # carnation
 
+## v0.99.8
+
+- Add packages to `Suggests::` to address build issues.
+
 ## v0.99.7
 
 - Add unit tests
