@@ -329,8 +329,26 @@ saveServer <- function(id, original, current, coldata, pattern, username, config
               )
             } else {
               if(!input$rds_path %in% y$data_area[[ug]]){
-                y$data_area[[ug]] <- c(y$data_area[[ug]],
-                                       input$rds_path)
+                # check if any parent path of RDS object exists in data_areas
+                # if not, add to list
+                parent <- FALSE
+
+                path <- dirname(path.expand(input$rds_path))
+                current_areas <- path.expand(y$data_area[[ ug ]])
+
+                while(path != '.' | path != '/'){
+                  if(path %in% current_areas){
+                    parent <- TRUE
+                    break
+                  } else {
+                    path <- dirname(path)
+                  }
+                }
+
+                if(!parent){
+                  y$data_area[[ug]] <- c(y$data_area[[ug]],
+                                         input$rds_path)
+                }
               }
             }
             save_access_yaml(y)
