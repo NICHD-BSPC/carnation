@@ -124,26 +124,3 @@ We welcome contributions to Carnation! Please feel free to submit issues or pull
 
 Carnation is available under the MIT license.
 
-## 💻 Server Mode
-
-Carnation supports multi-user environments with authentication:
-
-```r
-# Create user database
-credentials <- data.frame(
-  user = c('shinymanager'),
-  password = c('12345'),
-  admin = c(TRUE),
-  stringsAsFactors = FALSE
-)
-
-# Initialize the database
-shinymanager::create_db(
-  credentials_data = credentials,
-  sqlite_path = 'credentials.sqlite',
-  passphrase = 'admin_passphrase'
-)
-
-# Run with authentication
-run_carnation(credentials='credentials.sqlite', passphrase='admin_passphrase')
-```
