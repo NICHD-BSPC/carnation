@@ -442,7 +442,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                     ), # selectizeInput
                     actionButton('assay_do', label='Go!',
                                  class='btn-primary')
-                ) # conditionalPanel
+                ), # conditionalPanel
+
+                br(),
+                fluidRow(
+                  column(9, uiOutput('current_obj'))
+                ) # fluidRow
               ), # column
               column(9, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
@@ -646,6 +651,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     # list to hold original object and file path
     original <- reactiveValues(obj=NULL, path=NULL)
+
+    # reactiveValues to hold loaded project
+    current <- reactiveValues(proj=NULL, analysis=NULL)
 
     # list to hold user details
     user_details <- reactiveValues(username=NULL, admin=FALSE)
@@ -1237,7 +1245,27 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                         selected='DE analysis')
       updateTabsetPanel(session, inputId='de_mode',
                         selected='Summary')
+
+      # update current project
+      current$proj <- input$dds
+
+      al <- assay.list$l[[ input$dds ]]
+      idx <- which(unname(al) == input$assay)
+      current$analysis <- names(assay.list$l[[ input$dds ]])[idx]
+
     }) # observeEvent load data
+
+    # show loaded dataset
+    output$current_obj <- renderUI({
+      req(current$proj)
+
+      tags$div(
+        class='div-stats-card',
+        tags$p('Currently loaded:'),
+        tags$p('  - Project: ', tags$i(current$proj)),
+        tags$p('  - Analysis: ', tags$i(current$analysis))
+      )
+    })
 
     # update comparison menus after load
     observeEvent(app_object$res, {
