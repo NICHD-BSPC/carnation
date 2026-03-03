@@ -212,6 +212,21 @@ server:
     - sizeFactor
 
   de_analysis:
+    column_names:
+      # here we list alternative names of columns
+      # to support multiple tools
+      pvalue:
+        - PValue # edgeR
+        - P.Value # limma
+      padj:
+        - FDR # edgeR
+        - adj.P.Val # limma
+      log2FoldChange:
+        - logFC # edgeR/limma
+      baseMean:
+        - logCPM # edgeR
+        - AveExpr # limma
+
     pdf:
       width: 10
       height: 10

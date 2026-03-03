@@ -1081,6 +1081,46 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                                x
                            })
 
+      # make sure 'padj' & 'log2FoldChange' columns exist in res objects
+      # or supported alternatives exist
+      sanitized_res_list <- obj[[ res.name ]]
+
+      # supported column names
+      column_names <- config()$server$de_analysis$column_names
+      defaults <- names(column_names)
+
+      # these res objects will be dropped
+      drop_res_names <- NULL
+
+      for(name in names(sanitized_res_list)){
+        res <- sanitized_res_list[[ name ]]$res
+        res <- as.data.frame(res)
+
+        for(cname in defaults){
+          idx <- colnames(res) %in% column_names[[ cname ]]
+
+          # if matches exist
+          if(sum(idx) > 0){
+            if(sum(idx) > 1){
+            # only use the first match if multiple matches
+            # and show warning
+              message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
+            }
+
+            idx <- which(idx)[1]
+            colnames(res)[idx] <- cname
+          } else {
+            message('Unsupported res type for ', name, ':', cname, ' column not found, skipping')
+            drop_res_names <- c(drop_res_names, name)
+          }
+        }
+        sanitized_res_list[[ name ]]$res <- res
+      }
+
+      # remove unsupported res objects
+      sanitized_res_list <- sanitized_res_list[ !names(sanitized_res_list) %in% drop_res_names ]
+      obj[[ res.name ]] <- sanitized_res_list
+
       # add obj slots to reactive values
       obj <- make_final_object(obj)
 
