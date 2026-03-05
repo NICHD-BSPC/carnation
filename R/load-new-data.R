@@ -42,7 +42,6 @@ NULL
 loadDataUI <- function(id){
   ns <- NS(id)
 
-  # TODO: add multiple dds
   tagList(
     fluidRow(
       column(12, align='left',
