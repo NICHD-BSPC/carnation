@@ -442,12 +442,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                     ), # selectizeInput
                     actionButton('assay_do', label='Go!',
                                  class='btn-primary')
-                ), # conditionalPanel
-
-                br(),
-                fluidRow(
-                  column(9, uiOutput('current_obj'))
-                ) # fluidRow
+                ) # conditionalPanel
               ), # column
               column(9, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
@@ -458,7 +453,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
             withSpinner(
               uiOutput('load_ui')
-            ) # withSpinner
+            ),  # withSpinner
+
+            br(),
+            fluidRow(
+              column(3, uiOutput('current_obj'))
+            ) # fluidRow
           ), # tabPanel
 
           tabPanel('DE analysis',
