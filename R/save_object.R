@@ -333,15 +333,16 @@ saveServer <- function(id, original, current, coldata, pattern, username, config
                 # if not, add to list
                 parent <- FALSE
 
-                path <- dirname(path.expand(input$rds_path))
-                current_areas <- path.expand(y$data_area[[ ug ]])
+                path <- normalizePath(dirname(path.expand(input$rds_path)), mustWork=FALSE)
+                current_areas <- normalizePath(path.expand(y$data_area[[ ug ]]), mustWork=FALSE)
 
-                while(path != '.' | path != '/'){
+                while(TRUE){
                   if(path %in% current_areas){
                     parent <- TRUE
                     break
                   } else {
                     path <- dirname(path)
+                    if(path == '.' || path == '/') break
                   }
                 }
 

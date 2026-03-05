@@ -989,8 +989,27 @@ loadDataServer <- function(id, username, config, rds=NULL){
               )
             } else {
               if(!input$dir_new %in% y$data_area[[ug]]){
-                y$data_area[[ug]] <- c(y$data_area[[ug]],
-                                       input$dir_new)
+                # check if any parent path of new_dir exists in data_areas
+                # if not, add to list
+                parent <- FALSE
+
+                path <- normalizePath(path.expand(input$dir_new), mustWork=FALSE)
+                current_areas <- normalizePath(path.expand(y$data_area[[ ug ]]), mustWork=FALSE)
+
+                while(TRUE){
+                  if(path %in% current_areas){
+                    parent <- TRUE
+                    break
+                  } else {
+                    path <- dirname(path)
+                    if(path == '.' || path == '/') break
+                  }
+                }
+
+                if(!parent){
+                  y$data_area[[ug]] <- c(y$data_area[[ug]],
+                                         input$dir_new)
+                }
               }
             }
             save_access_yaml(y)
