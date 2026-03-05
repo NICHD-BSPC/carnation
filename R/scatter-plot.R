@@ -647,8 +647,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         }
 
         # filter rows with NA values
-        df <- df %>% filter(!is.na(.data[[ xcol ]]))
-        df <- df %>% filter(!is.na(.data[[ xcol ]]))
+        df <- df %>% filter(!is.na(.data[[ xcol ]]), !is.na(.data[[ ycol ]]))
 
         # Create column with plotting character based on lim.x
         # Change point values for those outside plot limits to values that are within the limits
