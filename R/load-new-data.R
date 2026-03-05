@@ -954,11 +954,12 @@ loadDataServer <- function(id, username, config, rds=NULL){
             # - this prevents saved object from becoming very large if another
             #   object has been previously loaded
             combined_final$dds <- lapply(combined_final$dds, function(x){
-                                    attr(x@design, '.Environment') <- NULL
+                                    if(.hasSlot(x, 'design')) attr(x@design, '.Environment') <- NULL
                                     x
                                   })
 
-            attr(combined_final$all_dds@design, '.Environment') <- NULL
+            if(.hasSlot(combined_final$all_dds, 'design'))
+              attr(combined_final$all_dds@design, '.Environment') <- NULL
 
             saveRDS(combined_final, ofile,
                     compress=as.logical(input$compress))
