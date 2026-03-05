@@ -448,6 +448,69 @@ get_y_init <- function(df, y_delta, pseudocount){
     return( c(min.init, max.init) )
 }
 
+#' Validate Pattern Analysis Object Schema
+#'
+#' Validate the schema for a single `degpatterns` analysis element used by the
+#' pattern analysis module.
+#'
+#' @param pattern_obj A single pattern analysis element. Must be either a
+#' `data.frame` or a list containing a `normalized` `data.frame`.
+#' @param require_symbol Logical, if `TRUE` require a `symbol` column in the
+#' analysis table.
+#'
+#' @return Returns `TRUE` when validation succeeds, otherwise returns `FALSE`
+#' after emitting a message describing the issue.
+#'
+#' @examples
+#' data(degpatterns_dex, package = "carnation")
+#'
+#' is_valid_pattern_obj(degpatterns_dex)
+#'
+#' @export
+is_valid_pattern_obj <- function(pattern_obj, require_symbol = FALSE){
+  if(is.null(pattern_obj)){
+    message('"pattern_obj" cannot be NULL')
+    return(FALSE)
+  }
+
+  req_cols <- c("genes", "value")
+  if(require_symbol) req_cols <- c(req_cols, "symbol")
+
+  if(is.data.frame(pattern_obj)){
+    df <- pattern_obj
+  } else if(is.list(pattern_obj) &&
+            "normalized" %in% names(pattern_obj) &&
+            is.data.frame(pattern_obj$normalized)){
+    df <- pattern_obj$normalized
+  } else {
+    message(
+      '"pattern_obj" must be a data.frame or a list containing a data.frame in "$normalized"'
+    )
+    return(FALSE)
+  }
+
+  missing_cols <- setdiff(req_cols, colnames(df))
+  if(length(missing_cols) > 0){
+    message(
+      '"pattern_obj" is missing required column(s): ',
+      paste(missing_cols, collapse = ", ")
+    )
+    return(FALSE)
+  }
+
+  # Pattern module expects at least one clustering column.
+  cluster_cols <- c("cluster", grep("^cutoff", colnames(df), value = TRUE))
+  if(!any(cluster_cols %in% colnames(df))){
+    message(
+      '"pattern_obj" must contain at least one cluster column: ',
+      '"cluster" or columns starting with "cutoff"'
+    )
+    return(FALSE)
+  }
+
+  TRUE
+}
+
 #' Make final object for internal use by the app
 #'
 #' This function takes an uploaded object and sanitizes
