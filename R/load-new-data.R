@@ -68,6 +68,14 @@ loadDataUI <- function(id){
     textOutput(ns('func_summary')),
     br(), br(),
 
+    span('Step 4: ',
+         style='font-style: italic;'),
+    actionButton(ns('add_dp'), 'Add pattern analysis results'),
+    span('(Optional)',
+         style='font-style: italic;'),
+    textOutput(ns('dp_summary')),
+    br(), br(),
+
     actionButton(ns('create_new'), 'Create data set',
                  class='btn-primary')
   ) # tagList
@@ -837,6 +845,211 @@ loadDataServer <- function(id, username, config, rds=NULL){
             )
           }
         }
+        removeModal()
+      })
+
+      #################### Pattern analysis results ####################
+
+      observeEvent(input$add_dp, {
+        if(is.null(new_obj$dds_list)){
+          showNotification(
+            'Must add at least one counts table before uploading pattern analysis results!',
+            type='error'
+          )
+        }
+
+        validate(
+          need(!is.null(new_obj$dds_list), 'Must have counts')
+        )
+
+        if(is.null(new_obj$res_list)){
+          showNotification(
+            'Must add at least one DE results table before uploading pattern analysis results!',
+            type='error'
+          )
+        }
+
+        validate(
+          need(!is.null(new_obj$res_list), 'Must have DE results')
+        )
+
+        showModal(
+          modalDialog(
+            fileInput(ns('dp_file'),
+                      label='Pattern analysis result file(s)',
+                      multiple=TRUE),
+
+            tags$div(
+              span('*Can add multiple files here'),
+              br(), br(),
+              span('Supported formats:'),
+              tags$ul(
+                tags$li('RDS files containing a degPatterns-like object (data.frame or list with "normalized" data.frame).'),
+                tags$li('Tab-delimited text files (TSV) containing pattern analysis table columns.')
+              ),
+              style='font-style: italic;'
+            ),
+
+            footer=tagList(
+                     actionButton(ns('add_dp_files'), 'OK'),
+                     modalButton('Cancel')
+                   ),
+            easyClose=TRUE
+          )
+        )
+      })
+
+      observeEvent(input$add_dp_files, {
+        if(is.null(input$dp_file)){
+          showNotification(
+            'No pattern analysis results uploaded!',
+            type='error'
+          )
+        }
+
+        req(input$dp_file)
+
+        tag <- tagList(
+                 fluidRow(
+                   column(6, strong('Analysis name')),
+                   column(6, strong('File'))
+                 )
+               )
+
+        for(i in seq_len(nrow(input$dp_file))){
+          tmp_id <- tools::file_path_sans_ext(basename(input$dp_file$name[i]))
+
+          tag <- tagAppendChildren(
+                   tag,
+                   fluidRow(
+                     column(6,
+                       textInput(ns(paste0('dp_id', i)),
+                                 label=NULL,
+                                 value=tmp_id)
+                     ),
+                     column(6,
+                       span(input$dp_file$name[i])
+                     )
+                   )
+                 )
+        }
+
+        tag <- tagAppendChildren(
+                 tag,
+                 tags$div(
+                   tags$ul(
+                     tags$li('Analysis name: Unique name without white-space or commas.'),
+                     tags$li('Each uploaded object must match the expected pattern-analysis schema.')
+                   ),
+                   style='font-style: italic;'
+                 )
+               )
+
+        showModal(
+          modalDialog(
+            tag,
+            footer=tagList(
+                     actionButton(ns('add_dp_do'), 'OK'),
+                     modalButton('Cancel')
+                   ),
+            easyClose=TRUE
+          )
+        )
+      })
+
+      output$dp_summary <- renderText({
+        if(!is.null(new_obj$degpatterns)){
+          nsets <- length(new_obj$degpatterns)
+
+          if(nsets > 1){
+            msg <- paste(nsets, 'pattern analysis results')
+          } else {
+            msg <- paste(nsets, 'pattern analysis result')
+          }
+          msg
+        }
+      })
+
+      observeEvent(input$add_dp_do, {
+        req(input$dp_file)
+
+        ndp <- nrow(input$dp_file)
+        all_names <- paste0('dp_id', seq_len(ndp))
+
+        # check that analysis names are not empty
+        for(name in all_names){
+          if(input[[ name ]] == ''){
+            showNotification(
+              'Pattern analysis name cannot be empty!',
+              type='warning'
+            )
+          }
+
+          validate(
+            need(input[[ name ]] != '', '')
+          )
+
+          if(grepl('[[:space:],]', input[[ name ]])){
+            showNotification(
+              'Pattern analysis name cannot contain white-space or commas!',
+              type='warning'
+            )
+          }
+
+          validate(
+            need(!grepl('[[:space:],]', input[[ name ]]), '')
+          )
+        }
+
+        for(i in seq_len(ndp)){
+          dp_id <- input[[ paste0('dp_id', i) ]]
+          f <- input$dp_file$datapath[i]
+          ext <- tolower(tools::file_ext(input$dp_file$name[i]))
+
+          if(ext == 'rds'){
+            dp_obj <- readRDS(f)
+          } else if(ext %in% c('tsv', 'txt')){
+            dp_obj <- read.table(f, sep='\t', header=TRUE)
+          } else {
+            showNotification(
+              paste0('Unsupported pattern analysis file type: "', ext, '". Use .rds, .tsv or .txt'),
+              type='error'
+            )
+
+            validate(
+              need(ext %in% c('rds', 'tsv', 'txt'), '')
+            )
+          }
+
+          is_valid <- is_valid_pattern_obj(dp_obj, require_symbol=FALSE)
+          if(!is_valid){
+            showNotification(
+              paste0('Invalid pattern analysis object: "', input$dp_file$name[i], '"'),
+              type='error'
+            )
+
+            validate(
+              need(is_valid, '')
+            )
+          }
+
+          if(is.null(new_obj$degpatterns)){
+            new_obj$degpatterns <- setNames(list(dp_obj), dp_id)
+          } else if(dp_id %in% names(new_obj$degpatterns)){
+            showNotification(
+              paste0('Pattern analysis named "', dp_id,
+                     '" already present in object. Please choose different name'),
+              type='error'
+            )
+
+            validate(
+              need(!dp_id %in% names(new_obj$degpatterns), '')
+            )
+          } else {
+            new_obj$degpatterns[[ dp_id ]] <- dp_obj
+          }
+        }
+
         removeModal()
       })
 
