@@ -571,6 +571,9 @@ make_final_object <- function(obj){
     # get res.list names
     comp.names <- names(obj[[res.name]])
 
+    # these dds objects are not linked to res_list
+    orphan_dds <- NULL
+
     # if res.list contains 'res', 'dds', 'label' elements
     # build the following:
     #
@@ -654,9 +657,8 @@ make_final_object <- function(obj){
         } else if(name %in% names(obj[[res.name]])){
           res <- obj[[res.name]][[name]]
         } else {
-          message('no matching dds object found for ', name, ', skipping\n')
-          obj[[dds.name]] <- obj[[dds.name]][!names(obj[[dds.name]]) %in% name]
-          obj[[rld.name]] <- obj[[rld.name]][!names(obj[[rld.name]]) %in% name]
+          message('no matching dds object found for ', name, '\n')
+          orphan_dds <- c(orphan_dds, name)
           next
         }
 
@@ -719,6 +721,20 @@ make_final_object <- function(obj){
       names(dds_mapping) <- comp.names
 
       obj$dds_mapping <- dds_mapping
+    }
+
+    # use full idmap for orphan dds objects
+    if(!is.null(orphan_dds)){
+      for(name in orphan_dds){
+        dds <- obj[[dds.name]][[name]]
+        rownames(dds) <- all_idmap[rownames(dds)]
+
+        rld <- obj[[rld.name]][[name]]
+        rownames(rld) <- all_idmap[rownames(rld)]
+
+        obj[[dds.name]][[name]] <- dds
+        obj[[rld.name]][[name]] <- rld
+      }
     }
 
     # if degpatterns element exists, add symbol column
