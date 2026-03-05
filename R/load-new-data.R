@@ -767,7 +767,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
 
           # GSEA columns
           cprof_gsea_cols <- c('ID', 'Description', 'core_enrichment', 'setSize',
-                               'pvalue', 'p,adjust', 'qvalue', 'NES', 'setSize')
+                               'pvalue', 'p.adjust', 'qvalue', 'NES', 'setSize')
 
           # check for clusterProfiler columns
           if(all(cprof_or_cols %in% colnames(eres))){
