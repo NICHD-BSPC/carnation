@@ -289,6 +289,23 @@ scatterPlotUI <- function(id, panel){
       withSpinner(
         DTOutput(ns('scatter_datatable_out'))
       ) # withSpinner
+      fluidRow(
+        column(3,
+          h4('Table filters'),
+          selectizeInput(ns('filter_tbl'), h5('Filter by significance'),
+                         choices=NULL, selected=NULL, multiple=TRUE),
+
+          # For 'Select all' and 'Select none' buttons
+          fluidRow(style='margin-bottom: 5px; margin-left: 2px;',
+            actionButton(ns('select_all'), 'Select all', class = "btn-secondary"),
+            actionButton(ns('select_none'), 'Select none', class = "btn-secondary")
+          ), # fluidRow
+
+          actionButton(ns('filter_tbl_do'),
+                       style='margin-bottom: 20px;',
+                       label='Apply filters',
+                       icon=icon('filter'),
+                       class='btn-primary'),
 
     ) # tagList
   } # else if panel='main'
@@ -547,14 +564,33 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         }
 
         # Significance as factor, to reorder in the graph
-        df$significance <- factor(df$significance, levels = c('None', label_i, label_j, 'Both - opposite LFC sign', 'Both - same LFC sign'))
+        sig_levels <- c('None', label_i, label_j,
+                        'Both - opposite LFC sign', 'Both - same LFC sign')
+        df$significance <- factor(df$significance, levels = sig_levels)
 
         # Store the dataframe in the df_react reactiveVal
+        updateSelectizeInput(session, 'filter_tbl', choices=sig_levels, selected=sig_levels)
+
         df_react(df)
         df_full(df_full)
 
         flags$data_loaded <- flags$data_loaded + 1
       })
+
+      # observers for tbl filters
+      observeEvent(input$select_all, {
+        # Get all possible comparison options
+        all_sig <- levels(df_react()$significance)
+        # Update the select_none checkbox
+        updateSelectizeInput(session, 'filter_tbl', selected=all_sig)
+      })
+
+      # Observer for Select none checkbox
+      observeEvent(input$select_none, {
+        # Update comp_all with no selected comparisons
+        updateSelectizeInput(session, 'filter_tbl', selected=character(0))
+      })
+
       # ---------------------------------------------------------- #
 
       # --------------- Swap comparisons button  ----------------- #
@@ -788,29 +824,38 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       # ------------------------------------------------------- #
 
       # -------------------- renerDataTable  ------------------ #
-      scatter_dt <- eventReactive(c(df_full(), input$x_axis_comp, input$y_axis_comp), {
+      scatter_dt <- eventReactive(c(df_react(), input$x_axis_comp, input$y_axis_comp,
+                                    input$filter_tbl_do), {
         validate(
           need(!is.null(df_full()), '')
         )
         df <- df_full()
 
         # add significance column
-        isolate({
-          sig_df <- df_react()
-        })
+        sig_df <- df_react()
 
         # map geneid to significance
         sigvec <- sig_df$significance
         names(sigvec) <- sig_df$geneid
         df$significance <- sigvec[df$geneid]
 
+        # get current filters
+        curr_filters <- input$filter_tbl
+        idx <- df$significance %in% curr_filters
+        if(sum(idx) == 0){
+          showNotification(
+            'No rows left in table after filtering', type='error'
+          )
+
+          validate(need(sum(idx) > 0, ''))
+        }
         # move geneid & significance to beginning to work with container
-        df %>% relocate('significance') %>% relocate('geneid')
+        df[which(idx),] %>% relocate('significance') %>% relocate('geneid')
 
       })
 
       # Optionally display datatable for scatter plot input data
-      output$scatter_datatable_out <- renderDT({
+      output$scatter_tbl <- renderDT({
         validate(
           need(!is.null(df_full()), '')
         )
