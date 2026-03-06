@@ -2749,6 +2749,7 @@ plotScatter.label_ly <- function(compare,
                                   orientation = 'v',
                                   xanchor = 'left',
                                   yanchor = 'middle',
+                                  itemsizing = 'constant',
                                   font = list(size = 14),
                                   title = list(text = 'Significant in:')))
 
