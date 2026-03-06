@@ -470,7 +470,8 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
              input$x_axis_comp,
              input$y_axis_comp,
              curr_thres$fc.thres,
-             curr_thres$fdr.thres)
+             curr_thres$fdr.thres,
+             genes_clicked$g)
       }, {
 
         req(app_object()$res)
