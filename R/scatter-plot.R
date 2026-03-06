@@ -33,11 +33,11 @@
 #' plot_args <- reactive({
 #'   list(
 #'     fdr.thres=0.1,
-#'     fc.thres=0,
-#'     gene.to.plot=c('gene1', 'gene2')
+#'     fc.thres=0
 #'   )
 #' })
 #'
+#' gene_scratchpad <- reactive({ c('gene1', 'gene2') })
 #' reset_genes <- reactiveVal()
 #'
 #' config <- reactiveVal(get_config())
