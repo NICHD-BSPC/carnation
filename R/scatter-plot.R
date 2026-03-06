@@ -275,9 +275,16 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      withSpinner(
-        uiOutput(ns('scatterplot_out'))
-      ), # withSpinner
+      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "yes"'),
+        withSpinner(
+          plotlyOutput(ns('plotly_out'), height='600px')
+        )
+      ), # conditionalPanel
+      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "no"'),
+        withSpinner(
+          plotOutput(ns('plot_out'), height='600px')
+        )
+      ), # conditionalPanel
 
       withSpinner(
         DTOutput(ns('scatter_datatable_out'))
@@ -770,29 +777,14 @@ scatterPlotServer <- function(id, obj, plot_args, config){
      }) # eventReactive scatterplot_ly
       # ----------------------------------------------------- #
 
-      # ---------------------- renerUI ---------------------- #
-      output$scatterplot_out <- renderUI({
-        if (input$plot_interactive == 'yes') {
+      output$plotly_out <- renderPlotly({
+        scatterplot_ly()
+      })
 
-          p <- scatterplot_ly() %>% toWebGL()
+      output$plot_out <- renderPlot({
+        scatterplot() + theme(text=element_text(size=18))
+      })
 
-          output$plot1 <- renderPlotly({ p })
-
-          withSpinner(
-            plotlyOutput(ns('plot1'), height='600px')
-          )
-
-        } else if (input$plot_interactive == 'no') {
-
-          p <- scatterplot() + theme(text=element_text(size=18))
-
-          output$plot2 <- renderPlot({ p })
-
-          withSpinner(
-            plotOutput(ns('plot2'), height='600px')
-          )
-        }
-      }) # renderUI
       # ------------------------------------------------------- #
 
       # -------------------- renerDataTable  ------------------ #
