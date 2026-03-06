@@ -1672,7 +1672,25 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
            gene.to.plot=gene_scratchpad())
     })
 
-    scatterPlotServer('scatterplot', app_object, scatterplot_args, config)
+    scatter_data <- scatterPlotServer('scatterplot',
+                                      app_object,
+                                      scatterplot_args,
+                                      gene_scratchpad,
+                                      reactive({ input$reset.genes }),
+                                      config)
+
+    observeEvent(scatter_data(), {
+      g <- scatter_data()$genes
+
+      # only update scratchpad if different genes returned
+      if(length(setdiff(g, input$gene.to.plot)) != 0){
+        # update gene selector with clicked genes
+        updateSelectizeInput(session, 'gene.to.plot',
+                             choices=gene.id$gene,
+                             selected=g,
+                             server=TRUE)
+      }
+    })
 
     ##################### UpSet plot #########################
 

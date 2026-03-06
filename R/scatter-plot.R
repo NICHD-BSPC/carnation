@@ -6,8 +6,9 @@
 #' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main' passed to UI
 #' @param obj reactiveValues object containing carnation object passed to server
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
-#' 'gene.to.plot' (genes to be labeled) passed to server
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC)
+#' @param gene_scratchpad reactive containing gene scratchpad genes
+#' @param reset_genes reactive to reset gene scratchpad selection
 #' @param config reactive list with config settings passed to server
 #'
 #' @returns
@@ -37,6 +38,8 @@
 #'   )
 #' })
 #'
+#' reset_genes <- reactiveVal()
+#'
 #' config <- reactiveVal(get_config())
 #'
 #' shinyApp(
@@ -45,7 +48,8 @@
 #'          mainPanel(scatterPlotUI('p', 'sidebar'))
 #'        ),
 #'   server = function(input, output, session){
-#'              scatterPlotServer('p', obj, plot_args, config)
+#'              scatter_data <- scatterPlotServer('p', obj, plot_args,
+#'                                gene_scratchpad, reset_genes, config)
 #'            }
 #' )
 #'
@@ -286,9 +290,6 @@ scatterPlotUI <- function(id, panel){
         )
       ), # conditionalPanel
 
-      withSpinner(
-        DTOutput(ns('scatter_datatable_out'))
-      ) # withSpinner
       fluidRow(
         column(3,
           h4('Table filters'),
@@ -315,13 +316,20 @@ scatterPlotUI <- function(id, panel){
                          class='btn-primary')
           ) # fluidRow
         ), # column
+        column(9, style='margin-top: 10px;',
+          withSpinner(
+            DTOutput(ns('scatter_tbl'))
+          ) # withSpinner
+        ) # column
+      ) # fluidRow
+
     ) # tagList
   } # else if panel='main'
 } # scatterPlotUI
 
 #' @rdname scattermod
 #' @export
-scatterPlotServer <- function(id, obj, plot_args, config){
+scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
 
   moduleServer(
     id,
@@ -354,6 +362,9 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
       # reactive values to keep track of axis limits
       axis_limits <- reactiveValues(lim.x=NULL, lim.y=NULL)
+
+      # reactive to hold labeled genes
+      genes_clicked <- reactiveValues(g=NULL)
 
       # Initialize comparison selection dropdowns when data is available
       observeEvent(comp_all(), {
@@ -389,6 +400,21 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         curr_thres$fdr.thres <- fdr.thres
         curr_thres$fc.thres <- fc.thres
       })
+
+      # gene scratchpad
+
+      observeEvent(gene_scratchpad(), {
+        g <- gene_scratchpad()
+        if(any(g != '')){
+          if(!all(g %in% genes_clicked$g))
+            genes_clicked$g <- unique(c(genes_clicked$g, g))
+        }
+      })
+
+      observeEvent(reset_genes(), {
+        genes_clicked$g <- NULL
+      })
+
       # ------------------------------------------------------------#
 
       # ------------- helper functions -----------------------------#
@@ -736,7 +762,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         )
 
         # Get genes to label
-        genes <- plot_args()$gene.to.plot
+        genes <- genes_clicked$g
         if(is.null(genes) || all(genes %in% '')){
             lab.genes <- NULL
         } else {
