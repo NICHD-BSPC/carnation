@@ -307,6 +307,14 @@ scatterPlotUI <- function(id, panel){
                        icon=icon('filter'),
                        class='btn-primary'),
 
+          h4('Table selection'),
+          fluidRow(style='margin-left: 2px;',
+            actionButton(ns('add_selected'), 'Add to scratchpad'),
+            actionButton(ns('reset_tbl'),
+                         'Reset selection',
+                         class='btn-primary')
+          ) # fluidRow
+        ), # column
     ) # tagList
   } # else if panel='main'
 } # scatterPlotUI
@@ -888,7 +896,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
         df %>%
           datatable(rownames=FALSE,
-                    selection='none',
+                    selection=list(mode='multiple'),
                     container=sketch,
                     options=list(autoWidth=TRUE,
                                  columnDefs=list(list(className='dt-center',
@@ -899,11 +907,58 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       }) # renderDT
       # ------------------------------------------------------- #
 
+      # table selection handling
+
+      scatter_proxy <- dataTableProxy('scatter_tbl')
+
+      observeEvent(input$reset_tbl, {
+        scatter_proxy %>% selectRows(NULL)
+      })
+
+      observeEvent(input$add_selected, {
+        tbl <- scatter_dt()
+        sel <- input$scatter_tbl_rows_selected
+
+        # handle NAs in symbol
+        s <- tbl$geneid
+        #s[is.na(s)] <- tbl$gene[is.na(s)]
+
+        if(is.null(sel)){
+          showNotification(
+            'Cannot add genes, no rows selected', type='warning'
+          )
+          validate(
+            need(!is.null(sel), '')
+          )
+        } else if(all(s[sel] %in% genes_clicked$g)){
+          showNotification(
+            'Selected genes already present in scratchpad, skipping', type='warning'
+          )
+        } else {
+          if(is.null(genes_clicked$g)) selected <- s[sel]
+          else selected <- unique(c(genes_clicked$g, s[sel]))
+
+          new_genes <- setdiff(selected, genes_clicked$g)
+          showNotification(
+            paste('Adding', length(new_genes),
+                  'new genes to scratchpad')
+          )
+
+          genes_clicked$g <- c(genes_clicked$g, new_genes)
+        }
+      }) # observeEvent
+
       # ---------------- Help and download buttons ------------ #
       helpButtonServer('de_cmp_scatter_help', size='l')
       helpButtonServer('de_scatter_help', size='l')
       downloadButtonServer('scatterplot_download', scatterplot, 'scatterplot')
       # ----------------------------------------------------- #
+
+      return(
+        reactive({
+          list(genes=genes_clicked$g)
+        })
+      )
     } # Server function
   ) # moduleServer
 } # maPlotServer
