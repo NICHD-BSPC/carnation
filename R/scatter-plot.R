@@ -788,8 +788,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       # ------------------------------------------------------- #
 
       # -------------------- renerDataTable  ------------------ #
-      # Optionally display datatable for scatter plot input data
-      output$scatter_datatable_out <- renderDT({
+      scatter_dt <- eventReactive(c(df_full(), input$x_axis_comp, input$y_axis_comp), {
         validate(
           need(!is.null(df_full()), '')
         )
@@ -806,7 +805,16 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         df$significance <- sigvec[df$geneid]
 
         # move geneid & significance to beginning to work with container
-        df <- df %>% relocate('significance') %>% relocate('geneid')
+        df %>% relocate('significance') %>% relocate('geneid')
+
+      })
+
+      # Optionally display datatable for scatter plot input data
+      output$scatter_datatable_out <- renderDT({
+        validate(
+          need(!is.null(df_full()), '')
+        )
+        df <- scatter_dt()
 
         # Define the columns to format to 3 sig figs
         columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
