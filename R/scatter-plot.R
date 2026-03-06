@@ -795,13 +795,23 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         )
         df <- df_full()
 
-        # move geneid to beginning to work with container
-        df <- df %>% relocate('geneid')
+        # add significance column
+        isolate({
+          sig_df <- df_react()
+        })
+
+        # map geneid to significance
+        sigvec <- sig_df$significance
+        names(sigvec) <- sig_df$geneid
+        df$significance <- sigvec[df$geneid]
+
+        # move geneid & significance to beginning to work with container
+        df <- df %>% relocate('significance') %>% relocate('geneid')
 
         # Define the columns to format to 3 sig figs
         columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
         which_cols <- which(colnames(df) %in% columns_to_format)
-        border_cols <- c(1, grep('padj', colnames(df)))
+        border_cols <- c(1, 2, grep('padj', colnames(df)))
 
         all_comps <- c(input$x_axis_comp, input$y_axis_comp)
         validate(
@@ -813,7 +823,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
           class = 'display',
           tags$thead(
             tags$tr(
-              tags$th(rowspan=2, 'geneid'),
+              lapply(c('geneid', 'significance'), function(x) tags$th(rowspan=2, x)),
               lapply(all_comps,
                      function(x) tags$th(class='dt-center', colspan=2, x))
             ),
