@@ -108,16 +108,6 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      fluidRow(
-        column(6, h5('Show table?')),
-        column(6,
-          selectInput(ns("show_table"), label=NULL,
-                      choices=c('yes', 'no'),
-                      selected='yes'
-          ) # selectInput
-        ) # column
-      ), # fluidRow
-
       wellPanel(
         style='background: white',
 
@@ -293,8 +283,6 @@ scatterPlotUI <- function(id, panel){
         DTOutput(ns('scatter_datatable_out'))
       ) # withSpinner
 
-     # conditionalPanel("input.show_table == 'yes'",
-     # ) # conditionalPanel
     ) # tagList
   } # else if panel='main'
 } # scatterPlotUI
@@ -810,51 +798,49 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       # -------------------- renerDataTable  ------------------ #
       # Optionally display datatable for scatter plot input data
       output$scatter_datatable_out <- renderDT({
-        if (input$show_table == 'yes') {
-          validate(
-            need(!is.null(df_full()), '')
-          )
-          df <- df_full()
+        validate(
+          need(!is.null(df_full()), '')
+        )
+        df <- df_full()
 
-          # move geneid to beginning to work with container
-          df <- df %>% relocate('geneid')
+        # move geneid to beginning to work with container
+        df <- df %>% relocate('geneid')
 
-          # Define the columns to format to 3 sig figs
-          columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
-          which_cols <- which(colnames(df) %in% columns_to_format)
-          border_cols <- c(1, grep('padj', colnames(df)))
+        # Define the columns to format to 3 sig figs
+        columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
+        which_cols <- which(colnames(df) %in% columns_to_format)
+        border_cols <- c(1, grep('padj', colnames(df)))
 
-          all_comps <- c(input$x_axis_comp, input$y_axis_comp)
-          validate(
-            need(!any(is.null(all_comps)), 'Waiting for selection')
-          )
+        all_comps <- c(input$x_axis_comp, input$y_axis_comp)
+        validate(
+          need(!any(is.null(all_comps)), 'Waiting for selection')
+        )
 
-          # build container for table
-          sketch <- htmltools::withTags(table(
-            class = 'display',
-            tags$thead(
-              tags$tr(
-                tags$th(rowspan=2, 'geneid'),
-                lapply(all_comps,
-                       function(x) tags$th(class='dt-center', colspan=2, x))
-              ),
-              tags$tr(
-                lapply(rep(c('log2FoldChange', 'padj'), 2), tags$th)
-              )
+        # build container for table
+        sketch <- htmltools::withTags(table(
+          class = 'display',
+          tags$thead(
+            tags$tr(
+              tags$th(rowspan=2, 'geneid'),
+              lapply(all_comps,
+                     function(x) tags$th(class='dt-center', colspan=2, x))
+            ),
+            tags$tr(
+              lapply(rep(c('log2FoldChange', 'padj'), 2), tags$th)
             )
-          ))
+          )
+        ))
 
-          df %>%
-            datatable(rownames=FALSE,
-                      selection='none',
-                      container=sketch,
-                      options=list(autoWidth=TRUE,
-                                   columnDefs=list(list(className='dt-center',
-                                                        targets=seq_len((ncol(df)-1)))))) %>%
-            formatStyle(columns=border_cols,
-                        'border-right'='solid 1px') %>%
-            formatSignif(columns=which_cols, digits=5)
-        } # if show_table == 'yes'
+        df %>%
+          datatable(rownames=FALSE,
+                    selection='none',
+                    container=sketch,
+                    options=list(autoWidth=TRUE,
+                                 columnDefs=list(list(className='dt-center',
+                                                      targets=seq_len((ncol(df)-1)))))) %>%
+          formatStyle(columns=border_cols,
+                      'border-right'='solid 1px') %>%
+          formatSignif(columns=which_cols, digits=5)
       }) # renderDT
       # ------------------------------------------------------- #
 
