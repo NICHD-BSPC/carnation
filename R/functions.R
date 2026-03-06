@@ -2718,14 +2718,16 @@ plotScatter.label_ly <- function(compare,
     lab.df <- df[df[[name.col]] %in% lab.genes, ]
     if(nrow(lab.df) > 0){
       p <- p %>%
-          add_markers(x=lab.df[[x]], y=lab.df[[y]],
-                      text=lab.df$name.col,
-                      hoverinfo='none',
-                      name='Gene scratchpad',
-                      marker=list(color='black',
-                                  symbol='circle-open',
-                                  size=size*2,
-                                  line=list(width=2)))
+          add_trace(x=lab.df[[x]], y=lab.df[[y]],
+                    text=lab.df$name.col,
+                    hoverinfo='none',
+                    type='scattergl',
+                    mode='markers',
+                    name='Gene scratchpad',
+                    marker=list(color='black',
+                                symbol='circle-open',
+                                size=size*2,
+                                line=list(width=2)))
     }
   }
 
