@@ -892,7 +892,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
       # Optionally display datatable for scatter plot input data
       output$scatter_tbl <- renderDT({
         validate(
-          need(!is.null(df_full()), '')
+          need(!is.null(scatter_dt()), '')
         )
         df <- scatter_dt()
 
