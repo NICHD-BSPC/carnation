@@ -2564,6 +2564,7 @@ plotScatter.label <- function(compare,
 #' @param alpha float, marker opacity (default=1).
 #' @param size float, marker size (default=4).
 #' @param show.grid string, can be 'yes' (default) or 'no'.
+#' @param source name of source to return event_data from
 
 #' @return plotly handle
 #'
@@ -2646,7 +2647,8 @@ plotScatter.label_ly <- function(compare,
                                  lines=c('yes', 'yes', 'yes'),
                                  alpha=1,
                                  size=4,
-                                 show.grid='yes') {
+                                 show.grid='yes',
+                                 source='A') {
 
   names(color.palette) <- c('None', label_x, label_y, 'Both - opposite LFC sign', 'Both - same LFC sign')
 
@@ -2670,7 +2672,7 @@ plotScatter.label_ly <- function(compare,
 
   show.grid <- if (show.grid == 'yes') TRUE else FALSE
 
-  p <- plot_ly()
+  p <- plot_ly(source=source)
 
   # list of plotting characters
   pch <- c('in'='circle',
@@ -2784,7 +2786,7 @@ plotScatter.label_ly <- function(compare,
 
   # Add all collected shapes at once
   if (length(shapes_to_add) > 0) {
-    p <- p %>% layout(shapes = shapes_to_add)
+    p <- p %>% layout(shapes = shapes_to_add, dragmode='lasso')
   }
 
   # Return the Plotly plot object
