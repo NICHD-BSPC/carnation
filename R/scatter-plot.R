@@ -382,7 +382,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
         df_react(NULL)
         df_full(NULL)
-        })
+      })
       # -------------------------------------------------------------- #
 
       # --------------- Set FDR and FC thresholds ---------------- #
