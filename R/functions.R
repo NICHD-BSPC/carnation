@@ -2786,7 +2786,7 @@ plotScatter.label_ly <- function(compare,
 
   # Add all collected shapes at once
   if (length(shapes_to_add) > 0) {
-    p <- p %>% layout(shapes = shapes_to_add, dragmode='lasso')
+    p <- p %>% layout(shapes = shapes_to_add, dragmode='select')
   }
 
   # Return the Plotly plot object
