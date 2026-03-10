@@ -292,29 +292,47 @@ scatterPlotUI <- function(id, panel){
 
       fluidRow(
         column(3,
-          h4('Table filters'),
-          selectizeInput(ns('filter_tbl'), h5('Filter by significance'),
+
+          h4('Selection settings'),
+
+          bsCollapse(open='Plot selection',
+            bsCollapsePanel('Plot selection',
+              fluidRow(style='margin-left: 2px;',
+                uiOutput(ns('pt_selected')),
+                actionButton(ns('filter_sel_do'),
+                             label='Toggle table filter'),
+                actionButton(ns('reset_plt_selection'),
+                                'Clear',
+                                class='btn-primary')
+              ) # fluidRow
+            ) # bsCollapsePanel
+          ), # bsCollapse
+
+          bsCollapse(open='Table selection',
+            bsCollapsePanel('Table selection',
+              fluidRow(style='margin-left: 2px;',
+                actionButton(ns('add_selected'), 'Add to scratchpad'),
+                actionButton(ns('reset_tbl'),
+                             'Clear selection',
+                             class='btn-primary')
+              ) # fluidRow
+            ) # bsCollapsePanel
+          ), # bsCollapse
+
+          h4('Filter table by significance'),
+          selectizeInput(ns('filter_tbl'), label=NULL, width='100%',
                          choices=NULL, selected=NULL, multiple=TRUE),
 
           # For 'Select all' and 'Select none' buttons
           fluidRow(style='margin-bottom: 5px; margin-left: 2px;',
             actionButton(ns('select_all'), 'Select all', class = "btn-secondary"),
-            actionButton(ns('select_none'), 'Select none', class = "btn-secondary")
-          ), # fluidRow
-
-          actionButton(ns('filter_tbl_do'),
-                       style='margin-bottom: 20px;',
-                       label='Apply filters',
-                       icon=icon('filter'),
-                       class='btn-primary'),
-
-          h4('Table selection'),
-          fluidRow(style='margin-left: 2px;',
-            actionButton(ns('add_selected'), 'Add to scratchpad'),
-            actionButton(ns('reset_tbl'),
-                         'Reset selection',
+            actionButton(ns('select_none'), 'Select none', class = "btn-secondary"),
+            actionButton(ns('filter_tbl_do'),
+                         label='Apply',
+                         icon=icon('filter'),
                          class='btn-primary')
           ) # fluidRow
+
         ), # column
         column(9, style='margin-top: 10px;',
           withSpinner(
@@ -365,6 +383,12 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
       # reactive to hold labeled genes
       genes_clicked <- reactiveValues(g=NULL)
+
+      # reactive to hold selected genes
+      selected_genes <- reactiveValues(g=NULL)
+
+      # reactive to toggle table selection by selected genes
+      filter_tbl_by_sel_genes <- reactiveVal(FALSE)
 
       # Initialize comparison selection dropdowns when data is available
       observeEvent(comp_all(), {
@@ -829,7 +853,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         lab.genes <- params[['lab.genes']]
         color.palette <- params[['color.palette']]
 
-        plotScatter.label_ly(
+        p <- plotScatter.label_ly(
           compare=input$compare,
           df=df,
           label_x=input$x_axis_comp,
@@ -842,10 +866,14 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           size=input$size,
           show.grid=input$show_grid,
           color.palette=color.palette,
-          lab.genes=lab.genes
+          lab.genes=lab.genes,
+          source='scatter'
         )
 
-     }) # eventReactive scatterplot_ly
+        event_register(p, 'plotly_selected')
+
+        p
+      }) # eventReactive scatterplot_ly
       # ----------------------------------------------------- #
 
       output$plotly_out <- renderPlotly({
@@ -856,11 +884,79 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         scatterplot() + theme(text=element_text(size=18))
       })
 
+      #################### point selection ####################
+
+      plotProxy <- plotlyProxy('plotly_out', session)
+
+      get_pt_selected <- reactive({
+        #validate(
+        #  need(!is.null(df_full()), '')
+        #)
+        event_data('plotly_selected', source='scatter')
+      })
+
+      observeEvent(get_pt_selected(), {
+        # Validation
+        #needs <- c(!is.null(df_react()), !is.null(df_full()))
+        #for (need in needs) {
+        #  validate(need(need, "Waiting for selection"))
+        #}
+
+        df <- get_pt_selected()
+
+        data_df <- df_full()
+        xcol <- paste0(input$compare, '.x')
+        ycol <- paste0(input$compare, '.y')
+
+        # get points by matching coords & key
+        keys <- paste(df$x, df$y)
+        data_keys <- paste(data_df[, xcol], data_df[, ycol])
+
+        new <- data_df$geneid[data_keys %in% keys]
+        curr <- unique(unlist(selected_genes$g))
+
+        # only add new points
+        if(!all(new %in% curr)){
+          new_idx <- which(!new %in% curr)
+          showNotification(
+              paste0('Adding ', length(new_idx), ' genes to selection')
+          )
+
+          selected_genes$g[[ length(selected_genes$g) + 1 ]] <- new[new_idx]
+        } else if(length(new) > 0){
+          showNotification(
+              paste0('All selected genes already in selection'),
+              type='warning'
+          )
+        }
+      })
+
+      output$pt_selected <- renderUI({
+        np <- length(unique(unlist(selected_genes$g)))
+
+        tagList(
+          fluidRow(
+            column(12, style='margin-bottom: 10px;',
+
+              paste(np, 'genes selected')
+            )
+          )
+        )
+      })
+
+      observeEvent(input$reset_plt_selection, {
+        selected_genes$g <- NULL
+      })
+
+      observeEvent(input$filter_sel_do, {
+        filter_tbl_by_sel_genes(!filter_tbl_by_sel_genes())
+      })
+
       # ------------------------------------------------------- #
 
       # -------------------- renerDataTable  ------------------ #
       scatter_dt <- eventReactive(c(df_react(), input$x_axis_comp, input$y_axis_comp,
-                                    input$filter_tbl_do), {
+                                    input$filter_tbl_do, filter_tbl_by_sel_genes()), {
         validate(
           need(!is.null(df_full()), '')
         )
@@ -873,6 +969,19 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         sigvec <- sig_df$significance
         names(sigvec) <- sig_df$geneid
         df$significance <- sigvec[df$geneid]
+
+        if(filter_tbl_by_sel_genes()){
+          idx <- df$geneid %in% unique(unlist(selected_genes$g))
+
+          if(sum(idx) == 0){
+            showNotification(
+              'No rows left in table after filtering', type='error'
+            )
+
+            validate(need(sum(idx) > 0, ''))
+          }
+          df <- df[idx,]
+        }
 
         # get current filters
         curr_filters <- input$filter_tbl
