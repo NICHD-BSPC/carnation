@@ -216,14 +216,18 @@ server:
       # here we list alternative names of columns
       # to support multiple tools
       pvalue:
+        - pvalue #DESeq2
         - PValue # edgeR
         - P.Value # limma
       padj:
+        - padj # DESeq2
         - FDR # edgeR
         - adj.P.Val # limma
       log2FoldChange:
+        - log2FoldChange # DESeq2
         - logFC # edgeR/limma
       baseMean:
+        - baseMean # DESeq2
         - logCPM # edgeR
         - AveExpr # limma
 
