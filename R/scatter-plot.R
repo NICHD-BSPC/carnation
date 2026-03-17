@@ -300,7 +300,7 @@ scatterPlotUI <- function(id, panel){
               fluidRow(style='margin-left: 2px;',
                 uiOutput(ns('pt_selected')),
                 actionButton(ns('filter_sel_do'),
-                             label='Toggle table filter'),
+                             label='Show/Hide in table'),
                 actionButton(ns('reset_plt_selection'),
                                 'Clear',
                                 class='btn-primary')
