@@ -33,6 +33,24 @@ for more details.
 
 ## 🚀 Installation
 
+Carnation can be installed using `BiocManager::install`. First, start R (version: 4.6)
+and then run:
+
+```r
+# first check to see if BiocManager is available
+if(!requireNamespace('BiocManager', quietly=TRUE)){
+  install.packages('BiocManager')
+}
+
+BiocManager::install('carnation')
+```
+
+To install the 'devel' version
+
+```r
+BiocManager::install('carnation', version='devel')
+```
+
 ### remotes
 
 You can install the developmental version of carnation from github using the `remotes`
@@ -56,11 +74,14 @@ conda activate ./env
 R
 ```
 
-Then install the package with the `remotes` package. Note, here we set `upgrade='never'`
-to make sure the conda-installed package versions remain unchanged.
+Then install the package with the `remotes` package.Note,
+
+- Conda packages for R >= 4.6.0 may not be available yet causing installation using the default
+  github branch to fail. To avoid this, use branch `r4.3` which pins R to a lower version.
+- Here we set `upgrade='never'` to make sure the conda-installed package versions remain unchanged.
 
 ```r
-remotes::install_github('NICHD-BSPC/carnation', upgrade='never')
+remotes::install_github('NICHD-BSPC/carnation@r4.3', upgrade='never')
 ```
 
 ## 🏁 Getting Started
