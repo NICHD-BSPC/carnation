@@ -448,6 +448,69 @@ get_y_init <- function(df, y_delta, pseudocount){
     return( c(min.init, max.init) )
 }
 
+#' Validate Pattern Analysis Object Schema
+#'
+#' Validate the schema for a single `degpatterns` analysis element used by the
+#' pattern analysis module.
+#'
+#' @param pattern_obj A single pattern analysis element. Must be either a
+#' `data.frame` or a list containing a `normalized` `data.frame`.
+#' @param require_symbol Logical, if `TRUE` require a `symbol` column in the
+#' analysis table.
+#'
+#' @return Returns `TRUE` when validation succeeds, otherwise returns `FALSE`
+#' after emitting a message describing the issue.
+#'
+#' @examples
+#' data(degpatterns_dex, package = "carnation")
+#'
+#' is_valid_pattern_obj(degpatterns_dex)
+#'
+#' @export
+is_valid_pattern_obj <- function(pattern_obj, require_symbol = FALSE){
+  if(is.null(pattern_obj)){
+    message('"pattern_obj" cannot be NULL')
+    return(FALSE)
+  }
+
+  req_cols <- c("genes", "value")
+  if(require_symbol) req_cols <- c(req_cols, "symbol")
+
+  if(is.data.frame(pattern_obj)){
+    df <- pattern_obj
+  } else if(is.list(pattern_obj) &&
+            "normalized" %in% names(pattern_obj) &&
+            is.data.frame(pattern_obj$normalized)){
+    df <- pattern_obj$normalized
+  } else {
+    message(
+      '"pattern_obj" must be a data.frame or a list containing a data.frame in "$normalized"'
+    )
+    return(FALSE)
+  }
+
+  missing_cols <- setdiff(req_cols, colnames(df))
+  if(length(missing_cols) > 0){
+    message(
+      '"pattern_obj" is missing required column(s): ',
+      paste(missing_cols, collapse = ", ")
+    )
+    return(FALSE)
+  }
+
+  # Pattern module expects at least one clustering column.
+  cluster_cols <- c("cluster", grep("^cutoff", colnames(df), value = TRUE))
+  if(!any(cluster_cols %in% colnames(df))){
+    message(
+      '"pattern_obj" must contain at least one cluster column: ',
+      '"cluster" or columns starting with "cutoff"'
+    )
+    return(FALSE)
+  }
+
+  TRUE
+}
+
 #' Make final object for internal use by the app
 #'
 #' This function takes an uploaded object and sanitizes
@@ -507,6 +570,9 @@ make_final_object <- function(obj){
 
     # get res.list names
     comp.names <- names(obj[[res.name]])
+
+    # these dds objects are not linked to res_list
+    orphan_dds <- NULL
 
     # if res.list contains 'res', 'dds', 'label' elements
     # build the following:
@@ -591,9 +657,8 @@ make_final_object <- function(obj){
         } else if(name %in% names(obj[[res.name]])){
           res <- obj[[res.name]][[name]]
         } else {
-          message('no matching dds object found for ', name, ', skipping\n')
-          obj[[dds.name]] <- obj[[dds.name]][!names(obj[[dds.name]]) %in% name]
-          obj[[rld.name]] <- obj[[rld.name]][!names(obj[[rld.name]]) %in% name]
+          message('no matching dds object found for ', name, '\n')
+          orphan_dds <- c(orphan_dds, name)
           next
         }
 
@@ -656,6 +721,20 @@ make_final_object <- function(obj){
       names(dds_mapping) <- comp.names
 
       obj$dds_mapping <- dds_mapping
+    }
+
+    # use full idmap for orphan dds objects
+    if(!is.null(orphan_dds)){
+      for(name in orphan_dds){
+        dds <- obj[[dds.name]][[name]]
+        rownames(dds) <- all_idmap[rownames(dds)]
+
+        rld <- obj[[rld.name]][[name]]
+        rownames(rld) <- all_idmap[rownames(rld)]
+
+        obj[[dds.name]][[name]] <- dds
+        obj[[rld.name]][[name]] <- rld
+      }
     }
 
     # if degpatterns element exists, add symbol column
@@ -2485,6 +2564,7 @@ plotScatter.label <- function(compare,
 #' @param alpha float, marker opacity (default=1).
 #' @param size float, marker size (default=4).
 #' @param show.grid string, can be 'yes' (default) or 'no'.
+#' @param source name of source to return event_data from
 
 #' @return plotly handle
 #'
@@ -2567,7 +2647,8 @@ plotScatter.label_ly <- function(compare,
                                  lines=c('yes', 'yes', 'yes'),
                                  alpha=1,
                                  size=4,
-                                 show.grid='yes') {
+                                 show.grid='yes',
+                                 source='A') {
 
   names(color.palette) <- c('None', label_x, label_y, 'Both - opposite LFC sign', 'Both - same LFC sign')
 
@@ -2591,7 +2672,7 @@ plotScatter.label_ly <- function(compare,
 
   show.grid <- if (show.grid == 'yes') TRUE else FALSE
 
-  p <- plot_ly()
+  p <- plot_ly(source=source)
 
   # list of plotting characters
   pch <- c('in'='circle',
@@ -2620,7 +2701,7 @@ plotScatter.label_ly <- function(compare,
       p <- p %>% add_trace(data = df_i[df_i$shape == sym, ],
                            x = ~get(x),
                            y = ~get(y),
-                           type = 'scatter',
+                           type = 'scattergl',
                            mode = 'markers',
                            text = ~get(name.col),
                            hoverinfo = 'text',
@@ -2639,14 +2720,16 @@ plotScatter.label_ly <- function(compare,
     lab.df <- df[df[[name.col]] %in% lab.genes, ]
     if(nrow(lab.df) > 0){
       p <- p %>%
-          add_markers(x=lab.df[[x]], y=lab.df[[y]],
-                      text=lab.df$name.col,
-                      hoverinfo='none',
-                      name='Gene scratchpad',
-                      marker=list(color='black',
-                                  symbol='circle-open',
-                                  size=size*2,
-                                  line=list(width=2)))
+          add_trace(x=lab.df[[x]], y=lab.df[[y]],
+                    text=lab.df$name.col,
+                    hoverinfo='none',
+                    type='scattergl',
+                    mode='markers',
+                    name='Gene scratchpad',
+                    marker=list(color='black',
+                                symbol='circle-open',
+                                size=size*2,
+                                line=list(width=2)))
     }
   }
 
@@ -2670,6 +2753,7 @@ plotScatter.label_ly <- function(compare,
                                   orientation = 'v',
                                   xanchor = 'left',
                                   yanchor = 'middle',
+                                  itemsizing = 'constant',
                                   font = list(size = 14),
                                   title = list(text = 'Significant in:')))
 
@@ -2702,7 +2786,7 @@ plotScatter.label_ly <- function(compare,
 
   # Add all collected shapes at once
   if (length(shapes_to_add) > 0) {
-    p <- p %>% layout(shapes = shapes_to_add)
+    p <- p %>% layout(shapes = shapes_to_add, dragmode='select')
   }
 
   # Return the Plotly plot object

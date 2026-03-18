@@ -12,5 +12,7 @@
 #' - Manage local data in single-user mode or deploy on a server to share with
 #'   collaborators using in-built user management system.
 #'
+#' Main function to run the app: [run_carnation()]
+#'
 #' @keywords internal
 '_PACKAGE'

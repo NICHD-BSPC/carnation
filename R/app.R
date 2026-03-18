@@ -453,7 +453,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
             withSpinner(
               uiOutput('load_ui')
-            ) # withSpinner
+            ),  # withSpinner
+
+            br(),
+            fluidRow(
+              column(3, uiOutput('current_obj'))
+            ) # fluidRow
           ), # tabPanel
 
           tabPanel('DE analysis',
@@ -646,6 +651,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     # list to hold original object and file path
     original <- reactiveValues(obj=NULL, path=NULL)
+
+    # reactiveValues to hold loaded project
+    current <- reactiveValues(proj=NULL, analysis=NULL)
 
     # list to hold user details
     user_details <- reactiveValues(username=NULL, admin=FALSE)
@@ -1073,6 +1081,46 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                                x
                            })
 
+      # make sure 'padj' & 'log2FoldChange' columns exist in res objects
+      # or supported alternatives exist
+      sanitized_res_list <- obj[[ res.name ]]
+
+      # supported column names
+      column_names <- config()$server$de_analysis$column_names
+      defaults <- names(column_names)
+
+      # these res objects will be dropped
+      drop_res_names <- NULL
+
+      for(name in names(sanitized_res_list)){
+        res <- sanitized_res_list[[ name ]]$res
+        res <- as.data.frame(res)
+
+        for(cname in defaults){
+          idx <- colnames(res) %in% column_names[[ cname ]]
+
+          # if matches exist
+          if(sum(idx) > 0){
+            if(sum(idx) > 1){
+            # only use the first match if multiple matches
+            # and show warning
+              message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
+            }
+
+            idx <- which(idx)[1]
+            colnames(res)[idx] <- cname
+          } else {
+            message('Unsupported res type for ', name, ':', cname, ' column not found, skipping')
+            drop_res_names <- c(drop_res_names, name)
+          }
+        }
+        sanitized_res_list[[ name ]]$res <- res
+      }
+
+      # remove unsupported res objects
+      sanitized_res_list <- sanitized_res_list[ !names(sanitized_res_list) %in% drop_res_names ]
+      obj[[ res.name ]] <- sanitized_res_list
+
       # add obj slots to reactive values
       obj <- make_final_object(obj)
 
@@ -1237,7 +1285,27 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                         selected='DE analysis')
       updateTabsetPanel(session, inputId='de_mode',
                         selected='Summary')
+
+      # update current project
+      current$proj <- input$dds
+
+      al <- assay.list$l[[ input$dds ]]
+      idx <- which(unname(al) == input$assay)
+      current$analysis <- names(assay.list$l[[ input$dds ]])[idx]
+
     }) # observeEvent load data
+
+    # show loaded dataset
+    output$current_obj <- renderUI({
+      req(current$proj)
+
+      tags$div(
+        class='div-stats-card',
+        tags$p('Currently loaded:'),
+        tags$p('  - Project: ', tags$i(current$proj)),
+        tags$p('  - Analysis: ', tags$i(current$analysis))
+      )
+    })
 
     # update comparison menus after load
     observeEvent(app_object$res, {
@@ -1604,7 +1672,25 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
            gene.to.plot=gene_scratchpad())
     })
 
-    scatterPlotServer('scatterplot', app_object, scatterplot_args, config)
+    scatter_data <- scatterPlotServer('scatterplot',
+                                      app_object,
+                                      scatterplot_args,
+                                      gene_scratchpad,
+                                      reactive({ input$reset.genes }),
+                                      config)
+
+    observeEvent(scatter_data(), {
+      g <- scatter_data()$genes
+
+      # only update scratchpad if different genes returned
+      if(length(setdiff(g, input$gene.to.plot)) != 0){
+        # update gene selector with clicked genes
+        updateSelectizeInput(session, 'gene.to.plot',
+                             choices=gene.id$gene,
+                             selected=g,
+                             server=TRUE)
+      }
+    })
 
     ##################### UpSet plot #########################
 

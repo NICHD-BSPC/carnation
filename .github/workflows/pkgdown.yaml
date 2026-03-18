@@ -61,7 +61,7 @@ jobs:
           source "${HOME}/conda/etc/profile.d/conda.sh"
           conda activate ../env
 
-          Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation', upgrade='never')"
+          Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation@r4.3', upgrade='never')"
           Rscript -e "pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)"
 
       - name: Deploy to GitHub pages 🚀

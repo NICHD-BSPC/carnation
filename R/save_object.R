@@ -295,11 +295,12 @@ saveServer <- function(id, original, current, coldata, pattern, username, config
             # - this prevents saved object from becoming very large if another
             #   object has been previously loaded
             obj$dds <- lapply(obj$dds, function(x){
-                         attr(x@design, '.Environment') <- NULL
+                         if(.hasSlot(x, 'design')) attr(x@design, '.Environment') <- NULL
                          x
                        })
 
-            attr(obj$all_dds@design, '.Environment') <- NULL
+            if(.hasSlot(obj$all_dds, 'design'))
+              attr(obj$all_dds@design, '.Environment') <- NULL
 
             saveRDS(obj, destpath, compress=as.logical(input$compress))
 
@@ -328,8 +329,27 @@ saveServer <- function(id, original, current, coldata, pattern, username, config
               )
             } else {
               if(!input$rds_path %in% y$data_area[[ug]]){
-                y$data_area[[ug]] <- c(y$data_area[[ug]],
-                                       input$rds_path)
+                # check if any parent path of RDS object exists in data_areas
+                # if not, add to list
+                parent <- FALSE
+
+                path <- normalizePath(dirname(path.expand(input$rds_path)), mustWork=FALSE)
+                current_areas <- normalizePath(path.expand(y$data_area[[ ug ]]), mustWork=FALSE)
+
+                while(TRUE){
+                  if(path %in% current_areas){
+                    parent <- TRUE
+                    break
+                  } else {
+                    path <- dirname(path)
+                    if(path == '.' || path == '/') break
+                  }
+                }
+
+                if(!parent){
+                  y$data_area[[ug]] <- c(y$data_area[[ug]],
+                                         input$rds_path)
+                }
               }
             }
             save_access_yaml(y)

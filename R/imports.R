@@ -19,8 +19,8 @@
 #' @importFrom htmltools withTags tagAppendChild tagAppendChildren tags tagList
 #' @importFrom igraph V "V<-"
 #' @importFrom MatrixGenerics rowVars
-#' @importFrom methods new
-#' @importFrom plotly plotlyOutput renderPlotly layout plot_ly add_trace add_markers toWebGL save_image ggplotly
+#' @importFrom methods new .hasSlot
+#' @importFrom plotly plotlyOutput renderPlotly layout plot_ly add_trace add_markers toWebGL save_image ggplotly plotlyProxy event_data event_register
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom reticulate py_install use_virtualenv
 #' @importFrom rintrojs introjsUI introBox introjs
