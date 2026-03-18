@@ -74,7 +74,9 @@ conda activate ./env
 R
 ```
 
-Then install the package with the `remotes` package.Note,
+Then install the package with the `remotes` package.
+
+Note:
 
 - Conda packages for R >= 4.6.0 may not be available yet causing installation using the default
   github branch to fail. To avoid this, use branch `r4.3` which pins R to a lower version.
