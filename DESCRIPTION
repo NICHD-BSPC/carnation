@@ -1,23 +1,27 @@
 Package: carnation
-Title: Shiny App to Explore RNA-Seq Analysis
-Version: 0.99.8
+Title: Interactive Exploration & Management of RNA-Seq Analyses
+Version: 0.99.9
 Authors@R:
     c(
         person("Apratim", "Mitra", , "apratim.mitra@nih.gov",
                role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3279-0054")),
+        person(c("Matthew", "Tyler"), "Menold", , "matthew.menold@gmail.com",
+               role = c("ctb"), comment = c(ORCID = "0009-0007-4728-2470")),
         person("Ryan", "Dale", , "ryan.dale@nih.gov",
                role = c("fnd"), comment = c(ORCID = "0000-0003-2664-3744"))
     )
-Description: Interactive Shiny dashboard app that can be used to
-    explore RNA-Seq analysis results including differential expression (DE),
+Description: This package provides a highly interactive & modular shiny app to
+    explore three facets of RNA-Seq analysis: differential expression (DE),
     functional enrichment and pattern analysis. Several visualizations
     are implemented to provide a wide-ranging view of data sets. For
     DE analysis, we provide PCA plot, MA plot, Upset plot & heatmaps,
     in addition to a highly customizable gene plot.  Seven different
     visualizations are available for functional enrichment analysis,
-    and we also support gene pattern analysis. In addition, the app
-    provides a platform to manage multiple projects and user groups
-    that can be run on a central server.
+    and we also support gene pattern analysis. Genes of interest can
+    be tracked across all modules using the gene scratchpad. In addition,
+    carnation provides an integrated platform to manage multiple projects
+    and user access that can be run on a central server to share with
+    collaborators.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

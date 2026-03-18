@@ -495,6 +495,8 @@ patternPlotServer <- function(id,
         )
 
         obj <- pattern_obj()[[input$dp_analysis]]
+
+        # if DEGpatterns object, only use 'normalized' slot
         if(!is.data.frame(obj)) obj <- obj$normalized
 
         # get metadata and attach if necessary

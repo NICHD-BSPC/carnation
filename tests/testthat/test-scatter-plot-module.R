@@ -32,12 +32,16 @@ test_that("scatterPlotServer processes data correctly with log2FoldChange", {
     )
   })
 
+  gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+  reset_genes <- reactiveVal()
   config <- reactiveVal(get_config())
 
   testServer(scatterPlotServer, args = list(
     id = "test_scatter",
     obj = obj,
     plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    reset_genes = reset_genes,
     config = config
   ), {
     # Set inputs for scatter plot
@@ -109,12 +113,16 @@ test_that("scatterPlotServer handles comparison swapping", {
     )
   })
 
+  gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+  reset_genes <- reactiveVal()
   config <- reactiveVal(get_config())
 
   testServer(scatterPlotServer, args = list(
     id = "test_scatter_swap",
     obj = obj,
     plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    reset_genes = reset_genes,
     config = config
   ), {
     # Set initial inputs
@@ -174,12 +182,16 @@ test_that("scatterPlotServer handles autoscaling", {
     )
   })
 
+  gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+  reset_genes <- reactiveVal()
   config <- reactiveVal(get_config())
 
   testServer(scatterPlotServer, args = list(
     id = "test_scatter_autoscale",
     obj = obj,
     plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    reset_genes = reset_genes,
     config = config
   ), {
     # Set inputs
@@ -245,12 +257,16 @@ test_that("scatterPlotServer handles gene labeling", {
     )
   })
 
+  gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+  reset_genes <- reactiveVal()
   config <- reactiveVal(get_config())
 
   testServer(scatterPlotServer, args = list(
     id = "test_scatter_labels",
     obj = obj,
     plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    reset_genes = reset_genes,
     config = config
   ), {
     # Set inputs

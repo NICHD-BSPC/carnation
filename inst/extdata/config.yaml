@@ -37,6 +37,16 @@ style:
       margin-bottom: -5px
     }
 
+    .div-stats-card {
+      border-radius: 8px;
+      box-shadow: 3px 4px 5px 0px rgba(0, 0, 0, 0.3);
+      margin-bottom: 10px;
+      padding-left: 10px;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      background-color: #ebecf0;
+    }
+
     .rank-list-container.custom-sortable {
       background-color: #d0d0d0;
       width: fit-content;
@@ -202,6 +212,25 @@ server:
     - sizeFactor
 
   de_analysis:
+    column_names:
+      # here we list alternative names of columns
+      # to support multiple tools
+      pvalue:
+        - pvalue #DESeq2
+        - PValue # edgeR
+        - P.Value # limma
+      padj:
+        - padj # DESeq2
+        - FDR # edgeR
+        - adj.P.Val # limma
+      log2FoldChange:
+        - log2FoldChange # DESeq2
+        - logFC # edgeR/limma
+      baseMean:
+        - baseMean # DESeq2
+        - logCPM # edgeR
+        - AveExpr # limma
+
     pdf:
       width: 10
       height: 10
