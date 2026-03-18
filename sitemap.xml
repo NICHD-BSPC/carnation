@@ -10,6 +10,7 @@
 <url><loc>https://nichd-bspc.github.io/carnation/reference/add.set.column.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/add_metadata.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/alluvialmod.html</loc></url>
+<url><loc>https://nichd-bspc.github.io/carnation/reference/carnation-package.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/check_user_access.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/cnetmod.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/create_access_yaml.html</loc></url>
@@ -45,6 +46,7 @@
 <url><loc>https://nichd-bspc.github.io/carnation/reference/index.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/install_carnation.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/is_site_admin.html</loc></url>
+<url><loc>https://nichd-bspc.github.io/carnation/reference/is_valid_pattern_obj.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/loadmod.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/makeEnrichResult.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/make_example_carnation_object.html</loc></url>

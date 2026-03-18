@@ -32,17 +32,12 @@ NULL (used for side effects).
 ## Examples
 
 ``` r
+if (FALSE) { # interactive()
 library(shiny)
 library(ggplot2)
 
 # get example object
 obj <- make_example_carnation_object()
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
 res <- as.data.frame(obj$res[[1]])
 
 # make MA plot
@@ -61,5 +56,6 @@ if(interactive()){
                downloadButtonServer('p', outplot, 'maplot')
              }
   )
+}
 }
 ```

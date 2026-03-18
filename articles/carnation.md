@@ -2,14 +2,32 @@
 
 Abstract
 
-Carnation is an interactive Shiny dashboard that simplifies and
+`carnation` is an interactive Shiny dashboard that simplifies and
 transforms complex bulk RNA-Seq data using insightful visualizations and
 numerous interactive features. Designed for both computational and
-experimental biologists, Carnation makes exploring differential
+experimental biologists, `carnation` makes exploring differential
 expression analysis, functional enrichment, and pattern analysis
-intuitive and exciting. In this vignette, we will describe some of its
-functionality using the `airway` dataset. Carnation package version:
-0.99.6
+intuitive and accessible, while providing a platform to manage multiple
+complex RNA-Seq datasets either locally or on a server to share with
+collaborators (package version: 0.99.8).
+
+Now, we will use the `airway` dataset to explore some of `carnation's`
+functionality.
+
+### Install carnation
+
+Install carnation from Bioconductor using
+[`BiocManager::install`](https://bioconductor.github.io/BiocManager/reference/install.html).
+
+``` r
+
+# first check to see if BiocManager is available
+if(!requireNamespace('BiocManager', quietly=TRUE)){
+  install.packages('BiocManager')
+}
+
+BiocManager::install('carnation')
+```
 
 ### Load libraries & airway dataset
 
@@ -21,9 +39,8 @@ tutorial.
 # install optional packages if not present
 pkgs_to_check <- c('airway', 'org.Hs.eg.db', 'DEGreport')
 for(pkg in pkgs_to_check){
-  setRepositories(ind=c(1,2,3,4,5))
   if(!requireNamespace(pkg, quietly=TRUE)){
-    install.packages(pkg, repos='http://cran.us.r-project.org')
+    BiocManager::install(pkg)
   }
 }
 ```
@@ -767,6 +784,45 @@ Now run carnation with authentication
 run_carnation(credentials='credentials.sqlite', passphrase='admin_passphrase')
 ```
 
+## Summary
+
+In summary, `carnation` adds to the rich Bioconductor ecosystem
+providing a sophisticated interactive tool that makes it easier to ask
+complex questions of the data and accelerate the process of scientific
+discovery for biologists and computational scientists alike. Other
+packages with comparable functionality include
+*[pcaExplorer](https://bioconductor.org/packages/3.20/pcaExplorer)* &
+*[iSEE](https://bioconductor.org/packages/3.20/iSEE)*. However,
+`carnation's` unique combination of thoughtful features, e.g. fuzzy
+search & gene scratchpad, in-built access management system and
+deployment flexibility to single or multi-user environments, makes it
+ideal as a platform for managing and sharing complex bulk RNA-Seq
+projects with collaborators.
+
+`carnation` currently supports the following widely-used tools:
+
+- Differential expression analysis:
+  *[DESeq2](https://bioconductor.org/packages/3.20/DESeq2)*
+- Functional enrichment analysis:
+  *[clusterProfiler](https://bioconductor.org/packages/3.20/clusterProfiler)*
+  (both overrepresentation & gene set enrichment analysis).
+- Pattern analysis:
+  *[DEGreport](https://bioconductor.org/packages/3.20/DEGreport)*
+
+The functional enrichment module incorporates plots from the
+*[GeneTonic](https://bioconductor.org/packages/3.20/GeneTonic)* and
+*[enrichplot](https://bioconductor.org/packages/3.20/enrichplot)*
+packages.
+
+Future plans include extending functionality to include support for
+other differential expression frameworks,
+e.g. *[edgeR](https://bioconductor.org/packages/3.20/edgeR)* &
+*[limma](https://bioconductor.org/packages/3.20/limma)*, functional
+enrichment tools, e.g.
+*[topGO](https://bioconductor.org/packages/3.20/topGO)* and coexpression
+analysis methods, e.g.
+*[WGCNA](https://CRAN.R-project.org/package=WGCNA)*.
+
 ## sessionInfo
 
 ``` r
@@ -793,18 +849,19 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] carnation_0.99.6            org.Hs.eg.db_3.20.0        
+#>  [1] carnation_0.99.8            org.Hs.eg.db_3.20.0        
 #>  [3] AnnotationDbi_1.68.0        GeneTonic_3.0.0            
-#>  [5] dplyr_1.1.4                 DESeq2_1.46.0              
+#>  [5] dplyr_1.2.0                 DESeq2_1.46.0              
 #>  [7] airway_1.26.0               SummarizedExperiment_1.36.0
 #>  [9] Biobase_2.66.0              GenomicRanges_1.58.0       
 #> [11] GenomeInfoDb_1.42.0         IRanges_2.40.0             
 #> [13] S4Vectors_0.44.0            BiocGenerics_0.52.0        
 #> [15] MatrixGenerics_1.18.0       matrixStats_1.5.0          
+#> [17] BiocStyle_2.34.0           
 #> 
 #> loaded via a namespace (and not attached):
 #>   [1] fs_1.6.6                    bitops_1.0-9               
-#>   [3] enrichplot_1.26.1           httr_1.4.7                 
+#>   [3] enrichplot_1.26.1           httr_1.4.8                 
 #>   [5] webshot_0.5.5               RColorBrewer_1.1-3         
 #>   [7] doParallel_1.0.17           dynamicTreeCut_1.63-1      
 #>   [9] backports_1.5.0             tippy_0.1.0                
@@ -813,97 +870,98 @@ sessionInfo()
 #>  [15] mgcv_1.9-4                  GetoptLong_1.1.0           
 #>  [17] withr_3.0.2                 prettyunits_1.2.0          
 #>  [19] gridExtra_2.3               cli_3.6.5                  
-#>  [21] textshaping_1.0.4           logging_0.10-108           
+#>  [21] textshaping_1.0.5           logging_0.10-108           
 #>  [23] TSP_1.2.6                   sass_0.4.10                
 #>  [25] topGO_2.58.0                bs4Dash_2.3.5              
 #>  [27] askpass_1.2.1               ggridges_0.5.7             
 #>  [29] goseq_1.58.0                pkgdown_2.2.0              
-#>  [31] Rsamtools_2.22.0            systemfonts_1.3.1          
-#>  [33] yulab.utils_0.2.3           gson_0.1.0                 
+#>  [31] Rsamtools_2.22.0            systemfonts_1.3.2          
+#>  [33] yulab.utils_0.2.4           gson_0.1.0                 
 #>  [35] txdbmaker_1.2.0             DOSE_4.0.0                 
 #>  [37] R.utils_2.13.0              limma_3.62.1               
-#>  [39] RSQLite_2.4.5               visNetwork_2.1.4           
+#>  [39] RSQLite_2.4.6               visNetwork_2.1.4           
 #>  [41] generics_0.1.4              gridGraphics_0.5-1         
 #>  [43] shape_1.4.6.1               BiocIO_1.16.0              
 #>  [45] dendextend_1.19.1           GO.db_3.20.0               
 #>  [47] Matrix_1.7-4                abind_1.4-8                
-#>  [49] R.methodsS3_1.8.2           lifecycle_1.0.4            
+#>  [49] R.methodsS3_1.8.2           lifecycle_1.0.5            
 #>  [51] edgeR_4.4.0                 yaml_2.3.12                
 #>  [53] qvalue_2.38.0               SparseArray_1.6.0          
 #>  [55] BiocFileCache_2.14.0        grid_4.4.3                 
-#>  [57] blob_1.2.4                  promises_1.5.0             
+#>  [57] blob_1.3.0                  promises_1.5.0             
 #>  [59] crayon_1.5.3                miniUI_0.1.2               
-#>  [61] ggtangle_0.0.9              lattice_0.22-7             
-#>  [63] billboarder_0.5.0           ComplexUpset_1.3.3         
+#>  [61] ggtangle_0.1.1              lattice_0.22-9             
+#>  [63] billboarder_0.5.1           ComplexUpset_1.3.3         
 #>  [65] cowplot_1.2.0               GenomicFeatures_1.58.0     
 #>  [67] KEGGREST_1.46.0             pillar_1.11.1              
 #>  [69] knitr_1.51                  ComplexHeatmap_2.22.0      
 #>  [71] fgsea_1.32.2                rjson_0.2.23               
-#>  [73] codetools_0.2-20            fastmatch_1.1-6            
+#>  [73] codetools_0.2-20            fastmatch_1.1-8            
 #>  [75] glue_1.8.0                  ggfun_0.2.0                
-#>  [77] data.table_1.17.8           vctrs_0.6.5                
+#>  [77] data.table_1.17.8           vctrs_0.7.1                
 #>  [79] png_0.1-8                   treeio_1.30.0              
 #>  [81] gtable_0.3.6                assertthat_0.2.1           
-#>  [83] cachem_1.1.0                xfun_0.55                  
+#>  [83] cachem_1.1.0                xfun_0.56                  
 #>  [85] S4Arrays_1.6.0              mime_0.13                  
 #>  [87] ConsensusClusterPlus_1.70.0 seriation_1.5.8            
 #>  [89] shinythemes_1.2.0           iterators_1.0.14           
 #>  [91] statmod_1.5.1               nlme_3.1-168               
 #>  [93] ggtree_3.14.0               bit64_4.6.0-1              
 #>  [95] progress_1.2.3              filelock_1.0.3             
-#>  [97] rprojroot_2.1.1             bslib_0.9.0                
+#>  [97] rprojroot_2.1.1             bslib_0.10.0               
 #>  [99] otel_0.2.0                  colorspace_2.1-2           
-#> [101] DBI_1.2.3                   mnormt_2.1.1               
+#> [101] DBI_1.3.0                   mnormt_2.1.1               
 #> [103] tidyselect_1.2.1            bit_4.6.0                  
 #> [105] compiler_4.4.3              curl_7.0.0                 
 #> [107] httr2_1.2.2                 graph_1.84.0               
 #> [109] BiasedUrn_2.0.12            SparseM_1.84-2             
-#> [111] expm_1.0-0                  xml2_1.5.1                 
+#> [111] expm_1.0-0                  xml2_1.5.2                 
 #> [113] ggdendro_0.2.0              desc_1.4.3                 
-#> [115] DelayedArray_0.32.0         plotly_4.11.0              
+#> [115] DelayedArray_0.32.0         plotly_4.12.0              
 #> [117] scrypt_0.1.6                colourpicker_1.3.0         
-#> [119] rtracklayer_1.66.0          scales_1.4.0               
-#> [121] psych_2.5.6                 mosdef_1.2.0               
-#> [123] rappdirs_0.3.3              stringr_1.6.0              
-#> [125] digest_0.6.39               shinyBS_0.63.0             
-#> [127] rmarkdown_2.30              ca_0.71.1                  
-#> [129] XVector_0.46.0              htmltools_0.5.9            
-#> [131] pkgconfig_2.0.3             learnr_0.11.6              
-#> [133] dbplyr_2.5.1                fastmap_1.2.0              
-#> [135] rlang_1.1.6                 GlobalOptions_0.1.3        
-#> [137] htmlwidgets_1.6.4           UCSC.utils_1.2.0           
-#> [139] shiny_1.12.1                shinymanager_1.0.410       
-#> [141] farver_2.1.2                jquerylib_0.1.4            
-#> [143] jsonlite_2.0.0              BiocParallel_1.40.0        
-#> [145] GOSemSim_2.32.0             R.oo_1.27.1                
-#> [147] RCurl_1.98-1.17             magrittr_2.0.4             
-#> [149] GenomeInfoDbData_1.2.13     ggplotify_0.1.3            
-#> [151] patchwork_1.3.2             Rcpp_1.1.0                 
-#> [153] reticulate_1.44.1           ape_5.8-1                  
-#> [155] shinycssloaders_1.1.0       viridis_0.6.5              
-#> [157] stringi_1.8.7               rintrojs_0.3.4             
-#> [159] zlibbioc_1.52.0             MASS_7.3-65                
-#> [161] DEGreport_1.42.0            plyr_1.8.9                 
-#> [163] parallel_4.4.3              ggrepel_0.9.6              
-#> [165] Biostrings_2.74.0           splines_4.4.3              
-#> [167] hms_1.1.4                   geneLenDataBase_1.42.0     
-#> [169] circlize_0.4.17             locfit_1.5-9.12            
-#> [171] igraph_2.1.4                reshape2_1.4.5             
-#> [173] biomaRt_2.62.0              XML_3.99-0.20              
-#> [175] evaluate_1.0.5              foreach_1.5.2              
-#> [177] tweenr_2.0.3                httpuv_1.6.16              
-#> [179] backbone_2.1.5              openssl_2.3.4              
-#> [181] tidyr_1.3.2                 purrr_1.2.0                
-#> [183] polyclip_1.10-7             reshape_0.8.10             
-#> [185] heatmaply_1.6.0             clue_0.3-66                
-#> [187] ggplot2_3.5.2               ggforce_0.5.0              
-#> [189] broom_1.0.11                xtable_1.8-4               
-#> [191] restfulr_0.0.16             tidytree_0.4.6             
-#> [193] later_1.4.4                 viridisLite_0.4.2          
-#> [195] ragg_1.5.0                  tibble_3.3.0               
-#> [197] clusterProfiler_4.14.0      aplot_0.2.9                
-#> [199] registry_0.5-1              memoise_2.0.1              
-#> [201] GenomicAlignments_1.42.0    cluster_2.1.8.1            
-#> [203] sortable_0.5.0              shinyWidgets_0.9.0         
-#> [205] shinyAce_0.4.4
+#> [119] bookdown_0.46               rtracklayer_1.66.0         
+#> [121] scales_1.4.0                psych_2.6.1                
+#> [123] mosdef_1.2.0                rappdirs_0.3.4             
+#> [125] stringr_1.6.0               digest_0.6.39              
+#> [127] shinyBS_0.64.0              rmarkdown_2.30             
+#> [129] ca_0.71.1                   XVector_0.46.0             
+#> [131] htmltools_0.5.9             pkgconfig_2.0.3            
+#> [133] learnr_0.11.6               dbplyr_2.5.2               
+#> [135] fastmap_1.2.0               rlang_1.1.7                
+#> [137] GlobalOptions_0.1.3         htmlwidgets_1.6.4          
+#> [139] UCSC.utils_1.2.0            shiny_1.13.0               
+#> [141] shinymanager_1.0.410        farver_2.1.2               
+#> [143] jquerylib_0.1.4             jsonlite_2.0.0             
+#> [145] BiocParallel_1.40.0         GOSemSim_2.32.0            
+#> [147] R.oo_1.27.1                 RCurl_1.98-1.17            
+#> [149] magrittr_2.0.4              GenomeInfoDbData_1.2.13    
+#> [151] ggplotify_0.1.3             patchwork_1.3.2            
+#> [153] Rcpp_1.1.1                  reticulate_1.45.0          
+#> [155] ape_5.8-1                   shinycssloaders_1.1.0      
+#> [157] viridis_0.6.5               stringi_1.8.7              
+#> [159] rintrojs_0.3.4              zlibbioc_1.52.0            
+#> [161] MASS_7.3-65                 DEGreport_1.42.0           
+#> [163] plyr_1.8.9                  parallel_4.4.3             
+#> [165] ggrepel_0.9.6               Biostrings_2.74.0          
+#> [167] splines_4.4.3               hms_1.1.4                  
+#> [169] geneLenDataBase_1.42.0      circlize_0.4.17            
+#> [171] locfit_1.5-9.12             igraph_2.1.4               
+#> [173] reshape2_1.4.5              biomaRt_2.62.0             
+#> [175] XML_3.99-0.22               evaluate_1.0.5             
+#> [177] BiocManager_1.30.27         foreach_1.5.2              
+#> [179] tweenr_2.0.3                httpuv_1.6.16              
+#> [181] backbone_2.1.5              openssl_2.3.5              
+#> [183] tidyr_1.3.2                 purrr_1.2.1                
+#> [185] polyclip_1.10-7             reshape_0.8.10             
+#> [187] heatmaply_1.6.0             clue_0.3-67                
+#> [189] ggplot2_3.5.2               ggforce_0.5.0              
+#> [191] broom_1.0.12                xtable_1.8-8               
+#> [193] restfulr_0.0.16             tidytree_0.4.7             
+#> [195] later_1.4.8                 viridisLite_0.4.3          
+#> [197] ragg_1.5.1                  tibble_3.3.1               
+#> [199] clusterProfiler_4.14.0      aplot_0.2.9                
+#> [201] registry_0.5-1              memoise_2.0.1              
+#> [203] GenomicAlignments_1.42.0    cluster_2.1.8.2            
+#> [205] sortable_0.5.0              shinyWidgets_0.9.1         
+#> [207] shinyAce_0.4.4
 ```

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.6</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -42,7 +42,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">scatterPlotUI</span><span class="op">(</span><span class="va">id</span>, <span class="va">panel</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">scatterPlotServer</span><span class="op">(</span><span class="va">id</span>, <span class="va">obj</span>, <span class="va">plot_args</span>, <span class="va">config</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">scatterPlotServer</span><span class="op">(</span><span class="va">id</span>, <span class="va">obj</span>, <span class="va">plot_args</span>, <span class="va">gene_scratchpad</span>, <span class="va">reset_genes</span>, <span class="va">config</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,8 +62,15 @@
 
 
 <dt id="arg-plot-args">plot_args<a class="anchor" aria-label="anchor" href="#arg-plot-args"></a></dt>
-<dd><p>reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &amp;
-'gene.to.plot' (genes to be labeled) passed to server</p></dd>
+<dd><p>reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC)</p></dd>
+
+
+<dt id="arg-gene-scratchpad">gene_scratchpad<a class="anchor" aria-label="anchor" href="#arg-gene-scratchpad"></a></dt>
+<dd><p>reactive containing gene scratchpad genes</p></dd>
+
+
+<dt id="arg-reset-genes">reset_genes<a class="anchor" aria-label="anchor" href="#arg-reset-genes"></a></dt>
+<dd><p>reactive to reset gene scratchpad selection</p></dd>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
@@ -96,10 +103,12 @@ Server invisibly returns NULL (used for side effects).</p>
 <span class="r-in"><span><span class="va">plot_args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>    fdr.thres<span class="op">=</span><span class="fl">0.1</span>,</span></span>
-<span class="r-in"><span>    fc.thres<span class="op">=</span><span class="fl">0</span>,</span></span>
-<span class="r-in"><span>    gene.to.plot<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'gene1'</span>, <span class="st">'gene2'</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    fc.thres<span class="op">=</span><span class="fl">0</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">gene_scratchpad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'gene1'</span>, <span class="st">'gene2'</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">reset_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveVal.html" class="external-link">reactiveVal</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">config</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveVal.html" class="external-link">reactiveVal</a></span><span class="op">(</span><span class="fu"><a href="get_config.html">get_config</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -109,7 +118,8 @@ Server invisibly returns NULL (used for side effects).</p>
 <span class="r-in"><span>         <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sidebarLayout.html" class="external-link">mainPanel</a></span><span class="op">(</span><span class="fu">scatterPlotUI</span><span class="op">(</span><span class="st">'p'</span>, <span class="st">'sidebar'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span>       <span class="op">)</span>,</span></span>
 <span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span><span class="op">{</span></span></span>
-<span class="r-in"><span>             <span class="fu">scatterPlotServer</span><span class="op">(</span><span class="st">'p'</span>, <span class="va">obj</span>, <span class="va">plot_args</span>, <span class="va">config</span><span class="op">)</span></span></span>
+<span class="r-in"><span>             <span class="va">scatter_data</span> <span class="op">&lt;-</span> <span class="fu">scatterPlotServer</span><span class="op">(</span><span class="st">'p'</span>, <span class="va">obj</span>, <span class="va">plot_args</span>,</span></span>
+<span class="r-in"><span>                               <span class="va">gene_scratchpad</span>, <span class="va">reset_genes</span>, <span class="va">config</span><span class="op">)</span></span></span>
 <span class="r-in"><span>           <span class="op">}</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
@@ -120,7 +130,7 @@ Server invisibly returns NULL (used for side effects).</p>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Apratim Mitra.</p>
+  <p>Developed by Apratim Mitra, Ryan Dale.</p>
 </div>
 
 <div class="pkgdown-footer-right">

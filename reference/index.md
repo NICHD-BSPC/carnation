@@ -135,6 +135,9 @@
 - [`is_site_admin()`](https://nichd-bspc.github.io/carnation/reference/is_site_admin.md)
   : is user an admin?
 
+- [`is_valid_pattern_obj()`](https://nichd-bspc.github.io/carnation/reference/is_valid_pattern_obj.md)
+  : Validate Pattern Analysis Object Schema
+
 - [`loadDataUI()`](https://nichd-bspc.github.io/carnation/reference/loadmod.md)
   [`loadDataServer()`](https://nichd-bspc.github.io/carnation/reference/loadmod.md)
   : Load data module

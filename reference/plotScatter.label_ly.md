@@ -18,7 +18,8 @@ plotScatter.label_ly(
   lines = c("yes", "yes", "yes"),
   alpha = 1,
   size = 4,
-  show.grid = "yes"
+  show.grid = "yes",
+  source = "A"
 )
 ```
 
@@ -79,6 +80,10 @@ plotScatter.label_ly(
 
   string, can be 'yes' (default) or 'no'.
 
+- source:
+
+  name of source to return event_data from
+
 ## Value
 
 plotly handle
@@ -86,23 +91,29 @@ plotly handle
 ## Examples
 
 ``` r
-library(DESeq2)
+# make mock results df
+n_genes <- 100
+res1 <- data.frame(
+          baseMean = runif(n_genes, 10, 1000),
+          log2FoldChange = rnorm(n_genes, 0, 2),
+          lfcSE = runif(n_genes, 0.1, 0.5),
+          stat = rnorm(n_genes, 0, 3),
+          pvalue = runif(n_genes, 0, 1),
+          padj = runif(n_genes, 0, 1),
+          symbol = paste0("GENE", 1:n_genes),
+          row.names = paste0("gene", 1:n_genes)
+        )
 
-# make example dataset
-dds <- makeExampleDESeqDataSet()
-
-# run DE analysis
-dds <- DESeq(dds)
-#> estimating size factors
-#> estimating dispersions
-#> gene-wise dispersion estimates
-#> mean-dispersion relationship
-#> final dispersion estimates
-#> fitting model and testing
-
-# extract comparisons of interest
-res1 <- results(dds, contrast = c("condition", "A", "B"))
-res2 <- results(dds, contrast = c("condition", "B", "A"))
+res2 <- data.frame(
+          baseMean = runif(n_genes, 10, 1000),
+          log2FoldChange = rnorm(n_genes, 0, 2),
+          lfcSE = runif(n_genes, 0.1, 0.5),
+          stat = rnorm(n_genes, 0, 3),
+          pvalue = runif(n_genes, 0, 1),
+          padj = runif(n_genes, 0, 1),
+          symbol = paste0("GENE", 1:n_genes),
+          row.names = paste0("gene", 1:n_genes)
+        )
 
 # add geneid column
 res1 <- cbind(geneid=rownames(res1), res1)

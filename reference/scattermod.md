@@ -7,7 +7,7 @@ Module UI + server for generating scatter plots.
 ``` r
 scatterPlotUI(id, panel)
 
-scatterPlotServer(id, obj, plot_args, config)
+scatterPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes, config)
 ```
 
 ## Arguments
@@ -27,7 +27,14 @@ scatterPlotServer(id, obj, plot_args, config)
 - plot_args:
 
   reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC)
-  & 'gene.to.plot' (genes to be labeled) passed to server
+
+- gene_scratchpad:
+
+  reactive containing gene scratchpad genes
+
+- reset_genes:
+
+  reactive to reset gene scratchpad selection
 
 - config:
 
@@ -59,10 +66,12 @@ obj <- reactiveValues(
 plot_args <- reactive({
   list(
     fdr.thres=0.1,
-    fc.thres=0,
-    gene.to.plot=c('gene1', 'gene2')
+    fc.thres=0
   )
 })
+
+gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+reset_genes <- reactiveVal()
 
 config <- reactiveVal(get_config())
 
@@ -72,7 +81,8 @@ shinyApp(
          mainPanel(scatterPlotUI('p', 'sidebar'))
        ),
   server = function(input, output, session){
-             scatterPlotServer('p', obj, plot_args, config)
+             scatter_data <- scatterPlotServer('p', obj, plot_args,
+                               gene_scratchpad, reset_genes, config)
            }
 )
 }

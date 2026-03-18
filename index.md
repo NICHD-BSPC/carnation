@@ -1,5 +1,10 @@
 # Carnation
 
+[![](https://bioconductor.org/shields/availability/devel/carnation.svg)](https://bioconductor.org/packages/devel/bioc/html/carnation.html#archives)
+[![](https://bioconductor.org/shields/lastcommit/devel/bioc/carnation.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/carnation/)
+[![](https://bioconductor.org/shields/build/devel/bioc/carnation.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/carnation/)
+[![](https://bioconductor.org/shields/years-in-bioc/carnation.svg)](https://bioconductor.org/packages/devel/bioc/html/carnation.html#since)
+
 **Deeply explore your bulk RNA-Seq data with interactive
 visualizations**
 
@@ -8,6 +13,13 @@ RNA-Seq data into beautiful, insightful visualizations. Designed for
 both computational and experimental biologists, Carnation makes
 exploring differential expression analysis, functional enrichment, and
 pattern analysis intuitive and exciting.
+
+**Carnation is now on Bioconductor devel (Official release: April
+2026)**
+
+Check out the official bioconductor page
+[here](https://bioconductor.org/packages/devel/bioc/html/carnation.html)
+for more details.
 
 ## ✨ Key Features
 
@@ -37,9 +49,42 @@ pattern analysis intuitive and exciting.
 
 ## 🚀 Installation
 
-### conda (recommended)
+Carnation can be installed using
+[`BiocManager::install`](https://bioconductor.github.io/BiocManager/reference/install.html).
+First, start R (version: 4.6) and then run:
 
-The easiest way to get started with Carnation is through conda, which
+``` r
+
+# first check to see if BiocManager is available
+if(!requireNamespace('BiocManager', quietly=TRUE)){
+  install.packages('BiocManager')
+}
+
+BiocManager::install('carnation')
+```
+
+To install the ‘devel’ version
+
+``` r
+
+BiocManager::install('carnation', version='devel')
+```
+
+### remotes
+
+You can install the developmental version of carnation from github using
+the `remotes` package:
+
+``` r
+
+install.packages('remotes')
+remotes::install_github('NICHD-BSPC/carnation',
+                        dependencies=TRUE, build_vignettes=TRUE)
+```
+
+### conda
+
+An alternative way to get started with Carnation is through conda, which
 handles all dependencies automatically:
 
 ``` bash
@@ -49,24 +94,19 @@ conda activate ./env
 R
 ```
 
-Then install the package with the `remotes` package. Note, here we set
-`upgrade='never'` to make sure the conda-installed package versions
-remain unchanged.
+Then install the package with the `remotes` package.
+
+Note:
+
+- Conda packages for R \>= 4.6.0 may not be available yet causing
+  installation using the default github branch to fail. To avoid this,
+  use branch `r4.3` which pins R to a lower version.
+- Here we set `upgrade='never'` to make sure the conda-installed package
+  versions remain unchanged.
 
 ``` r
 
-remotes::install_github('NICHD-BSPC/carnation', upgrade='never')
-```
-
-### remotes
-
-Alternatively, you can install directly with `remotes`:
-
-``` r
-
-install.packages('remotes')
-setRepositories(ind=c(1,2,3,4,5))  # Get both CRAN and Bioconductor packages
-remotes::install_github('NICHD-BSPC/carnation')
+remotes::install_github('NICHD-BSPC/carnation@r4.3', upgrade='never')
 ```
 
 ## 🏁 Getting Started
@@ -152,28 +192,3 @@ or pull requests to the GitHub repository.
 ## 📄 License
 
 Carnation is available under the MIT license.
-
-## 💻 Server Mode
-
-Carnation supports multi-user environments with authentication:
-
-``` r
-
-# Create user database
-credentials <- data.frame(
-  user = c('shinymanager'),
-  password = c('12345'),
-  admin = c(TRUE),
-  stringsAsFactors = FALSE
-)
-
-# Initialize the database
-shinymanager::create_db(
-  credentials_data = credentials,
-  sqlite_path = 'credentials.sqlite',
-  passphrase = 'admin_passphrase'
-)
-
-# Run with authentication
-run_carnation(credentials='credentials.sqlite', passphrase='admin_passphrase')
-```
