@@ -378,6 +378,9 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
       df_react <- reactiveVal(NULL)
       df_full <- reactiveVal(NULL)
 
+      # reactive to hold plot source
+      plot_source <- reactiveVal(NULL)
+
       # reactive values to keep track of axis limits
       axis_limits <- reactiveValues(lim.x=NULL, lim.y=NULL)
 
@@ -870,6 +873,9 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           source='scatter'
         )
 
+        # save plot source to reactive
+        plot_source('scatter')
+
         event_register(p, 'plotly_selected')
 
         p
@@ -889,19 +895,11 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
       plotProxy <- plotlyProxy('plotly_out', session)
 
       get_pt_selected <- reactive({
-        #validate(
-        #  need(!is.null(df_full()), '')
-        #)
-        event_data('plotly_selected', source='scatter')
+        req(plot_source())
+        event_data('plotly_selected', source=plot_source())
       })
 
       observeEvent(get_pt_selected(), {
-        # Validation
-        #needs <- c(!is.null(df_react()), !is.null(df_full()))
-        #for (need in needs) {
-        #  validate(need(need, "Waiting for selection"))
-        #}
-
         df <- get_pt_selected()
 
         data_df <- df_full()
