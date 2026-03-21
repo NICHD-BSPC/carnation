@@ -2689,6 +2689,7 @@ plotScatter.label_ly <- function(compare,
     all_sym <- unique(df_i[['shape']])
     for(sym in all_sym){
       # don't show legend if point is outside limits
+      showlegend <- TRUE
       if(sym != 'in'){
         ps <- size + 1
 
@@ -2696,7 +2697,6 @@ plotScatter.label_ly <- function(compare,
         if(!all(all_sym == sym)) showlegend <- FALSE
       } else {
         ps <- size
-        showlegend <- TRUE
       }
       p <- p %>% add_trace(data = df_i[df_i$shape == sym, ],
                            x = ~get(x),
