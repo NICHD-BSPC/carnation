@@ -14,7 +14,7 @@ Carnation is an interactive Shiny dashboard that transforms complex bulk RNA-Seq
 Check out the official bioconductor page [here](https://bioconductor.org/packages/devel/bioc/html/carnation.html)
 for more details.
 
-## ✨ Key Features
+## Key Features
 
 - **DE Analysis**: Analyze differential expression through multiple visualizations
   - **Summary**: Get a quick overview of your differential expression results
@@ -40,7 +40,7 @@ for more details.
 - **User Management**: Optional authentication system for controlled access in multi-user environments
 
 
-## 🚀 Installation
+## Installation
 
 Carnation can be installed using `BiocManager::install`. First, start R (version: 4.6)
 and then run:
@@ -83,19 +83,20 @@ conda activate ./env
 R
 ```
 
-Then install the package with the `remotes` package.
-
-Note:
-
-- Conda packages for R >= 4.6.0 may not be available yet causing installation using the default
-  github branch to fail. To avoid this, use branch `r4.3` which pins R to a lower version.
-- Here we set `upgrade='never'` to make sure the conda-installed package versions remain unchanged.
+Then install the package with the `remotes` package. Here we set
+`upgrade='never'` to make sure the conda-installed package versions remain
+unchanged.
 
 ```r
 remotes::install_github('NICHD-BSPC/carnation@r4.3', upgrade='never')
 ```
 
-## 🏁 Getting Started
+Note:
+
+- Conda packages for R >= 4.6.0 may not be available yet causing installation using the default
+  github branch to fail. To avoid this, use branch `r4.3` which pins R to a lower version.
+
+## Getting Started
 
 ### Data Organization
 
@@ -130,15 +131,19 @@ run_carnation(options=list(port=12345, launch.browser=FALSE))
 
 Then access Carnation at `http://127.0.0.1:12345`
 
-## 📚 Documentation
+## Documentation
 
-Each module includes comprehensive help documentation accessible through the help buttons throughout the interface. The documentation provides detailed explanations of plot options, statistical methods, and interpretation guidelines.
+Each module includes comprehensive help documentation accessible through the
+help buttons throughout the interface. The documentation provides detailed
+explanations of plot options, statistical methods, and interpretation
+guidelines.
 
-## 🤝 Contributing
+## Contributing
 
-We welcome contributions to Carnation! Please feel free to submit issues or pull requests to the GitHub repository.
+We welcome contributions to Carnation! Please feel free to submit issues or
+pull requests to the GitHub repository.
 
-## 📄 License
+## License
 
 Carnation is available under the MIT license.
 
