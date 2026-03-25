@@ -492,13 +492,11 @@ loadDataServer <- function(id, username, config, rds=NULL){
           # check for 'gene' column
           if(!'gene' %in% tolower(colnames(res))){
             showNotification(
-              'DE results table must contain "gene" column!',
+              'DE results table must contain "gene" column! Skipping',
               type='error'
             )
 
-            validate(
-              need('gene' %in% tolower(colnames(res)), '')
-            )
+            next
           } else {
             # set gene column name to exactly 'gene'
             gcol <- grep('gene', tolower(colnames(res)))
@@ -538,9 +536,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
                 type='error'
               )
 
-              validate(
-                need(!res_id %in% names(new_obj$res_list), '')
-              )
+              next
             } else {
               new_obj$res_list[[ res_id ]] <- res_list
             }
