@@ -1089,13 +1089,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       column_names <- config()$server$de_analysis$column_names
       defaults <- names(column_names)
 
-      # these res objects will be dropped
-      drop_res_names <- NULL
-
       for(name in names(sanitized_res_list)){
         res <- sanitized_res_list[[ name ]]$res
         res <- as.data.frame(res)
 
+        # keep track of missing columns
+        missing_cols <- NULL
         for(cname in defaults){
           idx <- colnames(res) %in% column_names[[ cname ]]
 
@@ -1110,10 +1109,19 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
             idx <- which(idx)[1]
             colnames(res)[idx] <- cname
           } else {
-            message('Unsupported res type for ', name, ':', cname, ' column not found, skipping')
-            drop_res_names <- c(drop_res_names, name)
+            missing_cols <- c(missing_cols, cname)
           }
         }
+
+        if(length(missing_cols) > 0){
+          showNotification(
+            paste0('DE results table for "', name, '" does not match supported formats and will be skipped. ',
+                   'Missing columns corresponding to: ', paste(missing_cols, collapse=', ')),
+            type='error'
+          )
+          next
+        }
+
         sanitized_res_list[[ name ]]$res <- res
       }
 
