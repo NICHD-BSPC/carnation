@@ -931,7 +931,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 selection='none',
                 caption=tags$caption(style='font-weight: bold; font-size: 15px;',
                                      'Summary of available analyses'),
-                options=list(dom='t'))
+                options=list(dom='tlp'))
 
     })
 
