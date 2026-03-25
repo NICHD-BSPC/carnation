@@ -473,20 +473,36 @@ loadDataServer <- function(id, username, config, rds=NULL){
           res_counts <- input[[ paste0('res_counts', i) ]]
           res_label <- input[[ paste0('res_label', i) ]]
 
-          # check for DESeq2 columns
-          deseq2_cols <- c('baseMean', 'log2FoldChange', 'padj', 'pvalue')
+          # check for supported columns
+          column_names <- config()$server$de_analysis$column_names
+          defaults <- names(column_names)
 
-          if(!all(deseq2_cols  %in% colnames(res))){
-            missing <- setdiff(deseq2_cols, colnames(res))
+          missing_cols <- NULL
+          for(cname in defaults){
+            idx <- colnames(res) %in% column_names[[ cname ]]
+
+            # if matches exist
+            if(sum(idx) > 0){
+              if(sum(idx) > 1){
+              # only use the first match if multiple matches
+              # and show warning
+                message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
+              }
+
+              idx <- which(idx)[1]
+              colnames(res)[idx] <- cname
+            } else {
+              missing_cols <- c(missing_cols, cname)
+            }
+          }
+
+          if(length(missing_cols) > 0){
             showNotification(
-              paste0('DE results table does not match DESeq2 format. Missing columns: ',
-                     paste(missing, collapse=',')),
+              paste0('DE results table for "', res_label, '" does not match supported formats and will be skipped. ',
+                     'Missing columns corresponding to: ', paste(missing_cols, collapse=', ')),
               type='error'
             )
-
-            validate(
-              need(all(deseq2_cols %in% colnames(res)), '')
-            )
+            next
           }
 
           # check for 'gene' column
