@@ -542,6 +542,13 @@ loadDataServer <- function(id, username, config, rds=NULL){
             }
           }
         }
+
+        if(length(new_obj$res_list) == 0){
+          showNotification(
+            'No valid DE results added',
+            type='error'
+          )
+        }
         removeModal()
       })
 
