@@ -356,7 +356,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
               tags$ul(
                 tags$li('Gene IDs should be in a "gene" column.'),
                 tags$li('Gene symbols can also be present in a column named "symbol".'),
-                tags$li('Only "DESeq2" results are supported at the moment.')
+                tags$li('DESeq2, edgeR & limma results are supported at the moment.')
               ),
               style='font-style: italic;'
             ), # div
