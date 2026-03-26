@@ -487,6 +487,9 @@ loadDataServer <- function(id, username, config, rds=NULL){
           )
         }
 
+        # supported columns
+        column_names <- config()$server$de_analysis$column_names
+
         # read DE files & build res_list
         for(i in seq_len(nres)){
           res <- read.table(input$res_file$datapath[i],
@@ -496,33 +499,14 @@ loadDataServer <- function(id, username, config, rds=NULL){
           res_counts <- input[[ paste0('res_counts', i) ]]
           res_label <- input[[ paste0('res_label', i) ]]
 
-          # check for supported columns
-          column_names <- config()$server$de_analysis$column_names
-          defaults <- names(column_names)
+          # check res for supported columns
+          ll <- .check_res_columns(res, column_names=column_names)
+          res <- ll$res
 
-          missing_cols <- NULL
-          for(cname in defaults){
-            idx <- colnames(res) %in% column_names[[ cname ]]
-
-            # if matches exist
-            if(sum(idx) > 0){
-              if(sum(idx) > 1){
-              # only use the first match if multiple matches
-              # and show warning
-                message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
-              }
-
-              idx <- which(idx)[1]
-              colnames(res)[idx] <- cname
-            } else {
-              missing_cols <- c(missing_cols, cname)
-            }
-          }
-
-          if(length(missing_cols) > 0){
+          if(length(ll$missing_cols) > 0){
             showNotification(
               paste0('DE results table for "', res_label, '" does not match supported formats and will be skipped. ',
-                     'Missing columns corresponding to: ', paste(missing_cols, collapse=', ')),
+                     'Missing columns corresponding to: ', paste(ll$missing_cols, collapse=', ')),
               type='error'
             )
             next
