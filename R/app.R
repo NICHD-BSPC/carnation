@@ -1087,36 +1087,19 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       # supported column names
       column_names <- config()$server$de_analysis$column_names
-      defaults <- names(column_names)
 
       for(name in names(sanitized_res_list)){
         res <- sanitized_res_list[[ name ]]$res
         res <- as.data.frame(res)
 
-        # keep track of missing columns
-        missing_cols <- NULL
-        for(cname in defaults){
-          idx <- colnames(res) %in% column_names[[ cname ]]
+        # check supported columns
+        ll <- .check_res_columns(res, column_names=column_names)
+        res <- ll$res
 
-          # if matches exist
-          if(sum(idx) > 0){
-            if(sum(idx) > 1){
-            # only use the first match if multiple matches
-            # and show warning
-              message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
-            }
-
-            idx <- which(idx)[1]
-            colnames(res)[idx] <- cname
-          } else {
-            missing_cols <- c(missing_cols, cname)
-          }
-        }
-
-        if(length(missing_cols) > 0){
+        if(length(ll$missing_cols) > 0){
           showNotification(
             paste0('DE results table for "', name, '" does not match supported formats and will be skipped. ',
-                   'Missing columns corresponding to: ', paste(missing_cols, collapse=', ')),
+                   'Missing columns corresponding to: ', paste(ll$missing_cols, collapse=', ')),
             type='error'
           )
           next
@@ -1126,7 +1109,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       }
 
       # remove unsupported res objects
-      sanitized_res_list <- sanitized_res_list[ !names(sanitized_res_list) %in% drop_res_names ]
       obj[[ res.name ]] <- sanitized_res_list
 
       # add obj slots to reactive values

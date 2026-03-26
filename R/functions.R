@@ -511,6 +511,34 @@ is_valid_pattern_obj <- function(pattern_obj, require_symbol = FALSE){
   TRUE
 }
 
+# check res for supported columns
+.check_res_columns <- function(res, column_names){
+  defaults <- names(column_names)
+
+  # keep track of missing columns
+  missing_cols <- NULL
+  for(cname in defaults){
+    idx <- colnames(res) %in% column_names[[ cname ]]
+
+    # if matches exist
+    if(sum(idx) > 0){
+      if(sum(idx) > 1){
+      # only use the first match if multiple matches
+      # and show warning
+        message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
+      }
+
+      idx <- which(idx)[1]
+      colnames(res)[idx] <- cname
+    } else {
+      missing_cols <- c(missing_cols, cname)
+    }
+  }
+
+  return(
+    list(res=res, missing_cols=missing_cols)
+  )
+}
 #' Make final object for internal use by the app
 #'
 #' This function takes an uploaded object and sanitizes
