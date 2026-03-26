@@ -654,8 +654,11 @@ make_final_object <- function(obj){
     # get object names and map to 'res.list', etc
     n <- names(obj)
     res.name <- n[grep('res', n)]
-    dds.name <- n[grep('dds', n)]
-    rld.name <- n[grep('rld', n)]
+    dds.name <- n[setdiff(grep('dds', n),
+                  c(grep('all_dds', n),
+                    grep('dds_mapping', n)))]
+    rld.name <- n[setdiff(grep('rld', n),
+                          grep('all_rld', n))]
     enrich.name <- n[grep('enrich', n)]
     degpatterns.name <- n[grep('degpatterns', n)]
 
