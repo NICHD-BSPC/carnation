@@ -511,6 +511,97 @@ is_valid_pattern_obj <- function(pattern_obj, require_symbol = FALSE){
   TRUE
 }
 
+# check res for supported columns
+.check_res_columns <- function(res, column_names){
+  defaults <- names(column_names)
+
+  # keep track of missing columns
+  missing_cols <- NULL
+  for(cname in defaults){
+    idx <- colnames(res) %in% column_names[[ cname ]]
+
+    # if matches exist
+    if(sum(idx) > 0){
+      if(sum(idx) > 1){
+      # only use the first match if multiple matches
+      # and show warning
+        message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
+      }
+
+      idx <- which(idx)[1]
+      colnames(res)[idx] <- cname
+    } else {
+      missing_cols <- c(missing_cols, cname)
+    }
+  }
+
+  return(
+    list(res=res, missing_cols=missing_cols)
+  )
+}
+
+# internal function to get gene -> symbol mapping
+# from a list of DE results
+.get_idmap <- function(res_list){
+  # get symbol mapping from res objects
+  all_idmap <- NULL
+  all_idmap_names <- NULL
+
+  for(res_name in names(res_list)){
+    # get de results table
+    if(all(c('res', 'dds', 'label') %in% names(res_list[[ res_name ]]))){
+      res <- res_list[[ res_name ]]$res
+    } else {
+      res <- res_list[[ res_name ]]
+    }
+
+    # get symbol column from res.list object
+    idx <- toupper(colnames(res)) %in% 'SYMBOL'
+
+    # build id to symbol mapping
+    if(sum(idx) > 0){
+      idmap <- res[,which(idx)]
+
+      # get gene column or use rownames
+      gidx <- toupper(colnames(res)) %in% 'GENE'
+      if(sum(gidx) > 0){
+          idmap_names <- res[,which(gidx)]
+      } else if(!is.null(rownames(res))){
+          idmap_names <- rownames(res)
+      } else {
+          message(
+            'No gene column or row names found in ',
+            'res object: ', name, '. Skipping\n'
+          )
+          next
+      }
+
+      # change mapping to id for which symbol is NA
+      idmap[is.na(idmap)] <- idmap_names[is.na(idmap)]
+
+      # add any new genes to mapping vector
+      new_idx <- which(!idmap %in% all_idmap)
+      if(length(new_idx) > 0){
+        all_idmap <- c(all_idmap, idmap[new_idx])
+        all_idmap_names <- c(all_idmap_names, idmap_names[new_idx])
+      }
+
+      # switch rownames to symbol
+      names(idmap) <- idmap_names
+    }
+
+    # replace NAs
+    all_idmap[is.na(all_idmap)] <- all_idmap_names[is.na(all_idmap)]
+
+    # remove duplicates from idmap
+    idx <- duplicated(all_idmap)
+    all_idmap <- all_idmap[which(!idx)]
+    names(all_idmap) <- all_idmap_names[which(!idx)]
+  }
+
+  return(all_idmap)
+}
+
 #' Make final object for internal use by the app
 #'
 #' This function takes an uploaded object and sanitizes
@@ -563,8 +654,11 @@ make_final_object <- function(obj){
     # get object names and map to 'res.list', etc
     n <- names(obj)
     res.name <- n[grep('res', n)]
-    dds.name <- n[grep('dds', n)]
-    rld.name <- n[grep('rld', n)]
+    dds.name <- n[setdiff(grep('dds', n),
+                  c(grep('all_dds', n),
+                    grep('dds_mapping', n)))]
+    rld.name <- n[setdiff(grep('rld', n),
+                          grep('all_rld', n))]
     enrich.name <- n[grep('enrich', n)]
     degpatterns.name <- n[grep('degpatterns', n)]
 
@@ -573,6 +667,9 @@ make_final_object <- function(obj){
 
     # these dds objects are not linked to res_list
     orphan_dds <- NULL
+
+    # get gene -> symbol mapping
+    all_idmap <- .get_idmap(obj[[ res.name ]])
 
     # if res.list contains 'res', 'dds', 'label' elements
     # build the following:
@@ -591,13 +688,20 @@ make_final_object <- function(obj){
 
         # - if no 'symbol' column, add from rownames
         # - else replace NA's with rownames
-        sidx <- which('SYMBOL' %in% toupper(colnames(res)))
+        sidx <- which(toupper(colnames(res)) %in% 'SYMBOL')
+        gidx <- which(toupper(colnames(res)) %in% 'GENE')
+
         if(length(sidx) == 0){
             res$symbol <- rownames(res)
         } else {
           if(any(is.na(res[,sidx]))){
               idx <- which(is.na(res[, sidx]))
-              res[idx, sidx] <- rownames(res)[idx]
+
+              if(!is.null(rownames(res))) res[idx, sidx] <- rownames(res)[idx]
+              else if(length(gidx) > 0) res[idx, sidx] <- res[idx, gidx[1]]
+              else {
+                message('symbol column in res object has NA\'s')
+              }
           }
         }
         res[order(res$padj),]
@@ -640,10 +744,6 @@ make_final_object <- function(obj){
       obj$labels <- labels
       obj$dds_mapping <- dds_mapping
 
-      # get symbol mapping from res objects
-      all_idmap <- NULL
-      all_idmap_names <- NULL
-
       # if symbol column exists, change rownames(dds) to symbol
       for(name in names(obj[[dds.name]])){
         # 1. try to use dds_mapping to get res.list element
@@ -652,11 +752,7 @@ make_final_object <- function(obj){
         #    name exists
         # 3. else skip
         idx <- obj$dds_mapping %in% name
-        if(sum(idx) >= 1){
-          res <- obj[[res.name]][[which(idx)[1]]]
-        } else if(name %in% names(obj[[res.name]])){
-          res <- obj[[res.name]][[name]]
-        } else {
+        if(sum(idx) == 0){
           message('no matching dds object found for ', name, '\n')
           orphan_dds <- c(orphan_dds, name)
           next
@@ -665,51 +761,12 @@ make_final_object <- function(obj){
         dds <- obj[[dds.name]][[name]]
         rld <- obj[[rld.name]][[name]]
 
-        # get symbol column from res.list object
-        idx <- toupper(colnames(res)) %in% 'SYMBOL'
+        # convert rownames that need conversion
+        didx <- which(!rownames(dds) %in% unname(all_idmap))
+        rownames(dds)[didx] <- all_idmap[ rownames(dds)[didx] ]
 
-        # build id to symbol mapping
-        if(sum(idx) > 0){
-          idmap <- res[,which(idx)]
-
-          # get gene column or use rownames
-          gidx <- toupper(colnames(res)) %in% 'GENE'
-          if(sum(gidx) > 0){
-              idmap_names <- res[,which(gidx)]
-          } else if(!is.null(rownames(res))){
-              idmap_names <- rownames(res)
-          } else {
-              message(
-                'No gene column or row names found in ',
-                'res object: ', name, '. Skipping\n'
-              )
-              next
-          }
-
-          # change mapping to id for which symbol is NA
-          idmap[is.na(idmap)] <- idmap_names[is.na(idmap)]
-
-          # add any new genes to mapping vector
-          new_idx <- which(!idmap %in% all_idmap)
-          if(length(new_idx) > 0){
-            all_idmap <- c(all_idmap, idmap[new_idx])
-            all_idmap_names <- c(all_idmap_names, idmap_names[new_idx])
-          }
-
-          # switch rownames to symbol
-          names(idmap) <- idmap_names
-          rownames(dds) <- idmap[rownames(dds)]
-          rownames(rld) <- idmap[rownames(rld)]
-        }
-
-        # replace NAs
-        all_idmap[is.na(all_idmap)] <- all_idmap_names[is.na(all_idmap)]
-
-        # remove duplicates from idmap
-        idx <- duplicated(all_idmap)
-        all_idmap <- all_idmap[which(!idx)]
-        names(all_idmap) <- all_idmap_names[which(!idx)]
-
+        ridx <- which(!rownames(rld) %in% unname(all_idmap))
+        rownames(rld)[didx] <- all_idmap[ rownames(rld)[didx] ]
 
         obj[[dds.name]][[name]] <- dds
         obj[[rld.name]][[name]] <- rld
@@ -2689,6 +2746,7 @@ plotScatter.label_ly <- function(compare,
     all_sym <- unique(df_i[['shape']])
     for(sym in all_sym){
       # don't show legend if point is outside limits
+      showlegend <- TRUE
       if(sym != 'in'){
         ps <- size + 1
 
@@ -2696,7 +2754,6 @@ plotScatter.label_ly <- function(compare,
         if(!all(all_sym == sym)) showlegend <- FALSE
       } else {
         ps <- size
-        showlegend <- TRUE
       }
       p <- p %>% add_trace(data = df_i[df_i$shape == sym, ],
                            x = ~get(x),

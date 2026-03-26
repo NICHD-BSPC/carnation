@@ -11,10 +11,10 @@ ENV CONDA_DIR=/opt/conda
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 # get carnation code
-COPY . /app/carnation/
+COPY requirements.yaml /app/carnation/
 
 # build conda env
-RUN conda env create -p /env/carnation-env --file /app/carnation/requirements-pinned.yaml
+RUN conda env create -p /env/carnation-env --file /app/carnation/requirements.yaml
 
 # set workdir to carnation
 WORKDIR /app
@@ -33,8 +33,11 @@ ENV PORT=3838
 
 EXPOSE 3838
 
+# re-install ComplexUpset
+RUN Rscript -e "remove.packages('ComplexUpset'); install.packages('ComplexUpset', type='source', repos='https://cloud.r-project.org')"
+
 # install carnation into env
-RUN Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation', upgrade='never')"
+RUN Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation', ref='r4.3', upgrade='never')"
 
 # run carnation
 CMD R -e "library(carnation); run_carnation(options=list(host='0.0.0.0', port=as.integer(Sys.getenv('PORT'))))"

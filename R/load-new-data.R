@@ -123,6 +123,29 @@ loadDataServer <- function(id, username, config, rds=NULL){
         new_obj$dds_list <- edit_obj()[[ dds_name ]]
         new_obj$rld_list <- edit_obj()[[ rld_name ]]
 
+        # if res_list is native carnation format, reconstitute old form
+        column_names <- config()$server$de_analysis$column_names
+        if(!all(c('res', 'dds', 'label') %in% names(new_obj$res_list[[1]]))){
+          tmp <- lapply(names(new_obj$res_list), function(x){
+                   res <- new_obj$res_list[[ x ]]
+                   y <- .check_res_columns(res, column_names)
+                   res <- y$res
+                   list(
+                     res=res,
+                     dds=edit_obj()$dds_mapping[[ x ]],
+                     label=edit_obj()$labels[[ x ]]
+                   )
+                 })
+          names(tmp) <- names(new_obj$res_list)
+          new_obj$res_list <- tmp
+        } else {
+          new_obj$res_list <- lapply(new_obj$res_list, function(x){
+                                y <- .check_res_columns(x$res, column_names)
+                                x$res <- y$res
+                                x
+                              })
+        }
+
         # add optional elements
         if(length(enrich_name) > 0) new_obj$enrich_list <- edit_obj()[[ enrich_name ]]
         if(length(genetonic_name) > 0) new_obj$genetonic <- edit_obj()[[ genetonic_name ]]
@@ -356,7 +379,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
               tags$ul(
                 tags$li('Gene IDs should be in a "gene" column.'),
                 tags$li('Gene symbols can also be present in a column named "symbol".'),
-                tags$li('Only "DESeq2" results are supported at the moment.')
+                tags$li('DESeq2, edgeR & limma results are supported at the moment.')
               ),
               style='font-style: italic;'
             ), # div
@@ -464,6 +487,9 @@ loadDataServer <- function(id, username, config, rds=NULL){
           )
         }
 
+        # supported columns
+        column_names <- config()$server$de_analysis$column_names
+
         # read DE files & build res_list
         for(i in seq_len(nres)){
           res <- read.table(input$res_file$datapath[i],
@@ -473,32 +499,27 @@ loadDataServer <- function(id, username, config, rds=NULL){
           res_counts <- input[[ paste0('res_counts', i) ]]
           res_label <- input[[ paste0('res_label', i) ]]
 
-          # check for DESeq2 columns
-          deseq2_cols <- c('baseMean', 'log2FoldChange', 'padj', 'pvalue')
+          # check res for supported columns
+          ll <- .check_res_columns(res, column_names=column_names)
+          res <- ll$res
 
-          if(!all(deseq2_cols  %in% colnames(res))){
-            missing <- setdiff(deseq2_cols, colnames(res))
+          if(length(ll$missing_cols) > 0){
             showNotification(
-              paste0('DE results table does not match DESeq2 format. Missing columns: ',
-                     paste(missing, collapse=',')),
+              paste0('DE results table for "', res_label, '" does not match supported formats and will be skipped. ',
+                     'Missing columns corresponding to: ', paste(ll$missing_cols, collapse=', ')),
               type='error'
             )
-
-            validate(
-              need(all(deseq2_cols %in% colnames(res)), '')
-            )
+            next
           }
 
           # check for 'gene' column
           if(!'gene' %in% tolower(colnames(res))){
             showNotification(
-              'DE results table must contain "gene" column!',
+              'DE results table must contain "gene" column! Skipping',
               type='error'
             )
 
-            validate(
-              need('gene' %in% tolower(colnames(res)), '')
-            )
+            next
           } else {
             # set gene column name to exactly 'gene'
             gcol <- grep('gene', tolower(colnames(res)))
@@ -538,13 +559,18 @@ loadDataServer <- function(id, username, config, rds=NULL){
                 type='error'
               )
 
-              validate(
-                need(!res_id %in% names(new_obj$res_list), '')
-              )
+              next
             } else {
               new_obj$res_list[[ res_id ]] <- res_list
             }
           }
+        }
+
+        if(length(new_obj$res_list) == 0){
+          showNotification(
+            'No valid DE results added',
+            type='error'
+          )
         }
         removeModal()
       })

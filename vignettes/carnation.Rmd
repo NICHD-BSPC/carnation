@@ -676,7 +676,8 @@ bulk RNA-Seq projects with collaborators.
 
 `carnation` currently supports the following widely-used tools:
 
-- Differential expression analysis: `r BiocStyle::Biocpkg('DESeq2')`
+- Differential expression analysis: `r BiocStyle::Biocpkg('DESeq2')`, `r BiocStyle::Biocpkg('edgeR')`,
+  `r BiocStyle::Biocpkg('limma')`
 - Functional enrichment analysis: `r BiocStyle::Biocpkg('clusterProfiler')`
   (both overrepresentation & gene set enrichment analysis).
 - Pattern analysis: `r BiocStyle::Biocpkg('DEGreport')`
@@ -685,8 +686,7 @@ The functional enrichment module incorporates plots from the `r BiocStyle::Biocp
 and `r BiocStyle::Biocpkg('enrichplot')` packages.
 
 Future plans include extending functionality to include support for other
-differential expression frameworks, e.g. `r BiocStyle::Biocpkg('edgeR')` &
-`r BiocStyle::Biocpkg('limma')`, functional enrichment tools, e.g.
+functional enrichment tools, e.g.
 `r BiocStyle::Biocpkg('topGO')` and coexpression analysis methods, e.g.
 `r BiocStyle::CRANpkg('WGCNA')`.
 
