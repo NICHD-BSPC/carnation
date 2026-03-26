@@ -688,13 +688,20 @@ make_final_object <- function(obj){
 
         # - if no 'symbol' column, add from rownames
         # - else replace NA's with rownames
-        sidx <- which('SYMBOL' %in% toupper(colnames(res)))
+        sidx <- which(toupper(colnames(res)) %in% 'SYMBOL')
+        gidx <- which(toupper(colnames(res)) %in% 'GENE')
+
         if(length(sidx) == 0){
             res$symbol <- rownames(res)
         } else {
           if(any(is.na(res[,sidx]))){
               idx <- which(is.na(res[, sidx]))
-              res[idx, sidx] <- rownames(res)[idx]
+
+              if(!is.null(rownames(res))) res[idx, sidx] <- rownames(res)[idx]
+              else if(length(gidx) > 0) res[idx, sidx] <- res[idx, gidx[1]]
+              else {
+                message('symbol column in res object has NA\'s')
+              }
           }
         }
         res[order(res$padj),]
