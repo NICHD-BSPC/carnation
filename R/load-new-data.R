@@ -123,6 +123,29 @@ loadDataServer <- function(id, username, config, rds=NULL){
         new_obj$dds_list <- edit_obj()[[ dds_name ]]
         new_obj$rld_list <- edit_obj()[[ rld_name ]]
 
+        # if res_list is native carnation format, reconstitute old form
+        column_names <- config()$server$de_analysis$column_names
+        if(!all(c('res', 'dds', 'label') %in% names(new_obj$res_list[[1]]))){
+          tmp <- lapply(names(new_obj$res_list), function(x){
+                   res <- new_obj$res_list[[ x ]]
+                   y <- .check_res_columns(res, column_names)
+                   res <- y$res
+                   list(
+                     res=res,
+                     dds=edit_obj()$dds_mapping[[ x ]],
+                     label=edit_obj()$labels[[ x ]]
+                   )
+                 })
+          names(tmp) <- names(new_obj$res_list)
+          new_obj$res_list <- tmp
+        } else {
+          new_obj$res_list <- lapply(new_obj$res_list, function(x){
+                                y <- .check_res_columns(x$res, column_names)
+                                x$res <- y$res
+                                x
+                              })
+        }
+
         # add optional elements
         if(length(enrich_name) > 0) new_obj$enrich_list <- edit_obj()[[ enrich_name ]]
         if(length(genetonic_name) > 0) new_obj$genetonic <- edit_obj()[[ genetonic_name ]]
