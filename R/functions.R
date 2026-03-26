@@ -751,7 +751,12 @@ make_final_object <- function(obj){
         dds <- obj[[dds.name]][[name]]
         rld <- obj[[rld.name]][[name]]
 
+        # convert rownames that need conversion
+        didx <- which(!rownames(dds) %in% unname(all_idmap))
+        rownames(dds)[didx] <- all_idmap[ rownames(dds)[didx] ]
 
+        ridx <- which(!rownames(rld) %in% unname(all_idmap))
+        rownames(rld)[didx] <- all_idmap[ rownames(rld)[didx] ]
 
         obj[[dds.name]][[name]] <- dds
         obj[[rld.name]][[name]] <- rld
