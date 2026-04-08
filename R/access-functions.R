@@ -29,6 +29,35 @@ get_access_path <- function(){
   file.path(path, '.carnation-access.yaml')
 }
 
+#' Get path to local config yaml file
+#'
+#' This function checks for an environment variable
+#' \code{CARNATION_CONFIG_YAML} to specify the local config yaml path.
+#' If the variable is not set, a default path in the home directory is used.
+#'
+#' @return path to local config yaml
+#'
+#' @examples
+#' p <- get_config_path()
+#'
+#' @export
+get_config_path <- function(){
+  if(Sys.getenv('CARNATION_CONFIG_YAML') != ''){
+    path <- Sys.getenv('CARNATION_CONFIG_YAML')
+    parent <- dirname(path)
+    if(!dir.exists(parent)){
+      stop(
+        'Environment variable "CARNATION_CONFIG_YAML" exists ',
+        'but the parent directory does not exist on disk: ', parent
+      )
+    }
+  } else {
+    path <- file.path(path.expand('~'), '.carnation-config.yaml')
+  }
+
+  path
+}
+
 #' Get data areas a user has access to
 #'
 #' This function takes a username and returns a
@@ -86,5 +115,4 @@ check_user_access <- function(al, u, admin='admin'){
 
   return(ll)
 }
-
 
