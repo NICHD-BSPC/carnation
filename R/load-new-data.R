@@ -1185,6 +1185,11 @@ loadDataServer <- function(id, username, config, rds=NULL){
                              genetonic=new_obj$genetonic,
                              degpatterns=new_obj$degpatterns)
 
+            combined <- materialize_carnation_object(
+              combined,
+              config = config(),
+              cores = config()$server$cores
+            )
             combined_final <- make_final_object(combined)
 
             # NOTE: remove .Environment attributes from @design slots of obj$dds
@@ -1338,4 +1343,3 @@ loadDataServer <- function(id, username, config, rds=NULL){
     } # function
   ) # moduleServer
 } # function
-
