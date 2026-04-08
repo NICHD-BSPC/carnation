@@ -165,8 +165,12 @@ in_admin_group <- function(u){
 
 #' Get config
 #'
-#' This function reads the config.yaml and
-#' returns the list
+#' This function reads the bundled package config and returns it.
+#' If a local config yaml exists, only supported user-editable settings
+#' are merged into the returned config.
+#'
+#' @param config_path optional path to a local config yaml. If \code{NULL},
+#'   uses the path returned by \code{get_config_path()}.
 #'
 #' @return list containing config items
 #'
@@ -174,11 +178,243 @@ in_admin_group <- function(u){
 #' cfg <- get_config()
 #'
 #' @export
-get_config <- function(){
+get_config <- function(config_path = NULL){
   cfg_path <- system.file('extdata', 'config.yaml',
                           package=packageName())
   cfg <- read_yaml(cfg_path)
+
+  if (is.null(config_path)) {
+    config_path <- get_config_path()
+  }
+
+  if (file.exists(config_path)) {
+    local_cfg <- read_yaml(config_path)
+    cfg <- .merge_user_config(cfg, local_cfg)
+  }
+
   cfg
+}
+
+#' Initialize local config
+#'
+#' This function copies the bundled package config to a user-writable
+#' local config yaml. This is intended for users who want to customize
+#' the supported config settings without editing the installed package.
+#'
+#' @param config_path path to the local config yaml to create.
+#'   Defaults to \code{get_config_path()}.
+#' @param overwrite logical indicating whether to overwrite an existing file.
+#'
+#' @return Path to the local config yaml, invisibly.
+#'
+#' @examples
+#' cfg_out <- tempfile(fileext = ".yaml")
+#' init_local_config(cfg_out)
+#'
+#' @export
+init_local_config <- function(config_path = get_config_path(),
+                              overwrite = FALSE) {
+  src <- system.file('extdata', 'config.yaml',
+                     package = packageName())
+
+  if (file.exists(config_path) && !overwrite) {
+    return(invisible(config_path))
+  }
+
+  parent <- dirname(config_path)
+  if (!dir.exists(parent)) {
+    stop('Directory for local config does not exist: "', parent, '"',
+         call. = FALSE)
+  }
+
+  ok <- file.copy(src, config_path, overwrite = overwrite)
+  if (!ok) {
+    stop('Failed to create local config at: "', config_path, '"',
+         call. = FALSE)
+  }
+
+  invisible(config_path)
+}
+
+#' Set config
+#'
+#' This function updates a limited subset of the package config YAML.
+#' Only stable user-facing settings are writable; style settings and
+#' other internal options are intentionally left untouched.
+#'
+#' @param config_path character path to the config YAML file to update.
+#'   Defaults to the local config returned by \code{get_config_path()}. If the
+#'   file does not exist yet, it is initialized from the bundled package config.
+#' @param de_analysis optional list with DE analysis config updates.
+#'   Currently only \code{de_analysis$column_names} is supported, and the
+#'   provided aliases are merged into the existing column-name mappings.
+#' @param fdr_threshold optional numeric FDR threshold between 0 and 1.
+#' @param log2fc_threshold optional numeric log2 fold-change threshold
+#'   greater than or equal to 0.
+#' @param max_upload_size optional positive numeric upload limit in MB.
+#' @param cores optional positive integer number of cores to use.
+#'
+#' @return Updated config list, invisibly.
+#'
+#' @examples
+#' cfg_out <- tempfile(fileext = ".yaml")
+#'
+#' set_config(
+#'   config_path = cfg_out,
+#'   de_analysis = list(
+#'     column_names = list(
+#'       padj = "qvalue",
+#'       log2FoldChange = c("logFC", "avg_log2FC")
+#'     )
+#'   ),
+#'   fdr_threshold = 0.05,
+#'   log2fc_threshold = 1,
+#'   max_upload_size = 50,
+#'   cores = 2
+#' )
+#' @export
+set_config <- function(config_path = get_config_path(),
+                       de_analysis = NULL,
+                       fdr_threshold = NULL,
+                       log2fc_threshold = NULL,
+                       max_upload_size = NULL,
+                       cores = NULL) {
+  if (!nzchar(config_path)) {
+    stop('`config_path` must be a non-empty path.', call. = FALSE)
+  }
+
+  if (!file.exists(config_path)) {
+    init_local_config(config_path = config_path, overwrite = FALSE)
+  }
+  if (file.access(config_path, 2) != 0) {
+    stop('Config file is not writable: "', config_path, '"',
+         call. = FALSE)
+  }
+
+  cfg <- read_yaml(config_path)
+
+  if (!is.null(de_analysis)) {
+    if (!is.list(de_analysis) ||
+        !identical(sort(names(de_analysis)), "column_names")) {
+      stop('`de_analysis` must be a list containing only `column_names`.',
+           call. = FALSE)
+    }
+
+    column_names <- de_analysis$column_names
+    valid_cols <- c("pvalue", "padj", "log2FoldChange", "baseMean")
+
+    if (!is.list(column_names) || is.null(names(column_names)) ||
+        any(!nzchar(names(column_names)))) {
+      stop('`de_analysis$column_names` must be a named list.',
+           call. = FALSE)
+    }
+
+    invalid_cols <- setdiff(names(column_names), valid_cols)
+    if (length(invalid_cols) > 0) {
+      stop("Unsupported `de_analysis$column_names` entries: ",
+           paste(invalid_cols, collapse = ", "),
+           call. = FALSE)
+    }
+
+    for (nm in names(column_names)) {
+      aliases <- column_names[[nm]]
+      if (!is.character(aliases) || length(aliases) < 1 ||
+          anyNA(aliases) || any(!nzchar(aliases))) {
+        stop("`de_analysis$column_names$", nm,
+             "` must be a non-empty character vector.",
+             call. = FALSE)
+      }
+
+      existing <- cfg$server$de_analysis$column_names[[nm]]
+      cfg$server$de_analysis$column_names[[nm]] <- unique(c(existing, aliases))
+    }
+  }
+
+  if (!is.null(fdr_threshold)) {
+    if (!is.numeric(fdr_threshold) || length(fdr_threshold) != 1 ||
+        is.na(fdr_threshold) || fdr_threshold < 0 || fdr_threshold > 1) {
+      stop("`fdr_threshold` must be a single numeric value between 0 and 1.",
+           call. = FALSE)
+    }
+    cfg$ui$de_analysis$filters$fdr_threshold <- fdr_threshold
+  }
+
+  if (!is.null(log2fc_threshold)) {
+    if (!is.numeric(log2fc_threshold) || length(log2fc_threshold) != 1 ||
+        is.na(log2fc_threshold) || log2fc_threshold < 0) {
+      stop("`log2fc_threshold` must be a single non-negative numeric value.",
+           call. = FALSE)
+    }
+    cfg$ui$de_analysis$filters$log2fc_threshold <- log2fc_threshold
+  }
+
+  if (!is.null(max_upload_size)) {
+    if (!is.numeric(max_upload_size) || length(max_upload_size) != 1 ||
+        is.na(max_upload_size) || max_upload_size <= 0) {
+      stop("`max_upload_size` must be a single positive numeric value.",
+           call. = FALSE)
+    }
+    cfg$max_upload_size <- max_upload_size
+  }
+
+  if (!is.null(cores)) {
+    if (!is.numeric(cores) || length(cores) != 1 || is.na(cores) ||
+        cores <= 0 || cores != as.integer(cores)) {
+      stop("`cores` must be a single positive integer value.",
+           call. = FALSE)
+    }
+    cfg$server$cores <- as.integer(cores)
+  }
+
+  write_yaml(cfg, config_path)
+
+  invisible(cfg)
+}
+
+.merge_user_config <- function(default_cfg, user_cfg) {
+  if (is.null(user_cfg) || !is.list(user_cfg)) {
+    return(default_cfg)
+  }
+
+  user_de <- user_cfg$server$de_analysis$column_names
+  valid_cols <- c("pvalue", "padj", "log2FoldChange", "baseMean")
+  if (is.list(user_de) && !is.null(names(user_de))) {
+    valid_user_de <- intersect(names(user_de), valid_cols)
+    for (nm in valid_user_de) {
+      aliases <- user_de[[nm]]
+      if (is.character(aliases) && length(aliases) > 0 &&
+          !anyNA(aliases) && all(nzchar(aliases))) {
+        existing <- default_cfg$server$de_analysis$column_names[[nm]]
+        default_cfg$server$de_analysis$column_names[[nm]] <- unique(c(existing, aliases))
+      }
+    }
+  }
+
+  fdr_threshold <- user_cfg$ui$de_analysis$filters$fdr_threshold
+  if (is.numeric(fdr_threshold) && length(fdr_threshold) == 1 &&
+      !is.na(fdr_threshold) && fdr_threshold >= 0 && fdr_threshold <= 1) {
+    default_cfg$ui$de_analysis$filters$fdr_threshold <- fdr_threshold
+  }
+
+  log2fc_threshold <- user_cfg$ui$de_analysis$filters$log2fc_threshold
+  if (is.numeric(log2fc_threshold) && length(log2fc_threshold) == 1 &&
+      !is.na(log2fc_threshold) && log2fc_threshold >= 0) {
+    default_cfg$ui$de_analysis$filters$log2fc_threshold <- log2fc_threshold
+  }
+
+  max_upload_size <- user_cfg$max_upload_size
+  if (is.numeric(max_upload_size) && length(max_upload_size) == 1 &&
+      !is.na(max_upload_size) && max_upload_size > 0) {
+    default_cfg$max_upload_size <- max_upload_size
+  }
+
+  cores <- user_cfg$server$cores
+  if (is.numeric(cores) && length(cores) == 1 &&
+      !is.na(cores) && cores > 0 && cores == as.integer(cores)) {
+    default_cfg$server$cores <- as.integer(cores)
+  }
+
+  default_cfg
 }
 
 #' Get project name from path
