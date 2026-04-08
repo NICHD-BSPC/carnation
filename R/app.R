@@ -6,6 +6,7 @@
 #' @param passphrase passphrase for credentials db.
 #' @param enable_admin if TRUE, admin view is shown. Note, this is only available
 #'        if credentials have sqlite backend.
+#' @param config_path optional path to a local config yaml override.
 #' @param ... parameters passed to shinyApp() call
 #'
 #' @return shinyApp object
@@ -18,10 +19,11 @@
 #' }
 #'
 #' @export
-run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
+run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
+                          config_path = NULL, ...){
 
   # read config yaml
-  cfg <- get_config()
+  cfg <- get_config(config_path = config_path)
 
   # set some options
   oopt <- options(spinner.type = 4)
