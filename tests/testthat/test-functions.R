@@ -403,6 +403,98 @@ test_that("materialize_carnation_object generates missing derived objects", {
   expect_true(inherits(materialized$rld_list$main, "DESeqTransform"))
 })
 
+test_that("set_config updates supported config fields", {
+  cfg_out <- tempfile(fileext = ".yaml")
+
+  updated <- set_config(
+    config_path = cfg_out,
+    de_analysis = list(
+      column_names = list(
+        padj = c("qvalue", "adj_pval"),
+        log2FoldChange = "avg_log2FC"
+      )
+    ),
+    fdr_threshold = 0.05,
+    log2fc_threshold = 1.5,
+    max_upload_size = 64,
+    cores = 3
+  )
+
+  expect_equal(updated$ui$de_analysis$filters$fdr_threshold, 0.05)
+  expect_equal(updated$ui$de_analysis$filters$log2fc_threshold, 1.5)
+  expect_equal(updated$max_upload_size, 64)
+  expect_equal(updated$server$cores, 3L)
+  expect_true(all(c("qvalue", "adj_pval") %in%
+                    updated$server$de_analysis$column_names$padj))
+  expect_true("avg_log2FC" %in%
+                updated$server$de_analysis$column_names$log2FoldChange)
+
+  saved <- yaml::read_yaml(cfg_out)
+  expect_equal(saved$ui$de_analysis$filters$fdr_threshold, 0.05)
+  expect_equal(saved$ui$de_analysis$filters$log2fc_threshold, 1.5)
+  expect_equal(saved$max_upload_size, 64)
+  expect_equal(saved$server$cores, 3L)
+})
+
+test_that("set_config rejects unsupported or invalid config updates", {
+  cfg_out <- tempfile(fileext = ".yaml")
+
+  expect_error(
+    set_config(
+      config_path = cfg_out,
+      de_analysis = list(style = list(global = "body {}"))
+    ),
+    "`de_analysis` must be a list containing only `column_names`."
+  )
+
+  expect_error(
+    set_config(
+      config_path = cfg_out,
+      de_analysis = list(column_names = list(stat = "waldStat"))
+    ),
+    "Unsupported `de_analysis\\$column_names` entries: stat"
+  )
+
+  expect_error(
+    set_config(config_path = cfg_out, fdr_threshold = 2),
+    "`fdr_threshold` must be a single numeric value between 0 and 1."
+  )
+
+  expect_error(
+    set_config(config_path = cfg_out, log2fc_threshold = -1),
+    "`log2fc_threshold` must be a single non-negative numeric value."
+  )
+
+  expect_error(
+    set_config(config_path = cfg_out, max_upload_size = 0),
+    "`max_upload_size` must be a single positive numeric value."
+  )
+
+  expect_error(
+    set_config(config_path = cfg_out, cores = 1.5),
+    "`cores` must be a single positive integer value."
+  )
+})
+
+test_that("get_config merges only supported local overrides", {
+  cfg_out <- tempfile(fileext = ".yaml")
+  init_local_config(cfg_out)
+
+  local_cfg <- yaml::read_yaml(cfg_out)
+  local_cfg$ui$de_analysis$filters$fdr_threshold <- 0.2
+  local_cfg$style$global <- "body { color: red; }"
+  local_cfg$server$de_analysis$column_names$padj <- c("padj", "qvalue")
+  yaml::write_yaml(local_cfg, cfg_out)
+
+  merged <- get_config(config_path = cfg_out)
+  default_cfg <- yaml::read_yaml(system.file("extdata", "config.yaml",
+                                             package = "carnation"))
+
+  expect_equal(merged$ui$de_analysis$filters$fdr_threshold, 0.2)
+  expect_true("qvalue" %in% merged$server$de_analysis$column_names$padj)
+  expect_equal(merged$style$global, default_cfg$style$global)
+})
+
 # Test fromList.with.names function
 test_that("fromList.with.names creates correct binary matrix", {
   # Create test list
@@ -1136,4 +1228,3 @@ test_that("getcountplot works with DESeq2 transformed data", {
   expect_true(is_ggplot(p_vst))
   expect_equal(p_vst$labels$y, "VST-transformed counts")
 })
-
