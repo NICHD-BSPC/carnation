@@ -4,14 +4,19 @@
 \alias{get_config}
 \title{Get config}
 \usage{
-get_config()
+get_config(config_path = NULL)
+}
+\arguments{
+\item{config_path}{optional path to a local config yaml. If \code{NULL},
+uses the path returned by \code{get_config_path()}.}
 }
 \value{
 list containing config items
 }
 \description{
-This function reads the config.yaml and
-returns the list
+This function reads the bundled package config and returns it.
+If a local config yaml exists, only supported user-editable settings
+are merged into the returned config.
 }
 \examples{
 cfg <- get_config()

@@ -4,7 +4,13 @@
 \alias{run_carnation}
 \title{Carnation}
 \usage{
-run_carnation(credentials = NULL, passphrase = NULL, enable_admin = TRUE, ...)
+run_carnation(
+  credentials = NULL,
+  passphrase = NULL,
+  enable_admin = TRUE,
+  config_path = NULL,
+  ...
+)
 }
 \arguments{
 \item{credentials}{path to encrypted sqlite db with user credentials.}
@@ -13,6 +19,8 @@ run_carnation(credentials = NULL, passphrase = NULL, enable_admin = TRUE, ...)
 
 \item{enable_admin}{if TRUE, admin view is shown. Note, this is only available
 if credentials have sqlite backend.}
+
+\item{config_path}{optional path to a local config yaml override.}
 
 \item{...}{parameters passed to shinyApp() call}
 }
