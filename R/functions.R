@@ -668,8 +668,14 @@ make_final_object <- function(obj){
     # these dds objects are not linked to res_list
     orphan_dds <- NULL
 
-    # get gene -> symbol mapping
-    all_idmap <- .get_idmap(obj[[ res.name ]])
+    .apply_idmap <- function(ids, idmap) {
+      if (is.null(idmap) || length(idmap) == 0) return(ids)
+
+      mapped <- unname(idmap[ids])
+      keep_original <- is.na(mapped) | mapped == ""
+      mapped[keep_original] <- ids[keep_original]
+      mapped
+    }
 
     # if res.list contains 'res', 'dds', 'label' elements
     # build the following:
@@ -744,6 +750,9 @@ make_final_object <- function(obj){
       obj$labels <- labels
       obj$dds_mapping <- dds_mapping
 
+      # get gene -> symbol mapping after normalizing res.list
+      all_idmap <- .get_idmap(obj[[ res.name ]])
+
       # if symbol column exists, change rownames(dds) to symbol
       for(name in names(obj[[dds.name]])){
         # 1. try to use dds_mapping to get res.list element
@@ -763,10 +772,10 @@ make_final_object <- function(obj){
 
         # convert rownames that need conversion
         didx <- which(!rownames(dds) %in% unname(all_idmap))
-        rownames(dds)[didx] <- all_idmap[ rownames(dds)[didx] ]
+        rownames(dds)[didx] <- .apply_idmap(rownames(dds)[didx], all_idmap)
 
         ridx <- which(!rownames(rld) %in% unname(all_idmap))
-        rownames(rld)[didx] <- all_idmap[ rownames(rld)[didx] ]
+        rownames(rld)[ridx] <- .apply_idmap(rownames(rld)[ridx], all_idmap)
 
         obj[[dds.name]][[name]] <- dds
         obj[[rld.name]][[name]] <- rld
@@ -784,10 +793,10 @@ make_final_object <- function(obj){
     if(!is.null(orphan_dds)){
       for(name in orphan_dds){
         dds <- obj[[dds.name]][[name]]
-        rownames(dds) <- all_idmap[rownames(dds)]
+        rownames(dds) <- .apply_idmap(rownames(dds), all_idmap)
 
         rld <- obj[[rld.name]][[name]]
-        rownames(rld) <- all_idmap[rownames(rld)]
+        rownames(rld) <- .apply_idmap(rownames(rld), all_idmap)
 
         obj[[dds.name]][[name]] <- dds
         obj[[rld.name]][[name]] <- rld
@@ -2964,4 +2973,3 @@ get_upset_table <- function(gene.lists, comp_split_pattern=';'){
 
   list(tbl=tbl, set_mapping=set_mapping, set_labels=inter_choices)
 }
-
