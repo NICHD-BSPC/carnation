@@ -3,7 +3,7 @@ Title: Interactive Exploration & Management of RNA-Seq Analyses
 Version: 0.99.9
 Authors@R:
     c(
-        person("Apratim", "Mitra", , "apratim.mitra@nih.gov",
+        person("Apratim", "Mitra", , "apratim.mitra@gmail.com",
                role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3279-0054")),
         person(c("Matthew", "Tyler"), "Menold", , "matthew.menold@gmail.com",
                role = c("ctb"), comment = c(ORCID = "0009-0007-4728-2470")),
