@@ -32,7 +32,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Apratim Mitra \email{apratim.mitra@nih.gov} (\href{https://orcid.org/0000-0003-3279-0054}{ORCID})
+\strong{Maintainer}: Apratim Mitra \email{apratim.mitra@gmail.com} (\href{https://orcid.org/0000-0003-3279-0054}{ORCID})
 
 Other contributors:
 \itemize{

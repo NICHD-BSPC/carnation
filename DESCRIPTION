@@ -1,16 +1,16 @@
 Package: carnation
 Title: Interactive Exploration & Management of RNA-Seq Analyses
-Version: 0.99.9
+Version: 0.99.10
 Authors@R:
     c(
-        person("Apratim", "Mitra", , "apratim.mitra@nih.gov",
+        person("Apratim", "Mitra", , "apratim.mitra@gmail.com",
                role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3279-0054")),
         person(c("Matthew", "Tyler"), "Menold", , "matthew.menold@gmail.com",
                role = c("ctb"), comment = c(ORCID = "0009-0007-4728-2470")),
         person("Ryan", "Dale", , "ryan.dale@nih.gov",
                role = c("fnd"), comment = c(ORCID = "0000-0003-2664-3744"))
     )
-Description: This package provides a highly interactive & modular shiny app to
+Description: Highly interactive & modular shiny app to
     explore three facets of RNA-Seq analysis: differential expression (DE),
     functional enrichment and pattern analysis. Several visualizations
     are implemented to provide a wide-ranging view of data sets. For

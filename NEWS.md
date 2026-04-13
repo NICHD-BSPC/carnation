@@ -1,5 +1,12 @@
 # carnation
 
+## v0.99.10
+
+- add `edgeR`/`limma` support for input files and objects.
+- allow addition of degPatterns/pattern analysis results via UI
+- improve object validation
+- add helper functions to edit carnation default settings
+
 ## v0.99.9
 
 - carnation now supports `edgeR` and `limma` output in differential
