@@ -348,7 +348,7 @@ validate_carnation_object <- function(res_list,
       }
 
       count_cols <- 2:ncol(counts_df)
-      if (!all(sapply(counts_df[, count_cols], is.numeric))) {
+      if (!all(apply(counts_df[, count_cols], 2, is.numeric))) {
         stop("Columns 2+ in count matrix '", dds_name, "' must all be numeric")
       }
 
