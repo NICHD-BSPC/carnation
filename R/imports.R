@@ -35,7 +35,7 @@
 #' @importFrom stats as.formula prcomp setNames median
 #' @importFrom SummarizedExperiment "colData<-" colData assay
 #' @importFrom tools file_path_sans_ext
-#' @importFrom utils read.table packageName
+#' @importFrom utils read.table packageName capture.output str
 #' @importFrom viridisLite viridis
 #' @importFrom visNetwork renderVisNetwork visNetworkOutput visIgraph visOptions visNodes
 #' @importFrom yaml read_yaml write_yaml

@@ -6,6 +6,7 @@
 #' @param passphrase passphrase for credentials db.
 #' @param enable_admin if TRUE, admin view is shown. Note, this is only available
 #'        if credentials have sqlite backend.
+#' @param config_path optional path to a local config yaml override.
 #' @param ... parameters passed to shinyApp() call
 #'
 #' @return shinyApp object
@@ -18,10 +19,11 @@
 #' }
 #'
 #' @export
-run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
+run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
+                          config_path = NULL, ...){
 
   # read config yaml
-  cfg <- get_config()
+  cfg <- get_config(config_path = config_path)
 
   # set some options
   oopt <- options(spinner.type = 4)
@@ -931,7 +933,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                 selection='none',
                 caption=tags$caption(style='font-weight: bold; font-size: 15px;',
                                      'Summary of available analyses'),
-                options=list(dom='t'))
+                options=list(dom='tlp'))
 
     })
 
@@ -993,284 +995,59 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
         }
         if('degpatterns' %in% names(obj)) app_object$degpatterns <- obj$degpatterns
       } else {
+        obj <- tryCatch({
+          showModal(
+            modalDialog(
+              span('Validating object'),
+              footer=NULL
+            )
+          )
+          obj <- validate_loaded_carnation_object(obj, config = config())
 
-      # perform vst if necessary
-      orig.names <- names(obj)
+          showModal(
+            modalDialog(
+              span('Materializing object'),
+              footer=NULL
+            )
+          )
+          obj <- materialize_carnation_object(
+            obj,
+            config = config(),
+            cores = config()$server$cores
+          )
 
-      # TODO: add checks for presence of expected elements
-      # res, dds, enrich, degpatterns
-      res.name <- orig.names[grep('res', orig.names)]
-      dds.name <- orig.names[setdiff(grep('dds', orig.names),
-                               c(grep('all_dds', orig.names),
-                                 grep('dds_mapping', orig.names)))]
-      rld.name <- orig.names[setdiff(grep('rld', orig.names),
-                                     grep('all_rld', orig.names))]
-      enrich.name <- orig.names[grep('enrich', orig.names)]
-      degpatterns.name <- orig.names[grep('degpatterns', orig.names)]
-
-      if(length(res.name) == 0 | length(dds.name) == 0){
-        if(length(res.name) == 0 & length(dds.name) == 0){
-          missing <- 'both'
-        } else if(length(res.name) == 0){
-          missing <- 'DE result'
-        } else {
-          missing <- 'counts table'
-        }
-        showNotification(
-          paste0('Loaded object must have both DE results & counts table. Missing:',
-                 missing),
-          type='error'
-        )
+          showModal(
+            modalDialog(
+              span('Finalizing object'),
+              footer=NULL
+            )
+          )
+          make_final_object(obj)
+        }, error=function(e){
+          removeModal()
+          showNotification(conditionMessage(e), type='error')
+          NULL
+        })
 
         validate(
-          need(length(res.name) != 0 & length(dds.name) != 0,
-               'Missing DE result and/or counts table')
-        )
-      }
-
-      validate(
-          need(length(dds.name) == 1,
-               'Uploaded object must have exactly 1 counts list')
-      )
-
-      # TODO: sanitize res, dds
-      # TODO: sanitize degpatterns
-      # - check for 'normalized' in names if list
-      # - check for 'genes' column
-
-      if(length(rld.name) == 0){
-
-        showModal(
-          modalDialog(
-            span('Normalizing data'),
-            footer=NULL
-          )
+          need(!is.null(obj), '')
         )
 
-        rld_list <- lapply(obj[[dds.name]],
-                           function(x) varianceStabilizingTransformation(x, blind=TRUE))
-
-        obj$rld_list <- rld_list
-        rld.name <- 'rld_list'
-
-        removeModal()
-      } else if(length(rld.name) > 1){
-        validate(
-            need(length(rld.name) == 1,
-                 'Uploaded object must have exactly 1 normalized counts list')
-        )
-      }
-
-      showModal(
-        modalDialog(
-          span('Sanitizing object'),
-          footer=NULL
-        )
-      )
-
-      # add 'sample' to colData of rld_list & dds_list
-      obj[[ rld.name ]] <- lapply(obj[[ rld.name ]],
-                             function(x){
-                               colData(x)$sample <- rownames(colData(x))
-                               x
-                           })
-
-      obj[[ dds.name ]] <- lapply(obj[[ dds.name ]],
-                             function(x){
-                               colData(x)$sample <- rownames(colData(x))
-                               x
-                           })
-
-      # make sure 'padj' & 'log2FoldChange' columns exist in res objects
-      # or supported alternatives exist
-      sanitized_res_list <- obj[[ res.name ]]
-
-      # supported column names
-      column_names <- config()$server$de_analysis$column_names
-      defaults <- names(column_names)
-
-      # these res objects will be dropped
-      drop_res_names <- NULL
-
-      for(name in names(sanitized_res_list)){
-        res <- sanitized_res_list[[ name ]]$res
-        res <- as.data.frame(res)
-
-        for(cname in defaults){
-          idx <- colnames(res) %in% column_names[[ cname ]]
-
-          # if matches exist
-          if(sum(idx) > 0){
-            if(sum(idx) > 1){
-            # only use the first match if multiple matches
-            # and show warning
-              message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
-            }
-
-            idx <- which(idx)[1]
-            colnames(res)[idx] <- cname
-          } else {
-            message('Unsupported res type for ', name, ':', cname, ' column not found, skipping')
-            drop_res_names <- c(drop_res_names, name)
-          }
-        }
-        sanitized_res_list[[ name ]]$res <- res
-      }
-
-      # remove unsupported res objects
-      sanitized_res_list <- sanitized_res_list[ !names(sanitized_res_list) %in% drop_res_names ]
-      obj[[ res.name ]] <- sanitized_res_list
-
-      # add obj slots to reactive values
-      obj <- make_final_object(obj)
-
-      # get final names of obj
-      n <- names(obj)
-      res.name <- n[grep('res', n)]
-      enrich.name <- n[grep('enrich', n)]
-      degpatterns.name <- n[grep('degpatterns', n)]
-
-      # get dds and rld elements
-      # - need to distinguish from all_dds, dds_mapping & all_rld
-      dds.idx <- setdiff(grep('dds', n),
-                         c(grep('all_dds', n),
-                           grep('dds_mapping', n)))
-      rld.idx <- setdiff(grep('rld', n), grep('all_rld', n))
-      dds.name <- n[dds.idx]
-      rld.name <- n[rld.idx]
-
-      # map to elements
-      app_object$dds <- obj[[dds.name]]
-      app_object$rld <- obj[[rld.name]]
-      app_object$res <- obj[[res.name]]
-      if(length(enrich.name) != 0)
-        app_object$enrich <- obj[[enrich.name]]
-      if(length(degpatterns.name) != 0)
-        app_object$degpatterns <- obj[[degpatterns.name]]
-      app_object$labels <- obj$labels
-      app_object$dds_mapping <- obj$dds_mapping
-
-      # add element with genetonic objects
-      # NOTE: using loop to keep names
-      if(!'genetonic' %in% names(obj) | is.null(obj$genetonic)){
-
-        showModal(
-          modalDialog(
-            span('Converting FE results to GeneTonic format'),
-            footer=NULL
-          )
-        )
-
-        start_time <- Sys.time()
-
-        # flatten list
-        elem_names <- NULL
-        sep <- '*'
-        res_keys <- list()
-        enrich_copy <- app_object$enrich
-        for(x in names(app_object$enrich)){
-          for(y in names(app_object$enrich[[x]])){
-            # NOTE: if key is 'res' save & skip
-            if(y == 'res'){
-              res_keys[[ x ]] <- app_object$enrich[[ x ]][[ 'res' ]]
-              next
-            }
-            for(z in names(app_object$enrich[[x]][[y]])){
-              elem_names <- c(elem_names, paste(x, y, z, sep=sep))
-              if(!is.data.frame(app_object$enrich[[ x ]][[ y ]][[ z ]])){
-                app_object$enrich[[ x ]][[ y ]][[ z ]] <- app_object$enrich[[ x ]][[ y ]][[ z ]]@result
-              }
-            }
-          }
-        }
-        names(elem_names) <- elem_names
-
-        # run conversion
-        #
-        # NOTE: making local copies here to avoid 'reactive' errors
-        #       in parallel lapply
-        #
-        res_names <- names(app_object$res)
-        res_list <- app_object$res
-        enrich_list <- app_object$enrich
-
-        # TODO: add check for cores
-        flat_obj <- BiocParallel::bplapply(elem_names, function(x){
-                      toks <- strsplit(x, split=sep, fixed=TRUE)[[1]]
-                      # look for toks[1] in res_names & res_keys, else NULL
-                      if(toks[1] %in% res_names){
-                        res <- res_list[[ toks[1] ]]
-                      } else if(toks[1] %in% names(res_keys)){
-                        res <- res_list[[ res_keys[[ toks[1] ]] ]]
-                      } else{
-                        return(NULL)
-                      }
-
-                      eres <- enrich_list[[ toks[1] ]][[ toks[2] ]][[ toks[3] ]]
-
-                      # NOTE: if obj is dataframe then convert, else continue
-                      if(is.data.frame(eres)){
-                        # NOTE: if df contains 'core_enrichment' then it's a 'gseaResult'
-                        #       else it's an enrichResult
-                        if(!'core_enrichment' %in% colnames(eres)){
-                          eres <- makeEnrichResult(eres, type='enrichResult')
-                        } else {
-                          eres <- makeEnrichResult(eres, type='gseaResult')
-                        }
-                      }
-
-                      df <- enrich_to_genetonic(eres, res)
-                      df
-                    }, BPPARAM=BiocParallel::MulticoreParam(config()$server$cores))
-
-        # reconstitute & clean up
-        app_object$genetonic <- list()
-        rm(res_list)
-        rm(enrich_list)
-
-        for(x in names(app_object$enrich)){
-          app_object$genetonic[[x]] <- list()
-
-          for(y in names(app_object$enrich[[x]])){
-            # NOTE: if key is 'res', skip
-            if(y == 'res'){
-              next
-            } else {
-              app_object$genetonic[[x]][[y]] <- list()
-            }
-
-            for(z in names(app_object$enrich[[x]][[y]])){
-              key <- paste(x, y, z, sep=sep)
-              if(!is.null(flat_obj[[key]])){
-                app_object$genetonic[[x]][[y]][[z]] <- flat_obj[[key]]
-              } else {
-                app_object$genetonic[[x]][[y]][[z]] <- dummy_genetonic(enrich_copy[[x]][[y]][[z]])
-              }
-            }
-          }
-        }
-        rm(enrich_copy)
-
-        end_time <- Sys.time()
-
-        delta <- end_time - start_time
-
-      } else {
-        app_object$genetonic <- obj[['genetonic']]
-      }
-
-      if('all_dds' %in% names(obj)){
-          app_object$all_dds <- obj$all_dds
-          app_object$all_rld <- obj$all_rld
-      } else {
-          app_object$all_dds <- NULL
-          app_object$all_rld <- NULL
-      }
+        app_object$dds <- obj$dds
+        app_object$rld <- obj$rld
+        app_object$res <- obj$res
+        app_object$labels <- obj$labels
+        app_object$dds_mapping <- obj$dds_mapping
+        app_object$all_dds <- obj$all_dds
+        app_object$all_rld <- obj$all_rld
+        if('enrich' %in% names(obj)) app_object$enrich <- obj$enrich
+        if('genetonic' %in% names(obj)) app_object$genetonic <- obj$genetonic
+        if('degpatterns' %in% names(obj)) app_object$degpatterns <- obj$degpatterns
 
         showNotification(
           'Remember to save object to avoid preprocessing again next time!',
           type='warning'
-      )
+        )
       }
 
       if(is.null(app_object$all_dds)){

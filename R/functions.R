@@ -165,8 +165,12 @@ in_admin_group <- function(u){
 
 #' Get config
 #'
-#' This function reads the config.yaml and
-#' returns the list
+#' This function reads the bundled package config and returns it.
+#' If a local config yaml exists, only supported user-editable settings
+#' are merged into the returned config.
+#'
+#' @param config_path optional path to a local config yaml. If \code{NULL},
+#'   uses the path returned by \code{get_config_path()}.
 #'
 #' @return list containing config items
 #'
@@ -174,11 +178,245 @@ in_admin_group <- function(u){
 #' cfg <- get_config()
 #'
 #' @export
-get_config <- function(){
+get_config <- function(config_path = NULL){
   cfg_path <- system.file('extdata', 'config.yaml',
                           package=packageName())
   cfg <- read_yaml(cfg_path)
+
+  if (is.null(config_path)) {
+    config_path <- get_config_path()
+  }
+
+  if (file.exists(config_path)) {
+    local_cfg <- read_yaml(config_path)
+    cfg <- .merge_user_config(cfg, local_cfg)
+  }
+
   cfg
+}
+
+#' Initialize local config
+#'
+#' This function copies the bundled package config to a user-writable
+#' local config yaml. This is intended for users who want to customize
+#' the supported config settings without editing the installed package.
+#'
+#' @param config_path path to the local config yaml to create.
+#'   Defaults to \code{get_config_path()}.
+#' @param overwrite logical indicating whether to overwrite an existing file.
+#'
+#' @return Path to the local config yaml, invisibly.
+#'
+#' @examples
+#' cfg_out <- tempfile(fileext = ".yaml")
+#' init_local_config(cfg_out)
+#'
+#' @export
+init_local_config <- function(config_path = get_config_path(),
+                              overwrite = FALSE) {
+  src <- system.file('extdata', 'config.yaml',
+                     package = packageName())
+
+  if (file.exists(config_path) && !overwrite) {
+    return(invisible(config_path))
+  }
+
+  parent <- dirname(config_path)
+  if (!dir.exists(parent)) {
+    stop('Directory for local config does not exist: "', parent, '"',
+         call. = FALSE)
+  }
+
+  ok <- file.copy(src, config_path, overwrite = overwrite)
+  if (!ok) {
+    stop('Failed to create local config at: "', config_path, '"',
+         call. = FALSE)
+  }
+
+  invisible(config_path)
+}
+
+#' Set config
+#'
+#' This function updates a limited subset of the package config YAML.
+#' Only stable user-facing settings are writable; style settings and
+#' other internal options are intentionally left untouched.
+#'
+#' @param config_path character path to the config YAML file to update.
+#'   Defaults to the local config returned by \code{get_config_path()}. If the
+#'   file does not exist yet, it is initialized from the bundled package config.
+#' @param de_analysis optional list with DE analysis config updates.
+#'   Currently only \code{de_analysis$column_names} is supported, and the
+#'   provided aliases are merged into the existing column-name mappings.
+#' @param fdr_threshold optional numeric FDR threshold between 0 and 1.
+#' @param log2fc_threshold optional numeric log2 fold-change threshold
+#'   greater than or equal to 0.
+#' @param max_upload_size optional positive numeric upload limit in MB.
+#' @param cores optional positive integer number of cores to use.
+#'
+#' @return Updated config list, invisibly.
+#'
+#' @examples
+#' cfg_out <- tempfile(fileext = ".yaml")
+#'
+#' set_config(
+#'   config_path = cfg_out,
+#'   de_analysis = list(
+#'     column_names = list(
+#'       padj = "qvalue",
+#'       log2FoldChange = c("logFC", "avg_log2FC")
+#'     )
+#'   ),
+#'   fdr_threshold = 0.05,
+#'   log2fc_threshold = 1,
+#'   max_upload_size = 50,
+#'   cores = 2
+#' )
+#' @export
+set_config <- function(config_path = get_config_path(),
+                       de_analysis = NULL,
+                       fdr_threshold = NULL,
+                       log2fc_threshold = NULL,
+                       max_upload_size = NULL,
+                       cores = NULL) {
+  if (!nzchar(config_path)) {
+    stop('`config_path` must be a non-empty path.', call. = FALSE)
+  }
+
+  if (!file.exists(config_path)) {
+    init_local_config(config_path = config_path, overwrite = FALSE)
+  }
+  if (file.access(config_path, 2) != 0) {
+    stop('Config file is not writable: "', config_path, '"',
+         call. = FALSE)
+  }
+
+  cfg <- read_yaml(config_path)
+  default_cfg <- get_config()
+
+  if (!is.null(de_analysis)) {
+    if (!is.list(de_analysis) ||
+        !identical(sort(names(de_analysis)), "column_names")) {
+      stop('`de_analysis` must be a list containing only `column_names`.',
+           call. = FALSE)
+    }
+
+    # get valid column names from default config
+    column_names <- de_analysis$column_names
+    valid_cols <- names(default_cfg$server$de_analysis$column_names)
+
+    if (!is.list(column_names) || is.null(names(column_names)) ||
+        any(!nzchar(names(column_names)))) {
+      stop('`de_analysis$column_names` must be a named list.',
+           call. = FALSE)
+    }
+
+    invalid_cols <- setdiff(names(column_names), valid_cols)
+    if (length(invalid_cols) > 0) {
+      stop("Unsupported `de_analysis$column_names` entries: ",
+           paste(invalid_cols, collapse = ", "),
+           call. = FALSE)
+    }
+
+    for (nm in names(column_names)) {
+      aliases <- column_names[[nm]]
+      if (!is.character(aliases) || length(aliases) < 1 ||
+          anyNA(aliases) || any(!nzchar(aliases))) {
+        stop("`de_analysis$column_names$", nm,
+             "` must be a non-empty character vector.",
+             call. = FALSE)
+      }
+
+      existing <- cfg$server$de_analysis$column_names[[nm]]
+      cfg$server$de_analysis$column_names[[nm]] <- unique(c(existing, aliases))
+    }
+  }
+
+  if (!is.null(fdr_threshold)) {
+    if (!is.numeric(fdr_threshold) || length(fdr_threshold) != 1 ||
+        is.na(fdr_threshold) || fdr_threshold < 0 || fdr_threshold > 1) {
+      stop("`fdr_threshold` must be a single numeric value between 0 and 1.",
+           call. = FALSE)
+    }
+    cfg$ui$de_analysis$filters$fdr_threshold <- fdr_threshold
+  }
+
+  if (!is.null(log2fc_threshold)) {
+    if (!is.numeric(log2fc_threshold) || length(log2fc_threshold) != 1 ||
+        is.na(log2fc_threshold) || log2fc_threshold < 0) {
+      stop("`log2fc_threshold` must be a single non-negative numeric value.",
+           call. = FALSE)
+    }
+    cfg$ui$de_analysis$filters$log2fc_threshold <- log2fc_threshold
+  }
+
+  if (!is.null(max_upload_size)) {
+    if (!is.numeric(max_upload_size) || length(max_upload_size) != 1 ||
+        is.na(max_upload_size) || max_upload_size <= 0) {
+      stop("`max_upload_size` must be a single positive numeric value.",
+           call. = FALSE)
+    }
+    cfg$max_upload_size <- max_upload_size
+  }
+
+  if (!is.null(cores)) {
+    if (!is.numeric(cores) || length(cores) != 1 || is.na(cores) ||
+        cores <= 0 || cores != as.integer(cores)) {
+      stop("`cores` must be a single positive integer value.",
+           call. = FALSE)
+    }
+    cfg$server$cores <- as.integer(cores)
+  }
+
+  write_yaml(cfg, config_path)
+
+  invisible(cfg)
+}
+
+.merge_user_config <- function(default_cfg, user_cfg) {
+  if (is.null(user_cfg) || !is.list(user_cfg)) {
+    return(default_cfg)
+  }
+
+  user_de <- user_cfg$server$de_analysis$column_names
+  valid_cols <- c("pvalue", "padj", "log2FoldChange", "baseMean")
+  if (is.list(user_de) && !is.null(names(user_de))) {
+    valid_user_de <- intersect(names(user_de), valid_cols)
+    for (nm in valid_user_de) {
+      aliases <- user_de[[nm]]
+      if (is.character(aliases) && length(aliases) > 0 &&
+          !anyNA(aliases) && all(nzchar(aliases))) {
+        existing <- default_cfg$server$de_analysis$column_names[[nm]]
+        default_cfg$server$de_analysis$column_names[[nm]] <- unique(c(existing, aliases))
+      }
+    }
+  }
+
+  fdr_threshold <- user_cfg$ui$de_analysis$filters$fdr_threshold
+  if (is.numeric(fdr_threshold) && length(fdr_threshold) == 1 &&
+      !is.na(fdr_threshold) && fdr_threshold >= 0 && fdr_threshold <= 1) {
+    default_cfg$ui$de_analysis$filters$fdr_threshold <- fdr_threshold
+  }
+
+  log2fc_threshold <- user_cfg$ui$de_analysis$filters$log2fc_threshold
+  if (is.numeric(log2fc_threshold) && length(log2fc_threshold) == 1 &&
+      !is.na(log2fc_threshold) && log2fc_threshold >= 0) {
+    default_cfg$ui$de_analysis$filters$log2fc_threshold <- log2fc_threshold
+  }
+
+  max_upload_size <- user_cfg$max_upload_size
+  if (is.numeric(max_upload_size) && length(max_upload_size) == 1 &&
+      !is.na(max_upload_size) && max_upload_size > 0) {
+    default_cfg$max_upload_size <- max_upload_size
+  }
+
+  cores <- user_cfg$server$cores
+  if (is.numeric(cores) && length(cores) == 1 &&
+      !is.na(cores) && cores > 0 && cores == as.integer(cores)) {
+    default_cfg$server$cores <- as.integer(cores)
+  }
+
+  default_cfg
 }
 
 #' Get project name from path
@@ -511,6 +749,97 @@ is_valid_pattern_obj <- function(pattern_obj, require_symbol = FALSE){
   TRUE
 }
 
+# check res for supported columns
+.check_res_columns <- function(res, column_names){
+  defaults <- names(column_names)
+
+  # keep track of missing columns
+  missing_cols <- NULL
+  for(cname in defaults){
+    idx <- colnames(res) %in% column_names[[ cname ]]
+
+    # if matches exist
+    if(sum(idx) > 0){
+      if(sum(idx) > 1){
+      # only use the first match if multiple matches
+      # and show warning
+        message('Ambiguous ', cname, 'column.\nUsing ', colnames(res)[which(idx)[1]])
+      }
+
+      idx <- which(idx)[1]
+      colnames(res)[idx] <- cname
+    } else {
+      missing_cols <- c(missing_cols, cname)
+    }
+  }
+
+  return(
+    list(res=res, missing_cols=missing_cols)
+  )
+}
+
+# internal function to get gene -> symbol mapping
+# from a list of DE results
+.get_idmap <- function(res_list){
+  # get symbol mapping from res objects
+  all_idmap <- NULL
+  all_idmap_names <- NULL
+
+  for(res_name in names(res_list)){
+    # get de results table
+    if(all(c('res', 'dds', 'label') %in% names(res_list[[ res_name ]]))){
+      res <- res_list[[ res_name ]]$res
+    } else {
+      res <- res_list[[ res_name ]]
+    }
+
+    # get symbol column from res.list object
+    idx <- toupper(colnames(res)) %in% 'SYMBOL'
+
+    # build id to symbol mapping
+    if(sum(idx) > 0){
+      idmap <- res[,which(idx)]
+
+      # get gene column or use rownames
+      gidx <- toupper(colnames(res)) %in% 'GENE'
+      if(sum(gidx) > 0){
+          idmap_names <- res[,which(gidx)]
+      } else if(!is.null(rownames(res))){
+          idmap_names <- rownames(res)
+      } else {
+          message(
+            'No gene column or row names found in ',
+            'res object: ', res_name, '. Skipping\n'
+          )
+          next
+      }
+
+      # change mapping to id for which symbol is NA
+      idmap[is.na(idmap)] <- idmap_names[is.na(idmap)]
+
+      # add any new genes to mapping vector
+      new_idx <- which(!idmap %in% all_idmap)
+      if(length(new_idx) > 0){
+        all_idmap <- c(all_idmap, idmap[new_idx])
+        all_idmap_names <- c(all_idmap_names, idmap_names[new_idx])
+      }
+
+      # switch rownames to symbol
+      names(idmap) <- idmap_names
+    }
+
+    # replace NAs
+    all_idmap[is.na(all_idmap)] <- all_idmap_names[is.na(all_idmap)]
+
+    # remove duplicates from idmap
+    idx <- duplicated(all_idmap)
+    all_idmap <- all_idmap[which(!idx)]
+    names(all_idmap) <- all_idmap_names[which(!idx)]
+  }
+
+  return(all_idmap)
+}
+
 #' Make final object for internal use by the app
 #'
 #' This function takes an uploaded object and sanitizes
@@ -563,8 +892,11 @@ make_final_object <- function(obj){
     # get object names and map to 'res.list', etc
     n <- names(obj)
     res.name <- n[grep('res', n)]
-    dds.name <- n[grep('dds', n)]
-    rld.name <- n[grep('rld', n)]
+    dds.name <- n[setdiff(grep('dds', n),
+                  c(grep('all_dds', n),
+                    grep('dds_mapping', n)))]
+    rld.name <- n[setdiff(grep('rld', n),
+                          grep('all_rld', n))]
     enrich.name <- n[grep('enrich', n)]
     degpatterns.name <- n[grep('degpatterns', n)]
 
@@ -573,6 +905,15 @@ make_final_object <- function(obj){
 
     # these dds objects are not linked to res_list
     orphan_dds <- NULL
+
+    .apply_idmap <- function(ids, idmap) {
+      if (is.null(idmap) || length(idmap) == 0) return(ids)
+
+      mapped <- unname(idmap[ids])
+      keep_original <- is.na(mapped) | mapped == ""
+      mapped[keep_original] <- ids[keep_original]
+      mapped
+    }
 
     # if res.list contains 'res', 'dds', 'label' elements
     # build the following:
@@ -591,13 +932,20 @@ make_final_object <- function(obj){
 
         # - if no 'symbol' column, add from rownames
         # - else replace NA's with rownames
-        sidx <- which('SYMBOL' %in% toupper(colnames(res)))
+        sidx <- which(toupper(colnames(res)) %in% 'SYMBOL')
+        gidx <- which(toupper(colnames(res)) %in% 'GENE')
+
         if(length(sidx) == 0){
             res$symbol <- rownames(res)
         } else {
           if(any(is.na(res[,sidx]))){
               idx <- which(is.na(res[, sidx]))
-              res[idx, sidx] <- rownames(res)[idx]
+
+              if(!is.null(rownames(res))) res[idx, sidx] <- rownames(res)[idx]
+              else if(length(gidx) > 0) res[idx, sidx] <- res[idx, gidx[1]]
+              else {
+                message('symbol column in res object has NA\'s')
+              }
           }
         }
         res[order(res$padj),]
@@ -640,9 +988,8 @@ make_final_object <- function(obj){
       obj$labels <- labels
       obj$dds_mapping <- dds_mapping
 
-      # get symbol mapping from res objects
-      all_idmap <- NULL
-      all_idmap_names <- NULL
+      # get gene -> symbol mapping after normalizing res.list
+      all_idmap <- .get_idmap(obj[[ res.name ]])
 
       # if symbol column exists, change rownames(dds) to symbol
       for(name in names(obj[[dds.name]])){
@@ -652,11 +999,7 @@ make_final_object <- function(obj){
         #    name exists
         # 3. else skip
         idx <- obj$dds_mapping %in% name
-        if(sum(idx) >= 1){
-          res <- obj[[res.name]][[which(idx)[1]]]
-        } else if(name %in% names(obj[[res.name]])){
-          res <- obj[[res.name]][[name]]
-        } else {
+        if(sum(idx) == 0){
           message('no matching dds object found for ', name, '\n')
           orphan_dds <- c(orphan_dds, name)
           next
@@ -665,51 +1008,12 @@ make_final_object <- function(obj){
         dds <- obj[[dds.name]][[name]]
         rld <- obj[[rld.name]][[name]]
 
-        # get symbol column from res.list object
-        idx <- toupper(colnames(res)) %in% 'SYMBOL'
+        # convert rownames that need conversion
+        didx <- which(!rownames(dds) %in% unname(all_idmap))
+        rownames(dds)[didx] <- .apply_idmap(rownames(dds)[didx], all_idmap)
 
-        # build id to symbol mapping
-        if(sum(idx) > 0){
-          idmap <- res[,which(idx)]
-
-          # get gene column or use rownames
-          gidx <- toupper(colnames(res)) %in% 'GENE'
-          if(sum(gidx) > 0){
-              idmap_names <- res[,which(gidx)]
-          } else if(!is.null(rownames(res))){
-              idmap_names <- rownames(res)
-          } else {
-              message(
-                'No gene column or row names found in ',
-                'res object: ', name, '. Skipping\n'
-              )
-              next
-          }
-
-          # change mapping to id for which symbol is NA
-          idmap[is.na(idmap)] <- idmap_names[is.na(idmap)]
-
-          # add any new genes to mapping vector
-          new_idx <- which(!idmap %in% all_idmap)
-          if(length(new_idx) > 0){
-            all_idmap <- c(all_idmap, idmap[new_idx])
-            all_idmap_names <- c(all_idmap_names, idmap_names[new_idx])
-          }
-
-          # switch rownames to symbol
-          names(idmap) <- idmap_names
-          rownames(dds) <- idmap[rownames(dds)]
-          rownames(rld) <- idmap[rownames(rld)]
-        }
-
-        # replace NAs
-        all_idmap[is.na(all_idmap)] <- all_idmap_names[is.na(all_idmap)]
-
-        # remove duplicates from idmap
-        idx <- duplicated(all_idmap)
-        all_idmap <- all_idmap[which(!idx)]
-        names(all_idmap) <- all_idmap_names[which(!idx)]
-
+        ridx <- which(!rownames(rld) %in% unname(all_idmap))
+        rownames(rld)[ridx] <- .apply_idmap(rownames(rld)[ridx], all_idmap)
 
         obj[[dds.name]][[name]] <- dds
         obj[[rld.name]][[name]] <- rld
@@ -727,10 +1031,10 @@ make_final_object <- function(obj){
     if(!is.null(orphan_dds)){
       for(name in orphan_dds){
         dds <- obj[[dds.name]][[name]]
-        rownames(dds) <- all_idmap[rownames(dds)]
+        rownames(dds) <- .apply_idmap(rownames(dds), all_idmap)
 
         rld <- obj[[rld.name]][[name]]
-        rownames(rld) <- all_idmap[rownames(rld)]
+        rownames(rld) <- .apply_idmap(rownames(rld), all_idmap)
 
         obj[[dds.name]][[name]] <- dds
         obj[[rld.name]][[name]] <- rld
@@ -2689,6 +2993,7 @@ plotScatter.label_ly <- function(compare,
     all_sym <- unique(df_i[['shape']])
     for(sym in all_sym){
       # don't show legend if point is outside limits
+      showlegend <- TRUE
       if(sym != 'in'){
         ps <- size + 1
 
@@ -2696,7 +3001,6 @@ plotScatter.label_ly <- function(compare,
         if(!all(all_sym == sym)) showlegend <- FALSE
       } else {
         ps <- size
-        showlegend <- TRUE
       }
       p <- p %>% add_trace(data = df_i[df_i$shape == sym, ],
                            x = ~get(x),
@@ -2907,4 +3211,3 @@ get_upset_table <- function(gene.lists, comp_split_pattern=';'){
 
   list(tbl=tbl, set_mapping=set_mapping, set_labels=inter_choices)
 }
-
