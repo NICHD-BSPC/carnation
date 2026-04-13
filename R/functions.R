@@ -807,7 +807,7 @@ is_valid_pattern_obj <- function(pattern_obj, require_symbol = FALSE){
       } else {
           message(
             'No gene column or row names found in ',
-            'res object: ', name, '. Skipping\n'
+            'res object: ', res_name, '. Skipping\n'
           )
           next
       }
