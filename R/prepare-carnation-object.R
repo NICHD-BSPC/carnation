@@ -61,8 +61,7 @@
 #'
 #' If validation fails, the function will stop with an informative error message.
 #'
-#' @examples
-#' \dontrun{
+#' @examplesIf interactive()
 #' # Minimal example with DE results and counts
 #' library(DESeq2)
 #'
@@ -105,7 +104,6 @@
 #'   metadata = metadata,
 #'   dds_mapping = list(comp1 = "main")
 #' )
-#' }
 #'
 #' @rdname validate_carnation_object
 #' @name validate_carnation_object
