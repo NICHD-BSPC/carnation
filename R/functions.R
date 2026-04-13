@@ -292,6 +292,7 @@ set_config <- function(config_path = get_config_path(),
   }
 
   cfg <- read_yaml(config_path)
+  default_cfg <- get_config()
 
   if (!is.null(de_analysis)) {
     if (!is.list(de_analysis) ||
@@ -300,8 +301,9 @@ set_config <- function(config_path = get_config_path(),
            call. = FALSE)
     }
 
+    # get valid column names from default config
     column_names <- de_analysis$column_names
-    valid_cols <- c("pvalue", "padj", "log2FoldChange", "baseMean")
+    valid_cols <- names(default_cfg$server$de_analysis$column_names)
 
     if (!is.list(column_names) || is.null(names(column_names)) ||
         any(!nzchar(names(column_names)))) {
