@@ -10,7 +10,7 @@ Authors@R:
         person("Ryan", "Dale", , "ryan.dale@nih.gov",
                role = c("fnd"), comment = c(ORCID = "0000-0003-2664-3744"))
     )
-Description: This package provides a highly interactive & modular shiny app to
+Description: Highly interactive & modular shiny app to
     explore three facets of RNA-Seq analysis: differential expression (DE),
     functional enrichment and pattern analysis. Several visualizations
     are implemented to provide a wide-ranging view of data sets. For
