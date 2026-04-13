@@ -363,12 +363,12 @@ validate_carnation_object <- function(res_list,
       if (!all(colnames(counts_only) %in% rownames(metadata_df))) {
         missing <- setdiff(colnames(counts_only), rownames(metadata_df))
         stop("Sample names in count matrix '", dds_name,
-             "' not found in metadata: ", paste(head(missing), collapse = ", "))
+             "' not found in metadata: ", paste(missing, collapse = ", "))
       }
       if (!all(rownames(metadata_df) %in% colnames(counts_only))) {
         missing <- setdiff(rownames(metadata_df), colnames(counts_only))
         stop("Sample names in metadata not found in count matrix '", dds_name,
-             "': ", paste(head(missing), collapse = ", "))
+             "': ", paste(missing, collapse = ", "))
       }
 
       validated_dds_list[[dds_name]] <- counts_df
