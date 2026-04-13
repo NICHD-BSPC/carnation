@@ -280,7 +280,7 @@ validate_carnation_object <- function(res_list,
       label = label
     )
 
-    message("  ✓ ", res_name)
+    message(" - ", res_name, " ... done")
   }
 
   obj$res_list <- validated_res_list
@@ -401,7 +401,7 @@ validate_carnation_object <- function(res_list,
         rownames(SummarizedExperiment::colData(validated_rld_list[[dds_name]]))
     }
 
-    message("  ✓ ", dds_name)
+    message(" - ", dds_name, " ... done")
   }
 
   obj$dds_list <- validated_dds_list
@@ -499,7 +499,7 @@ validate_carnation_object <- function(res_list,
             validated_enrich_list[[func_id]]$res <- res_ref
           }
 
-          message("  ✓ ", func_id, ".", effect, ".", pathway)
+          message(" - ", func_id, ".", effect, ".", pathway, " ... done")
         }
       }
     }
@@ -524,7 +524,7 @@ validate_carnation_object <- function(res_list,
       } else {
         validated_degpatterns[[dp_name]] <- dp_item
       }
-      message("  ✓ ", dp_name)
+      message(" - ", dp_name, " ... done")
     }
 
     obj$degpatterns <- validated_degpatterns
