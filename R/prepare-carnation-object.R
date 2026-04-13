@@ -548,6 +548,31 @@ validate_carnation_object <- function(res_list,
 #' @param cores Optional number of worker processes. If NULL, uses
 #'   \code{config$server$cores}.
 #'
+#' @examplesIf interactive()
+#' # Minimal example with DE results and counts
+#' library(DESeq2)
+#'
+#' # Create example data
+#' dds <- makeExampleDESeqDataSet()
+#' dds <- DESeq(dds)
+#' res <- results(dds, contrast = c("condition", "A", "B"))
+#' rld <- varianceStabilizingTransformation(dds, blind = TRUE)
+#'
+#' # Validate object inputs
+#' obj <- validate_carnation_object(
+#'   res_list = list(
+#'     comp1 = list(
+#'       res = as.data.frame(res),
+#'       dds = "main",
+#'       label = "A vs B"
+#'     )
+#'   ),
+#'   dds_list = list(main = dds),
+#'   rld_list = list(main = rld)
+#' )
+#'
+#' materialized <- materialize_carnation_object(obj, cores = 1)
+#'
 #' @return The input object with materialized \code{dds_list},
 #'   \code{rld_list}, and optional \code{genetonic} slots.
 #'
