@@ -673,6 +673,7 @@ materialize_carnation_object <- function(obj,
   obj
 }
 
+# Internal function to validate loaded carnation object
 validate_loaded_carnation_object <- function(obj,
                                              config = NULL) {
   if (is.null(config)) {
