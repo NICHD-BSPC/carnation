@@ -94,7 +94,7 @@ edgeR, limma), ensures gene and symbol columns exist
 If validation fails, the function will stop with an informative error message.
 }
 \examples{
-\dontrun{
+\dontshow{if (interactive()) withAutoprint(\{ # examplesIf}
 # Minimal example with DE results and counts
 library(DESeq2)
 
@@ -137,6 +137,5 @@ obj <- validate_carnation_object(
   metadata = metadata,
   dds_mapping = list(comp1 = "main")
 )
-}
-
+\dontshow{\}) # examplesIf}
 }
