@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_carnation</span><span class="op">(</span>credentials <span class="op">=</span> <span class="cn">NULL</span>, passphrase <span class="op">=</span> <span class="cn">NULL</span>, enable_admin <span class="op">=</span> <span class="cn">TRUE</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">run_carnation</span><span class="op">(</span></span>
+<span>  credentials <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  passphrase <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  enable_admin <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  config_path <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -58,6 +64,10 @@
 <dt id="arg-enable-admin">enable_admin<a class="anchor" aria-label="anchor" href="#arg-enable-admin"></a></dt>
 <dd><p>if TRUE, admin view is shown. Note, this is only available
 if credentials have sqlite backend.</p></dd>
+
+
+<dt id="arg-config-path">config_path<a class="anchor" aria-label="anchor" href="#arg-config-path"></a></dt>
+<dd><p>optional path to a local config yaml override.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

@@ -32,7 +32,7 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Apratim Mitra <apratim.mitra@nih.gov>
+**Maintainer**: Apratim Mitra <apratim.mitra@gmail.com>
 ([ORCID](https://orcid.org/0000-0003-3279-0054))
 
 Other contributors:

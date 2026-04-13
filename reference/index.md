@@ -90,6 +90,9 @@
 - [`get_config()`](https://nichd-bspc.github.io/carnation/reference/get_config.md)
   : Get config
 
+- [`get_config_path()`](https://nichd-bspc.github.io/carnation/reference/get_config_path.md)
+  : Get path to local config yaml file
+
 - [`get_degplot()`](https://nichd-bspc.github.io/carnation/reference/get_degplot.md)
   : Plot a degPatterns object
 
@@ -129,6 +132,9 @@
 - [`in_admin_group()`](https://nichd-bspc.github.io/carnation/reference/in_admin_group.md)
   : is user is in admin group?
 
+- [`init_local_config()`](https://nichd-bspc.github.io/carnation/reference/init_local_config.md)
+  : Initialize local config
+
 - [`install_carnation()`](https://nichd-bspc.github.io/carnation/reference/install_carnation.md)
   : Create carnation python environment
 
@@ -154,6 +160,9 @@
 - [`maPlotUI()`](https://nichd-bspc.github.io/carnation/reference/maplotmod.md)
   [`maPlotServer()`](https://nichd-bspc.github.io/carnation/reference/maplotmod.md)
   : MA plot module
+
+- [`materialize_carnation_object()`](https://nichd-bspc.github.io/carnation/reference/materialize_carnation_object.md)
+  : Materialize expensive carnation object components
 
 - [`metadataUI()`](https://nichd-bspc.github.io/carnation/reference/metamod.md)
   [`metadataServer()`](https://nichd-bspc.github.io/carnation/reference/metamod.md)
@@ -217,6 +226,9 @@
   [`scatterPlotServer()`](https://nichd-bspc.github.io/carnation/reference/scattermod.md)
   : Scatterplot module
 
+- [`set_config()`](https://nichd-bspc.github.io/carnation/reference/set_config.md)
+  : Set config
+
 - [`settingsUI()`](https://nichd-bspc.github.io/carnation/reference/settingsmod.md)
   [`settingsServer()`](https://nichd-bspc.github.io/carnation/reference/settingsmod.md)
   : Settings module
@@ -234,3 +246,6 @@
 - [`upsetPlotUI()`](https://nichd-bspc.github.io/carnation/reference/upsetmod.md)
   [`upsetPlotServer()`](https://nichd-bspc.github.io/carnation/reference/upsetmod.md)
   : Upset plot module
+
+- [`validate_carnation_object()`](https://nichd-bspc.github.io/carnation/reference/validate_carnation_object.md)
+  : Validate a carnation object

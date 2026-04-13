@@ -31,5 +31,5 @@ emitting a message describing the issue.
 data(degpatterns_dex, package = "carnation")
 
 is_valid_pattern_obj(degpatterns_dex)
-#> Error in is_valid_pattern_obj(degpatterns_dex): could not find function "is_valid_pattern_obj"
+#> [1] TRUE
 ```

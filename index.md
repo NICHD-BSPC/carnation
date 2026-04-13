@@ -21,33 +21,43 @@ Check out the official bioconductor page
 [here](https://bioconductor.org/packages/devel/bioc/html/carnation.html)
 for more details.
 
-## ✨ Key Features
+## Key Features
 
-- **Interactive Visualizations**: Explore your data through multiple
-  perspectives
-  - 📊 PCA plots - Visualize sample relationships with gene loadings
+- **DE Analysis**: Analyze differential expression through multiple
+  visualizations
+  - **Summary**: Get a quick overview of your differential expression
+    results
+  - **Metadata**: Explore sample metadata and experimental design
+  - **PCA Plot**: Visualize sample relationships with gene loadings
     overlay
-  - 🔥 Heatmaps - Examine expression patterns across samples and
+  - **Scatter Plot**: Compare fold-changes for genes between different
+    comparisons
+  - **MA Plot**: Identify differentially expressed genes with
+    statistical significance
+  - **Gene Plot**: Create customizable expression visualizations for
+    genes of interest
+  - **UpSet Plot**: Discover overlapping gene sets across multiple
+    comparisons
+  - **Heatmap**: Examine expression patterns across samples and
     conditions
-  - 📈 MA plots - Identify differentially expressed genes
-  - 🧩 UpSet plots - Discover overlapping gene sets across comparisons
-  - 📉 Gene plots - Create customizable expression visualizations
-- **Functional Enrichment Analysis**: Understand the biological
-  significance of your results
-  - 🌐 Network plots - Visualize gene-term relationships
-  - 📊 Summary overviews - Compare enrichment across conditions
-  - 🔍 Fuzzy search - Find relevant pathways across genes or
-    descriptions
+- **Functional Enrichment**: Understand the biological significance of
+  your results
+  - **Table**: Interactive tables with powerful search capabilities
+  - **Plots**: Seven different visualizations including network plots
+    and dendrograms
+  - **Compare Results**: Directly compare enrichment results between
+    conditions
 - **Pattern Analysis**: Identify co-regulated gene clusters across
   conditions
-- **Gene Tracking**: Keep your genes of interest at your fingertips with
-  the “Gene scratchpad”
+  - **Plot**: Visualize expression patterns of gene clusters
+  - **Cluster Membership**: Explore which genes belong to which clusters
+- **Gene Scratchpad**: Track genes of interest across all visualizations
 - **Flexible Deployment**: Run locally for personal analysis or on a
   server to share with collaborators
 - **User Management**: Optional authentication system for controlled
   access in multi-user environments
 
-## 🚀 Installation
+## Installation
 
 Carnation can be installed using
 [`BiocManager::install`](https://bioconductor.github.io/BiocManager/reference/install.html).
@@ -94,22 +104,22 @@ conda activate ./env
 R
 ```
 
-Then install the package with the `remotes` package.
-
-Note:
-
-- Conda packages for R \>= 4.6.0 may not be available yet causing
-  installation using the default github branch to fail. To avoid this,
-  use branch `r4.3` which pins R to a lower version.
-- Here we set `upgrade='never'` to make sure the conda-installed package
-  versions remain unchanged.
+Then install the package with the `remotes` package. Here we set
+`upgrade='never'` to make sure the conda-installed package versions
+remain unchanged.
 
 ``` r
 
 remotes::install_github('NICHD-BSPC/carnation@r4.3', upgrade='never')
 ```
 
-## 🏁 Getting Started
+Note:
+
+- Conda packages for R \>= 4.6.0 may not be available yet causing
+  installation using the default github branch to fail. To avoid this,
+  use branch `r4.3` which pins R to a lower version.
+
+## Getting Started
 
 ### Data Organization
 
@@ -145,50 +155,18 @@ run_carnation(options=list(port=12345, launch.browser=FALSE))
 
 Then access Carnation at `http://127.0.0.1:12345`
 
-## 🔍 Exploring Your Data
-
-Once your data is loaded, Carnation offers multiple ways to explore:
-
-- **DE Analysis**: Analyze differential expression through multiple
-  visualizations
-  - **Summary**: Get a quick overview of your differential expression
-    results
-  - **Metadata**: Explore sample metadata and experimental design
-  - **PCA Plot**: Visualize sample relationships with gene loadings
-    overlay
-  - **MA Plot**: Identify differentially expressed genes with
-    statistical significance
-  - **Gene Plot**: Create customizable expression visualizations for
-    genes of interest
-  - **UpSet Plot**: Discover overlapping gene sets across multiple
-    comparisons
-  - **Heatmap**: Examine expression patterns across samples and
-    conditions
-- **Functional Enrichment**: Understand the biological significance of
-  your results
-  - **Table**: Interactive tables with powerful search capabilities
-  - **Plots**: Seven different visualizations including network plots
-    and dendrograms
-  - **Compare Results**: Directly compare enrichment results between
-    conditions
-- **Pattern Analysis**: Identify co-regulated gene clusters across
-  conditions
-  - **Plot**: Visualize expression patterns of gene clusters
-  - **Cluster Membership**: Explore which genes belong to which clusters
-- **Gene Scratchpad**: Track genes of interest across all visualizations
-
-## 📚 Documentation
+## Documentation
 
 Each module includes comprehensive help documentation accessible through
 the help buttons throughout the interface. The documentation provides
 detailed explanations of plot options, statistical methods, and
 interpretation guidelines.
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions to Carnation! Please feel free to submit issues
 or pull requests to the GitHub repository.
 
-## 📄 License
+## License
 
 Carnation is available under the MIT license.

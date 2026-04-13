@@ -10,8 +10,8 @@
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Interactive Exploration &amp; Management of RNA-Seq Analyses">
-<meta name="description" content="This package provides a highly interactive &amp; modular shiny app to explore three facets of RNA-Seq analysis: differential expression (DE), functional enrichment and pattern analysis. Several visualizations are implemented to provide a wide-ranging view of data sets. For DE analysis, we provide PCA plot, MA plot, Upset plot &amp; heatmaps, in addition to a highly customizable gene plot. Seven different visualizations are available for functional enrichment analysis, and we also support gene pattern analysis. Genes of interest can be tracked across all modules using the gene scratchpad. In addition, carnation provides an integrated platform to manage multiple projects and user access that can be run on a central server to share with collaborators.">
-<meta property="og:description" content="This package provides a highly interactive &amp; modular shiny app to explore three facets of RNA-Seq analysis: differential expression (DE), functional enrichment and pattern analysis. Several visualizations are implemented to provide a wide-ranging view of data sets. For DE analysis, we provide PCA plot, MA plot, Upset plot &amp; heatmaps, in addition to a highly customizable gene plot. Seven different visualizations are available for functional enrichment analysis, and we also support gene pattern analysis. Genes of interest can be tracked across all modules using the gene scratchpad. In addition, carnation provides an integrated platform to manage multiple projects and user access that can be run on a central server to share with collaborators.">
+<meta name="description" content="Highly interactive &amp; modular shiny app to explore three facets of RNA-Seq analysis: differential expression (DE), functional enrichment and pattern analysis. Several visualizations are implemented to provide a wide-ranging view of data sets. For DE analysis, we provide PCA plot, MA plot, Upset plot &amp; heatmaps, in addition to a highly customizable gene plot. Seven different visualizations are available for functional enrichment analysis, and we also support gene pattern analysis. Genes of interest can be tracked across all modules using the gene scratchpad. In addition, carnation provides an integrated platform to manage multiple projects and user access that can be run on a central server to share with collaborators.">
+<meta property="og:description" content="Highly interactive &amp; modular shiny app to explore three facets of RNA-Seq analysis: differential expression (DE), functional enrichment and pattern analysis. Several visualizations are implemented to provide a wide-ranging view of data sets. For DE analysis, we provide PCA plot, MA plot, Upset plot &amp; heatmaps, in addition to a highly customizable gene plot. Seven different visualizations are available for functional enrichment analysis, and we also support gene pattern analysis. Genes of interest can be tracked across all modules using the gene scratchpad. In addition, carnation provides an integrated platform to manage multiple projects and user access that can be run on a central server to share with collaborators.">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.9</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.10</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -55,112 +55,8 @@
 <p><strong>Carnation is now on Bioconductor devel (Official release: April 2026)</strong></p>
 <p>Check out the official bioconductor page <a href="https://bioconductor.org/packages/devel/bioc/html/carnation.html" class="external-link">here</a> for more details.</p>
 <div class="section level2">
-<h2 id="sparkles-key-features">✨ Key Features<a class="anchor" aria-label="anchor" href="#sparkles-key-features"></a>
+<h2 id="key-features">Key Features<a class="anchor" aria-label="anchor" href="#key-features"></a>
 </h2>
-<ul>
-<li>
-<strong>Interactive Visualizations</strong>: Explore your data through multiple perspectives
-<ul>
-<li>📊 PCA plots - Visualize sample relationships with gene loadings overlay</li>
-<li>🔥 Heatmaps - Examine expression patterns across samples and conditions</li>
-<li>📈 MA plots - Identify differentially expressed genes</li>
-<li>🧩 UpSet plots - Discover overlapping gene sets across comparisons</li>
-<li>📉 Gene plots - Create customizable expression visualizations</li>
-</ul>
-</li>
-<li>
-<strong>Functional Enrichment Analysis</strong>: Understand the biological significance of your results
-<ul>
-<li>🌐 Network plots - Visualize gene-term relationships</li>
-<li>📊 Summary overviews - Compare enrichment across conditions</li>
-<li>🔍 Fuzzy search - Find relevant pathways across genes or descriptions</li>
-</ul>
-</li>
-<li>
-<strong>Pattern Analysis</strong>: Identify co-regulated gene clusters across conditions</li>
-<li>
-<strong>Gene Tracking</strong>: Keep your genes of interest at your fingertips with the “Gene scratchpad”</li>
-<li>
-<strong>Flexible Deployment</strong>: Run locally for personal analysis or on a server to share with collaborators</li>
-<li>
-<strong>User Management</strong>: Optional authentication system for controlled access in multi-user environments</li>
-</ul>
-</div>
-<div class="section level2">
-<h2 id="rocket-installation">🚀 Installation<a class="anchor" aria-label="anchor" href="#rocket-installation"></a>
-</h2>
-<p>Carnation can be installed using <code><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">BiocManager::install</a></code>. First, start R (version: 4.6) and then run:</p>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># first check to see if BiocManager is available</span></span>
-<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">'BiocManager'</span>, quietly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'BiocManager'</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">'carnation'</span><span class="op">)</span></span></code></pre></div>
-<p>To install the ‘devel’ version</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">'carnation'</span>, version<span class="op">=</span><span class="st">'devel'</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="remotes">remotes<a class="anchor" aria-label="anchor" href="#remotes"></a>
-</h3>
-<p>You can install the developmental version of carnation from github using the <code>remotes</code> package:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'remotes'</span><span class="op">)</span></span>
-<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'NICHD-BSPC/carnation'</span>,</span>
-<span>                        dependencies<span class="op">=</span><span class="cn">TRUE</span>, build_vignettes<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="conda">conda<a class="anchor" aria-label="anchor" href="#conda"></a>
-</h3>
-<p>An alternative way to get started with Carnation is through conda, which handles all dependencies automatically:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Create environment outside the carnation directory</span></span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="bu">cd</span> .. <span class="kw">&amp;&amp;</span> <span class="ex">conda</span> env create <span class="at">-p</span> env <span class="at">--file</span> carnation/requirements-pinned.yaml</span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="ex">conda</span> activate ./env</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="ex">R</span></span></code></pre></div>
-<p>Then install the package with the <code>remotes</code> package.</p>
-<p>Note:</p>
-<ul>
-<li>Conda packages for R &gt;= 4.6.0 may not be available yet causing installation using the default github branch to fail. To avoid this, use branch <code>r4.3</code> which pins R to a lower version.</li>
-<li>Here we set <code>upgrade='never'</code> to make sure the conda-installed package versions remain unchanged.</li>
-</ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'NICHD-BSPC/carnation@r4.3'</span>, upgrade<span class="op">=</span><span class="st">'never'</span><span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level2">
-<h2 id="checkered_flag-getting-started">🏁 Getting Started<a class="anchor" aria-label="anchor" href="#checkered_flag-getting-started"></a>
-</h2>
-<div class="section level3">
-<h3 id="data-organization">Data Organization<a class="anchor" aria-label="anchor" href="#data-organization"></a>
-</h3>
-<p>Organize your data in a directory structure that Carnation can easily navigate:</p>
-<pre><code>/carnation/data/
-  ├─ project1
-  │  ├─ main.rds
-  │  ├─ subset.rds
-  │  └─ main-nooutlier.rds
-  │
-  └─ project2
-     └─ default.rds</code></pre>
-</div>
-<div class="section level3">
-<h3 id="first-run">First Run<a class="anchor" aria-label="anchor" href="#first-run"></a>
-</h3>
-<p>Load the library and install required Python dependencies:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nichd-bspc.github.io/carnation/">carnation</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="reference/install_carnation.html">install_carnation</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Installs plotly and kaleido for PDF export</span></span>
-<span><span class="fu"><a href="reference/run_carnation.html">run_carnation</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p>For remote servers with SSH port forwarding:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/run_carnation.html">run_carnation</a></span><span class="op">(</span>options<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>port<span class="op">=</span><span class="fl">12345</span>, launch.browser<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p>Then access Carnation at <code>http://127.0.0.1:12345</code></p>
-</div>
-</div>
-<div class="section level2">
-<h2 id="mag-exploring-your-data">🔍 Exploring Your Data<a class="anchor" aria-label="anchor" href="#mag-exploring-your-data"></a>
-</h2>
-<p>Once your data is loaded, Carnation offers multiple ways to explore:</p>
 <ul>
 <li>
 <strong>DE Analysis</strong>: Analyze differential expression through multiple visualizations
@@ -171,6 +67,8 @@
 <strong>Metadata</strong>: Explore sample metadata and experimental design</li>
 <li>
 <strong>PCA Plot</strong>: Visualize sample relationships with gene loadings overlay</li>
+<li>
+<strong>Scatter Plot</strong>: Compare fold-changes for genes between different comparisons</li>
 <li>
 <strong>MA Plot</strong>: Identify differentially expressed genes with statistical significance</li>
 <li>
@@ -203,20 +101,94 @@
 </li>
 <li>
 <strong>Gene Scratchpad</strong>: Track genes of interest across all visualizations</li>
+<li>
+<strong>Flexible Deployment</strong>: Run locally for personal analysis or on a server to share with collaborators</li>
+<li>
+<strong>User Management</strong>: Optional authentication system for controlled access in multi-user environments</li>
 </ul>
 </div>
 <div class="section level2">
-<h2 id="books-documentation">📚 Documentation<a class="anchor" aria-label="anchor" href="#books-documentation"></a>
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>Carnation can be installed using <code><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">BiocManager::install</a></code>. First, start R (version: 4.6) and then run:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># first check to see if BiocManager is available</span></span>
+<span><span class="kw">if</span><span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">'BiocManager'</span>, quietly<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'BiocManager'</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">'carnation'</span><span class="op">)</span></span></code></pre></div>
+<p>To install the ‘devel’ version</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://bioconductor.github.io/BiocManager/reference/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">'carnation'</span>, version<span class="op">=</span><span class="st">'devel'</span><span class="op">)</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="remotes">remotes<a class="anchor" aria-label="anchor" href="#remotes"></a>
+</h3>
+<p>You can install the developmental version of carnation from github using the <code>remotes</code> package:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'remotes'</span><span class="op">)</span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'NICHD-BSPC/carnation'</span>,</span>
+<span>                        dependencies<span class="op">=</span><span class="cn">TRUE</span>, build_vignettes<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="conda">conda<a class="anchor" aria-label="anchor" href="#conda"></a>
+</h3>
+<p>An alternative way to get started with Carnation is through conda, which handles all dependencies automatically:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Create environment outside the carnation directory</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="bu">cd</span> .. <span class="kw">&amp;&amp;</span> <span class="ex">conda</span> env create <span class="at">-p</span> env <span class="at">--file</span> carnation/requirements-pinned.yaml</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="ex">conda</span> activate ./env</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="ex">R</span></span></code></pre></div>
+<p>Then install the package with the <code>remotes</code> package. Here we set <code>upgrade='never'</code> to make sure the conda-installed package versions remain unchanged.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'NICHD-BSPC/carnation@r4.3'</span>, upgrade<span class="op">=</span><span class="st">'never'</span><span class="op">)</span></span></code></pre></div>
+<p>Note:</p>
+<ul>
+<li>Conda packages for R &gt;= 4.6.0 may not be available yet causing installation using the default github branch to fail. To avoid this, use branch <code>r4.3</code> which pins R to a lower version.</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="getting-started">Getting Started<a class="anchor" aria-label="anchor" href="#getting-started"></a>
+</h2>
+<div class="section level3">
+<h3 id="data-organization">Data Organization<a class="anchor" aria-label="anchor" href="#data-organization"></a>
+</h3>
+<p>Organize your data in a directory structure that Carnation can easily navigate:</p>
+<pre><code>/carnation/data/
+  ├─ project1
+  │  ├─ main.rds
+  │  ├─ subset.rds
+  │  └─ main-nooutlier.rds
+  │
+  └─ project2
+     └─ default.rds</code></pre>
+</div>
+<div class="section level3">
+<h3 id="first-run">First Run<a class="anchor" aria-label="anchor" href="#first-run"></a>
+</h3>
+<p>Load the library and install required Python dependencies:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://nichd-bspc.github.io/carnation/">carnation</a></span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/install_carnation.html">install_carnation</a></span><span class="op">(</span><span class="op">)</span>  <span class="co"># Installs plotly and kaleido for PDF export</span></span>
+<span><span class="fu"><a href="reference/run_carnation.html">run_carnation</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p>For remote servers with SSH port forwarding:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/run_carnation.html">run_carnation</a></span><span class="op">(</span>options<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>port<span class="op">=</span><span class="fl">12345</span>, launch.browser<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Then access Carnation at <code>http://127.0.0.1:12345</code></p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="documentation">Documentation<a class="anchor" aria-label="anchor" href="#documentation"></a>
 </h2>
 <p>Each module includes comprehensive help documentation accessible through the help buttons throughout the interface. The documentation provides detailed explanations of plot options, statistical methods, and interpretation guidelines.</p>
 </div>
 <div class="section level2">
-<h2 id="handshake-contributing">🤝 Contributing<a class="anchor" aria-label="anchor" href="#handshake-contributing"></a>
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
 </h2>
 <p>We welcome contributions to Carnation! Please feel free to submit issues or pull requests to the GitHub repository.</p>
 </div>
 <div class="section level2">
-<h2 id="page_facing_up-license">📄 License<a class="anchor" aria-label="anchor" href="#page_facing_up-license"></a>
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
 </h2>
 <p>Carnation is available under the MIT license.</p>
 </div>
