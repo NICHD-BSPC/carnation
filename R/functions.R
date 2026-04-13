@@ -761,7 +761,7 @@ is_valid_pattern_obj <- function(pattern_obj, require_symbol = FALSE){
       if(sum(idx) > 1){
       # only use the first match if multiple matches
       # and show warning
-        message('Warning: Ambiguous ', cname, 'column for ', name, '.\nUsing ', colnames(res)[which(idx)[1]])
+        message('Ambiguous ', cname, 'column.\nUsing ', colnames(res)[which(idx)[1]])
       }
 
       idx <- which(idx)[1]
