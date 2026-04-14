@@ -9,8 +9,8 @@
 #' if 'both', show settings for both.
 #' @param obj reactiveValues object containing carnation object
 #' @param coldata reactiveValues object containing object metadata
-#' @param plot_args reactive containing 'gene_scratchpad' (genes selected in scratchpad) &
-#' 'upset_data' (list containing data from upset plot module)
+#' @param gene_scratchpad reactive containing genes selected in scratchpad
+#' @param upset_data reactive containing list with data from upset plot module
 #' @param config reactive list with config settings
 #'
 #' @returns
@@ -37,12 +37,8 @@
 #'
 #' coldata <- reactiveValues( all=cdata, curr=cdata )
 #'
-#' plot_args <- reactive({
-#'   list(
-#'     gene_scratchpad=c('gene1', 'gene2'),
-#'     upset_data=list(genes=NULL, labels=NULL)
-#'   )
-#' })
+#' gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+#' upset_data <- reactive({ list(genes=NULL, labels=NULL) })
 #'
 #' config <- reactiveVal(get_config())
 #'
@@ -72,7 +68,7 @@
 #'        ),
 #'   server = function(input, output, session){
 #'              patternPlotServer('deg_plot', obj, coldata,
-#'                                plot_args, config)
+#'                                gene_scratchpad, upset_data, config)
 #'            }
 #' )
 #'
@@ -366,7 +362,8 @@ patternPlotUI <- function(id, panel, tab){
 patternPlotServer <- function(id,
                               obj,
                               coldata,
-                              plot_args,
+                              gene_scratchpad,
+                              upset_data,
                               config){
   moduleServer(
     id,
@@ -393,8 +390,6 @@ patternPlotServer <- function(id,
       xchoices <- reactiveValues(all=NULL, current=NULL)
 
       current_facet_levels <- reactiveValues(l=NULL)
-      upset_data <- reactiveValues(genes=NULL, labels=NULL)
-      gene_scratchpad <- reactiveValues(genes=NULL)
 
       # update from reactive config
       observeEvent(config(), {
@@ -456,32 +451,10 @@ patternPlotServer <- function(id,
       }, ignoreNULL=FALSE)
 
       # update upset intersections menu
-      observeEvent(plot_args()$upset_data, {
-        upset_genes <- plot_args()$upset_data$genes
-        upset_labels <- plot_args()$upset_data$labels
-
-        # only update if changed
-        updt <- FALSE
-        if(is.null(upset_data$labels)){
-          updt <- TRUE
-        } else if(length(unlist(upset_genes)) != length(unlist(upset_data$genes))){
-          updt <- TRUE
-        } else if(sum(unlist(upset_genes) != unlist(upset_data$genes)) > 0){
-          updt <- TRUE
-        }
-
-        if(updt){
-          upset_data$genes <- upset_genes
-          upset_data$labels <- upset_labels
-
-          updateSelectizeInput(session, 'upset_intersect',
-                               choices=upset_data$labels,
-                               server=TRUE)
-        }
-      })
-
-      observeEvent(plot_args()$gene.to.plot, {
-        gene_scratchpad$genes <- plot_args()$gene.to.plot
+      observeEvent(upset_data(), {
+        updateSelectizeInput(session, 'upset_intersect',
+                             choices=upset_data()$labels,
+                             server=TRUE)
       })
 
       # observer to get deg plot data and update menus
@@ -808,9 +781,9 @@ patternPlotServer <- function(id,
 
         current_facet_levels$l <- input$facet_var_levels
 
-        if(input$deg_label == 'gene_scratchpad') g <- plot_args()$gene_scratchpad
+        if(input$deg_label == 'gene_scratchpad') g <- gene_scratchpad()
         else if(input$deg_label == 'upset_intersections')
-          g <- upset_data$genes[[ input$upset_intersect ]]
+          g <- upset_data()$genes[[ input$upset_intersect ]]
         else g <- NULL
 
         if(length(g) > 10){
@@ -879,9 +852,9 @@ patternPlotServer <- function(id,
         table <- table[cidx,]
 
         if(input$deg_label == 'gene_scratchpad'){
-          g <- plot_args()$gene_scratchpad
+          g <- gene_scratchpad()
         } else if(input$deg_label == 'upset_intersections'){
-          g <- plot_args()$upset_data$genes[[ input$upset_intersect ]]
+          g <- upset_data()$genes[[ input$upset_intersect ]]
         } else {
           g <- NULL
         }

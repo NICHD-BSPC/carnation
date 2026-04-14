@@ -1547,16 +1547,13 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     ######################## DEG patterns ########################
 
-    pattern_plot_args <- reactive({
-      list(
-        gene_scratchpad=gene_scratchpad(),
-        upset_data=list(genes=upset_table$intersections,
-                        labels=upset_table$set_labels)
-      )
-    })
-
     patternPlotServer('deg_plot', app_object, coldata.all,
-                      pattern_plot_args, config)
+                      gene_scratchpad,
+                      reactive({
+                        list(genes=upset_table$intersections,
+                             labels=upset_table$set_labels)
+                      }),
+                      config)
 
     ######################### Help buttons #######################
 
