@@ -27,12 +27,8 @@ test_that("patternPlotServer generates pattern plot correctly", {
     )
   )
 
-  plot_args <- reactive({
-    list(
-      gene_scratchpad = c("gene1", "gene2"),
-      upset_data = list(genes = NULL, labels = NULL)
-    )
-  })
+  gene_scratchpad <- reactive({ c("gene1", "gene2") })
+  upset_data <- reactive({ list(genes = NULL, labels = NULL) })
 
   config <- reactiveVal(get_config())
 
@@ -40,7 +36,8 @@ test_that("patternPlotServer generates pattern plot correctly", {
     id = "test_pattern",
     obj = obj,
     coldata = coldata,
-    plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    upset_data = upset_data,
     config = config
   ), {
     # Set inputs
@@ -101,12 +98,8 @@ test_that("patternPlotServer handles gene_scratchpad labeling", {
     )
   )
 
-  plot_args <- reactive({
-    list(
-      gene_scratchpad = c("GENE1", "GENE2"),
-      upset_data = list(genes = NULL, labels = NULL)
-    )
-  })
+  gene_scratchpad <- reactive({ c("GENE1", "GENE2") })
+  upset_data <- reactive({ list(genes = NULL, labels = NULL) })
 
   config <- reactiveVal(get_config())
 
@@ -114,7 +107,8 @@ test_that("patternPlotServer handles gene_scratchpad labeling", {
     id = "test_pattern",
     obj = obj,
     coldata = coldata,
-    plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    upset_data = upset_data,
     config = config
   ), {
     # Set inputs with gene_scratchpad labeling
