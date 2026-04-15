@@ -15,7 +15,7 @@
 #'
 #' @returns
 #' UI returns tagList with module UI
-#' server invisibly returns NULL (used for side effects)
+#' server returns reactive with selected genes for scratchpad updates
 #'
 #' @examplesIf interactive()
 #' library(shiny)
@@ -350,7 +350,20 @@ patternPlotUI <- function(id, panel, tab){
         ), # fluidRow
         withSpinner(
           DTOutput(ns('dp_table'))
-        ) # withSpinner
+        ), # withSpinner
+        fluidRow(align='center', style='margin-top: 25px;',
+          column(12,
+            splitLayout(
+              cellWidths=c('15%', '25%', '20%'),
+
+              strong('Selection options'),
+              actionButton(ns('add_selected'), 'Add to scratchpad'),
+              actionButton(ns('reset_dptable'),
+                           'Reset selection',
+                           class='btn-primary')
+            ) # splitLayout
+          ) # column
+        ) # fluidRow
       ) # tagList
   }
   tag
@@ -390,6 +403,7 @@ patternPlotServer <- function(id,
       xchoices <- reactiveValues(all=NULL, current=NULL)
 
       current_facet_levels <- reactiveValues(l=NULL)
+      genes_clicked <- reactiveValues(g=NULL)
 
       # update from reactive config
       observeEvent(config(), {
@@ -455,6 +469,13 @@ patternPlotServer <- function(id,
         updateSelectizeInput(session, 'upset_intersect',
                              choices=upset_data()$labels,
                              server=TRUE)
+      })
+
+      observeEvent(gene_scratchpad(), {
+        if(any(gene_scratchpad() != ''))
+          genes_clicked$g <- gene_scratchpad()
+        else
+          genes_clicked$g <- NULL
       })
 
       # observer to get deg plot data and update menus
@@ -933,8 +954,53 @@ patternPlotServer <- function(id,
       }, ignoreNULL=FALSE) # eventReactive degtable
 
       output$dp_table <- renderDT({
-        degtable()
-      }, rownames=FALSE)
+        degtable() %>%
+          datatable(rownames=FALSE,
+                    selection=list(mode='multiple'))
+      })
+
+      dptable_proxy <- dataTableProxy('dp_table')
+
+      observeEvent(input$reset_dptable, {
+        dptable_proxy %>% selectRows(NULL)
+      })
+
+      observeEvent(input$add_selected, {
+        tbl <- degtable()
+        sel <- input$dp_table_rows_selected
+
+        if('symbol' %in% colnames(tbl)){
+          s <- tbl$symbol
+          idx.na <- is.na(s) | s == ''
+          s[idx.na] <- tbl$genes[idx.na]
+        } else {
+          s <- tbl$genes
+        }
+
+        if(is.null(sel)){
+          showNotification(
+            'Cannot add genes, no rows selected', type='warning'
+          )
+          validate(
+            need(!is.null(sel), '')
+          )
+        } else if(all(s[sel] %in% genes_clicked$g)){
+          showNotification(
+            'Selected genes already present in scratchpad, skipping', type='warning'
+          )
+        } else {
+          if(is.null(genes_clicked$g)) selected <- s[sel]
+          else selected <- unique(c(genes_clicked$g, s[sel]))
+
+          new_genes <- setdiff(selected, genes_clicked$g)
+          showNotification(
+            paste('Adding', length(new_genes),
+                  'new genes to scratchpad')
+          )
+
+          genes_clicked$g <- selected
+        }
+      })
 
       # pattern analysis help
       helpButtonServer('dp_controls_help', size='l')
@@ -943,6 +1009,12 @@ patternPlotServer <- function(id,
 
       downloadButtonServer('dp_download', degplot,
                            paste0(input$dp_analysis, '-degplot'))
+
+      return(
+        reactive({
+          list(genes=genes_clicked$g)
+        })
+      )
 
     } # function
   ) # moduleServer

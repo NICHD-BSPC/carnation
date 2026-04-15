@@ -30,7 +30,7 @@ if 'both', show settings for both.}
 }
 \value{
 UI returns tagList with module UI
-server invisibly returns NULL (used for side effects)
+server returns reactive with selected genes for scratchpad updates
 }
 \description{
 Module UI & server to generate pattern plots.

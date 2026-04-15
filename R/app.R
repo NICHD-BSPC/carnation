@@ -1547,13 +1547,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     ######################## DEG patterns ########################
 
-    patternPlotServer('deg_plot', app_object, coldata.all,
-                      gene_scratchpad,
-                      reactive({
-                        list(genes=upset_table$intersections,
-                             labels=upset_table$set_labels)
-                      }),
-                      config)
+    pattern_data <- patternPlotServer('deg_plot', app_object, coldata.all,
+                                      gene_scratchpad,
+                                      reactive({
+                                        list(genes=upset_table$intersections,
+                                             labels=upset_table$set_labels)
+                                      }),
+                                      config)
+
+    observeEvent(pattern_data(), {
+      g <- pattern_data()$genes
+
+      if(length(setdiff(g, input$gene.to.plot)) != 0){
+        updateSelectizeInput(session, 'gene.to.plot',
+                             choices=gene.id$gene,
+                             selected=g,
+                             server=TRUE)
+      }
+    })
 
     ######################### Help buttons #######################
 
