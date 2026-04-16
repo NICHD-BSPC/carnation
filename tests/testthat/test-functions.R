@@ -417,13 +417,15 @@ test_that("set_config updates supported config fields", {
     fdr_threshold = 0.05,
     log2fc_threshold = 1.5,
     max_upload_size = 64,
-    cores = 3
+    cores = 3,
+    pattern = "carnation"
   )
 
   expect_equal(updated$ui$de_analysis$filters$fdr_threshold, 0.05)
   expect_equal(updated$ui$de_analysis$filters$log2fc_threshold, 1.5)
   expect_equal(updated$max_upload_size, 64)
   expect_equal(updated$server$cores, 3L)
+  expect_equal(updated$server$pattern, "carnation")
   expect_true(all(c("qvalue", "adj_pval") %in%
                     updated$server$de_analysis$column_names$padj))
   expect_true("avg_log2FC" %in%
@@ -434,6 +436,7 @@ test_that("set_config updates supported config fields", {
   expect_equal(saved$ui$de_analysis$filters$log2fc_threshold, 1.5)
   expect_equal(saved$max_upload_size, 64)
   expect_equal(saved$server$cores, 3L)
+  expect_equal(saved$server$pattern, "carnation")
 })
 
 test_that("set_config rejects unsupported or invalid config updates", {
@@ -474,6 +477,11 @@ test_that("set_config rejects unsupported or invalid config updates", {
     set_config(config_path = cfg_out, cores = 1.5),
     "`cores` must be a single positive integer value."
   )
+
+  expect_error(
+    set_config(config_path = cfg_out, pattern = 1),
+    "`pattern` must be a single character value."
+  )
 })
 
 test_that("get_config merges only supported local overrides", {
@@ -484,6 +492,7 @@ test_that("get_config merges only supported local overrides", {
   local_cfg$ui$de_analysis$filters$fdr_threshold <- 0.2
   local_cfg$style$global <- "body { color: red; }"
   local_cfg$server$de_analysis$column_names$padj <- c("padj", "qvalue")
+  local_cfg$server$pattern <- "carnation"
   yaml::write_yaml(local_cfg, cfg_out)
 
   merged <- get_config(config_path = cfg_out)
@@ -492,6 +501,7 @@ test_that("get_config merges only supported local overrides", {
 
   expect_equal(merged$ui$de_analysis$filters$fdr_threshold, 0.2)
   expect_true("qvalue" %in% merged$server$de_analysis$column_names$padj)
+  expect_equal(merged$server$pattern, "carnation")
   expect_equal(merged$style$global, default_cfg$style$global)
 })
 

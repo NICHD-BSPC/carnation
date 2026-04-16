@@ -253,6 +253,9 @@ init_local_config <- function(config_path = get_config_path(),
 #'   greater than or equal to 0.
 #' @param max_upload_size optional positive numeric upload limit in MB.
 #' @param cores optional positive integer number of cores to use.
+#' @param pattern optional character suffix pattern used to match dataset
+#'   filenames before the trailing \code{.rds}. Use \code{""} to match all
+#'   RDS files.
 #'
 #' @return Updated config list, invisibly.
 #'
@@ -270,7 +273,8 @@ init_local_config <- function(config_path = get_config_path(),
 #'   fdr_threshold = 0.05,
 #'   log2fc_threshold = 1,
 #'   max_upload_size = 50,
-#'   cores = 2
+#'   cores = 2,
+#'   pattern = "carnation"
 #' )
 #' @export
 set_config <- function(config_path = get_config_path(),
@@ -278,7 +282,8 @@ set_config <- function(config_path = get_config_path(),
                        fdr_threshold = NULL,
                        log2fc_threshold = NULL,
                        max_upload_size = NULL,
-                       cores = NULL) {
+                       cores = NULL,
+                       pattern = NULL) {
   if (!nzchar(config_path)) {
     stop('`config_path` must be a non-empty path.', call. = FALSE)
   }
@@ -368,6 +373,14 @@ set_config <- function(config_path = get_config_path(),
     cfg$server$cores <- as.integer(cores)
   }
 
+  if (!is.null(pattern)) {
+    if (!is.character(pattern) || length(pattern) != 1 || is.na(pattern)) {
+      stop("`pattern` must be a single character value.",
+           call. = FALSE)
+    }
+    cfg$server$pattern <- pattern
+  }
+
   write_yaml(cfg, config_path)
 
   invisible(cfg)
@@ -414,6 +427,11 @@ set_config <- function(config_path = get_config_path(),
   if (is.numeric(cores) && length(cores) == 1 &&
       !is.na(cores) && cores > 0 && cores == as.integer(cores)) {
     default_cfg$server$cores <- as.integer(cores)
+  }
+
+  pattern <- user_cfg$server$pattern
+  if (is.character(pattern) && length(pattern) == 1 && !is.na(pattern)) {
+    default_cfg$server$pattern <- pattern
   }
 
   default_cfg
