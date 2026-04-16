@@ -1,0 +1,26 @@
+name: Sync Main into r4.3
+on:
+  push:
+    branches:
+      - main  # Trigger whenever main is updated
+
+jobs:
+  sync-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for pushing changes
+    steps:
+      - name: Checkout dev branch
+        uses: actions/checkout@v4
+        with:
+          ref: r4.3  # The branch you want to merge main into
+          fetch-depth: 0
+
+      - name: Merge main into r4.3
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git merge origin/main --no-edit
+          git push origin dev
+
