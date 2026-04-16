@@ -2163,10 +2163,10 @@ get_degplot <- function(obj, time, color=NULL,
 #' dds_mapping <- list(comp1='main', comp2='main')
 #'
 #' # get summary
-#' df <- summarize.res.list(res_list, dds_list, dds_mapping, alpha=0.1, lfc.thresh=0)
+#' df <- summarize_res_list(res_list, dds_list, dds_mapping, alpha=0.1, lfc.thresh=0)
 #'
 #' @export
-summarize.res.list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thresh, labels=NULL){
+summarize_res_list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thresh, labels=NULL){
     slist <- list()
     for (name in names(res.list)){
         x <- my.summary(res.list[[name]], dds.list[[ dds_mapping[[name]] ]], alpha, lfc.thresh)

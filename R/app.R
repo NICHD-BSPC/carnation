@@ -1187,7 +1187,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       fdr.thres <- ifelse(input$fdr.thres == '' | is.na(input$fdr.thres),
                           config()$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
 
-      df <- summarize.res.list(app_object$res, app_object$dds, app_object$dds_mapping,
+      df <- summarize_res_list(app_object$res, app_object$dds, app_object$dds_mapping,
                                alpha=fdr.thres,
                                lfc.thresh=fc.thres,
                                app_object$labels)
