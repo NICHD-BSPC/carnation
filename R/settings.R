@@ -1017,9 +1017,8 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
               fixed_label <- dirname(old_label)
 
               # add dev/ prefix to assay label for dev datasets
-              names(alist[[old_label]]) <- paste0(staging_dir(),
-                                                  '/',
-                                                  names(alist[[old_label]]))
+              names(alist[[old_label]]) <- file.path(staging_dir(),
+                                                    names(alist[[old_label]]))
 
               # if fixed label already exists, add to existing list
               # otherwise create label
