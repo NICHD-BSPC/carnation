@@ -443,7 +443,11 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                                    selected=NULL
                     ), # selectizeInput
                     actionButton('assay_do', label='Go!',
-                                 class='btn-primary')
+                                 class='btn-primary'),
+
+                    br(), br(),
+                    uiOutput('current_obj')
+
                 ) # conditionalPanel
               ), # column
               column(9, style='margin-top: 20px',
@@ -457,10 +461,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               uiOutput('load_ui')
             ),  # withSpinner
 
-            br(),
-            fluidRow(
-              column(3, uiOutput('current_obj'))
-            ) # fluidRow
           ), # tabPanel
 
           tabPanel('DE analysis',
