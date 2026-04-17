@@ -86,7 +86,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         column(2,
           introBox(
             saveUI('save_object'),
-            data.step=7,
+            data.step=11,
             data.intro='Use this button at any point to save the modified object'
           ), # introBox
           offset=-1
@@ -143,7 +143,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               tooltip = tooltipOptions(title = "Global settings")
 
             ), # dropdownButton
-            data.step=3,
+            data.step=8,
             data.intro='Click this button to access global settings'
           ), # introBox
 
@@ -325,7 +325,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
             ), # dropdownButton
 
-            data.step=4,
+            data.step=9,
             data.intro='Here you will find specific controls to adjust plots or tables'
           ), # introBox
 
@@ -409,11 +409,11 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               tooltip = tooltipOptions(title = "Gene scratchpad")
 
             ), # dropdownButton
-            data.step=6,
+            data.step=10,
             data.intro='Keep track of your favorite genes or quickly select top genes with the "Gene scratchpad" here'
           ), # introBox
 
-          data.step=2,
+          data.step=7,
           data.intro='You can use controls shown in this area to filter data or adjust plots and tables.'
         ) # fluidRow
       ) # introBox
@@ -421,31 +421,47 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     mainPanel(width=11,
 
-      introBox(
+      tags$div(
         tabsetPanel(type='tabs',
                     id='mode',
 
           tabPanel('Load data',
             fluidRow(
               column(2,
-                selectInput('data_type', label='Type of data',
-                            choices=c('Existing', 'New', 'Edit')),
+                introBox(
+                  selectInput('data_type', label='Type of data',
+                              choices=c('Existing', 'New', 'Edit')),
+                  data.step=1,
+                  data.intro='Choose whether you want to load an existing project, create a new one, or edit the currently loaded object.'
+                ),
 
                 conditionalPanel('input.data_type == "Existing"',
-                    selectizeInput('dds',
-                                   label=h5('Available projects'),
-                                   choices=NULL,
-                                   selected=NULL,
-                                   width='100%'
-                    ), # selectizeInput
-                    selectizeInput('assay',
-                                   label=h5('Available analyses'),
-                                   choices=NULL,
-                                   selected=NULL,
-                                   width='100%'
-                    ), # selectizeInput
-                    actionButton('assay_do', label='Go!',
-                                 class='btn-primary'),
+                    introBox(
+                      selectizeInput('dds',
+                                     label=h5('Available projects'),
+                                     choices=NULL,
+                                     selected=NULL,
+                                     width='100%'
+                      ), # selectizeInput
+                      data.step=2,
+                      data.intro='Select the project you want to work with.'
+                    ),
+                    introBox(
+                      selectizeInput('assay',
+                                     label=h5('Available analyses'),
+                                     choices=NULL,
+                                     selected=NULL,
+                                     width='100%'
+                      ), # selectizeInput
+                      data.step=4,
+                      data.intro='Next, select the analysis to load for the chosen project.'
+                    ),
+                    introBox(
+                      actionButton('assay_do', label='Go!',
+                                   class='btn-primary'),
+                      data.step=6,
+                      data.intro='Finally, click this button to load the selected project and analysis into carnation.'
+                    ),
 
                     br(), br(),
                     uiOutput('current_obj')
@@ -455,11 +471,25 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               column(10, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
                   column(6,
-                    DTOutput('project_desc')
+
+                    introBox(
+                      tags$div(
+                        DTOutput('project_desc')
+                      ),
+
+                      data.step=3,
+                      data.intro='Alternatively, use this table to review available projects and click a row to update the project dropdown.'
+                    )
                   ),
-                  column(6,
-                    conditionalPanel('input.dds != "" & input.dds != "Choose one"',
-                      DTOutput('analysis_desc')
+                  conditionalPanel('input.dds != "" & input.dds != "Choose one"',
+                    column(6,
+                      introBox(
+                        tags$div(
+                          DTOutput('analysis_desc')
+                        ),
+                        data.step=5,
+                        data.intro='Or, use this table to review analyses for the selected project and click a row to populate the analysis dropdown.'
+                      )
                     )
                   )
                 ) # conditionalPanel
@@ -606,10 +636,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
             uiOutput('settings_main')
           ) # tabPanel settings
 
-        ), # tabsetPanel mode
-        data.step=1,
-        data.intro='Choose project and analysis and click "Go".\n\nOnce the data is loaded, use tabs to explore and navigate'
-      ) # introBox
+        ) # tabsetPanel mode
+      ) # tags$div
     ) # mainPanel
 
   ) # ui
