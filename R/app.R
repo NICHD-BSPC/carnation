@@ -1433,14 +1433,20 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
             df <- df[idx,]
         }
 
-        sidx <- grep('symbol', colnames(df), ignore.case=TRUE)
-        colnames(df)[sidx] <- tolower(colnames(df)[sidx])
+        df <- as.data.frame(df)
+
+        sidx <- which(tolower(colnames(df)) == 'symbol')
+        if(length(sidx) > 0){
+          colnames(df)[sidx] <- tolower(colnames(df)[sidx])
+          symbol.col <- sidx[1]
+        } else {
+          symbol.col <- NULL
+        }
 
         if(!'gene' %in% colnames(df))
           df$gene <- sub('\\.\\d+$','',rownames(df))
 
         gene.col <- 'gene'
-        symbol.col <- ifelse('symbol' %in% colnames(df), 'symbol', 'SYMBOL')
 
         cols.to.drop <- config()$server$de_analysis$de_table$cols.to.drop
         df <- df %>% as.data.frame %>%
