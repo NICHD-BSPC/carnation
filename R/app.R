@@ -909,12 +909,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       proj_info_idx <- which(tbl[,'group'] == parsed_name[1] & tbl[,'project'] == parsed_name[2])
 
       if(length(proj_info_idx) > 0){
+        # get idx relative to current sort order
+        current_idx <- which(input$project_desc_rows_all == proj_info_idx[1])
+
         # get page index, falling back before table state is available
         page_length <- input$project_desc_state$length
         if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
           page_length <- 10
         }
-        page_idx <- floor((proj_info_idx[1] - 1) / page_length) + 1
+        page_idx <- floor((current_idx - 1) / page_length) + 1
 
         # update tbl: clear selection, add new selection, scroll to page
         project_desc_proxy %>% selectRows(NULL) %>%
@@ -951,7 +954,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     }) # observeEvent
 
-    #################### project analysis summary ####################
+    #################### analysis description summary ####################
 
     output$analysis_desc <- renderDT({
       req(input$dds)
@@ -1018,16 +1021,19 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         return()
       }
 
+      # get idx relative to current sort order
+      current_idx <- which(input$analysis_desc_rows_all == desc_idx[1])
+
       # get page index
       page_length <- input$analysis_desc_state$length
       if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
         page_length <- 10
       }
-      page_idx <- floor((desc_idx[1] - 1) / page_length) + 1
+      page_idx <- floor((current_idx - 1) / page_length) + 1
 
       # update tbl selection
       analysis_desc_proxy %>% selectRows(NULL) %>%
-        selectRows(desc_idx) %>% selectPage(page_idx)
+        selectRows(desc_idx[1]) %>% selectPage(page_idx)
 
     })
 
@@ -1061,7 +1067,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                            selected=proj_from_tbl())
     })
 
-    # observer to load data
+    #################### observer to load data ####################
+
     observeEvent(input$assay_do, {
       validate(
         need(!is.null(input$assay) & input$assay != '' & input$assay != 'Choose one',
