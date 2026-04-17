@@ -1053,6 +1053,9 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
                    num_datasets=unname(unlist(lapply(alist, length)))
                  )
 
+      # order by group, then project
+      proj_df <- proj_df[order(proj_df$group, proj_df$project),]
+
       # find and read project descriptions
       project_descriptions <- list()
       for(name in names(assay_list)){
