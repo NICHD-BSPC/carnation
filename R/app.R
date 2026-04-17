@@ -427,7 +427,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
           tabPanel('Load data',
             fluidRow(
-              column(3,
+              column(2,
                 selectInput('data_type', label='Type of data',
                             choices=c('Existing', 'New', 'Edit')),
 
@@ -435,12 +435,14 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                     selectizeInput('dds',
                                    label=h5('Available projects'),
                                    choices=NULL,
-                                   selected=NULL
+                                   selected=NULL,
+                                   width='100%'
                     ), # selectizeInput
                     selectizeInput('assay',
                                    label=h5('Available analyses'),
                                    choices=NULL,
-                                   selected=NULL
+                                   selected=NULL,
+                                   width='100%'
                     ), # selectizeInput
                     actionButton('assay_do', label='Go!',
                                  class='btn-primary'),
@@ -450,12 +452,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
                 ) # conditionalPanel
               ), # column
-              column(9, style='margin-top: 20px',
+              column(10, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
-                  column(7,
+                  column(6,
                     DTOutput('project_desc')
                   ),
-                  column(5,
+                  column(6,
                     conditionalPanel('input.dds != "" & input.dds != "Choose one"',
                       DTOutput('analysis_desc')
                     )
