@@ -661,7 +661,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     user_details <- reactiveValues(username=NULL, admin=FALSE)
 
     # list to hold project/analysis descriptions
-    project_info <- reactiveValues(descriptions=list(), current=NULL)
+    project_info <- reactiveValues(descriptions=list(), current=NULL, df=NULL)
 
     #################### config updates ####################
 
@@ -780,6 +780,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       l <- settings()
 
       project_info$descriptions <- l$project_descriptions
+      project_info$df <- l$proj_df
 
       validate(
          need(!is.null(l$assay_list), 'No projects found')
