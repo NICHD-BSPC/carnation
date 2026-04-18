@@ -5,14 +5,28 @@
 [![](https://bioconductor.org/shields/build/devel/bioc/carnation.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/carnation/)
 [![](https://bioconductor.org/shields/years-in-bioc/carnation.svg)](https://bioconductor.org/packages/devel/bioc/html/carnation.html#since)
 
-**Deeply explore your bulk RNA-Seq data with interactive
-visualizations**
+**Less Code, More Biology: Carnation for Collaborative Multi-Omics
+Exploration**
 
-Carnation is an interactive Shiny dashboard that transforms complex bulk
-RNA-Seq data into beautiful, insightful visualizations. Designed for
-both computational and experimental biologists, Carnation makes
-exploring differential expression analysis, functional enrichment, and
-pattern analysis intuitive and exciting.
+Carnation is a modular, interactive Shiny app for working with bulk
+RNA-seq and related omics data across differential expression (DE),
+functional enrichment, and gene pattern analysis. It’s designed for
+experiments with many contrasts and iterative tuning, where results are
+otherwise scattered across scripts and output files, and can be used to
+compare signals across modalities (e.g. transcriptomics and proteomics).
+
+A range of interactive visualizations are available, including PCA, MA
+plots, UpSet plots, heatmaps, customizable gene-level views, and
+multiple enrichment summaries. Also, a global gene scratchpad lets you
+track genes of interest across all modules.
+
+Carnation supports multiple projects and user access control, and can be
+run locally or deployed on a central server for sharing analyses with
+collaborators. Its modular design makes it easy to extend with new
+tools, visualizations, or data types. In summary, Carnation democratizes
+multi-omic genomics analyses, transforming static analysis into a
+collaborative, interactive experience, enabling research teams to spend
+less time navigating data and more time generating biological insight.
 
 **Carnation is now on Bioconductor devel (Official release: April
 2026)**

@@ -52,7 +52,8 @@ other internal options are intentionally left untouched.</p>
 <span>  fdr_threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  log2fc_threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  max_upload_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  cores <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  cores <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -88,6 +89,12 @@ greater than or equal to 0.</p></dd>
 <dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
 <dd><p>optional positive integer number of cores to use.</p></dd>
 
+
+<dt id="arg-pattern">pattern<a class="anchor" aria-label="anchor" href="#arg-pattern"></a></dt>
+<dd><p>optional character suffix pattern used to match dataset
+filenames before the trailing <code>.rds</code>. Use <code>""</code> to match all
+RDS files.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -109,9 +116,10 @@ greater than or equal to 0.</p></dd>
 <span class="r-in"><span>  fdr_threshold <span class="op">=</span> <span class="fl">0.05</span>,</span></span>
 <span class="r-in"><span>  log2fc_threshold <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span>  max_upload_size <span class="op">=</span> <span class="fl">50</span>,</span></span>
-<span class="r-in"><span>  cores <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span>  cores <span class="op">=</span> <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>  pattern <span class="op">=</span> <span class="st">"carnation"</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in set_config(config_path = cfg_out, de_analysis = list(column_names = list(padj = "qvalue",     log2FoldChange = c("logFC", "avg_log2FC"))), fdr_threshold = 0.05,     log2fc_threshold = 1, max_upload_size = 50, cores = 2):</span> could not find function "set_config"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in set_config(config_path = cfg_out, de_analysis = list(column_names = list(padj = "qvalue",     log2FoldChange = c("logFC", "avg_log2FC"))), fdr_threshold = 0.05,     log2fc_threshold = 1, max_upload_size = 50, cores = 2, pattern = "carnation"):</span> unused argument (pattern = "carnation")</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

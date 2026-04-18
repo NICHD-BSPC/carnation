@@ -18,5 +18,4 @@ path to local config yaml
 
 ``` r
 p <- get_config_path()
-#> Error in get_config_path(): could not find function "get_config_path"
 ```

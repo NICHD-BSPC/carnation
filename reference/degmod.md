@@ -7,7 +7,7 @@ Module UI & server to generate pattern plots.
 ``` r
 patternPlotUI(id, panel, tab)
 
-patternPlotServer(id, obj, coldata, plot_args, config)
+patternPlotServer(id, obj, coldata, gene_scratchpad, upset_data, config)
 ```
 
 ## Arguments
@@ -33,10 +33,13 @@ patternPlotServer(id, obj, coldata, plot_args, config)
 
   reactiveValues object containing object metadata
 
-- plot_args:
+- gene_scratchpad:
 
-  reactive containing 'gene_scratchpad' (genes selected in scratchpad) &
-  'upset_data' (list containing data from upset plot module)
+  reactive containing genes selected in scratchpad
+
+- upset_data:
+
+  reactive containing list with data from upset plot module
 
 - config:
 
@@ -44,8 +47,8 @@ patternPlotServer(id, obj, coldata, plot_args, config)
 
 ## Value
 
-UI returns tagList with module UI server invisibly returns NULL (used
-for side effects)
+UI returns tagList with module UI server returns reactive with selected
+genes for scratchpad updates
 
 ## Examples
 
@@ -70,12 +73,8 @@ cdata <- lapply(oobj$rld, function(x) colData(x))
 
 coldata <- reactiveValues( all=cdata, curr=cdata )
 
-plot_args <- reactive({
-  list(
-    gene_scratchpad=c('gene1', 'gene2'),
-    upset_data=list(genes=NULL, labels=NULL)
-  )
-})
+gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+upset_data <- reactive({ list(genes=NULL, labels=NULL) })
 
 config <- reactiveVal(get_config())
 
@@ -105,7 +104,7 @@ shinyApp(
        ),
   server = function(input, output, session){
              patternPlotServer('deg_plot', obj, coldata,
-                               plot_args, config)
+                               gene_scratchpad, upset_data, config)
            }
 )
 }

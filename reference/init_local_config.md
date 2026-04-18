@@ -30,5 +30,4 @@ Path to the local config yaml, invisibly.
 ``` r
 cfg_out <- tempfile(fileext = ".yaml")
 init_local_config(cfg_out)
-#> Error in init_local_config(cfg_out): could not find function "init_local_config"
 ```

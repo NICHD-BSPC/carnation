@@ -233,7 +233,7 @@
   [`settingsServer()`](https://nichd-bspc.github.io/carnation/reference/settingsmod.md)
   : Settings module
 
-- [`summarize.res.list()`](https://nichd-bspc.github.io/carnation/reference/summarize.res.list.md)
+- [`summarize_res_list()`](https://nichd-bspc.github.io/carnation/reference/summarize_res_list.md)
   : Combine everything in the results list into a single table
 
 - [`sumovPlotUI()`](https://nichd-bspc.github.io/carnation/reference/sumovmod.md)

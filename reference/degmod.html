@@ -42,7 +42,7 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">patternPlotUI</span><span class="op">(</span><span class="va">id</span>, <span class="va">panel</span>, <span class="va">tab</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">patternPlotServer</span><span class="op">(</span><span class="va">id</span>, <span class="va">obj</span>, <span class="va">coldata</span>, <span class="va">plot_args</span>, <span class="va">config</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">patternPlotServer</span><span class="op">(</span><span class="va">id</span>, <span class="va">obj</span>, <span class="va">coldata</span>, <span class="va">gene_scratchpad</span>, <span class="va">upset_data</span>, <span class="va">config</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,9 +70,12 @@ if 'both', show settings for both.</p></dd>
 <dd><p>reactiveValues object containing object metadata</p></dd>
 
 
-<dt id="arg-plot-args">plot_args<a class="anchor" aria-label="anchor" href="#arg-plot-args"></a></dt>
-<dd><p>reactive containing 'gene_scratchpad' (genes selected in scratchpad) &amp;
-'upset_data' (list containing data from upset plot module)</p></dd>
+<dt id="arg-gene-scratchpad">gene_scratchpad<a class="anchor" aria-label="anchor" href="#arg-gene-scratchpad"></a></dt>
+<dd><p>reactive containing genes selected in scratchpad</p></dd>
+
+
+<dt id="arg-upset-data">upset_data<a class="anchor" aria-label="anchor" href="#arg-upset-data"></a></dt>
+<dd><p>reactive containing list with data from upset plot module</p></dd>
 
 
 <dt id="arg-config">config<a class="anchor" aria-label="anchor" href="#arg-config"></a></dt>
@@ -82,7 +85,7 @@ if 'both', show settings for both.</p></dd>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>UI returns tagList with module UI
-server invisibly returns NULL (used for side effects)</p>
+server returns reactive with selected genes for scratchpad updates</p>
     </div>
 
     <div class="section level2">
@@ -107,12 +110,8 @@ server invisibly returns NULL (used for side effects)</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">coldata</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveValues.html" class="external-link">reactiveValues</a></span><span class="op">(</span> all<span class="op">=</span><span class="va">cdata</span>, curr<span class="op">=</span><span class="va">cdata</span> <span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">plot_args</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    gene_scratchpad<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'gene1'</span>, <span class="st">'gene2'</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>    upset_data<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>genes<span class="op">=</span><span class="cn">NULL</span>, labels<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">gene_scratchpad</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'gene1'</span>, <span class="st">'gene2'</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">upset_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="op">{</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>genes<span class="op">=</span><span class="cn">NULL</span>, labels<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span> <span class="op">}</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">config</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactiveVal.html" class="external-link">reactiveVal</a></span><span class="op">(</span><span class="fu"><a href="get_config.html">get_config</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -142,7 +141,7 @@ server invisibly returns NULL (used for side effects)</p>
 <span class="r-in"><span>       <span class="op">)</span>,</span></span>
 <span class="r-in"><span>  server <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span><span class="op">{</span></span></span>
 <span class="r-in"><span>             <span class="fu">patternPlotServer</span><span class="op">(</span><span class="st">'deg_plot'</span>, <span class="va">obj</span>, <span class="va">coldata</span>,</span></span>
-<span class="r-in"><span>                               <span class="va">plot_args</span>, <span class="va">config</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                               <span class="va">gene_scratchpad</span>, <span class="va">upset_data</span>, <span class="va">config</span><span class="op">)</span></span></span>
 <span class="r-in"><span>           <span class="op">}</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>

@@ -13,7 +13,8 @@ set_config(
   fdr_threshold = NULL,
   log2fc_threshold = NULL,
   max_upload_size = NULL,
-  cores = NULL
+  cores = NULL,
+  pattern = NULL
 )
 ```
 
@@ -50,6 +51,11 @@ set_config(
 
   optional positive integer number of cores to use.
 
+- pattern:
+
+  optional character suffix pattern used to match dataset filenames
+  before the trailing `.rds`. Use `""` to match all RDS files.
+
 ## Value
 
 Updated config list, invisibly.
@@ -70,7 +76,8 @@ set_config(
   fdr_threshold = 0.05,
   log2fc_threshold = 1,
   max_upload_size = 50,
-  cores = 2
+  cores = 2,
+  pattern = "carnation"
 )
-#> Error in set_config(config_path = cfg_out, de_analysis = list(column_names = list(padj = "qvalue",     log2FoldChange = c("logFC", "avg_log2FC"))), fdr_threshold = 0.05,     log2fc_threshold = 1, max_upload_size = 50, cores = 2): could not find function "set_config"
+#> Error in set_config(config_path = cfg_out, de_analysis = list(column_names = list(padj = "qvalue",     log2FoldChange = c("logFC", "avg_log2FC"))), fdr_threshold = 0.05,     log2fc_threshold = 1, max_upload_size = 50, cores = 2, pattern = "carnation"): unused argument (pattern = "carnation")
 ```

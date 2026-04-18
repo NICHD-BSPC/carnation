@@ -9,7 +9,7 @@ experimental biologists, `carnation` makes exploring differential
 expression analysis, functional enrichment, and pattern analysis
 intuitive and accessible, while providing a platform to manage multiple
 complex RNA-Seq datasets either locally or on a server to share with
-collaborators (package version: 0.99.9).
+collaborators (package version: 0.99.10).
 
 Now, we will use the `airway` dataset to explore some of `carnation's`
 functionality.
@@ -848,7 +848,7 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] carnation_0.99.9            org.Hs.eg.db_3.20.0        
+#>  [1] carnation_0.99.10           org.Hs.eg.db_3.20.0        
 #>  [3] AnnotationDbi_1.68.0        GeneTonic_3.0.0            
 #>  [5] dplyr_1.2.1                 DESeq2_1.46.0              
 #>  [7] airway_1.26.0               SummarizedExperiment_1.36.0
@@ -896,7 +896,7 @@ sessionInfo()
 #>  [69] pillar_1.11.1               knitr_1.51                 
 #>  [71] ComplexHeatmap_2.22.0       fgsea_1.32.2               
 #>  [73] rjson_0.2.23                codetools_0.2-20           
-#>  [75] fastmatch_1.1-8             glue_1.8.0                 
+#>  [75] fastmatch_1.1-8             glue_1.8.1                 
 #>  [77] ggfun_0.2.0                 data.table_1.17.8          
 #>  [79] vctrs_0.7.3                 png_0.1-9                  
 #>  [81] treeio_1.30.0               gtable_0.3.6               
@@ -950,7 +950,7 @@ sessionInfo()
 #> [177] evaluate_1.0.5              BiocManager_1.30.27        
 #> [179] foreach_1.5.2               tweenr_2.0.3               
 #> [181] httpuv_1.6.17               backbone_2.1.5             
-#> [183] openssl_2.3.5               tidyr_1.3.2                
+#> [183] openssl_2.4.0               tidyr_1.3.2                
 #> [185] purrr_1.2.2                 polyclip_1.10-7            
 #> [187] reshape_0.8.10              heatmaply_1.6.0            
 #> [189] clue_0.3-68                 ggplot2_3.5.2              
