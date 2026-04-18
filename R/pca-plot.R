@@ -352,11 +352,15 @@ pcaPlotServer <- function(id, obj, coldata, config){
           need(input$pca_samples != '', 'Waiting for selection')
         )
 
+        # need the first rld obj to not be NULL
+        # to make sure the app object is fully loaded
+        req(app_object()$rld[1])
+
         if(input$pca_samples == 'all_samples'){
             cdata <- coldata.all()$curr[[ input$pca_samples ]]
             if(!is.null(app_object()$all_rld)){
                 rld <- app_object()$all_rld
-            } else if(length(app_object()$rld) == 1){
+            } else {
                 rld <- app_object()$rld[1]
             }
 

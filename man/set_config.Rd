@@ -10,7 +10,8 @@ set_config(
   fdr_threshold = NULL,
   log2fc_threshold = NULL,
   max_upload_size = NULL,
-  cores = NULL
+  cores = NULL,
+  pattern = NULL
 )
 }
 \arguments{
@@ -30,6 +31,10 @@ greater than or equal to 0.}
 \item{max_upload_size}{optional positive numeric upload limit in MB.}
 
 \item{cores}{optional positive integer number of cores to use.}
+
+\item{pattern}{optional character suffix pattern used to match dataset
+filenames before the trailing \code{.rds}. Use \code{""} to match all
+RDS files.}
 }
 \value{
 Updated config list, invisibly.
@@ -53,6 +58,7 @@ set_config(
   fdr_threshold = 0.05,
   log2fc_threshold = 1,
   max_upload_size = 50,
-  cores = 2
+  cores = 2,
+  pattern = "carnation"
 )
 }
