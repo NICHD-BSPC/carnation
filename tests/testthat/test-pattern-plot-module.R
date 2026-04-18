@@ -27,12 +27,8 @@ test_that("patternPlotServer generates pattern plot correctly", {
     )
   )
 
-  plot_args <- reactive({
-    list(
-      gene_scratchpad = c("gene1", "gene2"),
-      upset_data = list(genes = NULL, labels = NULL)
-    )
-  })
+  gene_scratchpad <- reactive({ c("gene1", "gene2") })
+  upset_data <- reactive({ list(genes = NULL, labels = NULL) })
 
   config <- reactiveVal(get_config())
 
@@ -40,7 +36,8 @@ test_that("patternPlotServer generates pattern plot correctly", {
     id = "test_pattern",
     obj = obj,
     coldata = coldata,
-    plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    upset_data = upset_data,
     config = config
   ), {
     # Set inputs
@@ -101,12 +98,8 @@ test_that("patternPlotServer handles gene_scratchpad labeling", {
     )
   )
 
-  plot_args <- reactive({
-    list(
-      gene_scratchpad = c("GENE1", "GENE2"),
-      upset_data = list(genes = NULL, labels = NULL)
-    )
-  })
+  gene_scratchpad <- reactive({ c("GENE1", "GENE2") })
+  upset_data <- reactive({ list(genes = NULL, labels = NULL) })
 
   config <- reactiveVal(get_config())
 
@@ -114,7 +107,8 @@ test_that("patternPlotServer handles gene_scratchpad labeling", {
     id = "test_pattern",
     obj = obj,
     coldata = coldata,
-    plot_args = plot_args,
+    gene_scratchpad = gene_scratchpad,
+    upset_data = upset_data,
     config = config
   ), {
     # Set inputs with gene_scratchpad labeling
@@ -147,3 +141,68 @@ test_that("patternPlotServer handles gene_scratchpad labeling", {
   })
 })
 
+test_that("patternPlotServer returns selected cluster membership genes", {
+  mock_dds <- create_mock_dds()
+  mock_degpatterns <- create_mock_degpatterns()
+
+  obj <- reactiveValues(
+    res = list(comp1 = create_mock_results()),
+    degpatterns = list(analysis1 = mock_degpatterns)
+  )
+
+  sample_coldata <- colData(mock_dds)
+  if(!"samplename" %in% colnames(sample_coldata)) {
+    sample_coldata$samplename <- rownames(sample_coldata)
+  }
+
+  coldata <- reactiveValues(
+    curr = list(
+      all_samples = sample_coldata
+    )
+  )
+
+  gene_scratchpad <- reactive({ character(0) })
+  upset_data <- reactive({ list(genes = NULL, labels = NULL) })
+  config <- reactiveVal(get_config())
+
+  testServer(patternPlotServer, args = list(
+    id = "test_pattern",
+    obj = obj,
+    coldata = coldata,
+    gene_scratchpad = gene_scratchpad,
+    upset_data = upset_data,
+    config = config
+  ), {
+    session$setInputs(
+      dp_analysis = "analysis1",
+      deg_facet = "cluster",
+      deg_time = "condition",
+      deg_color = "none",
+      deg_label = "gene_scratchpad",
+      facet_var_levels = c("1", "2", "3"),
+      deg_minc = 1,
+      deg_points = FALSE,
+      deg_lines = TRUE,
+      deg_boxes = TRUE,
+      deg_smooth = "line",
+      txt_scale = 1,
+      deg_rotate = 0,
+      deg_cluster = "cluster",
+      deg_cluster_levels = c("1", "2", "3")
+    )
+    session$flushReact()
+
+    tbl <- degtable()
+    expect_true(nrow(tbl) > 0)
+
+    session$setInputs(dp_table_rows_selected = 1)
+    session$setInputs(add_selected = 1)
+    session$flushReact()
+
+    returned <- session$getReturned()()
+    expected_gene <- if(!is.na(tbl$symbol[1]) && tbl$symbol[1] != "") tbl$symbol[1] else tbl$genes[1]
+
+    expect_true("genes" %in% names(returned))
+    expect_true(expected_gene %in% returned$genes)
+  })
+})

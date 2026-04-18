@@ -7,6 +7,7 @@
 #' @importFrom dplyr mutate relocate select filter any_of "%>%" rename inner_join case_when all_of
 #' arrange everything
 #' @importFrom DT renderDT DTOutput datatable formatStyle formatSignif dataTableProxy selectRows selectCells
+#' selectPage
 #' @importFrom enrichplot cnetplot
 #' @importFrom GeneTonic cluster_markov distill_enrichment gs_horizon
 #' gs_summary_overview gs_summary_overview_pair enrichment_map gs_dendro

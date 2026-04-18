@@ -86,7 +86,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         column(2,
           introBox(
             saveUI('save_object'),
-            data.step=7,
+            data.step=11,
             data.intro='Use this button at any point to save the modified object'
           ), # introBox
           offset=-1
@@ -143,7 +143,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               tooltip = tooltipOptions(title = "Global settings")
 
             ), # dropdownButton
-            data.step=3,
+            data.step=8,
             data.intro='Click this button to access global settings'
           ), # introBox
 
@@ -325,7 +325,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
             ), # dropdownButton
 
-            data.step=4,
+            data.step=9,
             data.intro='Here you will find specific controls to adjust plots or tables'
           ), # introBox
 
@@ -409,11 +409,11 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               tooltip = tooltipOptions(title = "Gene scratchpad")
 
             ), # dropdownButton
-            data.step=6,
+            data.step=10,
             data.intro='Keep track of your favorite genes or quickly select top genes with the "Gene scratchpad" here'
           ), # introBox
 
-          data.step=2,
+          data.step=7,
           data.intro='You can use controls shown in this area to filter data or adjust plots and tables.'
         ) # fluidRow
       ) # introBox
@@ -421,34 +421,77 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     mainPanel(width=11,
 
-      introBox(
+      tags$div(
         tabsetPanel(type='tabs',
                     id='mode',
 
           tabPanel('Load data',
             fluidRow(
-              column(3,
-                selectInput('data_type', label='Type of data',
-                            choices=c('Existing', 'New', 'Edit')),
+              column(2,
+                introBox(
+                  selectInput('data_type', label='Type of data',
+                              choices=c('Existing', 'New', 'Edit')),
+                  data.step=1,
+                  data.intro='Choose whether you want to load an existing project, create a new one, or edit the currently loaded object.'
+                ),
 
                 conditionalPanel('input.data_type == "Existing"',
-                    selectizeInput('dds',
-                                   label=h5('Available projects'),
-                                   choices=NULL,
-                                   selected=NULL
-                    ), # selectizeInput
-                    selectizeInput('assay',
-                                   label=h5('Available analyses'),
-                                   choices=NULL,
-                                   selected=NULL
-                    ), # selectizeInput
-                    actionButton('assay_do', label='Go!',
-                                 class='btn-primary')
+                    introBox(
+                      selectizeInput('dds',
+                                     label=h5('Available projects'),
+                                     choices=NULL,
+                                     selected=NULL,
+                                     width='100%'
+                      ), # selectizeInput
+                      data.step=2,
+                      data.intro='Select the project you want to work with.'
+                    ),
+                    introBox(
+                      selectizeInput('assay',
+                                     label=h5('Available analyses'),
+                                     choices=NULL,
+                                     selected=NULL,
+                                     width='100%'
+                      ), # selectizeInput
+                      data.step=4,
+                      data.intro='Next, select the analysis to load for the chosen project.'
+                    ),
+                    introBox(
+                      actionButton('assay_do', label='Go!',
+                                   class='btn-primary'),
+                      data.step=6,
+                      data.intro='Finally, click this button to load the selected project and analysis into carnation.'
+                    ),
+
+                    br(), br(),
+                    uiOutput('current_obj')
+
                 ) # conditionalPanel
               ), # column
-              column(9, style='margin-top: 20px',
+              column(10, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
-                  DTOutput('analysis_desc')
+                  column(6,
+
+                    introBox(
+                      tags$div(
+                        DTOutput('project_desc')
+                      ),
+
+                      data.step=3,
+                      data.intro='Alternatively, use this table to review available projects and click a row to update the project dropdown.'
+                    )
+                  ),
+                  conditionalPanel('input.dds != "" & input.dds != "Choose one"',
+                    column(6,
+                      introBox(
+                        tags$div(
+                          DTOutput('analysis_desc')
+                        ),
+                        data.step=5,
+                        data.intro='Or, use this table to review analyses for the selected project and click a row to populate the analysis dropdown.'
+                      )
+                    )
+                  )
                 ) # conditionalPanel
               )
             ), # fluidRow
@@ -457,10 +500,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               uiOutput('load_ui')
             ),  # withSpinner
 
-            br(),
-            fluidRow(
-              column(3, uiOutput('current_obj'))
-            ) # fluidRow
           ), # tabPanel
 
           tabPanel('DE analysis',
@@ -597,10 +636,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
             uiOutput('settings_main')
           ) # tabPanel settings
 
-        ), # tabsetPanel mode
-        data.step=1,
-        data.intro='Choose project and analysis and click "Go".\n\nOnce the data is loaded, use tabs to explore and navigate'
-      ) # introBox
+        ) # tabsetPanel mode
+      ) # tags$div
     ) # mainPanel
 
   ) # ui
@@ -661,7 +698,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     user_details <- reactiveValues(username=NULL, admin=FALSE)
 
     # list to hold project/analysis descriptions
-    project_info <- reactiveValues(descriptions=list(), current=NULL)
+    project_info <- reactiveValues(descriptions=list(), current=NULL, df=NULL)
 
     #################### config updates ####################
 
@@ -780,6 +817,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       l <- settings()
 
       project_info$descriptions <- l$project_descriptions
+      project_info$df <- l$proj_df
 
       validate(
          need(!is.null(l$assay_list), 'No projects found')
@@ -885,11 +923,37 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     observeEvent(c(input$dds, assay.list$l), {
       l <- assay.list$l
 
+      req(input$dds)
+
       validate(
-        need(!is.null(input$dds), '')
+        need(input$dds != '' & input$dds != 'Choose one', '')
       )
 
       assay.choices <- l[[input$dds]]
+
+      # parse project name and update global tbl selection
+      parsed_name <- strsplit(input$dds, .Platform$file.sep, fixed=TRUE)[[1]]
+      tbl <- project_info$df
+
+      # get row index by matching 'group' and 'project'
+      proj_info_idx <- which(tbl[,'group'] == parsed_name[1] & tbl[,'project'] == parsed_name[2])
+
+      if(length(proj_info_idx) > 0){
+        # get idx relative to current sort order
+        current_idx <- which(input$project_desc_rows_all == proj_info_idx[1])
+
+        # get page index, falling back before table state is available
+        page_length <- input$project_desc_state$length
+        if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
+          page_length <- 10
+        }
+        page_idx <- floor((current_idx - 1) / page_length) + 1
+
+        # update tbl: clear selection, add new selection, scroll to page
+        project_desc_proxy %>% selectRows(NULL) %>%
+          selectRows(proj_info_idx[1]) %>%
+          selectPage(page_idx)
+      }
 
       # if project description exists, order assay choices by description names
       proj_desc <- project_info$descriptions[[ input$dds ]]
@@ -920,6 +984,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     }) # observeEvent
 
+    #################### analysis description summary ####################
+
     output$analysis_desc <- renderDT({
       req(input$dds)
 
@@ -930,14 +996,109 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       datatable(df,
                 rownames=FALSE,
-                selection='none',
+                selection='single',
                 caption=tags$caption(style='font-weight: bold; font-size: 15px;',
                                      'Summary of available analyses'),
-                options=list(dom='tlp'))
+                options=list(dom='tp', stateSave=TRUE))
+    })
+
+    # proxy for analysis description table
+    analysis_desc_proxy <- dataTableProxy('analysis_desc')
+
+    # return 'group/project' from table selection
+    analysis_from_tbl <- eventReactive(input$analysis_desc_rows_selected, {
+      all_analysis <- names(project_info$descriptions[[ input$dds ]])
+      sel <- input$analysis_desc_rows_selected
+
+      # these are the datasets for the current project
+      current_assays <- assay.list$l[[ input$dds ]]
+
+      # match the selected name to the current assays
+      # since the order might be different (due to sorting)
+      idx <- which(names(current_assays) %in% all_analysis[sel])
+
+      current_assays[idx]
+    }) # observeEvent
+
+    # update 'assay' input based on selection
+    observeEvent(analysis_from_tbl(), {
+      updateSelectizeInput(session, 'assay',
+                           selected=analysis_from_tbl())
+    })
+
+    # update selection based on 'assay'
+    observeEvent(input$assay, {
+      validate(
+        need(!is.null(input$assay) & input$assay != '' & input$assay != 'Choose one',
+             'No assay selected!')
+      )
+
+      # get name of assay
+      current_assays <- assay.list$l[[ input$dds ]]
+      assay_idx <- which(unname(current_assays) %in% input$assay)
+      assay_name <- names(current_assays)[assay_idx]
+
+      # match to description
+      current_desc <- project_info$descriptions[[ input$dds ]]
+
+      validate(
+        need(length(current_desc) > 0, 'no project descriptions')
+      )
+      desc_idx <- which(names(current_desc) %in% assay_name)
+
+      if(length(desc_idx) == 0){
+        analysis_desc_proxy %>% selectRows(NULL)
+        return()
+      }
+
+      # get idx relative to current sort order
+      current_idx <- which(input$analysis_desc_rows_all == desc_idx[1])
+
+      # get page index
+      page_length <- input$analysis_desc_state$length
+      if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
+        page_length <- 10
+      }
+      page_idx <- floor((current_idx - 1) / page_length) + 1
+
+      # update tbl selection
+      analysis_desc_proxy %>% selectRows(NULL) %>%
+        selectRows(desc_idx[1]) %>% selectPage(page_idx)
 
     })
 
-    # observer to load data
+    #################### global project summary ####################
+
+    output$project_desc <- renderDT({
+      req(project_info$df)
+
+      datatable(project_info$df,
+                rownames=FALSE,
+                selection='single',
+                caption=tags$caption(style='font-weight: bold; font-size: 15px;',
+                                     'Summary of available projects'),
+                options=list(dom='tfip', stateSave=TRUE))
+    })
+
+    # proxy for project table
+    project_desc_proxy <- dataTableProxy('project_desc')
+
+    # return 'group/project' from table selection
+    proj_from_tbl <- eventReactive(input$project_desc_rows_selected, {
+      tbl <- project_info$df
+      sel <- input$project_desc_rows_selected
+
+      paste(tbl[sel,'group'], tbl[sel, 'project'], sep=.Platform$file.sep)
+    }) # observeEvent
+
+    # update 'dds' input based on table selection
+    observeEvent(proj_from_tbl(), {
+      updateSelectizeInput(session, 'dds',
+                           selected=proj_from_tbl())
+    })
+
+    #################### observer to load data ####################
+
     observeEvent(input$assay_do, {
       validate(
         need(!is.null(input$assay) & input$assay != '' & input$assay != 'Choose one',
@@ -1187,7 +1348,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       fdr.thres <- ifelse(input$fdr.thres == '' | is.na(input$fdr.thres),
                           config()$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
 
-      df <- summarize.res.list(app_object$res, app_object$dds, app_object$dds_mapping,
+      df <- summarize_res_list(app_object$res, app_object$dds, app_object$dds_mapping,
                                alpha=fdr.thres,
                                lfc.thresh=fc.thres,
                                app_object$labels)
@@ -1302,14 +1463,20 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
             df <- df[idx,]
         }
 
-        sidx <- grep('symbol', colnames(df), ignore.case=TRUE)
-        colnames(df)[sidx] <- tolower(colnames(df)[sidx])
+        df <- as.data.frame(df)
+
+        sidx <- which(tolower(colnames(df)) == 'symbol')
+        if(length(sidx) > 0){
+          colnames(df)[sidx] <- tolower(colnames(df)[sidx])
+          symbol.col <- sidx[1]
+        } else {
+          symbol.col <- NULL
+        }
 
         if(!'gene' %in% colnames(df))
           df$gene <- sub('\\.\\d+$','',rownames(df))
 
         gene.col <- 'gene'
-        symbol.col <- ifelse('symbol' %in% colnames(df), 'symbol', 'SYMBOL')
 
         cols.to.drop <- config()$server$de_analysis$de_table$cols.to.drop
         df <- df %>% as.data.frame %>%
@@ -1547,16 +1714,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     ######################## DEG patterns ########################
 
-    pattern_plot_args <- reactive({
-      list(
-        gene_scratchpad=gene_scratchpad(),
-        upset_data=list(genes=upset_table$intersections,
-                        labels=upset_table$set_labels)
-      )
-    })
+    pattern_data <- patternPlotServer('deg_plot', app_object, coldata.all,
+                                      gene_scratchpad,
+                                      reactive({
+                                        list(genes=upset_table$intersections,
+                                             labels=upset_table$set_labels)
+                                      }),
+                                      config)
 
-    patternPlotServer('deg_plot', app_object, coldata.all,
-                      pattern_plot_args, config)
+    observeEvent(pattern_data(), {
+      g <- pattern_data()$genes
+
+      if(length(setdiff(g, input$gene.to.plot)) != 0){
+        updateSelectizeInput(session, 'gene.to.plot',
+                             choices=gene.id$gene,
+                             selected=g,
+                             server=TRUE)
+      }
+    })
 
     ######################### Help buttons #######################
 
