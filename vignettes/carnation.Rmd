@@ -4,11 +4,11 @@ author: "Apratim Mitra"
 date: "`r format(Sys.Date(), '%m/%d/%Y')`"
 abstract: >
   `carnation` is an interactive Shiny dashboard that simplifies and transforms
-  complex bulk RNA-Seq data using insightful visualizations and numerous
+  complex bulk RNA-Seq and multi-omic data using insightful visualizations and numerous
   interactive features. Designed for both computational and experimental
-  biologists, `carnation` makes exploring differential expression analysis,
-  functional enrichment, and pattern analysis intuitive and accessible, while
-  providing a platform to manage multiple complex RNA-Seq datasets either
+  biologists, `carnation` unifies three facets of differential expression analysis,
+  functional enrichment, and pattern analysis making data exploration intuitive
+  and accessible, while also providing a platform to manage multiple datasets either
   locally or on a server to share with collaborators (package version:
   `r packageVersion("carnation")`).
 output:
@@ -468,6 +468,7 @@ Then access Carnation by opening the URL: `http://127.0.0.1:12345`
 - Now carnation will automatically refresh and you will see `data/airway` in the "Available Projects"
   menu, and `carnation_vignette` in the "Available Datasets".
 
+  On the right, you will see a table summarizing the projects available to carnation.
   Since this is the only dataset we have, these options are automatically selected.
   Now click 'Go' to load the data.
 
