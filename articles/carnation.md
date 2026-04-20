@@ -3,13 +3,13 @@
 Abstract
 
 `carnation` is an interactive Shiny dashboard that simplifies and
-transforms complex bulk RNA-Seq data using insightful visualizations and
-numerous interactive features. Designed for both computational and
-experimental biologists, `carnation` makes exploring differential
-expression analysis, functional enrichment, and pattern analysis
-intuitive and accessible, while providing a platform to manage multiple
-complex RNA-Seq datasets either locally or on a server to share with
-collaborators (package version: 0.99.10).
+transforms complex bulk RNA-Seq and multi-omic data using insightful
+visualizations and numerous interactive features. Designed for both
+computational and experimental biologists, `carnation` unifies three
+facets of differential expression analysis, functional enrichment, and
+pattern analysis making data exploration intuitive and accessible, while
+also providing a platform to manage multiple datasets either locally or
+on a server to share with collaborators (package version: 0.99.11).
 
 Now, we will use the `airway` dataset to explore some of `carnation's`
 functionality.
@@ -578,8 +578,9 @@ Then access Carnation by opening the URL: `http://127.0.0.1:12345`
   `data/airway` in the “Available Projects” menu, and
   `carnation_vignette` in the “Available Datasets”.
 
-  Since this is the only dataset we have, these options are
-  automatically selected. Now click ‘Go’ to load the data.
+  On the right, you will see a table summarizing the projects available
+  to carnation. Since this is the only dataset we have, these options
+  are automatically selected. Now click ‘Go’ to load the data.
 
   ![](images/02_pre_load.png)
 
@@ -848,7 +849,7 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] carnation_0.99.10           org.Hs.eg.db_3.20.0        
+#>  [1] carnation_0.99.11           org.Hs.eg.db_3.20.0        
 #>  [3] AnnotationDbi_1.68.0        GeneTonic_3.0.0            
 #>  [5] dplyr_1.2.1                 DESeq2_1.46.0              
 #>  [7] airway_1.26.0               SummarizedExperiment_1.36.0

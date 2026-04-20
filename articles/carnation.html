@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.99.11</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@
                         <h4 data-toc-skip class="author">Apratim
 Mitra</h4>
             
-            <h4 data-toc-skip class="date">04/18/2026</h4>
+            <h4 data-toc-skip class="date">04/20/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/NICHD-BSPC/carnation/blob/main/vignettes/carnation.Rmd" class="external-link"><code>vignettes/carnation.Rmd</code></a></small>
       <div class="d-none name"><code>carnation.Rmd</code></div>
@@ -64,14 +64,15 @@ Mitra</h4>
         <div class="abstract">
       <p class="abstract">Abstract</p>
       <p><code>carnation</code> is an interactive Shiny dashboard that
-      simplifies and transforms complex bulk RNA-Seq data using
-      insightful visualizations and numerous interactive features.
+      simplifies and transforms complex bulk RNA-Seq and multi-omic data
+      using insightful visualizations and numerous interactive features.
       Designed for both computational and experimental biologists,
-      <code>carnation</code> makes exploring differential expression
-      analysis, functional enrichment, and pattern analysis intuitive
-      and accessible, while providing a platform to manage multiple
-      complex RNA-Seq datasets either locally or on a server to share
-      with collaborators (package version: 0.99.10).</p>
+      <code>carnation</code> unifies three facets of differential
+      expression analysis, functional enrichment, and pattern analysis
+      making data exploration intuitive and accessible, while also
+      providing a platform to manage multiple datasets either locally or
+      on a server to share with collaborators (package version:
+      0.99.11).</p>
     </div>
     
 <p>Now, we will use the <code>airway</code> dataset to explore some of
@@ -545,7 +546,8 @@ where your data is located with a modal dialog.</p>
 <p>Now carnation will automatically refresh and you will see
 <code>data/airway</code> in the “Available Projects” menu, and
 <code>carnation_vignette</code> in the “Available Datasets”.</p>
-<p>Since this is the only dataset we have, these options are
+<p>On the right, you will see a table summarizing the projects available
+to carnation. Since this is the only dataset we have, these options are
 automatically selected. Now click ‘Go’ to load the data.</p>
 <p><img src="images/02_pre_load.png" width="600"></p>
 <p>Now carnation will load the airway data and switch to the “Summary”
@@ -800,7 +802,7 @@ coexpression analysis methods, e.g. <em><a href="https://CRAN.R-project.org/pack
 <span><span class="co">#&gt; [8] base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt;  [1] carnation_0.99.10           org.Hs.eg.db_3.20.0        </span></span>
+<span><span class="co">#&gt;  [1] carnation_0.99.11           org.Hs.eg.db_3.20.0        </span></span>
 <span><span class="co">#&gt;  [3] AnnotationDbi_1.68.0        GeneTonic_3.0.0            </span></span>
 <span><span class="co">#&gt;  [5] dplyr_1.2.1                 DESeq2_1.46.0              </span></span>
 <span><span class="co">#&gt;  [7] airway_1.26.0               SummarizedExperiment_1.36.0</span></span>

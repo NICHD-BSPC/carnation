@@ -79,5 +79,4 @@ set_config(
   cores = 2,
   pattern = "carnation"
 )
-#> Error in set_config(config_path = cfg_out, de_analysis = list(column_names = list(padj = "qvalue",     log2FoldChange = c("logFC", "avg_log2FC"))), fdr_threshold = 0.05,     log2fc_threshold = 1, max_upload_size = 50, cores = 2, pattern = "carnation"): unused argument (pattern = "carnation")
 ```

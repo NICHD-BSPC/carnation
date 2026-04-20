@@ -93,5 +93,4 @@ dds_mapping <- list(comp1='main', comp2='main')
 
 # get summary
 df <- summarize_res_list(res_list, dds_list, dds_mapping, alpha=0.1, lfc.thresh=0)
-#> Error in summarize_res_list(res_list, dds_list, dds_mapping, alpha = 0.1,     lfc.thresh = 0): could not find function "summarize_res_list"
 ```
