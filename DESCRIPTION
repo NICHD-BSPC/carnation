@@ -1,6 +1,6 @@
 Package: carnation
 Title: Interactive Exploration & Management of RNA-Seq Analyses
-Version: 1.0.0
+Version: 1.1.0
 Authors@R:
     c(
         person("Apratim", "Mitra", , "apratim.mitra@gmail.com",
