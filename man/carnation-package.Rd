@@ -32,10 +32,11 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Apratim Mitra \email{apratim.mitra@nih.gov} (\href{https://orcid.org/0000-0003-3279-0054}{ORCID})
+\strong{Maintainer}: Apratim Mitra \email{apratim.mitra@gmail.com} (\href{https://orcid.org/0000-0003-3279-0054}{ORCID})
 
 Other contributors:
 \itemize{
+  \item Matthew Tyler Menold \email{matthew.menold@gmail.com} (\href{https://orcid.org/0009-0007-4728-2470}{ORCID}) [contributor]
   \item Ryan Dale \email{ryan.dale@nih.gov} (\href{https://orcid.org/0000-0003-2664-3744}{ORCID}) [funder]
 }
 

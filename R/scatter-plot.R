@@ -6,8 +6,9 @@
 #' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main' passed to UI
 #' @param obj reactiveValues object containing carnation object passed to server
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC) &
-#' 'gene.to.plot' (genes to be labeled) passed to server
+#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC)
+#' @param gene_scratchpad reactive containing gene scratchpad genes
+#' @param reset_genes reactive to reset gene scratchpad selection
 #' @param config reactive list with config settings passed to server
 #'
 #' @returns
@@ -32,10 +33,12 @@
 #' plot_args <- reactive({
 #'   list(
 #'     fdr.thres=0.1,
-#'     fc.thres=0,
-#'     gene.to.plot=c('gene1', 'gene2')
+#'     fc.thres=0
 #'   )
 #' })
+#'
+#' gene_scratchpad <- reactive({ c('gene1', 'gene2') })
+#' reset_genes <- reactiveVal()
 #'
 #' config <- reactiveVal(get_config())
 #'
@@ -45,7 +48,8 @@
 #'          mainPanel(scatterPlotUI('p', 'sidebar'))
 #'        ),
 #'   server = function(input, output, session){
-#'              scatterPlotServer('p', obj, plot_args, config)
+#'              scatter_data <- scatterPlotServer('p', obj, plot_args,
+#'                                gene_scratchpad, reset_genes, config)
 #'            }
 #' )
 #'
@@ -102,16 +106,6 @@ scatterPlotUI <- function(id, panel){
         column(6, h5('Interactive?')),
         column(6,
           selectInput(ns("plot_interactive"), label=NULL,
-                      choices=c('yes', 'no'),
-                      selected='yes'
-          ) # selectInput
-        ) # column
-      ), # fluidRow
-
-      fluidRow(
-        column(6, h5('Show table?')),
-        column(6,
-          selectInput(ns("show_table"), label=NULL,
                       choices=c('yes', 'no'),
                       selected='yes'
           ) # selectInput
@@ -285,23 +279,75 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      withSpinner(
-        uiOutput(ns('scatterplot_out'))
-      ), # withSpinner
+      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "yes"'),
+        withSpinner(
+          plotlyOutput(ns('plotly_out'), height='600px')
+        )
+      ), # conditionalPanel
+      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "no"'),
+        withSpinner(
+          plotOutput(ns('plot_out'), height='600px')
+        )
+      ), # conditionalPanel
 
-      withSpinner(
-        DTOutput(ns('scatter_datatable_out'))
-      ) # withSpinner
+      fluidRow(
+        column(3,
 
-     # conditionalPanel("input.show_table == 'yes'",
-     # ) # conditionalPanel
+          h4('Selection settings'),
+
+          bsCollapse(open='Plot selection',
+            bsCollapsePanel('Plot selection',
+              fluidRow(style='margin-left: 2px;',
+                uiOutput(ns('pt_selected')),
+                actionButton(ns('filter_sel_do'),
+                             label='Show/Hide in table'),
+                actionButton(ns('reset_plt_selection'),
+                                'Clear',
+                                class='btn-primary')
+              ) # fluidRow
+            ) # bsCollapsePanel
+          ), # bsCollapse
+
+          bsCollapse(open='Table selection',
+            bsCollapsePanel('Table selection',
+              fluidRow(style='margin-left: 2px;',
+                actionButton(ns('add_selected'), 'Add to scratchpad'),
+                actionButton(ns('reset_tbl'),
+                             'Clear selection',
+                             class='btn-primary')
+              ) # fluidRow
+            ) # bsCollapsePanel
+          ), # bsCollapse
+
+          h4('Filter table by significance'),
+          selectizeInput(ns('filter_tbl'), label=NULL, width='100%',
+                         choices=NULL, selected=NULL, multiple=TRUE),
+
+          # For 'Select all' and 'Select none' buttons
+          fluidRow(style='margin-bottom: 5px; margin-left: 2px;',
+            actionButton(ns('select_all'), 'Select all', class = "btn-secondary"),
+            actionButton(ns('select_none'), 'Select none', class = "btn-secondary"),
+            actionButton(ns('filter_tbl_do'),
+                         label='Apply',
+                         icon=icon('filter'),
+                         class='btn-primary')
+          ) # fluidRow
+
+        ), # column
+        column(9, style='margin-top: 10px;',
+          withSpinner(
+            DTOutput(ns('scatter_tbl'))
+          ) # withSpinner
+        ) # column
+      ) # fluidRow
+
     ) # tagList
   } # else if panel='main'
 } # scatterPlotUI
 
 #' @rdname scattermod
 #' @export
-scatterPlotServer <- function(id, obj, plot_args, config){
+scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
 
   moduleServer(
     id,
@@ -332,8 +378,20 @@ scatterPlotServer <- function(id, obj, plot_args, config){
       df_react <- reactiveVal(NULL)
       df_full <- reactiveVal(NULL)
 
+      # reactive to hold plot source
+      plot_source <- reactiveVal(NULL)
+
       # reactive values to keep track of axis limits
       axis_limits <- reactiveValues(lim.x=NULL, lim.y=NULL)
+
+      # reactive to hold labeled genes
+      genes_clicked <- reactiveValues(g=NULL)
+
+      # reactive to hold selected genes
+      selected_genes <- reactiveValues(g=NULL)
+
+      # reactive to toggle table selection by selected genes
+      filter_tbl_by_sel_genes <- reactiveVal(FALSE)
 
       # Initialize comparison selection dropdowns when data is available
       observeEvent(comp_all(), {
@@ -351,7 +409,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
 
         df_react(NULL)
         df_full(NULL)
-        })
+      })
       # -------------------------------------------------------------- #
 
       # --------------- Set FDR and FC thresholds ---------------- #
@@ -369,6 +427,21 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         curr_thres$fdr.thres <- fdr.thres
         curr_thres$fc.thres <- fc.thres
       })
+
+      # gene scratchpad
+
+      observeEvent(gene_scratchpad(), {
+        g <- gene_scratchpad()
+        if(any(g != '')){
+          if(!all(g %in% genes_clicked$g))
+            genes_clicked$g <- unique(c(genes_clicked$g, g))
+        }
+      })
+
+      observeEvent(reset_genes(), {
+        genes_clicked$g <- NULL
+      })
+
       # ------------------------------------------------------------#
 
       # ------------- helper functions -----------------------------#
@@ -424,7 +497,8 @@ scatterPlotServer <- function(id, obj, plot_args, config){
              input$x_axis_comp,
              input$y_axis_comp,
              curr_thres$fc.thres,
-             curr_thres$fdr.thres)
+             curr_thres$fdr.thres,
+             genes_clicked$g)
       }, {
 
         req(app_object()$res)
@@ -552,14 +626,33 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         }
 
         # Significance as factor, to reorder in the graph
-        df$significance <- factor(df$significance, levels = c('None', label_i, label_j, 'Both - opposite LFC sign', 'Both - same LFC sign'))
+        sig_levels <- c('None', label_i, label_j,
+                        'Both - opposite LFC sign', 'Both - same LFC sign')
+        df$significance <- factor(df$significance, levels = sig_levels)
 
         # Store the dataframe in the df_react reactiveVal
+        updateSelectizeInput(session, 'filter_tbl', choices=sig_levels, selected=sig_levels)
+
         df_react(df)
         df_full(df_full)
 
         flags$data_loaded <- flags$data_loaded + 1
       })
+
+      # observers for tbl filters
+      observeEvent(input$select_all, {
+        # Get all possible comparison options
+        all_sig <- levels(df_react()$significance)
+        # Update the select_none checkbox
+        updateSelectizeInput(session, 'filter_tbl', selected=all_sig)
+      })
+
+      # Observer for Select none checkbox
+      observeEvent(input$select_none, {
+        # Update comp_all with no selected comparisons
+        updateSelectizeInput(session, 'filter_tbl', selected=character(0))
+      })
+
       # ---------------------------------------------------------- #
 
       # --------------- Swap comparisons button  ----------------- #
@@ -647,8 +740,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         }
 
         # filter rows with NA values
-        df <- df %>% filter(!is.na(.data[[ xcol ]]))
-        df <- df %>% filter(!is.na(.data[[ xcol ]]))
+        df <- df %>% filter(!is.na(.data[[ xcol ]]), !is.na(.data[[ ycol ]]))
 
         # Create column with plotting character based on lim.x
         # Change point values for those outside plot limits to values that are within the limits
@@ -698,7 +790,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         )
 
         # Get genes to label
-        genes <- plot_args()$gene.to.plot
+        genes <- genes_clicked$g
         if(is.null(genes) || all(genes %in% '')){
             lab.genes <- NULL
         } else {
@@ -764,7 +856,7 @@ scatterPlotServer <- function(id, obj, plot_args, config){
         lab.genes <- params[['lab.genes']]
         color.palette <- params[['color.palette']]
 
-        plotScatter.label_ly(
+        p <- plotScatter.label_ly(
           compare=input$compare,
           df=df,
           label_x=input$x_axis_comp,
@@ -777,93 +869,230 @@ scatterPlotServer <- function(id, obj, plot_args, config){
           size=input$size,
           show.grid=input$show_grid,
           color.palette=color.palette,
-          lab.genes=lab.genes
+          lab.genes=lab.genes,
+          source='scatter'
         )
 
-     }) # eventReactive scatterplot_ly
+        # save plot source to reactive
+        plot_source('scatter')
+
+        event_register(p, 'plotly_selected')
+
+        p
+      }) # eventReactive scatterplot_ly
       # ----------------------------------------------------- #
 
-      # ---------------------- renerUI ---------------------- #
-      output$scatterplot_out <- renderUI({
-        if (input$plot_interactive == 'yes') {
+      output$plotly_out <- renderPlotly({
+        scatterplot_ly()
+      })
 
-          p <- scatterplot_ly() %>% toWebGL()
+      output$plot_out <- renderPlot({
+        scatterplot() + theme(text=element_text(size=18))
+      })
 
-          output$plot1 <- renderPlotly({ p })
+      #################### point selection ####################
 
-          withSpinner(
-            plotlyOutput(ns('plot1'), height='600px')
+      plotProxy <- plotlyProxy('plotly_out', session)
+
+      get_pt_selected <- reactive({
+        req(plot_source())
+        event_data('plotly_selected', source=plot_source())
+      })
+
+      observeEvent(get_pt_selected(), {
+        df <- get_pt_selected()
+
+        data_df <- df_full()
+        xcol <- paste0(input$compare, '.x')
+        ycol <- paste0(input$compare, '.y')
+
+        # get points by matching coords & key
+        keys <- paste(df$x, df$y)
+        data_keys <- paste(data_df[, xcol], data_df[, ycol])
+
+        new <- data_df$geneid[data_keys %in% keys]
+        curr <- unique(unlist(selected_genes$g))
+
+        # only add new points
+        if(!all(new %in% curr)){
+          new_idx <- which(!new %in% curr)
+          showNotification(
+              paste0('Adding ', length(new_idx), ' genes to selection')
           )
 
-        } else if (input$plot_interactive == 'no') {
-
-          p <- scatterplot() + theme(text=element_text(size=18))
-
-          output$plot2 <- renderPlot({ p })
-
-          withSpinner(
-            plotOutput(ns('plot2'), height='600px')
+          selected_genes$g[[ length(selected_genes$g) + 1 ]] <- new[new_idx]
+        } else if(length(new) > 0){
+          showNotification(
+              paste0('All selected genes already in selection'),
+              type='warning'
           )
         }
-      }) # renderUI
+      })
+
+      output$pt_selected <- renderUI({
+        np <- length(unique(unlist(selected_genes$g)))
+
+        tagList(
+          fluidRow(
+            column(12, style='margin-bottom: 10px;',
+
+              paste(np, 'genes selected')
+            )
+          )
+        )
+      })
+
+      observeEvent(input$reset_plt_selection, {
+        selected_genes$g <- NULL
+      })
+
+      observeEvent(input$filter_sel_do, {
+        filter_tbl_by_sel_genes(!filter_tbl_by_sel_genes())
+      })
+
       # ------------------------------------------------------- #
 
       # -------------------- renerDataTable  ------------------ #
-      # Optionally display datatable for scatter plot input data
-      output$scatter_datatable_out <- renderDT({
-        if (input$show_table == 'yes') {
-          validate(
-            need(!is.null(df_full()), '')
-          )
-          df <- df_full()
+      scatter_dt <- eventReactive(c(df_react(), input$x_axis_comp, input$y_axis_comp,
+                                    input$filter_tbl_do, filter_tbl_by_sel_genes()), {
+        validate(
+          need(!is.null(df_full()), '')
+        )
+        df <- df_full()
 
-          # move geneid to beginning to work with container
-          df <- df %>% relocate('geneid')
+        # add significance column
+        sig_df <- df_react()
 
-          # Define the columns to format to 3 sig figs
-          columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
-          which_cols <- which(colnames(df) %in% columns_to_format)
-          border_cols <- c(1, grep('padj', colnames(df)))
+        # map geneid to significance
+        sigvec <- sig_df$significance
+        names(sigvec) <- sig_df$geneid
+        df$significance <- sigvec[df$geneid]
 
-          all_comps <- c(input$x_axis_comp, input$y_axis_comp)
-          validate(
-            need(!any(is.null(all_comps)), 'Waiting for selection')
-          )
+        if(filter_tbl_by_sel_genes()){
+          idx <- df$geneid %in% unique(unlist(selected_genes$g))
 
-          # build container for table
-          sketch <- htmltools::withTags(table(
-            class = 'display',
-            tags$thead(
-              tags$tr(
-                tags$th(rowspan=2, 'geneid'),
-                lapply(all_comps,
-                       function(x) tags$th(class='dt-center', colspan=2, x))
-              ),
-              tags$tr(
-                lapply(rep(c('log2FoldChange', 'padj'), 2), tags$th)
-              )
+          if(sum(idx) == 0){
+            showNotification(
+              'No rows left in table after filtering', type='error'
             )
-          ))
 
-          df %>%
-            datatable(rownames=FALSE,
-                      selection='none',
-                      container=sketch,
-                      options=list(autoWidth=TRUE,
-                                   columnDefs=list(list(className='dt-center',
-                                                        targets=seq_len((ncol(df)-1)))))) %>%
-            formatStyle(columns=border_cols,
-                        'border-right'='solid 1px') %>%
-            formatSignif(columns=which_cols, digits=5)
-        } # if show_table == 'yes'
+            validate(need(sum(idx) > 0, ''))
+          }
+          df <- df[idx,]
+        }
+
+        # get current filters
+        curr_filters <- input$filter_tbl
+        idx <- df$significance %in% curr_filters
+        if(sum(idx) == 0){
+          showNotification(
+            'No rows left in table after filtering', type='error'
+          )
+
+          validate(need(sum(idx) > 0, ''))
+        }
+        # move geneid & significance to beginning to work with container
+        df[which(idx),] %>% relocate('significance') %>% relocate('geneid')
+
+      })
+
+      # Optionally display datatable for scatter plot input data
+      output$scatter_tbl <- renderDT({
+        validate(
+          need(!is.null(scatter_dt()), '')
+        )
+        df <- scatter_dt()
+
+        # Define the columns to format to 3 sig figs
+        columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
+        which_cols <- which(colnames(df) %in% columns_to_format)
+        border_cols <- c(1, 2, grep('padj', colnames(df)))
+
+        all_comps <- c(input$x_axis_comp, input$y_axis_comp)
+        validate(
+          need(!any(is.null(all_comps)), 'Waiting for selection')
+        )
+
+        # build container for table
+        sketch <- htmltools::withTags(table(
+          class = 'display',
+          tags$thead(
+            tags$tr(
+              lapply(c('geneid', 'significance'), function(x) tags$th(rowspan=2, x)),
+              lapply(all_comps,
+                     function(x) tags$th(class='dt-center', colspan=2, x))
+            ),
+            tags$tr(
+              lapply(rep(c('log2FoldChange', 'padj'), 2), tags$th)
+            )
+          )
+        ))
+
+        df %>%
+          datatable(rownames=FALSE,
+                    selection=list(mode='multiple'),
+                    container=sketch,
+                    options=list(autoWidth=TRUE,
+                                 columnDefs=list(list(className='dt-center',
+                                                      targets=seq_len((ncol(df)-1)))))) %>%
+          formatStyle(columns=border_cols,
+                      'border-right'='solid 1px') %>%
+          formatSignif(columns=which_cols, digits=5)
       }) # renderDT
       # ------------------------------------------------------- #
+
+      # table selection handling
+
+      scatter_proxy <- dataTableProxy('scatter_tbl')
+
+      observeEvent(input$reset_tbl, {
+        scatter_proxy %>% selectRows(NULL)
+      })
+
+      observeEvent(input$add_selected, {
+        tbl <- scatter_dt()
+        sel <- input$scatter_tbl_rows_selected
+
+        # handle NAs in symbol
+        s <- tbl$geneid
+        #s[is.na(s)] <- tbl$gene[is.na(s)]
+
+        if(is.null(sel)){
+          showNotification(
+            'Cannot add genes, no rows selected', type='warning'
+          )
+          validate(
+            need(!is.null(sel), '')
+          )
+        } else if(all(s[sel] %in% genes_clicked$g)){
+          showNotification(
+            'Selected genes already present in scratchpad, skipping', type='warning'
+          )
+        } else {
+          if(is.null(genes_clicked$g)) selected <- s[sel]
+          else selected <- unique(c(genes_clicked$g, s[sel]))
+
+          new_genes <- setdiff(selected, genes_clicked$g)
+          showNotification(
+            paste('Adding', length(new_genes),
+                  'new genes to scratchpad')
+          )
+
+          genes_clicked$g <- c(genes_clicked$g, new_genes)
+        }
+      }) # observeEvent
 
       # ---------------- Help and download buttons ------------ #
       helpButtonServer('de_cmp_scatter_help', size='l')
       helpButtonServer('de_scatter_help', size='l')
       downloadButtonServer('scatterplot_download', scatterplot, 'scatterplot')
       # ----------------------------------------------------- #
+
+      return(
+        reactive({
+          list(genes=genes_clicked$g)
+        })
+      )
     } # Server function
   ) # moduleServer
 } # maPlotServer

@@ -42,7 +42,6 @@ NULL
 loadDataUI <- function(id){
   ns <- NS(id)
 
-  # TODO: add multiple dds
   tagList(
     fluidRow(
       column(12, align='left',
@@ -67,6 +66,14 @@ loadDataUI <- function(id){
     span('(Optional)',
          style='font-style: italic;'),
     textOutput(ns('func_summary')),
+    br(), br(),
+
+    span('Step 4: ',
+         style='font-style: italic;'),
+    actionButton(ns('add_dp'), 'Add pattern analysis results'),
+    span('(Optional)',
+         style='font-style: italic;'),
+    textOutput(ns('dp_summary')),
     br(), br(),
 
     actionButton(ns('create_new'), 'Create data set',
@@ -115,6 +122,29 @@ loadDataServer <- function(id, username, config, rds=NULL){
         new_obj$res_list <- edit_obj()[[ grep('res', obj_names) ]]
         new_obj$dds_list <- edit_obj()[[ dds_name ]]
         new_obj$rld_list <- edit_obj()[[ rld_name ]]
+
+        # if res_list is native carnation format, reconstitute old form
+        column_names <- config()$server$de_analysis$column_names
+        if(!all(c('res', 'dds', 'label') %in% names(new_obj$res_list[[1]]))){
+          tmp <- lapply(names(new_obj$res_list), function(x){
+                   res <- new_obj$res_list[[ x ]]
+                   y <- .check_res_columns(res, column_names)
+                   res <- y$res
+                   list(
+                     res=res,
+                     dds=edit_obj()$dds_mapping[[ x ]],
+                     label=edit_obj()$labels[[ x ]]
+                   )
+                 })
+          names(tmp) <- names(new_obj$res_list)
+          new_obj$res_list <- tmp
+        } else {
+          new_obj$res_list <- lapply(new_obj$res_list, function(x){
+                                y <- .check_res_columns(x$res, column_names)
+                                x$res <- y$res
+                                x
+                              })
+        }
 
         # add optional elements
         if(length(enrich_name) > 0) new_obj$enrich_list <- edit_obj()[[ enrich_name ]]
@@ -349,7 +379,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
               tags$ul(
                 tags$li('Gene IDs should be in a "gene" column.'),
                 tags$li('Gene symbols can also be present in a column named "symbol".'),
-                tags$li('Only "DESeq2" results are supported at the moment.')
+                tags$li('DESeq2, edgeR & limma results are supported at the moment.')
               ),
               style='font-style: italic;'
             ), # div
@@ -457,6 +487,9 @@ loadDataServer <- function(id, username, config, rds=NULL){
           )
         }
 
+        # supported columns
+        column_names <- config()$server$de_analysis$column_names
+
         # read DE files & build res_list
         for(i in seq_len(nres)){
           res <- read.table(input$res_file$datapath[i],
@@ -466,32 +499,27 @@ loadDataServer <- function(id, username, config, rds=NULL){
           res_counts <- input[[ paste0('res_counts', i) ]]
           res_label <- input[[ paste0('res_label', i) ]]
 
-          # check for DESeq2 columns
-          deseq2_cols <- c('baseMean', 'log2FoldChange', 'padj', 'pvalue')
+          # check res for supported columns
+          ll <- .check_res_columns(res, column_names=column_names)
+          res <- ll$res
 
-          if(!all(deseq2_cols  %in% colnames(res))){
-            missing <- setdiff(deseq2_cols, colnames(res))
+          if(length(ll$missing_cols) > 0){
             showNotification(
-              paste0('DE results table does not match DESeq2 format. Missing columns: ',
-                     paste(missing, collapse=',')),
+              paste0('DE results table for "', res_label, '" does not match supported formats and will be skipped. ',
+                     'Missing columns corresponding to: ', paste(ll$missing_cols, collapse=', ')),
               type='error'
             )
-
-            validate(
-              need(all(deseq2_cols %in% colnames(res)), '')
-            )
+            next
           }
 
           # check for 'gene' column
           if(!'gene' %in% tolower(colnames(res))){
             showNotification(
-              'DE results table must contain "gene" column!',
+              'DE results table must contain "gene" column! Skipping',
               type='error'
             )
 
-            validate(
-              need('gene' %in% tolower(colnames(res)), '')
-            )
+            next
           } else {
             # set gene column name to exactly 'gene'
             gcol <- grep('gene', tolower(colnames(res)))
@@ -531,13 +559,18 @@ loadDataServer <- function(id, username, config, rds=NULL){
                 type='error'
               )
 
-              validate(
-                need(!res_id %in% names(new_obj$res_list), '')
-              )
+              next
             } else {
               new_obj$res_list[[ res_id ]] <- res_list
             }
           }
+        }
+
+        if(length(new_obj$res_list) == 0){
+          showNotification(
+            'No valid DE results added',
+            type='error'
+          )
         }
         removeModal()
       })
@@ -767,7 +800,7 @@ loadDataServer <- function(id, username, config, rds=NULL){
 
           # GSEA columns
           cprof_gsea_cols <- c('ID', 'Description', 'core_enrichment', 'setSize',
-                               'pvalue', 'p,adjust', 'qvalue', 'NES', 'setSize')
+                               'pvalue', 'p.adjust', 'qvalue', 'NES', 'setSize')
 
           # check for clusterProfiler columns
           if(all(cprof_or_cols %in% colnames(eres))){
@@ -838,6 +871,211 @@ loadDataServer <- function(id, username, config, rds=NULL){
             )
           }
         }
+        removeModal()
+      })
+
+      #################### Pattern analysis results ####################
+
+      observeEvent(input$add_dp, {
+        if(is.null(new_obj$dds_list)){
+          showNotification(
+            'Must add at least one counts table before uploading pattern analysis results!',
+            type='error'
+          )
+        }
+
+        validate(
+          need(!is.null(new_obj$dds_list), 'Must have counts')
+        )
+
+        if(is.null(new_obj$res_list)){
+          showNotification(
+            'Must add at least one DE results table before uploading pattern analysis results!',
+            type='error'
+          )
+        }
+
+        validate(
+          need(!is.null(new_obj$res_list), 'Must have DE results')
+        )
+
+        showModal(
+          modalDialog(
+            fileInput(ns('dp_file'),
+                      label='Pattern analysis result file(s)',
+                      multiple=TRUE),
+
+            tags$div(
+              span('*Can add multiple files here'),
+              br(), br(),
+              span('Supported formats:'),
+              tags$ul(
+                tags$li('RDS files containing a degPatterns-like object (data.frame or list with "normalized" data.frame).'),
+                tags$li('Tab-delimited text files (TSV) containing pattern analysis table columns.')
+              ),
+              style='font-style: italic;'
+            ),
+
+            footer=tagList(
+                     actionButton(ns('add_dp_files'), 'OK'),
+                     modalButton('Cancel')
+                   ),
+            easyClose=TRUE
+          )
+        )
+      })
+
+      observeEvent(input$add_dp_files, {
+        if(is.null(input$dp_file)){
+          showNotification(
+            'No pattern analysis results uploaded!',
+            type='error'
+          )
+        }
+
+        req(input$dp_file)
+
+        tag <- tagList(
+                 fluidRow(
+                   column(6, strong('Analysis name')),
+                   column(6, strong('File'))
+                 )
+               )
+
+        for(i in seq_len(nrow(input$dp_file))){
+          tmp_id <- tools::file_path_sans_ext(basename(input$dp_file$name[i]))
+
+          tag <- tagAppendChildren(
+                   tag,
+                   fluidRow(
+                     column(6,
+                       textInput(ns(paste0('dp_id', i)),
+                                 label=NULL,
+                                 value=tmp_id)
+                     ),
+                     column(6,
+                       span(input$dp_file$name[i])
+                     )
+                   )
+                 )
+        }
+
+        tag <- tagAppendChildren(
+                 tag,
+                 tags$div(
+                   tags$ul(
+                     tags$li('Analysis name: Unique name without white-space or commas.'),
+                     tags$li('Each uploaded object must match the expected pattern-analysis schema.')
+                   ),
+                   style='font-style: italic;'
+                 )
+               )
+
+        showModal(
+          modalDialog(
+            tag,
+            footer=tagList(
+                     actionButton(ns('add_dp_do'), 'OK'),
+                     modalButton('Cancel')
+                   ),
+            easyClose=TRUE
+          )
+        )
+      })
+
+      output$dp_summary <- renderText({
+        if(!is.null(new_obj$degpatterns)){
+          nsets <- length(new_obj$degpatterns)
+
+          if(nsets > 1){
+            msg <- paste(nsets, 'pattern analysis results')
+          } else {
+            msg <- paste(nsets, 'pattern analysis result')
+          }
+          msg
+        }
+      })
+
+      observeEvent(input$add_dp_do, {
+        req(input$dp_file)
+
+        ndp <- nrow(input$dp_file)
+        all_names <- paste0('dp_id', seq_len(ndp))
+
+        # check that analysis names are not empty
+        for(name in all_names){
+          if(input[[ name ]] == ''){
+            showNotification(
+              'Pattern analysis name cannot be empty!',
+              type='warning'
+            )
+          }
+
+          validate(
+            need(input[[ name ]] != '', '')
+          )
+
+          if(grepl('[[:space:],]', input[[ name ]])){
+            showNotification(
+              'Pattern analysis name cannot contain white-space or commas!',
+              type='warning'
+            )
+          }
+
+          validate(
+            need(!grepl('[[:space:],]', input[[ name ]]), '')
+          )
+        }
+
+        for(i in seq_len(ndp)){
+          dp_id <- input[[ paste0('dp_id', i) ]]
+          f <- input$dp_file$datapath[i]
+          ext <- tolower(tools::file_ext(input$dp_file$name[i]))
+
+          if(ext == 'rds'){
+            dp_obj <- readRDS(f)
+          } else if(ext %in% c('tsv', 'txt')){
+            dp_obj <- read.table(f, sep='\t', header=TRUE)
+          } else {
+            showNotification(
+              paste0('Unsupported pattern analysis file type: "', ext, '". Use .rds, .tsv or .txt'),
+              type='error'
+            )
+
+            validate(
+              need(ext %in% c('rds', 'tsv', 'txt'), '')
+            )
+          }
+
+          is_valid <- is_valid_pattern_obj(dp_obj, require_symbol=FALSE)
+          if(!is_valid){
+            showNotification(
+              paste0('Invalid pattern analysis object: "', input$dp_file$name[i], '"'),
+              type='error'
+            )
+
+            validate(
+              need(is_valid, '')
+            )
+          }
+
+          if(is.null(new_obj$degpatterns)){
+            new_obj$degpatterns <- setNames(list(dp_obj), dp_id)
+          } else if(dp_id %in% names(new_obj$degpatterns)){
+            showNotification(
+              paste0('Pattern analysis named "', dp_id,
+                     '" already present in object. Please choose different name'),
+              type='error'
+            )
+
+            validate(
+              need(!dp_id %in% names(new_obj$degpatterns), '')
+            )
+          } else {
+            new_obj$degpatterns[[ dp_id ]] <- dp_obj
+          }
+        }
+
         removeModal()
       })
 
@@ -947,6 +1185,11 @@ loadDataServer <- function(id, username, config, rds=NULL){
                              genetonic=new_obj$genetonic,
                              degpatterns=new_obj$degpatterns)
 
+            combined <- materialize_carnation_object(
+              combined,
+              config = config(),
+              cores = config()$server$cores
+            )
             combined_final <- make_final_object(combined)
 
             # NOTE: remove .Environment attributes from @design slots of obj$dds
@@ -954,11 +1197,12 @@ loadDataServer <- function(id, username, config, rds=NULL){
             # - this prevents saved object from becoming very large if another
             #   object has been previously loaded
             combined_final$dds <- lapply(combined_final$dds, function(x){
-                                    attr(x@design, '.Environment') <- NULL
+                                    if(.hasSlot(x, 'design')) attr(x@design, '.Environment') <- NULL
                                     x
                                   })
 
-            attr(combined_final$all_dds@design, '.Environment') <- NULL
+            if(.hasSlot(combined_final$all_dds, 'design'))
+              attr(combined_final$all_dds@design, '.Environment') <- NULL
 
             saveRDS(combined_final, ofile,
                     compress=as.logical(input$compress))
@@ -988,8 +1232,27 @@ loadDataServer <- function(id, username, config, rds=NULL){
               )
             } else {
               if(!input$dir_new %in% y$data_area[[ug]]){
-                y$data_area[[ug]] <- c(y$data_area[[ug]],
-                                       input$dir_new)
+                # check if any parent path of new_dir exists in data_areas
+                # if not, add to list
+                parent <- FALSE
+
+                path <- normalizePath(path.expand(input$dir_new), mustWork=FALSE)
+                current_areas <- normalizePath(path.expand(y$data_area[[ ug ]]), mustWork=FALSE)
+
+                while(TRUE){
+                  if(path %in% current_areas){
+                    parent <- TRUE
+                    break
+                  } else {
+                    path <- dirname(path)
+                    if(path == '.' || path == '/') break
+                  }
+                }
+
+                if(!parent){
+                  y$data_area[[ug]] <- c(y$data_area[[ug]],
+                                         input$dir_new)
+                }
               }
             }
             save_access_yaml(y)
@@ -1080,4 +1343,3 @@ loadDataServer <- function(id, username, config, rds=NULL){
     } # function
   ) # moduleServer
 } # function
-

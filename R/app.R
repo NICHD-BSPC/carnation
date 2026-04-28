@@ -6,6 +6,7 @@
 #' @param passphrase passphrase for credentials db.
 #' @param enable_admin if TRUE, admin view is shown. Note, this is only available
 #'        if credentials have sqlite backend.
+#' @param config_path optional path to a local config yaml override.
 #' @param ... parameters passed to shinyApp() call
 #'
 #' @return shinyApp object
@@ -18,10 +19,11 @@
 #' }
 #'
 #' @export
-run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, ...){
+run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
+                          config_path = NULL, ...){
 
   # read config yaml
-  cfg <- get_config()
+  cfg <- get_config(config_path = config_path)
 
   # set some options
   oopt <- options(spinner.type = 4)
@@ -84,7 +86,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
         column(2,
           introBox(
             saveUI('save_object'),
-            data.step=7,
+            data.step=11,
             data.intro='Use this button at any point to save the modified object'
           ), # introBox
           offset=-1
@@ -141,7 +143,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
               tooltip = tooltipOptions(title = "Global settings")
 
             ), # dropdownButton
-            data.step=3,
+            data.step=8,
             data.intro='Click this button to access global settings'
           ), # introBox
 
@@ -323,7 +325,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
             ), # dropdownButton
 
-            data.step=4,
+            data.step=9,
             data.intro='Here you will find specific controls to adjust plots or tables'
           ), # introBox
 
@@ -407,11 +409,11 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
               tooltip = tooltipOptions(title = "Gene scratchpad")
 
             ), # dropdownButton
-            data.step=6,
+            data.step=10,
             data.intro='Keep track of your favorite genes or quickly select top genes with the "Gene scratchpad" here'
           ), # introBox
 
-          data.step=2,
+          data.step=7,
           data.intro='You can use controls shown in this area to filter data or adjust plots and tables.'
         ) # fluidRow
       ) # introBox
@@ -419,41 +421,85 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     mainPanel(width=11,
 
-      introBox(
+      tags$div(
         tabsetPanel(type='tabs',
                     id='mode',
 
           tabPanel('Load data',
             fluidRow(
-              column(3,
-                selectInput('data_type', label='Type of data',
-                            choices=c('Existing', 'New', 'Edit')),
+              column(2,
+                introBox(
+                  selectInput('data_type', label='Type of data',
+                              choices=c('Existing', 'New', 'Edit')),
+                  data.step=1,
+                  data.intro='Choose whether you want to load an existing project, create a new one, or edit the currently loaded object.'
+                ),
 
                 conditionalPanel('input.data_type == "Existing"',
-                    selectizeInput('dds',
-                                   label=h5('Available projects'),
-                                   choices=NULL,
-                                   selected=NULL
-                    ), # selectizeInput
-                    selectizeInput('assay',
-                                   label=h5('Available analyses'),
-                                   choices=NULL,
-                                   selected=NULL
-                    ), # selectizeInput
-                    actionButton('assay_do', label='Go!',
-                                 class='btn-primary')
+                    introBox(
+                      selectizeInput('dds',
+                                     label=h5('Available projects'),
+                                     choices=NULL,
+                                     selected=NULL,
+                                     width='100%'
+                      ), # selectizeInput
+                      data.step=2,
+                      data.intro='Select the project you want to work with.'
+                    ),
+                    introBox(
+                      selectizeInput('assay',
+                                     label=h5('Available analyses'),
+                                     choices=NULL,
+                                     selected=NULL,
+                                     width='100%'
+                      ), # selectizeInput
+                      data.step=4,
+                      data.intro='Next, select the analysis to load for the chosen project.'
+                    ),
+                    introBox(
+                      actionButton('assay_do', label='Go!',
+                                   class='btn-primary'),
+                      data.step=6,
+                      data.intro='Finally, click this button to load the selected project and analysis into carnation.'
+                    ),
+
+                    br(), br(),
+                    uiOutput('current_obj')
+
                 ) # conditionalPanel
               ), # column
-              column(9, style='margin-top: 20px',
+              column(10, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
-                  DTOutput('analysis_desc')
+                  column(6,
+
+                    introBox(
+                      tags$div(
+                        DTOutput('project_desc')
+                      ),
+
+                      data.step=3,
+                      data.intro='Alternatively, use this table to review available projects and click a row to update the project dropdown.'
+                    )
+                  ),
+                  conditionalPanel('input.dds != "" & input.dds != "Choose one"',
+                    column(6,
+                      introBox(
+                        tags$div(
+                          DTOutput('analysis_desc')
+                        ),
+                        data.step=5,
+                        data.intro='Or, use this table to review analyses for the selected project and click a row to populate the analysis dropdown.'
+                      )
+                    )
+                  )
                 ) # conditionalPanel
               )
             ), # fluidRow
 
             withSpinner(
               uiOutput('load_ui')
-            ) # withSpinner
+            ),  # withSpinner
+
           ), # tabPanel
 
           tabPanel('DE analysis',
@@ -590,10 +636,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
             uiOutput('settings_main')
           ) # tabPanel settings
 
-        ), # tabsetPanel mode
-        data.step=1,
-        data.intro='Choose project and analysis and click "Go".\n\nOnce the data is loaded, use tabs to explore and navigate'
-      ) # introBox
+        ) # tabsetPanel mode
+      ) # tags$div
     ) # mainPanel
 
   ) # ui
@@ -647,11 +691,14 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     # list to hold original object and file path
     original <- reactiveValues(obj=NULL, path=NULL)
 
+    # reactiveValues to hold loaded project
+    current <- reactiveValues(proj=NULL, analysis=NULL)
+
     # list to hold user details
     user_details <- reactiveValues(username=NULL, admin=FALSE)
 
     # list to hold project/analysis descriptions
-    project_info <- reactiveValues(descriptions=list(), current=NULL)
+    project_info <- reactiveValues(descriptions=list(), current=NULL, df=NULL)
 
     #################### config updates ####################
 
@@ -770,6 +817,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       l <- settings()
 
       project_info$descriptions <- l$project_descriptions
+      project_info$df <- l$proj_df
 
       validate(
          need(!is.null(l$assay_list), 'No projects found')
@@ -875,11 +923,37 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
     observeEvent(c(input$dds, assay.list$l), {
       l <- assay.list$l
 
+      req(input$dds)
+
       validate(
-        need(!is.null(input$dds), '')
+        need(input$dds != '' & input$dds != 'Choose one', '')
       )
 
       assay.choices <- l[[input$dds]]
+
+      # parse project name and update global tbl selection
+      parsed_name <- strsplit(input$dds, .Platform$file.sep, fixed=TRUE)[[1]]
+      tbl <- project_info$df
+
+      # get row index by matching 'group' and 'project'
+      proj_info_idx <- which(tbl[,'group'] == parsed_name[1] & tbl[,'project'] == parsed_name[2])
+
+      if(length(proj_info_idx) > 0){
+        # get idx relative to current sort order
+        current_idx <- which(input$project_desc_rows_all == proj_info_idx[1])
+
+        # get page index, falling back before table state is available
+        page_length <- input$project_desc_state$length
+        if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
+          page_length <- 10
+        }
+        page_idx <- floor((current_idx - 1) / page_length) + 1
+
+        # update tbl: clear selection, add new selection, scroll to page
+        project_desc_proxy %>% selectRows(NULL) %>%
+          selectRows(proj_info_idx[1]) %>%
+          selectPage(page_idx)
+      }
 
       # if project description exists, order assay choices by description names
       proj_desc <- project_info$descriptions[[ input$dds ]]
@@ -910,6 +984,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     }) # observeEvent
 
+    #################### analysis description summary ####################
+
     output$analysis_desc <- renderDT({
       req(input$dds)
 
@@ -920,14 +996,109 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
       datatable(df,
                 rownames=FALSE,
-                selection='none',
+                selection='single',
                 caption=tags$caption(style='font-weight: bold; font-size: 15px;',
                                      'Summary of available analyses'),
-                options=list(dom='t'))
+                options=list(dom='tp', stateSave=TRUE))
+    })
+
+    # proxy for analysis description table
+    analysis_desc_proxy <- dataTableProxy('analysis_desc')
+
+    # return 'group/project' from table selection
+    analysis_from_tbl <- eventReactive(input$analysis_desc_rows_selected, {
+      all_analysis <- names(project_info$descriptions[[ input$dds ]])
+      sel <- input$analysis_desc_rows_selected
+
+      # these are the datasets for the current project
+      current_assays <- assay.list$l[[ input$dds ]]
+
+      # match the selected name to the current assays
+      # since the order might be different (due to sorting)
+      idx <- which(names(current_assays) %in% all_analysis[sel])
+
+      current_assays[idx]
+    }) # observeEvent
+
+    # update 'assay' input based on selection
+    observeEvent(analysis_from_tbl(), {
+      updateSelectizeInput(session, 'assay',
+                           selected=analysis_from_tbl())
+    })
+
+    # update selection based on 'assay'
+    observeEvent(input$assay, {
+      validate(
+        need(!is.null(input$assay) & input$assay != '' & input$assay != 'Choose one',
+             'No assay selected!')
+      )
+
+      # get name of assay
+      current_assays <- assay.list$l[[ input$dds ]]
+      assay_idx <- which(unname(current_assays) %in% input$assay)
+      assay_name <- names(current_assays)[assay_idx]
+
+      # match to description
+      current_desc <- project_info$descriptions[[ input$dds ]]
+
+      validate(
+        need(length(current_desc) > 0, 'no project descriptions')
+      )
+      desc_idx <- which(names(current_desc) %in% assay_name)
+
+      if(length(desc_idx) == 0){
+        analysis_desc_proxy %>% selectRows(NULL)
+        return()
+      }
+
+      # get idx relative to current sort order
+      current_idx <- which(input$analysis_desc_rows_all == desc_idx[1])
+
+      # get page index
+      page_length <- input$analysis_desc_state$length
+      if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
+        page_length <- 10
+      }
+      page_idx <- floor((current_idx - 1) / page_length) + 1
+
+      # update tbl selection
+      analysis_desc_proxy %>% selectRows(NULL) %>%
+        selectRows(desc_idx[1]) %>% selectPage(page_idx)
 
     })
 
-    # observer to load data
+    #################### global project summary ####################
+
+    output$project_desc <- renderDT({
+      req(project_info$df)
+
+      datatable(project_info$df,
+                rownames=FALSE,
+                selection='single',
+                caption=tags$caption(style='font-weight: bold; font-size: 15px;',
+                                     'Summary of available projects'),
+                options=list(dom='tfip', stateSave=TRUE))
+    })
+
+    # proxy for project table
+    project_desc_proxy <- dataTableProxy('project_desc')
+
+    # return 'group/project' from table selection
+    proj_from_tbl <- eventReactive(input$project_desc_rows_selected, {
+      tbl <- project_info$df
+      sel <- input$project_desc_rows_selected
+
+      paste(tbl[sel,'group'], tbl[sel, 'project'], sep=.Platform$file.sep)
+    }) # observeEvent
+
+    # update 'dds' input based on table selection
+    observeEvent(proj_from_tbl(), {
+      updateSelectizeInput(session, 'dds',
+                           selected=proj_from_tbl())
+    })
+
+    #################### observer to load data ####################
+
     observeEvent(input$assay_do, {
       validate(
         need(!is.null(input$assay) & input$assay != '' & input$assay != 'Choose one',
@@ -985,244 +1156,59 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
         }
         if('degpatterns' %in% names(obj)) app_object$degpatterns <- obj$degpatterns
       } else {
+        obj <- tryCatch({
+          showModal(
+            modalDialog(
+              span('Validating object'),
+              footer=NULL
+            )
+          )
+          obj <- validate_loaded_carnation_object(obj, config = config())
 
-      # perform vst if necessary
-      orig.names <- names(obj)
+          showModal(
+            modalDialog(
+              span('Materializing object'),
+              footer=NULL
+            )
+          )
+          obj <- materialize_carnation_object(
+            obj,
+            config = config(),
+            cores = config()$server$cores
+          )
 
-      # TODO: add checks for presence of expected elements
-      # res, dds, enrich, degpatterns
-      res.name <- orig.names[grep('res', orig.names)]
-      dds.name <- orig.names[setdiff(grep('dds', orig.names),
-                               c(grep('all_dds', orig.names),
-                                 grep('dds_mapping', orig.names)))]
-      rld.name <- orig.names[setdiff(grep('rld', orig.names),
-                                     grep('all_rld', orig.names))]
-      enrich.name <- orig.names[grep('enrich', orig.names)]
-      degpatterns.name <- orig.names[grep('degpatterns', orig.names)]
-
-      if(length(res.name) == 0 | length(dds.name) == 0){
-        if(length(res.name) == 0 & length(dds.name) == 0){
-          missing <- 'both'
-        } else if(length(res.name) == 0){
-          missing <- 'DE result'
-        } else {
-          missing <- 'counts table'
-        }
-        showNotification(
-          paste0('Loaded object must have both DE results & counts table. Missing:',
-                 missing),
-          type='error'
-        )
+          showModal(
+            modalDialog(
+              span('Finalizing object'),
+              footer=NULL
+            )
+          )
+          make_final_object(obj)
+        }, error=function(e){
+          removeModal()
+          showNotification(conditionMessage(e), type='error')
+          NULL
+        })
 
         validate(
-          need(length(res.name) != 0 & length(dds.name) != 0,
-               'Missing DE result and/or counts table')
-        )
-      }
-
-      validate(
-          need(length(dds.name) == 1,
-               'Uploaded object must have exactly 1 counts list')
-      )
-
-      # TODO: sanitize res, dds
-      # TODO: sanitize degpatterns
-      # - check for 'normalized' in names if list
-      # - check for 'genes' column
-
-      if(length(rld.name) == 0){
-
-        showModal(
-          modalDialog(
-            span('Normalizing data'),
-            footer=NULL
-          )
+          need(!is.null(obj), '')
         )
 
-        rld_list <- lapply(obj[[dds.name]],
-                           function(x) varianceStabilizingTransformation(x, blind=TRUE))
-
-        obj$rld_list <- rld_list
-        rld.name <- 'rld_list'
-
-        removeModal()
-      } else if(length(rld.name) > 1){
-        validate(
-            need(length(rld.name) == 1,
-                 'Uploaded object must have exactly 1 normalized counts list')
-        )
-      }
-
-      showModal(
-        modalDialog(
-          span('Sanitizing object'),
-          footer=NULL
-        )
-      )
-
-      # add 'sample' to colData of rld_list & dds_list
-      obj[[ rld.name ]] <- lapply(obj[[ rld.name ]],
-                             function(x){
-                               colData(x)$sample <- rownames(colData(x))
-                               x
-                           })
-
-      obj[[ dds.name ]] <- lapply(obj[[ dds.name ]],
-                             function(x){
-                               colData(x)$sample <- rownames(colData(x))
-                               x
-                           })
-
-      # add obj slots to reactive values
-      obj <- make_final_object(obj)
-
-      # get final names of obj
-      n <- names(obj)
-      res.name <- n[grep('res', n)]
-      enrich.name <- n[grep('enrich', n)]
-      degpatterns.name <- n[grep('degpatterns', n)]
-
-      # get dds and rld elements
-      # - need to distinguish from all_dds, dds_mapping & all_rld
-      dds.idx <- setdiff(grep('dds', n),
-                         c(grep('all_dds', n),
-                           grep('dds_mapping', n)))
-      rld.idx <- setdiff(grep('rld', n), grep('all_rld', n))
-      dds.name <- n[dds.idx]
-      rld.name <- n[rld.idx]
-
-      # map to elements
-      app_object$dds <- obj[[dds.name]]
-      app_object$rld <- obj[[rld.name]]
-      app_object$res <- obj[[res.name]]
-      if(length(enrich.name) != 0)
-        app_object$enrich <- obj[[enrich.name]]
-      if(length(degpatterns.name) != 0)
-        app_object$degpatterns <- obj[[degpatterns.name]]
-      app_object$labels <- obj$labels
-      app_object$dds_mapping <- obj$dds_mapping
-
-      # add element with genetonic objects
-      # NOTE: using loop to keep names
-      if(!'genetonic' %in% names(obj) | is.null(obj$genetonic)){
-
-        showModal(
-          modalDialog(
-            span('Converting FE results to GeneTonic format'),
-            footer=NULL
-          )
-        )
-
-        start_time <- Sys.time()
-
-        # flatten list
-        elem_names <- NULL
-        sep <- '*'
-        res_keys <- list()
-        enrich_copy <- app_object$enrich
-        for(x in names(app_object$enrich)){
-          for(y in names(app_object$enrich[[x]])){
-            # NOTE: if key is 'res' save & skip
-            if(y == 'res'){
-              res_keys[[ x ]] <- app_object$enrich[[ x ]][[ 'res' ]]
-              next
-            }
-            for(z in names(app_object$enrich[[x]][[y]])){
-              elem_names <- c(elem_names, paste(x, y, z, sep=sep))
-              if(!is.data.frame(app_object$enrich[[ x ]][[ y ]][[ z ]])){
-                app_object$enrich[[ x ]][[ y ]][[ z ]] <- app_object$enrich[[ x ]][[ y ]][[ z ]]@result
-              }
-            }
-          }
-        }
-        names(elem_names) <- elem_names
-
-        # run conversion
-        #
-        # NOTE: making local copies here to avoid 'reactive' errors
-        #       in parallel lapply
-        #
-        res_names <- names(app_object$res)
-        res_list <- app_object$res
-        enrich_list <- app_object$enrich
-
-        # TODO: add check for cores
-        flat_obj <- BiocParallel::bplapply(elem_names, function(x){
-                      toks <- strsplit(x, split=sep, fixed=TRUE)[[1]]
-                      # look for toks[1] in res_names & res_keys, else NULL
-                      if(toks[1] %in% res_names){
-                        res <- res_list[[ toks[1] ]]
-                      } else if(toks[1] %in% names(res_keys)){
-                        res <- res_list[[ res_keys[[ toks[1] ]] ]]
-                      } else{
-                        return(NULL)
-                      }
-
-                      eres <- enrich_list[[ toks[1] ]][[ toks[2] ]][[ toks[3] ]]
-
-                      # NOTE: if obj is dataframe then convert, else continue
-                      if(is.data.frame(eres)){
-                        # NOTE: if df contains 'core_enrichment' then it's a 'gseaResult'
-                        #       else it's an enrichResult
-                        if(!'core_enrichment' %in% colnames(eres)){
-                          eres <- makeEnrichResult(eres, type='enrichResult')
-                        } else {
-                          eres <- makeEnrichResult(eres, type='gseaResult')
-                        }
-                      }
-
-                      df <- enrich_to_genetonic(eres, res)
-                      df
-                    }, BPPARAM=BiocParallel::MulticoreParam(config()$server$cores))
-
-        # reconstitute & clean up
-        app_object$genetonic <- list()
-        rm(res_list)
-        rm(enrich_list)
-
-        for(x in names(app_object$enrich)){
-          app_object$genetonic[[x]] <- list()
-
-          for(y in names(app_object$enrich[[x]])){
-            # NOTE: if key is 'res', skip
-            if(y == 'res'){
-              next
-            } else {
-              app_object$genetonic[[x]][[y]] <- list()
-            }
-
-            for(z in names(app_object$enrich[[x]][[y]])){
-              key <- paste(x, y, z, sep=sep)
-              if(!is.null(flat_obj[[key]])){
-                app_object$genetonic[[x]][[y]][[z]] <- flat_obj[[key]]
-              } else {
-                app_object$genetonic[[x]][[y]][[z]] <- dummy_genetonic(enrich_copy[[x]][[y]][[z]])
-              }
-            }
-          }
-        }
-        rm(enrich_copy)
-
-        end_time <- Sys.time()
-
-        delta <- end_time - start_time
-
-      } else {
-        app_object$genetonic <- obj[['genetonic']]
-      }
-
-      if('all_dds' %in% names(obj)){
-          app_object$all_dds <- obj$all_dds
-          app_object$all_rld <- obj$all_rld
-      } else {
-          app_object$all_dds <- NULL
-          app_object$all_rld <- NULL
-      }
+        app_object$dds <- obj$dds
+        app_object$rld <- obj$rld
+        app_object$res <- obj$res
+        app_object$labels <- obj$labels
+        app_object$dds_mapping <- obj$dds_mapping
+        app_object$all_dds <- obj$all_dds
+        app_object$all_rld <- obj$all_rld
+        if('enrich' %in% names(obj)) app_object$enrich <- obj$enrich
+        if('genetonic' %in% names(obj)) app_object$genetonic <- obj$genetonic
+        if('degpatterns' %in% names(obj)) app_object$degpatterns <- obj$degpatterns
 
         showNotification(
           'Remember to save object to avoid preprocessing again next time!',
           type='warning'
-      )
+        )
       }
 
       if(is.null(app_object$all_dds)){
@@ -1237,7 +1223,27 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
                         selected='DE analysis')
       updateTabsetPanel(session, inputId='de_mode',
                         selected='Summary')
+
+      # update current project
+      current$proj <- input$dds
+
+      al <- assay.list$l[[ input$dds ]]
+      idx <- which(unname(al) == input$assay)
+      current$analysis <- names(assay.list$l[[ input$dds ]])[idx]
+
     }) # observeEvent load data
+
+    # show loaded dataset
+    output$current_obj <- renderUI({
+      req(current$proj)
+
+      tags$div(
+        class='div-stats-card',
+        tags$p('Currently loaded:'),
+        tags$p('  - Project: ', tags$i(current$proj)),
+        tags$p('  - Analysis: ', tags$i(current$analysis))
+      )
+    })
 
     # update comparison menus after load
     observeEvent(app_object$res, {
@@ -1342,7 +1348,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
       fdr.thres <- ifelse(input$fdr.thres == '' | is.na(input$fdr.thres),
                           config()$ui$de_analysis$filters$fdr_threshold, input$fdr.thres)
 
-      df <- summarize.res.list(app_object$res, app_object$dds, app_object$dds_mapping,
+      df <- summarize_res_list(app_object$res, app_object$dds, app_object$dds_mapping,
                                alpha=fdr.thres,
                                lfc.thresh=fc.thres,
                                app_object$labels)
@@ -1457,14 +1463,20 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
             df <- df[idx,]
         }
 
-        sidx <- grep('symbol', colnames(df), ignore.case=TRUE)
-        colnames(df)[sidx] <- tolower(colnames(df)[sidx])
+        df <- as.data.frame(df)
+
+        sidx <- which(tolower(colnames(df)) == 'symbol')
+        if(length(sidx) > 0){
+          colnames(df)[sidx] <- tolower(colnames(df)[sidx])
+          symbol.col <- sidx[1]
+        } else {
+          symbol.col <- NULL
+        }
 
         if(!'gene' %in% colnames(df))
           df$gene <- sub('\\.\\d+$','',rownames(df))
 
         gene.col <- 'gene'
-        symbol.col <- ifelse('symbol' %in% colnames(df), 'symbol', 'SYMBOL')
 
         cols.to.drop <- config()$server$de_analysis$de_table$cols.to.drop
         df <- df %>% as.data.frame %>%
@@ -1604,7 +1616,25 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
            gene.to.plot=gene_scratchpad())
     })
 
-    scatterPlotServer('scatterplot', app_object, scatterplot_args, config)
+    scatter_data <- scatterPlotServer('scatterplot',
+                                      app_object,
+                                      scatterplot_args,
+                                      gene_scratchpad,
+                                      reactive({ input$reset.genes }),
+                                      config)
+
+    observeEvent(scatter_data(), {
+      g <- scatter_data()$genes
+
+      # only update scratchpad if different genes returned
+      if(length(setdiff(g, input$gene.to.plot)) != 0){
+        # update gene selector with clicked genes
+        updateSelectizeInput(session, 'gene.to.plot',
+                             choices=gene.id$gene,
+                             selected=g,
+                             server=TRUE)
+      }
+    })
 
     ##################### UpSet plot #########################
 
@@ -1684,16 +1714,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE, 
 
     ######################## DEG patterns ########################
 
-    pattern_plot_args <- reactive({
-      list(
-        gene_scratchpad=gene_scratchpad(),
-        upset_data=list(genes=upset_table$intersections,
-                        labels=upset_table$set_labels)
-      )
-    })
+    pattern_data <- patternPlotServer('deg_plot', app_object, coldata.all,
+                                      gene_scratchpad,
+                                      reactive({
+                                        list(genes=upset_table$intersections,
+                                             labels=upset_table$set_labels)
+                                      }),
+                                      config)
 
-    patternPlotServer('deg_plot', app_object, coldata.all,
-                      pattern_plot_args, config)
+    observeEvent(pattern_data(), {
+      g <- pattern_data()$genes
+
+      if(length(setdiff(g, input$gene.to.plot)) != 0){
+        updateSelectizeInput(session, 'gene.to.plot',
+                             choices=gene.id$gene,
+                             selected=g,
+                             server=TRUE)
+      }
+    })
 
     ######################### Help buttons #######################
 

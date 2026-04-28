@@ -945,6 +945,13 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
           need(!is.null(d), 'No access permissions')
       )
 
+      showModal(
+        modalDialog(
+          span('Gathering project info'),
+          footer=NULL
+        )
+      )
+
       l <- unlist(lapply(unique(d$data_area),
               function(x) list.files(x,
                               pattern=paste0(pattern(), '\\.rds$'),
@@ -1010,9 +1017,8 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
               fixed_label <- dirname(old_label)
 
               # add dev/ prefix to assay label for dev datasets
-              names(alist[[old_label]]) <- paste0(staging_dir(),
-                                                  '/',
-                                                  names(alist[[old_label]]))
+              names(alist[[old_label]]) <- file.path(staging_dir(),
+                                                     names(alist[[old_label]]))
 
               # if fixed label already exists, add to existing list
               # otherwise create label
@@ -1036,6 +1042,19 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
       }
 
       assay_list <- alist
+
+      # make df summarizing projects
+      proj_names <- strsplit(names(alist), .Platform$file.sep, fixed=TRUE)
+      group <- unlist(lapply(proj_names, function(x) x[1]))
+      project <- unlist(lapply(proj_names, function(x) x[2]))
+      proj_df <- data.frame(
+                   group=group,
+                   project=project,
+                   num_datasets=unname(unlist(lapply(alist, length)))
+                 )
+
+      # order by group, then project
+      proj_df <- proj_df[order(proj_df$group, proj_df$project),]
 
       # find and read project descriptions
       project_descriptions <- list()
@@ -1062,10 +1081,13 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
         }
       }
 
+      removeModal()
+
       list(assay_list=assay_list,
            reload_parent=reload_parent$flag,
            is_admin=is_admin,
-           project_descriptions=project_descriptions)
+           project_descriptions=project_descriptions,
+           proj_df=proj_df)
     })
 
     helpButtonServer('settings_help', size='l')

@@ -1,26 +1,18 @@
 Bootstrap: docker
-From: ubuntu:latest
+From: condaforge/miniforge3:latest
 
 %files
-    ./R/* /app/carnation/R/
-    ./inst /app/carnation
-    ./man /app/carnation
-    NAMESPACE /app/carnation
-    DESCRIPTION /app/carnation
-    .Rprofile /app/carnation
-    env.yml /app/carnation
+    requirements.yaml /app/carnation/
 
 %environment
     export PATH=/env/carnation-env/bin:/opt/conda/bin/:$PATH
+    export RETICULATE_PYTHON=/env/carnation-env/bin/python
 
 %post -c /bin/bash
-    apt-get update && apt-get install -y wget
-    wget --quiet https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O miniforge.sh && \
-        /bin/bash miniforge.sh -b -p /opt/conda
-
-    /opt/conda/bin/conda env create -p /env/carnation-env --file /app/carnation/env.yml
+    /opt/conda/bin/conda env create -p /env/carnation-env --file /app/carnation/requirements.yaml
+    /env/carnation-env/bin/Rscript -e "setRepositories(ind=1:5); remotes::install_github('NICHD-BSPC/carnation@r4.3', upgrade='never')"
 
 %runscript
     #!/bin/bash
 
-    exec /env/carnation-env/bin/R -e "devtools::load_all('/app/carnation/'); run_carnation(options=list(launch.browser=FALSE, port=as.integer(Sys.getenv('PORT1'))))"
+    exec /env/carnation-env/bin/R -e "library(carnation); run_carnation(options=list(launch.browser=FALSE, port=as.integer(Sys.getenv('PORT1'))))"

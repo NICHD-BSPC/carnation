@@ -17,7 +17,8 @@ plotScatter.label_ly(
   lines = c("yes", "yes", "yes"),
   alpha = 1,
   size = 4,
-  show.grid = "yes"
+  show.grid = "yes",
+  source = "A"
 )
 }
 \arguments{
@@ -49,6 +50,8 @@ x = 0 & y = 0, but not the x = y diagonal.}
 \item{size}{float, marker size (default=4).}
 
 \item{show.grid}{string, can be 'yes' (default) or 'no'.}
+
+\item{source}{name of source to return event_data from}
 }
 \value{
 plotly handle
