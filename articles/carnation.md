@@ -9,7 +9,7 @@ computational and experimental biologists, `carnation` unifies three
 facets of differential expression analysis, functional enrichment, and
 pattern analysis making data exploration intuitive and accessible, while
 also providing a platform to manage multiple datasets either locally or
-on a server to share with collaborators (package version: 0.99.11).
+on a server to share with collaborators (package version: 1.1.0).
 
 Now, we will use the `airway` dataset to explore some of `carnation's`
 functionality.
@@ -833,7 +833,7 @@ sessionInfo()
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
 #> Matrix products: default
-#> BLAS/LAPACK: /home/runner/work/carnation/env/lib/libopenblasp-r0.3.32.so;  LAPACK version 3.12.0
+#> BLAS/LAPACK: /home/runner/work/carnation/env/lib/libopenblasp-r0.3.33.so;  LAPACK version 3.12.0
 #> 
 #> locale:
 #>  [1] LC_CTYPE=C.UTF-8       LC_NUMERIC=C           LC_TIME=C.UTF-8       
@@ -849,7 +849,7 @@ sessionInfo()
 #> [8] base     
 #> 
 #> other attached packages:
-#>  [1] carnation_0.99.11           org.Hs.eg.db_3.20.0        
+#>  [1] carnation_1.1.0             org.Hs.eg.db_3.20.0        
 #>  [3] AnnotationDbi_1.68.0        GeneTonic_3.0.0            
 #>  [5] dplyr_1.2.1                 DESeq2_1.46.0              
 #>  [7] airway_1.26.0               SummarizedExperiment_1.36.0
@@ -860,7 +860,7 @@ sessionInfo()
 #> [17] BiocStyle_2.34.0           
 #> 
 #> loaded via a namespace (and not attached):
-#>   [1] fs_1.6.7                    bitops_1.0-9               
+#>   [1] fs_2.1.0                    bitops_1.0-9               
 #>   [3] enrichplot_1.26.1           webshot_0.5.5              
 #>   [5] httr_1.4.8                  RColorBrewer_1.1-3         
 #>   [7] doParallel_1.0.17           dynamicTreeCut_1.63-1      
@@ -873,13 +873,13 @@ sessionInfo()
 #>  [21] textshaping_1.0.5           logging_0.10-108           
 #>  [23] TSP_1.2.7                   sass_0.4.10                
 #>  [25] topGO_2.58.0                bs4Dash_2.3.5              
-#>  [27] S7_0.2.1                    askpass_1.2.1              
+#>  [27] S7_0.2.2                    askpass_1.2.1              
 #>  [29] ggridges_0.5.7              goseq_1.58.0               
 #>  [31] pkgdown_2.2.0               Rsamtools_2.22.0           
 #>  [33] systemfonts_1.3.2           yulab.utils_0.2.4          
 #>  [35] gson_0.1.0                  txdbmaker_1.2.0            
 #>  [37] DOSE_4.0.0                  R.utils_2.13.0             
-#>  [39] limma_3.62.1                RSQLite_2.4.6              
+#>  [39] limma_3.62.1                RSQLite_3.52.0             
 #>  [41] visNetwork_2.1.4            generics_0.1.4             
 #>  [43] gridGraphics_0.5-1          shape_1.4.6.1              
 #>  [45] BiocIO_1.16.0               dendextend_1.19.1          
@@ -890,7 +890,7 @@ sessionInfo()
 #>  [55] SparseArray_1.6.0           BiocFileCache_2.14.0       
 #>  [57] grid_4.4.3                  blob_1.3.0                 
 #>  [59] promises_1.5.0              crayon_1.5.3               
-#>  [61] miniUI_0.1.2                ggtangle_0.1.1             
+#>  [61] miniUI_0.1.2                ggtangle_0.1.2             
 #>  [63] lattice_0.22-9              billboarder_0.5.1          
 #>  [65] ComplexUpset_1.3.3          cowplot_1.2.0              
 #>  [67] GenomicFeatures_1.58.0      KEGGREST_1.46.0            
@@ -907,13 +907,13 @@ sessionInfo()
 #>  [89] seriation_1.5.8             shinythemes_1.2.0          
 #>  [91] iterators_1.0.14            statmod_1.5.1              
 #>  [93] nlme_3.1-169                ggtree_3.14.0              
-#>  [95] bit64_4.6.0-1               progress_1.2.3             
+#>  [95] bit64_4.8.0                 progress_1.2.3             
 #>  [97] filelock_1.0.3              rprojroot_2.1.1            
 #>  [99] bslib_0.10.0                otel_0.2.0                 
 #> [101] colorspace_2.1-2            DBI_1.3.0                  
 #> [103] mnormt_2.1.1                tidyselect_1.2.1           
 #> [105] bit_4.6.0                   compiler_4.4.3             
-#> [107] curl_7.0.0                  httr2_1.2.2                
+#> [107] curl_7.1.0                  httr2_1.2.2                
 #> [109] graph_1.84.0                BiasedUrn_2.0.12           
 #> [111] SparseM_1.84-2              expm_1.0-0                 
 #> [113] xml2_1.5.2                  ggdendro_0.2.0             
@@ -936,7 +936,7 @@ sessionInfo()
 #> [147] GOSemSim_2.32.0             R.oo_1.27.1                
 #> [149] RCurl_1.98-1.18             magrittr_2.0.5             
 #> [151] GenomeInfoDbData_1.2.13     ggplotify_0.1.3            
-#> [153] patchwork_1.3.2             Rcpp_1.1.1                 
+#> [153] patchwork_1.3.2             Rcpp_1.1.1-1.1             
 #> [155] reticulate_1.46.0           ape_5.8-1                  
 #> [157] shinycssloaders_1.1.0       viridis_0.6.5              
 #> [159] stringi_1.8.7               rintrojs_0.3.4             
@@ -946,7 +946,7 @@ sessionInfo()
 #> [167] Biostrings_2.74.0           splines_4.4.3              
 #> [169] hms_1.1.4                   geneLenDataBase_1.42.0     
 #> [171] circlize_0.4.18             locfit_1.5-9.12            
-#> [173] igraph_2.1.4                reshape2_1.4.5             
+#> [173] igraph_2.3.1                reshape2_1.4.5             
 #> [175] biomaRt_2.62.0              XML_3.99-0.23              
 #> [177] evaluate_1.0.5              BiocManager_1.30.27        
 #> [179] foreach_1.5.2               tweenr_2.0.3               
