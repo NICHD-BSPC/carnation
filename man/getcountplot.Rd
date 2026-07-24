@@ -20,7 +20,8 @@ getcountplot(
   facet = NULL,
   legend = TRUE,
   boxes = TRUE,
-  rotate_x_labels = 30
+  rotate_x_labels = 30,
+  box_dodge = "identity"
 )
 }
 \arguments{
@@ -55,6 +56,8 @@ getcountplot(
 \item{boxes}{show boxes?}
 
 \item{rotate_x_labels}{angle to rotate x-axis labels (default=30)}
+
+\item{box_dodge}{box position if enabled, can be 'identity' (default) or 'dodge'}
 }
 \value{
 ggplot handle

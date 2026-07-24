@@ -300,7 +300,9 @@ scatterPlotUI <- function(id, panel){
               fluidRow(style='margin-left: 2px;',
                 uiOutput(ns('pt_selected')),
                 actionButton(ns('filter_sel_do'),
-                             label='Show/Hide in table'),
+                             label='Show in table'),
+                actionButton(ns('filter_sel_reset_do'),
+                             label='Reset'),
                 actionButton(ns('reset_plt_selection'),
                                 'Clear',
                                 class='btn-primary')
@@ -407,8 +409,16 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         }
         updateSelectizeInput(session, 'y_axis_comp', choices = comp_all(), selected = available_y)
 
+        # reset cache
         df_react(NULL)
         df_full(NULL)
+        plot_source(NULL)
+        axis_limits$lim.x <- NULL
+        axis_limits$lim.y <- NULL
+        genes_clicked$g <- NULL
+        selected_genes$g <- NULL
+        filter_tbl_by_sel_genes(FALSE)
+
       })
       # -------------------------------------------------------------- #
 
@@ -502,6 +512,10 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
       }, {
 
         req(app_object()$res)
+        validate(
+          need(all(c(input$x_axis_comp, input$y_axis_comp) %in% names(app_object()$res)),
+               'Waiting for data')
+        )
 
         res_i <- as.data.frame(app_object()$res[[input$x_axis_comp]])
         res_j <- as.data.frame(app_object()$res[[input$y_axis_comp]])
@@ -944,10 +958,23 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
       observeEvent(input$reset_plt_selection, {
         selected_genes$g <- NULL
+        filter_tbl_by_sel_genes(FALSE)
       })
 
       observeEvent(input$filter_sel_do, {
-        filter_tbl_by_sel_genes(!filter_tbl_by_sel_genes())
+        # only set this if some genes selected
+        sel_genes <- unique(unlist(selected_genes$g))
+        if(length(sel_genes) > 0){
+          filter_tbl_by_sel_genes(TRUE)
+        } else {
+          showNotification(
+            'No genes selected, not filtering table', type='warning'
+          )
+        }
+      })
+
+      observeEvent(input$filter_sel_reset_do, {
+        filter_tbl_by_sel_genes(FALSE)
       })
 
       # ------------------------------------------------------- #

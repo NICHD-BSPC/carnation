@@ -54,6 +54,7 @@ test_that("genePlotServer handles gene selection correctly", {
       ymin = -10,
       logy = FALSE,
       boxes = TRUE,
+      box_dodge = "identity",
       freey = TRUE,
       x_rotate = 30,
       color = "batch",

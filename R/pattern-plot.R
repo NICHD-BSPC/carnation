@@ -404,6 +404,7 @@ patternPlotServer <- function(id,
 
       current_facet_levels <- reactiveValues(l=NULL)
       genes_clicked <- reactiveValues(g=NULL)
+      data_loaded <- reactiveVal(FALSE)
 
       # update from reactive config
       observeEvent(config(), {
@@ -413,22 +414,8 @@ patternPlotServer <- function(id,
                            value=config()$ui$pattern_analysis$x_rotate)
       })
 
-      observeEvent(pattern_obj(), {
-        obj <- pattern_obj()
-
-        if(is.null(names(obj))){
-          updateSelectizeInput(session,
-                               'dp_analysis',
-                               choices=c(''),
-                               selected=c(''))
-        } else {
-          updateSelectizeInput(session,
-                               'dp_analysis',
-                               choices=names(obj),
-                               selected=names(obj)[1])
-        }
-
-        # reset reactive values & menus on initial load
+      # function to reset module data
+      reset_data <- function(){
         deg_plot_data$obj <- NULL
         xchoices$all <- NULL
         xchoices$current <- NULL
@@ -462,6 +449,29 @@ patternPlotServer <- function(id,
                           'deg_color',
                           choices='',
                           selected='')
+
+        # set loaded flag to TRUE
+        data_loaded(FALSE)
+      }
+
+      # when obj is loaded, reset data and set dp_analysis to first option
+      observeEvent(pattern_obj(), {
+        # reset reactive values & menus on initial load
+        reset_data()
+        obj <- pattern_obj()
+
+        if(is.null(names(obj))){
+          updateSelectizeInput(session,
+                               'dp_analysis',
+                               choices=c(''),
+                               selected=c(''))
+        } else {
+          updateSelectizeInput(session,
+                               'dp_analysis',
+                               choices=names(obj),
+                               selected=names(obj)[1])
+        }
+
       }, ignoreNULL=FALSE)
 
       # update upset intersections menu
@@ -556,6 +566,7 @@ patternPlotServer <- function(id,
                               'deg_time',
                               choices=time,
                               selected=input$deg_time)
+            sel_time <- input$deg_time
         } else {
             updateSelectInput(session,
                               'deg_time',
@@ -576,9 +587,43 @@ patternPlotServer <- function(id,
                               selected=all.colors[1])
         }
 
+        # get cluster sizes
+        nodup.idx <- !duplicated(obj$genes)
+        cluster.sizes <- table(obj[nodup.idx, cluster_selected])
+
+        # if input is NA, set to 1
+        if(!is.na(input$deg_minc) & all(cluster.sizes < input$deg_minc)){
+          facet_levels <- NULL
+        } else {
+          facet_levels <- names(cluster.sizes)[cluster.sizes > input$deg_minc]
+        }
+
+        updateSelectizeInput(session, 'facet_var_levels',
+                             choices=facet_levels,
+                             selected=facet_levels)
+
+        # set initial xaxis levels
+        ctime <- cdata[,sel_time]
+
+        # if factor, use existing levels
+        # if numeric, sort ascending
+        # else, use unique values
+        if(is.factor(ctime)){
+          xchoices$all <- levels(ctime)
+        } else if(is.numeric(ctime)){
+          lvls <- unique(ctime)
+          xchoices$all <- lvls[order(lvls)]
+        } else {
+          xchoices$all <- unique(ctime)
+        }
+        xchoices$current <- xchoices$all
+
         # save degplot data
         deg_plot_data$obj <- obj
 
+        # this is set to TRUE, so it only triggers on *first* load
+        # and not on subsequent updates
+        data_loaded(TRUE)
       }, ignoreNULL=FALSE) # observeEvent get degplot data
 
       observeEvent(c(input$deg_cluster, deg_plot_data$obj,
@@ -609,7 +654,6 @@ patternPlotServer <- function(id,
       # observer to update facet var levels
       # when facet var, coldata updated or facet var reset
       observeEvent(c(input$deg_facet,
-                     deg_plot_data$obj,
                      input$deg_minc,
                      input$deg_facet_all), {
         validate(
@@ -730,7 +774,7 @@ patternPlotServer <- function(id,
       ############################################################
 
       # reactive to make degPatterns plot
-      degplot <- eventReactive(c(deg_plot_data$obj, input$plot_do), {
+      degplot <- eventReactive(c(data_loaded(), input$plot_do), {
 
         validate(
             need(!is.null(deg_plot_data$obj),
