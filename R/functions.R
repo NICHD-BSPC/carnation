@@ -619,7 +619,7 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
                  size=2, alpha=0.5)
 
   if(boxes){
-      p <- p + geom_boxplot(alpha=0, notch=FALSE, position=box_dodge,
+      p <- p + geom_boxplot(aes(group=.data[[color]]), alpha=0, notch=FALSE, position=box_dodge,
                             outlier.size=0, outlier.shape=NA)
   }
 
