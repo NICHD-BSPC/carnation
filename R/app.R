@@ -49,598 +49,609 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     }
   }
 
-  ui <- fluidPage(
-    theme=shinytheme('united'),
+  ui <- function(request) {
+    fluidPage(
+      theme=shinytheme('united'),
 
-    introjsUI(),
+      introjsUI(),
 
-    # custom CSS styles
-    tags$head(
-      tags$style(
-        HTML(cfg$style$global)
-      )  # tags$style
-    ), # tags$head
+      # custom CSS styles
+      tags$head(
+        tags$style(
+          HTML(cfg$style$global)
+        )  # tags$style
+      ), # tags$head
 
-    titlePanel(
-      fluidRow(
-        # add spacer to center heading
-        column(4, span()),
-        column(4,
-          tags$div(
-            HTML(
-              paste0(
-                'ca',
-                span('rna', style='color: #e95420; font-weight: bold;'), # primary color from united theme
-                'tion'
-              ) # paste
-            ) # HTML
-          ),
-          align='center',
-          style='font-family: Helvetica; font-size: 40px;'
-        ), # column
-        column(2,
-          actionButton('intro', label='Take a tour!',
-                       icon=icon('info'))
-        ), # column
+      titlePanel(
+        fluidRow(
+          # add spacer to center heading
+          column(4, span()),
+          column(4,
+            tags$div(
+              HTML(
+                paste0(
+                  'ca',
+                  span('rna', style='color: #e95420; font-weight: bold;'), # primary color from united theme
+                  'tion'
+                ) # paste
+              ) # HTML
+            ),
+            align='center',
+            style='font-family: Helvetica; font-size: 40px;'
+          ), # column
+          column(2,
+            actionButton('intro', label='Take a tour!',
+                         icon=icon('info'))
+          ), # column
 
-        column(2,
-          introBox(
-            saveUI('save_object'),
-            data.step=11,
-            data.intro='Use this button at any point to save the modified object'
-          ), # introBox
-          offset=-1
-        ) # column
+          column(2,
+            introBox(
+              saveUI('save_object'),
+              data.step=11,
+              data.intro='Use this button at any point to save the modified object'
+            ), # introBox
+            offset=-1
+          ), # column
 
-      ), # fluidRow
-      windowTitle='Carnation'
-    ), # titlePanel
+          column(2,
+            introBox(
+              actionButton('bookmark', label='Bookmark'),
+              data.step=11,
+              data.intro='Save the current settings for your plots into the url to share with others'
+            ), # introBox
+            offset=-2
+          ) # column
 
-    # side bar
-    sidebarPanel(width=1, id='sidebar',
+        ), # fluidRow
+        windowTitle='Carnation'
+      ), # titlePanel
 
-      introBox(
-        fluidRow(align='center',
-          introBox(
-            dropdownButton(
-              tagList(
-                  fluidRow(
-                    column(6, align='left',
-                      tags$label(class='control-label',
-                                      'DE Filters'
-                      ) # tags$label
-                    ), # column
-                    column(6, align='right',
-                      helpButtonUI('de_filters_help')
-                    ) # column
-                  ), # fluidRow
+      # side bar
+      sidebarPanel(width=1, id='sidebar',
 
-                  fluidRow(
-                    column(4, h5('FDR threshold')),
-                    column(8,
-                      numericInput("fdr.thres", label=NULL,
-                        value=cfg$ui$de_analysis$filters$fdr_threshold,
-                        min=0, max=1
-                      ) # numericInput
-                    ) # column
-                  ), # fluidRow
-                  fluidRow(
-                    column(4, h5('log2FC threshold')),
-                    column(8,
-                      numericInput("fc.thres", label=NULL,
-                        value=cfg$ui$de_analysis$filters$log2fc_threshold,
-                        min=0
-                      ) # numericInput
-                    ) # column
-                  ) # fluidRow
+        introBox(
+          fluidRow(align='center',
+            introBox(
+              dropdownButton(
+                tagList(
+                    fluidRow(
+                      column(6, align='left',
+                        tags$label(class='control-label',
+                                        'DE Filters'
+                        ) # tags$label
+                      ), # column
+                      column(6, align='right',
+                        helpButtonUI('de_filters_help')
+                      ) # column
+                    ), # fluidRow
 
-              ), # tagList
+                    fluidRow(
+                      column(4, h5('FDR threshold')),
+                      column(8,
+                        numericInput("fdr.thres", label=NULL,
+                          value=cfg$ui$de_analysis$filters$fdr_threshold,
+                          min=0, max=1
+                        ) # numericInput
+                      ) # column
+                    ), # fluidRow
+                    fluidRow(
+                      column(4, h5('log2FC threshold')),
+                      column(8,
+                        numericInput("fc.thres", label=NULL,
+                          value=cfg$ui$de_analysis$filters$log2fc_threshold,
+                          min=0
+                        ) # numericInput
+                      ) # column
+                    ) # fluidRow
 
-              icon = icon("sliders-h"), width = "400px",
-              size='sm',
-              inputId="global_settings",
+                ), # tagList
 
-              tooltip = tooltipOptions(title = "Global settings")
+                icon = icon("sliders-h"), width = "400px",
+                size='sm',
+                inputId="global_settings",
 
-            ), # dropdownButton
-            data.step=8,
-            data.intro='Click this button to access global settings'
-          ), # introBox
+                tooltip = tooltipOptions(title = "Global settings")
 
-          br(),
+              ), # dropdownButton
+              data.step=8,
+              data.intro='Click this button to access global settings'
+            ), # introBox
 
-          introBox(
-            dropdownButton(
-              tagList(
+            br(),
 
-                conditionalPanel("input.mode == 'Load data'",
-                  span('Load your data here. You can choose existing or new datasets',
-                    style='font-size: 15px;'
-                  )
-                ), # conditionalPanel
+            introBox(
+              dropdownButton(
+                tagList(
 
-                conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Summary'",
-                  span('Here we show a summary of the DE comparisons performed',
-                    style='font-size: 15px;'
-                  )
-                ), # conditionalPanel
+                  conditionalPanel("input.mode == 'Load data'",
+                    span('Load your data here. You can choose existing or new datasets',
+                      style='font-size: 15px;'
+                    )
+                  ), # conditionalPanel
 
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Table'",
+                  conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Summary'",
+                    span('Here we show a summary of the DE comparisons performed',
+                      style='font-size: 15px;'
+                    )
+                  ), # conditionalPanel
 
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Table'",
+
+                fluidRow(
+                  column(6, align='left',
+                    tags$label(class='control-label',
+                               'Comparison')
+                  ), # column
+                  column(6, align='right',
+                    helpButtonUI('de_cmp_help')
+                  ) # column
+                ), # fluidRow
+
+                selectizeInput('comp_all',
+                               label=NULL,
+                               choices=NULL,
+                               selected=NULL,
+                               multiple=TRUE),
+
+                # For 'Select all' and 'Select none' buttons
+                fluidRow(style='margin-bottom: 20px',
+                  column(6, align='center',
+                    actionButton('select_all_comp', 'Select all', class = "btn-secondary")
+                  ), # column for 'Select all'
+                  column(6, align='center',
+                    actionButton('select_none_comp', 'Select none', class = "btn-secondary")
+                  ) # column for 'Select none'
+                ), # fluidRow
+
+                fluidRow(
+                  column(4, h5('Only DE genes')),
+                  column(8,
+                    checkboxInput("toggle_filters", label=NULL,
+                      value=cfg$ui$de_analysis$filters$only_de_toggle
+                    ) # checkboxInput
+                  ) # column
+                ) # fluidRow
+
+              ), # conditionalPanel
+
+              ########################## Metadata ######################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Metadata'",
+
+                fluidRow(
+                  column(6, align='left',
+                    tags$label(class='control-label',
+                               'Sample group')
+                  ), # column
+                  column(6, align='right',
+                    helpButtonUI('metadata_sidebar_help')
+                  ) # column
+                ), # fluidRow
+
+                metadataUI('metadata', panel='sidebar')
+
+              ), # conditionalPanel
+
+              ########################## PCA plot ######################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'PCA plot'",
+                pcaPlotUI('pcaplot', panel='sidebar')
+              ), # conditionalPanel
+
+              ######################### MA plot ########################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'MA plot'",
+
+                maPlotUI('maplot', panel='sidebar')
+
+              ), # conditionalPanel
+
+              ######################### Scatter plot ########################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Scatter plot'",
+
+                scatterPlotUI('scatterplot', panel='sidebar')
+
+              ), # conditionalPanel
+
+              ######################### Upset plot ####################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Upset plot'",
+
+                upsetPlotUI('upset_plot', panel='sidebar')
+
+              ), # conditionalPanel
+
+              ######################### Heatmap ########################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Heatmap'",
+
+                heatmapUI('heatmap', panel='sidebar')
+
+              ), # conditionalPanel
+
+              ########################## Functional enrichment #########################
+
+              conditionalPanel("input.mode == 'Functional enrichment' & input.func == 'Table'",
+                enrichUI('func_enrich',
+                         panel='sidebar',
+                         tab='table')
+              ), # conditionalPanel
+
+              conditionalPanel("input.mode == 'Functional enrichment' & input.func == 'Plots'",
+                enrichUI('func_enrich',
+                         panel='sidebar',
+                         tab='plots')
+              ), # conditionalPanel
+
+              # compare results
+              conditionalPanel("input.mode == 'Functional enrichment' & input.func == 'Compare results'",
+                enrichUI('func_enrich',
+                         panel='sidebar',
+                         tab='compare_results')
+              ), # conditionalPanel
+
+              ########################## Pattern analysis ##############################
+
+              conditionalPanel(condition = "input.mode == 'Pattern analysis'",
+
+                patternPlotUI('deg_plot', 'sidebar', 'both')
+
+              ), # conditionalPanel
+
+              conditionalPanel(condition = "input.mode == 'Pattern analysis' & input.pattern_mode == 'Plot'",
+
+                patternPlotUI('deg_plot', 'sidebar', 'plot')
+
+              ), # conditionalPanel
+
+              conditionalPanel(condition = "input.mode == 'Pattern analysis' & input.pattern_mode == 'Cluster membership'",
+
+                patternPlotUI('deg_plot', 'sidebar', 'table')
+
+              ), # conditionalPanel
+
+              ########################## Gene plot #####################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Gene plot'",
+
+                genePlotUI('gene_plot', panel='sidebar')
+
+              ), # conditionalPanel
+
+              ########################## Settings ######################################
+
+              conditionalPanel(condition = "input.mode == 'Settings'",
+                uiOutput('settings_sidebar')
+              ) # conditionalPanel
+
+                ), # tagList
+
+                icon = icon("gear"), width = "400px",
+                size='sm',
+                inputId="tab_settings",
+
+                tooltip = tooltipOptions(title = "Settings")
+
+              ), # dropdownButton
+
+              data.step=9,
+              data.intro='Here you will find specific controls to adjust plots or tables'
+            ), # introBox
+
+            br(),
+
+            ########################## Gene Scratchpad ###############################
+
+            introBox(
+              dropdownButton(
+                tagList(
+                  conditionalPanel("input.mode == 'DE analysis' | input.mode == 'Functional enrichment' | input.mode == 'Pattern analysis'",
+
+                    fluidRow(
+                      column(6, strong('Gene scratchpad')),
+                      column(6, align='right',
+                         helpButtonUI('gene_scratchpad_help')
+                      ) # column
+                    ), # fluidRow
+
+                    selectizeInput('gene.to.plot',
+                                   label=NULL,
+                                   choices=NULL, selected=NULL,
+                                   options=list(create=TRUE, delimiter=','),
+                                   multiple=TRUE
+                    ), # selectizeInput
+
+                    fluidRow(
+                      column(12, align='center',
+                        style='margin-bottom: 20px;',
+                        splitLayout(cellWidths=c('50%','50%'),
+                          actionButton('reset.genes', label='Reset',
+                                     class='btn-primary'),
+                          actionButton('quick_add', label='Add top genes')
+                        ) # splitLayout
+                      ) # column
+                    ), # fluidRow
+
+                    bsCollapse(open='settings',
+                      bsCollapsePanel(span(icon('gear'), 'Top genes settings'),
+                        value='settings',
+
+                        fluidRow(
+                          column(4, 'Comparison'),
+                          column(8,
+                            selectInput('scratchpad_comp',
+                                        label=NULL,
+                                        choices=NULL, selected=NULL)
+                          ) # column
+                        ), # fluidRow
+
+                        fluidRow(
+                          column(4, '# of genes'),
+                          column(8,
+                            numericInput('scratchpad_ngenes',
+                                        label=NULL,
+                                        value=cfg$server$de_analysis$gene_scratchpad$ngenes,
+                                        step=1)
+                          ) # column
+                        ), # fluidRow
+
+                        fluidRow(
+                          column(4, 'ranking metric'),
+                          column(8,
+                            selectInput('top_genes_by',
+                                        label=NULL,
+                                        choices=c('padj', 'log2FoldChange'))
+                          ) # column
+                        ) # fluidRow
+
+                      ) # bsCollapsePanel
+                    ) # bsCollapse
+
+                  ) # conditionalPanel
+
+                ), # tagList
+
+                icon = icon("clipboard"), width = "400px",
+                size='sm',
+                inputId="scratchpad",
+
+                tooltip = tooltipOptions(title = "Gene scratchpad")
+
+              ), # dropdownButton
+              data.step=10,
+              data.intro='Keep track of your favorite genes or quickly select top genes with the "Gene scratchpad" here'
+            ), # introBox
+
+            data.step=7,
+            data.intro='You can use controls shown in this area to filter data or adjust plots and tables.'
+          ) # fluidRow
+        ) # introBox
+      ), # sidebarPanel
+
+      mainPanel(width=11,
+
+        tags$div(
+          tabsetPanel(type='tabs',
+                      id='mode',
+
+            tabPanel('Load data',
               fluidRow(
-                column(6, align='left',
-                  tags$label(class='control-label',
-                             'Comparison')
-                ), # column
-                column(6, align='right',
-                  helpButtonUI('de_cmp_help')
-                ) # column
-              ), # fluidRow
-
-              selectizeInput('comp_all',
-                             label=NULL,
-                             choices=NULL,
-                             selected=NULL,
-                             multiple=TRUE),
-
-              # For 'Select all' and 'Select none' buttons
-              fluidRow(style='margin-bottom: 20px',
-                column(6, align='center',
-                  actionButton('select_all_comp', 'Select all', class = "btn-secondary")
-                ), # column for 'Select all'
-                column(6, align='center',
-                  actionButton('select_none_comp', 'Select none', class = "btn-secondary")
-                ) # column for 'Select none'
-              ), # fluidRow
-
-              fluidRow(
-                column(4, h5('Only DE genes')),
-                column(8,
-                  checkboxInput("toggle_filters", label=NULL,
-                    value=cfg$ui$de_analysis$filters$only_de_toggle
-                  ) # checkboxInput
-                ) # column
-              ) # fluidRow
-
-            ), # conditionalPanel
-
-            ########################## Metadata ######################################
-
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Metadata'",
-
-              fluidRow(
-                column(6, align='left',
-                  tags$label(class='control-label',
-                             'Sample group')
-                ), # column
-                column(6, align='right',
-                  helpButtonUI('metadata_sidebar_help')
-                ) # column
-              ), # fluidRow
-
-              metadataUI('metadata', panel='sidebar')
-
-            ), # conditionalPanel
-
-            ########################## PCA plot ######################################
-
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'PCA plot'",
-              pcaPlotUI('pcaplot', panel='sidebar')
-            ), # conditionalPanel
-
-            ######################### MA plot ########################################
-
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'MA plot'",
-
-              maPlotUI('maplot', panel='sidebar')
-
-            ), # conditionalPanel
-
-            ######################### Scatter plot ########################################
-
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Scatter plot'",
-
-              scatterPlotUI('scatterplot', panel='sidebar')
-
-            ), # conditionalPanel
-
-            ######################### Upset plot ####################################
-
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Upset plot'",
-
-              upsetPlotUI('upset_plot', panel='sidebar')
-
-            ), # conditionalPanel
-
-            ######################### Heatmap ########################################
-
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Heatmap'",
-
-              heatmapUI('heatmap', panel='sidebar')
-
-            ), # conditionalPanel
-
-            ########################## Functional enrichment #########################
-
-            conditionalPanel("input.mode == 'Functional enrichment' & input.func == 'Table'",
-              enrichUI('func_enrich',
-                       panel='sidebar',
-                       tab='table')
-            ), # conditionalPanel
-
-            conditionalPanel("input.mode == 'Functional enrichment' & input.func == 'Plots'",
-              enrichUI('func_enrich',
-                       panel='sidebar',
-                       tab='plots')
-            ), # conditionalPanel
-
-            # compare results
-            conditionalPanel("input.mode == 'Functional enrichment' & input.func == 'Compare results'",
-              enrichUI('func_enrich',
-                       panel='sidebar',
-                       tab='compare_results')
-            ), # conditionalPanel
-
-            ########################## Pattern analysis ##############################
-
-            conditionalPanel(condition = "input.mode == 'Pattern analysis'",
-
-              patternPlotUI('deg_plot', 'sidebar', 'both')
-
-            ), # conditionalPanel
-
-            conditionalPanel(condition = "input.mode == 'Pattern analysis' & input.pattern_mode == 'Plot'",
-
-              patternPlotUI('deg_plot', 'sidebar', 'plot')
-
-            ), # conditionalPanel
-
-            conditionalPanel(condition = "input.mode == 'Pattern analysis' & input.pattern_mode == 'Cluster membership'",
-
-              patternPlotUI('deg_plot', 'sidebar', 'table')
-
-            ), # conditionalPanel
-
-            ########################## Gene plot #####################################
-
-            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Gene plot'",
-
-              genePlotUI('gene_plot', panel='sidebar')
-
-            ), # conditionalPanel
-
-            ########################## Settings ######################################
-
-            conditionalPanel(condition = "input.mode == 'Settings'",
-              uiOutput('settings_sidebar')
-            ) # conditionalPanel
-
-              ), # tagList
-
-              icon = icon("gear"), width = "400px",
-              size='sm',
-              inputId="tab_settings",
-
-              tooltip = tooltipOptions(title = "Settings")
-
-            ), # dropdownButton
-
-            data.step=9,
-            data.intro='Here you will find specific controls to adjust plots or tables'
-          ), # introBox
-
-          br(),
-
-          ########################## Gene Scratchpad ###############################
-
-          introBox(
-            dropdownButton(
-              tagList(
-                conditionalPanel("input.mode == 'DE analysis' | input.mode == 'Functional enrichment' | input.mode == 'Pattern analysis'",
-
-                  fluidRow(
-                    column(6, strong('Gene scratchpad')),
-                    column(6, align='right',
-                       helpButtonUI('gene_scratchpad_help')
-                    ) # column
-                  ), # fluidRow
-
-                  selectizeInput('gene.to.plot',
-                                 label=NULL,
-                                 choices=NULL, selected=NULL,
-                                 options=list(create=TRUE, delimiter=','),
-                                 multiple=TRUE
-                  ), # selectizeInput
-
-                  fluidRow(
-                    column(12, align='center',
-                      style='margin-bottom: 20px;',
-                      splitLayout(cellWidths=c('50%','50%'),
-                        actionButton('reset.genes', label='Reset',
-                                   class='btn-primary'),
-                        actionButton('quick_add', label='Add top genes')
-                      ) # splitLayout
-                    ) # column
-                  ), # fluidRow
-
-                  bsCollapse(open='settings',
-                    bsCollapsePanel(span(icon('gear'), 'Top genes settings'),
-                      value='settings',
-
-                      fluidRow(
-                        column(4, 'Comparison'),
-                        column(8,
-                          selectInput('scratchpad_comp',
-                                      label=NULL,
-                                      choices=NULL, selected=NULL)
-                        ) # column
-                      ), # fluidRow
-
-                      fluidRow(
-                        column(4, '# of genes'),
-                        column(8,
-                          numericInput('scratchpad_ngenes',
-                                      label=NULL,
-                                      value=cfg$server$de_analysis$gene_scratchpad$ngenes,
-                                      step=1)
-                        ) # column
-                      ), # fluidRow
-
-                      fluidRow(
-                        column(4, 'ranking metric'),
-                        column(8,
-                          selectInput('top_genes_by',
-                                      label=NULL,
-                                      choices=c('padj', 'log2FoldChange'))
-                        ) # column
-                      ) # fluidRow
-
-                    ) # bsCollapsePanel
-                  ) # bsCollapse
-
-                ) # conditionalPanel
-
-              ), # tagList
-
-              icon = icon("clipboard"), width = "400px",
-              size='sm',
-              inputId="scratchpad",
-
-              tooltip = tooltipOptions(title = "Gene scratchpad")
-
-            ), # dropdownButton
-            data.step=10,
-            data.intro='Keep track of your favorite genes or quickly select top genes with the "Gene scratchpad" here'
-          ), # introBox
-
-          data.step=7,
-          data.intro='You can use controls shown in this area to filter data or adjust plots and tables.'
-        ) # fluidRow
-      ) # introBox
-    ), # sidebarPanel
-
-    mainPanel(width=11,
-
-      tags$div(
-        tabsetPanel(type='tabs',
-                    id='mode',
-
-          tabPanel('Load data',
-            fluidRow(
-              column(2,
-                introBox(
-                  selectInput('data_type', label='Type of data',
-                              choices=c('Existing', 'New', 'Edit')),
-                  data.step=1,
-                  data.intro='Choose whether you want to load an existing project, create a new one, or edit the currently loaded object.'
-                ),
-
-                conditionalPanel('input.data_type == "Existing"',
-                    introBox(
-                      selectizeInput('dds',
-                                     label=h5('Available projects'),
-                                     choices=NULL,
-                                     selected=NULL,
-                                     width='100%'
-                      ), # selectizeInput
-                      data.step=2,
-                      data.intro='Select the project you want to work with.'
-                    ),
-                    introBox(
-                      selectizeInput('assay',
-                                     label=h5('Available analyses'),
-                                     choices=NULL,
-                                     selected=NULL,
-                                     width='100%'
-                      ), # selectizeInput
-                      data.step=4,
-                      data.intro='Next, select the analysis to load for the chosen project.'
-                    ),
-                    introBox(
-                      actionButton('assay_do', label='Go!',
-                                   class='btn-primary'),
-                      data.step=6,
-                      data.intro='Finally, click this button to load the selected project and analysis into carnation.'
-                    ),
-
-                    br(), br(),
-                    uiOutput('current_obj')
-
-                ) # conditionalPanel
-              ), # column
-              column(10, style='margin-top: 20px',
-                conditionalPanel('input.data_type == "Existing"',
-                  column(6,
-
-                    introBox(
-                      tags$div(
-                        DTOutput('project_desc')
+                column(2,
+                  introBox(
+                    selectInput('data_type', label='Type of data',
+                                choices=c('Existing', 'New', 'Edit')),
+                    data.step=1,
+                    data.intro='Choose whether you want to load an existing project, create a new one, or edit the currently loaded object.'
+                  ),
+
+                  conditionalPanel('input.data_type == "Existing"',
+                      introBox(
+                        selectizeInput('dds',
+                                       label=h5('Available projects'),
+                                       choices=NULL,
+                                       selected=NULL,
+                                       width='100%'
+                        ), # selectizeInput
+                        data.step=2,
+                        data.intro='Select the project you want to work with.'
+                      ),
+                      introBox(
+                        selectizeInput('assay',
+                                       label=h5('Available analyses'),
+                                       choices=NULL,
+                                       selected=NULL,
+                                       width='100%'
+                        ), # selectizeInput
+                        data.step=4,
+                        data.intro='Next, select the analysis to load for the chosen project.'
+                      ),
+                      introBox(
+                        actionButton('assay_do', label='Go!',
+                                     class='btn-primary'),
+                        data.step=6,
+                        data.intro='Finally, click this button to load the selected project and analysis into carnation.'
                       ),
 
-                      data.step=3,
-                      data.intro='Alternatively, use this table to review available projects and click a row to update the project dropdown.'
-                    )
-                  ),
-                  conditionalPanel('input.dds != "" & input.dds != "Choose one"',
+                      br(), br(),
+                      uiOutput('current_obj')
+
+                  ) # conditionalPanel
+                ), # column
+                column(10, style='margin-top: 20px',
+                  conditionalPanel('input.data_type == "Existing"',
                     column(6,
+
                       introBox(
                         tags$div(
-                          DTOutput('analysis_desc')
+                          DTOutput('project_desc')
                         ),
-                        data.step=5,
-                        data.intro='Or, use this table to review analyses for the selected project and click a row to populate the analysis dropdown.'
+
+                        data.step=3,
+                        data.intro='Alternatively, use this table to review available projects and click a row to update the project dropdown.'
+                      )
+                    ),
+                    conditionalPanel('input.dds != "" & input.dds != "Choose one"',
+                      column(6,
+                        introBox(
+                          tags$div(
+                            DTOutput('analysis_desc')
+                          ),
+                          data.step=5,
+                          data.intro='Or, use this table to review analyses for the selected project and click a row to populate the analysis dropdown.'
+                        )
                       )
                     )
-                  )
-                ) # conditionalPanel
-              )
-            ), # fluidRow
+                  ) # conditionalPanel
+                )
+              ), # fluidRow
 
-            withSpinner(
-              uiOutput('load_ui')
-            ),  # withSpinner
+              withSpinner(
+                uiOutput('load_ui')
+              ),  # withSpinner
 
-          ), # tabPanel
+            ), # tabPanel
 
-          tabPanel('DE analysis',
-            tabsetPanel(id='de_mode',
+            tabPanel('DE analysis',
+              tabsetPanel(id='de_mode',
 
-              ##### DE Analysis subtabs #####
+                ##### DE Analysis subtabs #####
 
-              tabPanel('Summary',
-                fluidRow(
-                  column(1, align='left',
-                    helpButtonUI('de_summary_help')
-                  ) # column
-                ), # fluidRow
+                tabPanel('Summary',
+                  fluidRow(
+                    column(1, align='left',
+                      helpButtonUI('de_summary_help')
+                    ) # column
+                  ), # fluidRow
 
-                fluidRow(
-                  column(12, align='left',
-                    withSpinner(
-                      DTOutput('summary_tbl')
-                    ) # withSpinner
-                  ) # column
-                ) # fluidRow
-              ), # tabPanel summary
+                  fluidRow(
+                    column(12, align='left',
+                      withSpinner(
+                        DTOutput('summary_tbl')
+                      ) # withSpinner
+                    ) # column
+                  ) # fluidRow
+                ), # tabPanel summary
 
-              tabPanel('Metadata',
-                # help button
-                fluidRow(
-                  column(12, align='left',
-                    helpButtonUI('de_meta_help')
-                  ) # column
-                ), # fluidRow
+                tabPanel('Metadata',
+                  # help button
+                  fluidRow(
+                    column(12, align='left',
+                      helpButtonUI('de_meta_help')
+                    ) # column
+                  ), # fluidRow
 
-                metadataUI('metadata', panel='main')
-              ), # tabPanel metadata
+                  metadataUI('metadata', panel='main')
+                ), # tabPanel metadata
 
-              tabPanel('PCA plot',
-                pcaPlotUI('pcaplot', panel='main')
-              ), # tabPanel PCA
+                tabPanel('PCA plot',
+                  pcaPlotUI('pcaplot', panel='main')
+                ), # tabPanel PCA
 
-              tabPanel('Table',
-                fluidRow(
-                  column(12, align='left',
-                    helpButtonUI('de_tbl_help')
-                  ) # column
-                ), # fluidRow
+                tabPanel('Table',
+                  fluidRow(
+                    column(12, align='left',
+                      helpButtonUI('de_tbl_help')
+                    ) # column
+                  ), # fluidRow
 
-                fluidRow(
-                  column(12,
-                    withSpinner(
-                      DTOutput('detable')
-                    ) # withSpinner
-                  ) # column
-                ), # fluidRow
+                  fluidRow(
+                    column(12,
+                      withSpinner(
+                        DTOutput('detable')
+                      ) # withSpinner
+                    ) # column
+                  ), # fluidRow
 
-                fluidRow(align='center', style='margin-top: 25px;',
-                  column(12,
-                    splitLayout(
-                      cellWidths=c('15%', '25%', '20%'),
+                  fluidRow(align='center', style='margin-top: 25px;',
+                    column(12,
+                      splitLayout(
+                        cellWidths=c('15%', '25%', '20%'),
 
-                      strong('Selection options'),
-                      actionButton('add_selected', 'Add to scratchpad'),
-                      actionButton('reset_detable',
-                                   'Reset selection',
-                                   class='btn-primary')
-                    ) # splitLayout
-                  ) # column
-                ) # fluidRow
-              ), # tabPanel table
+                        strong('Selection options'),
+                        actionButton('add_selected', 'Add to scratchpad'),
+                        actionButton('reset_detable',
+                                     'Reset selection',
+                                     class='btn-primary')
+                      ) # splitLayout
+                    ) # column
+                  ) # fluidRow
+                ), # tabPanel table
 
-              tabPanel('MA plot',
-                maPlotUI('maplot', panel='main')
-              ), # tabPanel ma_plot
+                tabPanel('MA plot',
+                  maPlotUI('maplot', panel='main')
+                ), # tabPanel ma_plot
 
-              tabPanel('Scatter plot',
-                scatterPlotUI('scatterplot', panel='main')
-              ), # tabPanel scatterplot
+                tabPanel('Scatter plot',
+                  scatterPlotUI('scatterplot', panel='main')
+                ), # tabPanel scatterplot
 
-              tabPanel('Gene plot',
-                genePlotUI('gene_plot', panel='main')
-              ), # tabPanel gene_plot
+                tabPanel('Gene plot',
+                  genePlotUI('gene_plot', panel='main')
+                ), # tabPanel gene_plot
 
-              tabPanel('Upset plot',
-                upsetPlotUI('upset_plot', panel='main')
-              ), # tabPanel upset
+                tabPanel('Upset plot',
+                  upsetPlotUI('upset_plot', panel='main')
+                ), # tabPanel upset
 
-              tabPanel('Heatmap',
-                heatmapUI('heatmap', panel='main')
-              ) # tabPanel
+                tabPanel('Heatmap',
+                  heatmapUI('heatmap', panel='main')
+                ) # tabPanel
 
-            ) # tabsetPanel de_mode
-          ), # tabPanel de_analysis
+              ) # tabsetPanel de_mode
+            ), # tabPanel de_analysis
 
 
-          tabPanel('Functional enrichment',
-            tabsetPanel(id='func',
+            tabPanel('Functional enrichment',
+              tabsetPanel(id='func',
 
-              ###### Functional enrichment subtabs #####
+                ###### Functional enrichment subtabs #####
 
-              tabPanel('Table',
-                enrichUI('func_enrich',
-                         panel='main',
-                         tab='table')
-              ), # tabPanel table
+                tabPanel('Table',
+                  enrichUI('func_enrich',
+                           panel='main',
+                           tab='table')
+                ), # tabPanel table
 
-              tabPanel('Plots',
-                enrichUI('func_enrich',
-                         panel='main',
-                         tab='plots')
-              ), # tabPanel plots
+                tabPanel('Plots',
+                  enrichUI('func_enrich',
+                           panel='main',
+                           tab='plots')
+                ), # tabPanel plots
 
-              tabPanel('Compare results',
-                enrichUI('func_enrich',
-                         panel='main',
-                         tab='compare_results')
-              ) # tabPanel compare_results
+                tabPanel('Compare results',
+                  enrichUI('func_enrich',
+                           panel='main',
+                           tab='compare_results')
+                ) # tabPanel compare_results
 
-            ) # tabsetPanel func
-          ), # tabPanel functional_enrichment
+              ) # tabsetPanel func
+            ), # tabPanel functional_enrichment
 
-          tabPanel('Pattern analysis',
-            tabsetPanel(id='pattern_mode',
+            tabPanel('Pattern analysis',
+              tabsetPanel(id='pattern_mode',
 
-              tabPanel('Plot',
-                patternPlotUI('deg_plot', 'plot')
-              ), # tabPanel plot
+                tabPanel('Plot',
+                  patternPlotUI('deg_plot', 'plot')
+                ), # tabPanel plot
 
-              tabPanel('Cluster membership',
-                patternPlotUI('deg_plot', 'table')
-              ) # tabPanel cluster_membership
+                tabPanel('Cluster membership',
+                  patternPlotUI('deg_plot', 'table')
+                ) # tabPanel cluster_membership
 
-            ) # tabsetPanel pattern_mode
-          ), # tabPanel pattern_analysis
+              ) # tabsetPanel pattern_mode
+            ), # tabPanel pattern_analysis
 
-          tabPanel('Settings',
-            uiOutput('settings_main')
-          ) # tabPanel settings
+            tabPanel('Settings',
+              uiOutput('settings_main')
+            ) # tabPanel settings
 
-        ) # tabsetPanel mode
-      ) # tags$div
-    ) # mainPanel
+          ) # tabsetPanel mode
+        ) # tags$div
+      ) # mainPanel
 
-  ) # ui
+    ) # fluidPage
+  } # ui
 
   # add custom login page, shown only if credentials are specified
   if(!is.null(credentials)){
@@ -980,7 +991,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       updateSelectizeInput(session, 'assay',
                            choices=assay.choices,
-                           selected=assay.choices[1])
+                           selected= if (isolate(restoring())) isolate(input$assay) else assay.choices[1])
 
     }) # observeEvent
 
@@ -1097,18 +1108,79 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                            selected=proj_from_tbl())
     })
 
-    #################### observer to load data ####################
+    ######################### bookmarking logic ##################
+
+    BOOKMARK_ROOT <- "./bookmarks"
+
+    # Is set to true in onRestore and set to false in onRestored.
+    # Used to prevent some restore settings from being overwritten by normal
+    # load effects.
+    restoring <- reactiveVal(FALSE)
+
+    observeEvent(input$bookmark, {
+      reactiveValuesToList(input)
+      session$doBookmark()
+    })
+
+
+    onBookmarked(function(url) {
+      updateQueryString(url)
+    })
+
+
+    onRestore(function(state){
+      restoring(TRUE)
+      message("RESTORE values dds=", state$values$dds,
+          " assay=", state$values$assay)
+    })
+
+    setBookmarkExclude(c('assay_do', 'bookmark'))
+
+    onBookmark(function(state) {
+      state$values$dds <- input$dds
+      state$values$assay <- input$assay
+      message("BOOKMARK dds=", input$dds, " assay=", input$assay)
+    })
+
+    onRestored(function(state) {
+    message("RESTORED start; assay.list ready=", !is.null(isolate(assay.list$l)))
+      dds_id <- state$values$dds
+      assay_path <- state$values$assay
+      if (!is.null(dds_id) && dds_id != '' &&
+        !is.null(assay_path) && assay_path != '' && assay_path != "Choose one") {
+        updateSelectizeInput(session, 'assay', selected = assay_path )
+        load_assay(dds_id, assay_path)
+      }
+      restoring(FALSE)
+    })
 
     observeEvent(input$assay_do, {
-      validate(
-        need(!is.null(input$assay) & input$assay != '' & input$assay != 'Choose one',
-             'No assay selected!')
-      )
+      load_assay(input$dds, input$assay)
+    })
+
+    assay_key <- function(proj, analysis) {
+      raw <- paste(proj, analysis, sep = '/')
+      gsub("[^A-Za-z0-9]+", "_", raw)
+    }
+
+    shinyOptions(
+      save.interface = I
+    )
+
+
+
+
+    load_assay <- function(dds_id, assay_path) {
+
+      if (is.null(assay_path) || assay_path == "" || assay_path == "Choose one") {
+        showNotification("No assay selected!", type = "error")
+        return(invisible())
+      }
 
       reset_data()
 
       # get file size for message
-      fs <- file.size(input$assay)
+      fs <- file.size(assay_path)
       if(fs < (1024**3)){
         fs_human <- paste0('(', round(fs/(1024**2), digits=1), ' MB)')
       } else {
@@ -1122,9 +1194,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       )
 
       # load data from RDS object
-      obj <- readRDS(input$assay)
+      obj <- readRDS(assay_path)
       original$obj <- obj
-      original$path <- input$assay
+      original$path <- assay_path
 
       # if 'carnation-ready' object is uploaded these elements will always be present
       all_obj_names <- c('res', 'dds', 'rld', 'labels', 'dds_mapping')
@@ -1190,9 +1262,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
           NULL
         })
 
-        validate(
-          need(!is.null(obj), '')
-        )
+        if (is.null(obj)) return(invisible())
 
         app_object$dds <- obj$dds
         app_object$rld <- obj$rld
@@ -1219,19 +1289,21 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       removeModal()
 
+      if (!isolate(restoring())) {
       updateTabsetPanel(session, inputId='mode',
                         selected='DE analysis')
       updateTabsetPanel(session, inputId='de_mode',
                         selected='Summary')
+      }
 
       # update current project
       current$proj <- input$dds
 
-      al <- assay.list$l[[ input$dds ]]
-      idx <- which(unname(al) == input$assay)
-      current$analysis <- names(assay.list$l[[ input$dds ]])[idx]
+      al <- assay.list$l[[ dds_id ]]
+      idx <- which(unname(al) == assay_path)
+      current$analysis <- names(assay.list$l[[ dds_id ]])[idx]
 
-    }) # observeEvent load data
+    }
 
     # show loaded dataset
     output$current_obj <- renderUI({
@@ -1748,6 +1820,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
   }
 
+
+  enableBookmarking("url")
   shinyApp(ui, server, ...)
 
 }
