@@ -29,6 +29,42 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
   oopt <- options(spinner.type = 4)
   options(shiny.maxRequestSize = cfg$max_upload_size*1024^2)
 
+  # server side bookmark storage
+  if (is.null(cfg$server$bookmark_dir)) {
+      bookmark_root <-  "carnation_bookmarks"
+  } else {
+    bookmark_root <- cfg$server$bookmark_dir
+  }
+
+  dir.create(bookmark_root, recursive = TRUE, showWarnings = FALSE)
+
+  # id_to_dir <- function(id) {
+  #   parts <- strsplit(id, "__", fixed = TRUE)[[1]]
+  #   if (length(parts) == 2) {
+  #     file.path(bookmark_root, parts[1], parts[2])
+  #   } else {
+  #     file.path(bookmark_root, id)   # fallback
+  #   }
+  # }
+
+
+  assay_key <- function(proj, analysis) {
+    raw <- paste(proj, analysis, sep = '/')
+    gsub("[^A-Za-z0-9]+", "_", raw)
+  }
+
+  shinyOptions(
+    save.interface = function(id, callback) {
+      dir <- file.path(bookmark_root, id)
+      dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+      callback(dir)
+    },
+    load.interface = function(id, callback) {
+      dir <- file.path(bookmark_root, id)
+      callback(dir)
+    }
+  )
+
   # reset to previous options on exit
   on.exit(options(oopt))
 
@@ -84,23 +120,42 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                          icon=icon('info'))
           ), # column
 
-          column(2,
-            introBox(
-              saveUI('save_object'),
-              data.step=11,
-              data.intro='Use this button at any point to save the modified object'
-            ), # introBox
-            offset=-1
-          ), # column
+          # column(2,
+          #   introBox(
+          #     saveUI('save_object'),
+          #     data.step=11,
+          #     data.intro='Use this button at any point to save the modified object'
+          #   ), # introBox
+          #   offset=-1
+          # ), # column
+
+          # column(2,
+          #   introBox(
+          #     actionButton('bookmark', label='Bookmark'),
+          #     data.step=11,
+          #     data.intro='Save the current settings for your plots into the url to share with others'
+          #   ), # introBox
+          #   offset=-2
+          # ) # column
 
           column(2,
-            introBox(
-              actionButton('bookmark', label='Bookmark'),
-              data.step=11,
-              data.intro='Save the current settings for your plots into the url to share with others'
-            ), # introBox
-            offset=-2
-          ) # column
+            fluidRow(
+              column(6, align='right',
+                introBox(
+                  saveUI('save_object'),
+                  data.step=11,
+                  data.intro='Use this button at any point to save the modified object'
+                )
+              ), # column
+              column(6, align='left',
+                introBox(
+                  actionButton('bookmark', label='Bookmark', class='btn-primary'),
+                  data.step=11,
+                  data.intro='Save the current settings for your plots into the url to share with others'
+                )
+              ) # column
+            ) # fluidRow
+          )
 
         ), # fluidRow
         windowTitle='Carnation'
@@ -465,6 +520,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                         ), # selectizeInput
                         data.step=4,
                         data.intro='Next, select the analysis to load for the chosen project.'
+                      ),
+                      introBox(
+                        uiOutput('saved_bookmarks_ui')
                       ),
                       introBox(
                         actionButton('assay_do', label='Go!',
@@ -1110,62 +1168,150 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     ######################### bookmarking logic ##################
 
-    BOOKMARK_ROOT <- "./bookmarks"
 
     # Is set to true in onRestore and set to false in onRestored.
     # Used to prevent some restore settings from being overwritten by normal
     # load effects.
     restoring <- reactiveVal(FALSE)
 
+    restored_inputs_store <- NULL
+
     observeEvent(input$bookmark, {
+    if (isolate(restoring())) return()
       reactiveValuesToList(input)
       session$doBookmark()
-    })
+    }, ignoreInit = TRUE)
 
 
+    # Runs after the bookmark has been generated
     onBookmarked(function(url) {
       updateQueryString(url)
     })
 
 
+    # Runs at start of loading bookmark/state
     onRestore(function(state){
-      restoring(TRUE)
+      restored_inputs_store <<- as.list(state$input)
       message("RESTORE values dds=", state$values$dds,
           " assay=", state$values$assay)
     })
 
     setBookmarkExclude(c('assay_do', 'bookmark'))
 
+    # Runs as an early effect of bookmarking
     onBookmark(function(state) {
       state$values$dds <- input$dds
       state$values$assay <- input$assay
+      state$values$assay_analysis <- current$analysis
+      state$values$label <- if (is.null(input$bookmark_name) || input$bookmark_name == '') {
+        NA_character_ } else { input$bookmark_name
+      }
+      state$values$mode <- input$mode
+      state$values$comp <- paste(input$comp_all, collapse = ", ")
+      state$values$saved_at <- as.character(Sys.time())
       message("BOOKMARK dds=", input$dds, " assay=", input$assay)
     })
 
     onRestored(function(state) {
-    message("RESTORED start; assay.list ready=", !is.null(isolate(assay.list$l)))
+    restoring(TRUE)
+    message('RESTORED start; assay.list ready=', !is.null(isolate(assay.list$l)))
       dds_id <- state$values$dds
       assay_path <- state$values$assay
       if (!is.null(dds_id) && dds_id != '' &&
-        !is.null(assay_path) && assay_path != '' && assay_path != "Choose one") {
+        !is.null(assay_path) && assay_path != '' && assay_path != 'Choose one') {
         updateSelectizeInput(session, 'assay', selected = assay_path )
         load_assay(dds_id, assay_path)
       }
-      restoring(FALSE)
+
+    })
+
+    observeEvent(app_object$res, {
+      if (isolate(restoring())) {
+        later::later(function() {
+          apply_restored_inputs(restored_inputs_store)
+          restoring(FALSE)
+        }, delay = 0.2)
+      }
+     }, priority = -100)
+
+    read_snap_meta <- function(dir) {
+      vfile <- file.path(dir, 'values.rds')
+      if (!file.exists(vfile)) return(NULL)
+      v <- tryCatch(readRDS(vfile), error = function(e) NULL)
+      if (is.null(v)) return(NULL)
+      list(
+        dds            = v$dds %||% NA_character_,
+        assay_analysis = v$assay_analysis %||% NA_character_,
+        label          = v$label %||% NA_character_,
+        mode           = v$mode %||% NA_character_,
+        comp           = v$comp %||% '',
+        saved_at       = v$saved_at %||% ''
+      )
+    }
+
+    apply_restored_inputs <- function(vals) {
+      if (is.null(vals) || length(vals) == 0) return()
+
+      skip_pat <- "(-help_btn|-dload_btn|_do$|^intro$|^bookmark|^go_bookmark|^load_bookmark|^assay_do|^dds$|^assay$|^data_type$|select_all|select_none)"
+
+      for (name in names(vals)) {
+        if (grepl(skip_pat, name)) next
+        v <- vals[[name]]
+        if (is.null(v)) next
+
+        if (is.logical(v) && length(v) == 1) {
+          updateCheckboxInput(session, name, value = v)
+        } else if (is.numeric(v) && length(v) == 1) {
+          updateNumericInput(session, name, value = v)
+        } else {
+          updateSelectInput(session, name, selected = v)
+        }
+      }
+    }
+
+    output$saved_bookmarks_ui <- renderUI({
+      req(current$proj, current$analysis)
+
+      all_ids <- list.dirs(bookmark_root, recursive = FALSE, full.names = FALSE)
+      if (length(all_ids) == 0) return(tags$p('No saved views yet.'))
+
+      matches <- Filter(Negate(is.null), lapply(all_ids, function(id) {
+        meta <- read_snap_meta(file.path(bookmark_root, id))
+        if (is.null(meta)) return(NULL)
+        if (identical(meta$dds, current$proj) &&
+            identical(meta$assay_analysis, current$analysis)) {
+          list(id = id, meta = meta)
+        } else NULL
+      }))
+
+      if (length(matches) == 0) {
+        return(tags$p('No saved views for this analysis yet.'))
+      }
+
+      labels <- vapply(matches, function(m) {
+        nm <- if (!is.na(m$meta$label)) m$meta$label else m$meta$saved_at
+        paste0(nm, if (nzchar(m$meta$mode)) paste0(' [', m$meta$mode, ']') else '')
+      }, character(1))
+
+      ids <- vapply(matches, function(m) m$id, character(1))
+      choices <- setNames(ids, labels)   # value = Shiny's alphanumeric id
+
+      tagList(
+        selectInput('load_bookmark', 'Saved views', choices = choices),
+        actionButton('go_bookmark', 'Load view', class = 'btn-primary')
+      )
+    })
+
+    observeEvent(input$go_bookmark, {
+      req(input$load_bookmark)
+      updateQueryString(paste0('?_state_id_=', input$load_bookmark), mode = 'push')
+      session$reload()
     })
 
     observeEvent(input$assay_do, {
       load_assay(input$dds, input$assay)
     })
 
-    assay_key <- function(proj, analysis) {
-      raw <- paste(proj, analysis, sep = '/')
-      gsub("[^A-Za-z0-9]+", "_", raw)
-    }
-
-    shinyOptions(
-      save.interface = I
-    )
 
 
 
@@ -1821,7 +1967,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
   }
 
 
-  enableBookmarking("url")
+  enableBookmarking("server")
   shinyApp(ui, server, ...)
 
 }
