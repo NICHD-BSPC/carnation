@@ -242,6 +242,31 @@ genePlotUI <- function(id, panel){
 
           ), # bsCollapsePanel
 
+          bsCollapsePanel('sample settings',
+
+            fluidRow(
+              column(4, 'samples'),
+              column(8,
+                selectizeInput(ns('sample_levels'),
+                               label=NULL,
+                               choices=NULL,
+                               selected=NULL,
+                               multiple=TRUE
+                ) # selectizeInput
+              ) # column
+            ), # fluidRow
+            fluidRow(
+              column(6, align='center',
+                     style='margin-bottom: 10px;',
+                actionButton(ns('sample_all'), 'Select all')
+              ), # column
+              column(6, align='center',
+                     style='margin-bottom: 10px;',
+                actionButton(ns('sample_none'), 'Select none')
+              ) # column
+            ) # fluidRow
+          ), # bsCollapsePanel
+
           bsCollapsePanel('More options',
 
             fluidRow(
@@ -430,7 +455,21 @@ genePlotServer <- function(id, obj,
             else if(input$norm_method == 'libsize') rld.i <- app_object()$all_dds
         }
 
+        updateSelectizeInput(session, 'sample_levels',
+                             choices=colnames(rld.i),
+                             selected=colnames(rld.i))
+
         gene_plot_data$all <- rld.i
+      })
+
+      observeEvent(input$sample_all, {
+        updateSelectizeInput(session, 'sample_levels',
+                             selected=colnames(gene_plot_data$all))
+      })
+
+      observeEvent(input$sample_none, {
+        updateSelectizeInput(session, 'sample_levels',
+                             selected='')
       })
 
       # update gene plot controls when col.data changes
@@ -523,7 +562,7 @@ genePlotServer <- function(id, obj,
         facet.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% c(input$xvar, cols.to.drop())]
         facet.cols <- c(facet.extra, facet.cols)
         if(length(facet.cols) > 0){
-            if(is.null(input$facet) || !(input$facet %in% facet.cols)){
+            if(is.null(input$facet) || !any(input$facet %in% facet.cols)){
                 updateSelectizeInput(session, 'facet',
                                      choices=facet.cols,
                                      selected='')
@@ -834,6 +873,10 @@ genePlotServer <- function(id, obj,
         df <- get_gene_counts(rld.i, g, input$xvar,
                               norm_method=input$norm_method)
 
+        if(!is.null(input$sample_levels) & all(input$sample_levels %in% df[['sample']])){
+          df <- df[df$sample %in% input$sample_levels, ]
+        }
+
         # add pseudocount
         pseudocount <- config()$server$de_analysis$gene_plot$pseudocount
         df$count <- df$count + pseudocount
@@ -954,7 +997,6 @@ genePlotServer <- function(id, obj,
           need(pts_inside > 0, 'No points within y-axis limits. Please adjust limits in "y-axis settings" or click "Autoscale"')
         )
 
-        # if more than 2 faceting variables are specified
         p <- getcountplot(df, intgroup=xvar, ylab=ylab,
                      log=logy, freey=freey,
                      color=color, ymax=ymax, ymin=ymin,
