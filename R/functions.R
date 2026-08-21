@@ -1662,6 +1662,7 @@ plotMA.label_ly <- function(res,
 #' @param color_by variable to color points by ('baseMean' or 'significance')
 #' @param colorscale ggplot-compatible continuous colorscale name
 #'  (viridis option), only used when color_by='baseMean'
+#' @param alpha point opacity between 0 and 1
 #' @return plotly handle
 #'
 #' @examples
@@ -1690,9 +1691,14 @@ plotVolcano.label_ly <- function(
   lab.genes = NULL,
   tolower.cols = c('SYMBOL', 'ALIAS'),
   color_by = c('baseMean', 'significance'),
-  colorscale = NULL
+  colorscale = NULL,
+  alpha = 0.6
 ) {
   color_by <- match.arg(color_by)
+  if (!is.numeric(alpha) || length(alpha) != 1 ||
+      is.na(alpha) || alpha < 0 || alpha > 1) {
+    stop('`alpha` must be a single numeric value between 0 and 1')
+  }
   if (is.null(colorscale)) {
     colorscale <- 'viridis'
   }
@@ -1896,6 +1902,7 @@ plotVolcano.label_ly <- function(
             color = color.rest,
             symbol = 'circle',
             size = 6,
+            opacity = alpha,
             line = list(width = 1, color = 'rgba(0,0,0,0.1)')
           ),
           color.args
@@ -1917,6 +1924,7 @@ plotVolcano.label_ly <- function(
               color = color.below,
               symbol = 'triangle-down',
               size = 6,
+              opacity = alpha,
               line = list(width = 1, color = 'rgba(0,0,0,0.1)')
             ),
             color.args
@@ -1938,6 +1946,7 @@ plotVolcano.label_ly <- function(
               color = color.above,
               symbol = 'triangle-up',
               size = 6,
+              opacity = alpha,
               line = list(width = 1, color = 'rgba(0,0,0,0.1)')
             ),
             color.args
@@ -1959,6 +1968,7 @@ plotVolcano.label_ly <- function(
               color = color.left,
               symbol = 'triangle-left',
               size = 6,
+              opacity = alpha,
               line = list(width = 1, color = 'rgba(0,0,0,0.1)')
             ),
             color.args
@@ -1980,6 +1990,7 @@ plotVolcano.label_ly <- function(
               color = color.right,
               symbol = 'triangle-right',
               size = 6,
+              opacity = alpha,
               line = list(width = 1, color = 'rgba(0,0,0,0.1)')
             ),
             color.args
@@ -2005,6 +2016,7 @@ plotVolcano.label_ly <- function(
             color = 'red',
             symbol = df.sig$plotly_shape,
             size = 6,
+            opacity = alpha,
             line = list(width = 1, color = 'rgba(0,0,0,0.1)')
           )
         ) %>%
@@ -2036,6 +2048,7 @@ plotVolcano.label_ly <- function(
             color = '#999999',
             symbol = df.nonsig$plotly_shape,
             size = 6,
+            opacity = alpha,
             line = list(width = 1, color = 'rgba(0,0,0,0.1)')
           )
         ) %>%
@@ -2075,6 +2088,7 @@ plotVolcano.label_ly <- function(
         add_trace(
           x = lab.list$log2FoldChange,
           y = lab.list$log_padj,
+          type = 'scatter',
           text = lab.list$symbol,
           hoverinfo = 'marker+text',
           name = 'labeled',
@@ -2082,13 +2096,15 @@ plotVolcano.label_ly <- function(
           mode = 'markers+text',
           textposition = 'bottom',
           textfont = list(size = 10),
-          marker = c(list(
-            color = lab.color,
-            symbol = lab_shapes[as.character(lab.list$shape)],
-            size = 10,
-            line = list(width = 1.5, color = 'rgba(0,0,0,1.0)')
-          )),
-          color.args
+          marker = c(
+            list(
+              color = lab.color,
+              symbol = lab_shapes[as.character(lab.list$shape)],
+              size = 10,
+              line = list(width = 1.5, color = 'rgba(0,0,0,1.0)')
+            ),
+            color.args
+          )
         )
     }
   }
@@ -2156,6 +2172,7 @@ plotVolcano.label_ly <- function(
 #' @param color_by variable to color points by ('baseMean' or 'significance')
 #' @param colorscale ggplot-compatible continuous colorscale name
 #'  (viridis option), only used when color_by='baseMean'
+#' @param alpha point opacity between 0 and 1
 #'
 #' @return ggplot handle
 #'
@@ -2184,9 +2201,14 @@ plotVolcano.label <- function(
   lab.genes = NULL,
   tolower.cols = c('SYMBOL', 'ALIAS'),
   color_by = c('baseMean', 'significance'),
-  colorscale = 'viridis'
+  colorscale = 'viridis',
+  alpha = 0.6
 ) {
   color_by <- match.arg(color_by)
+  if (!is.numeric(alpha) || length(alpha) != 1 ||
+      is.na(alpha) || alpha < 0 || alpha > 1) {
+    stop('`alpha` must be a single numeric value between 0 and 1')
+  }
 
   res <- data.frame(res)
 
@@ -2324,11 +2346,11 @@ plotVolcano.label <- function(
 
   if (color_by == 'baseMean') {
     p <- p +
-      geom_point(aes(color = .data$log_baseMean), alpha = 0.6, size = 1.8) +
+      geom_point(aes(color = .data$log_baseMean), alpha = alpha, size = 1.8) +
       scale_color_viridis_c(option = colorscale, name = 'log(baseMean)')
   } else {
     p <- p +
-      geom_point(aes(color = .data$significant), alpha = 0.6, size = 1.8) +
+      geom_point(aes(color = .data$significant), alpha = alpha, size = 1.8) +
       scale_color_manual(
         breaks = c('no', 'yes'),
         values = c('grey60', 'red'),
