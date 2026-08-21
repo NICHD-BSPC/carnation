@@ -38,20 +38,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
   dir.create(bookmark_root, recursive = TRUE, showWarnings = FALSE)
 
-  # id_to_dir <- function(id) {
-  #   parts <- strsplit(id, "__", fixed = TRUE)[[1]]
-  #   if (length(parts) == 2) {
-  #     file.path(bookmark_root, parts[1], parts[2])
-  #   } else {
-  #     file.path(bookmark_root, id)   # fallback
-  #   }
-  # }
-
-
-  assay_key <- function(proj, analysis) {
-    raw <- paste(proj, analysis, sep = '/')
-    gsub("[^A-Za-z0-9]+", "_", raw)
-  }
 
   shinyOptions(
     save.interface = function(id, callback) {
@@ -119,25 +105,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
             actionButton('intro', label='Take a tour!',
                          icon=icon('info'))
           ), # column
-
-          # column(2,
-          #   introBox(
-          #     saveUI('save_object'),
-          #     data.step=11,
-          #     data.intro='Use this button at any point to save the modified object'
-          #   ), # introBox
-          #   offset=-1
-          # ), # column
-
-          # column(2,
-          #   introBox(
-          #     actionButton('bookmark', label='Bookmark'),
-          #     data.step=11,
-          #     data.intro='Save the current settings for your plots into the url to share with others'
-          #   ), # introBox
-          #   offset=-2
-          # ) # column
-
           column(2,
             fluidRow(
               column(6, align='right',
@@ -1165,23 +1132,44 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       updateSelectizeInput(session, 'dds',
                            selected=proj_from_tbl())
     })
-
     ######################### bookmarking logic ##################
 
-
-    # Is set to true in onRestore and set to false in onRestored.
-    # Used to prevent some restore settings from being overwritten by normal
-    # load effects.
     restoring <- reactiveVal(FALSE)
 
-    restored_inputs_store <- NULL
+    # Captures the reloaded inputs after restore, so they can be
+    # overwritten as the data is reloaded and applied again
+    restored_inputs_store <- reactiveVal(NULL)
 
-    observeEvent(input$bookmark, {
-    if (isolate(restoring())) return()
-      reactiveValuesToList(input)
-      session$doBookmark()
-    }, ignoreInit = TRUE)
+    setBookmarkExclude(c('assay_do', 'bookmark'))
 
+    observeEvent(
+      input$bookmark,
+      {
+        if (isolate(restoring())) {
+          return()
+        }
+        reactiveValuesToList(input)
+        session$doBookmark()
+      },
+      ignoreInit = TRUE
+    )
+
+    # Runs as an early effect of bookmarking
+    onBookmark(function(state) {
+      state$values$dds <- input$dds
+      state$values$assay <- original$path
+      state$values$assay_analysis <- current$analysis
+      state$values$label <- if (
+        is.null(input$bookmark_name) || input$bookmark_name == ''
+      ) {
+        NA_character_
+      } else {
+        input$bookmark_name
+      }
+      state$values$mode <- input$mode
+      state$values$comp <- paste(input$comp_all, collapse = ", ")
+      state$values$saved_at <- as.character(Sys.time())
+    })
 
     # Runs after the bookmark has been generated
     onBookmarked(function(url) {
@@ -1190,111 +1178,139 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
 
     # Runs at start of loading bookmark/state
-    onRestore(function(state){
-      restored_inputs_store <<- as.list(state$input)
-      message("RESTORE values dds=", state$values$dds,
-          " assay=", state$values$assay)
+    onRestore(function(state) {
+      restored_inputs_store(as.list(state$input))
     })
 
-    setBookmarkExclude(c('assay_do', 'bookmark'))
-
-    # Runs as an early effect of bookmarking
-    onBookmark(function(state) {
-      state$values$dds <- input$dds
-      state$values$assay <- input$assay
-      state$values$assay_analysis <- current$analysis
-      state$values$label <- if (is.null(input$bookmark_name) || input$bookmark_name == '') {
-        NA_character_ } else { input$bookmark_name
-      }
-      state$values$mode <- input$mode
-      state$values$comp <- paste(input$comp_all, collapse = ", ")
-      state$values$saved_at <- as.character(Sys.time())
-      message("BOOKMARK dds=", input$dds, " assay=", input$assay)
-    })
-
+    # Restores the dds and analysis from
+    # metadata stored in state$values.
     onRestored(function(state) {
-    restoring(TRUE)
-    message('RESTORED start; assay.list ready=', !is.null(isolate(assay.list$l)))
+      restoring(TRUE)
       dds_id <- state$values$dds
       assay_path <- state$values$assay
-      if (!is.null(dds_id) && dds_id != '' &&
-        !is.null(assay_path) && assay_path != '' && assay_path != 'Choose one') {
-        updateSelectizeInput(session, 'assay', selected = assay_path )
+      if (
+        !is.null(dds_id) &&
+          dds_id != '' &&
+          !is.null(assay_path) &&
+          assay_path != '' &&
+          assay_path != 'Choose one'
+      ) {
+        updateSelectizeInput(session, 'assay', selected = assay_path)
         load_assay(dds_id, assay_path)
       }
-
     })
 
-    observeEvent(app_object$res, {
-      if (isolate(restoring())) {
-        later::later(function() {
-          apply_restored_inputs(restored_inputs_store)
-          restoring(FALSE)
-        }, delay = 0.2)
-      }
-     }, priority = -100)
+    # Reapplies the stored inputs after the data has
+    # been reloaded
+    observeEvent(
+      app_object$res,
+      {
+        if (isolate(restoring())) {
+          input_values <- isolate(restored_inputs_store())
+          later::later(
+            function() {
+              apply_restored_inputs(input_values)
+              restoring(FALSE)
+            },
+            delay = 0.2
+          )
+        }
+      },
+      priority = -100
+    )
 
+    # Returns a list of metadata
     read_snap_meta <- function(dir) {
-      vfile <- file.path(dir, 'values.rds')
-      if (!file.exists(vfile)) return(NULL)
-      v <- tryCatch(readRDS(vfile), error = function(e) NULL)
-      if (is.null(v)) return(NULL)
+      values_file <- file.path(dir, 'values.rds')
+      if (!file.exists(values_file)) {
+        return(NULL)
+      }
+      values <- tryCatch(readRDS(values_file), error = function(e) NULL)
+      if (is.null(values)) {
+        return(NULL)
+      }
       list(
-        dds            = v$dds %||% NA_character_,
-        assay_analysis = v$assay_analysis %||% NA_character_,
-        label          = v$label %||% NA_character_,
-        mode           = v$mode %||% NA_character_,
-        comp           = v$comp %||% '',
-        saved_at       = v$saved_at %||% ''
+        dds = values$dds %||% NA_character_,
+        assay_analysis = values$assay_analysis %||% NA_character_,
+        label = values$label %||% NA_character_,
+        mode = values$mode %||% NA_character_,
+        comp = values$comp %||% '',
+        saved_at = values$saved_at %||% ''
       )
     }
 
-    apply_restored_inputs <- function(vals) {
-      if (is.null(vals) || length(vals) == 0) return()
+    apply_restored_inputs <- function(values) {
+      if (is.null(values) || length(values) == 0) {
+        return()
+      }
 
       skip_pat <- "(-help_btn|-dload_btn|_do$|^intro$|^bookmark|^go_bookmark|^load_bookmark|^assay_do|^dds$|^assay$|^data_type$|select_all|select_none)"
 
-      for (name in names(vals)) {
-        if (grepl(skip_pat, name)) next
-        v <- vals[[name]]
-        if (is.null(v)) next
+      for (name in names(values)) {
+        if (grepl(skip_pat, name)) {
+          next
+        }
+        value <- values[[name]]
+        if (is.null(value)) {
+          next
+        }
 
-        if (is.logical(v) && length(v) == 1) {
-          updateCheckboxInput(session, name, value = v)
-        } else if (is.numeric(v) && length(v) == 1) {
-          updateNumericInput(session, name, value = v)
+        if (is.logical(value) && length(value) == 1) {
+          updateCheckboxInput(session, name, value = value)
+        } else if (is.numeric(value) && length(value) == 1) {
+          updateNumericInput(session, name, value = value)
         } else {
-          updateSelectInput(session, name, selected = v)
+          updateSelectInput(session, name, selected = value)
         }
       }
     }
 
+    # Scans bookmark directories and presents them as a
+    # selectInput and button
     output$saved_bookmarks_ui <- renderUI({
       req(current$proj, current$analysis)
 
       all_ids <- list.dirs(bookmark_root, recursive = FALSE, full.names = FALSE)
-      if (length(all_ids) == 0) return(tags$p('No saved views yet.'))
+      if (length(all_ids) == 0) {
+        return(tags$p('No saved views yet.'))
+      }
 
-      matches <- Filter(Negate(is.null), lapply(all_ids, function(id) {
-        meta <- read_snap_meta(file.path(bookmark_root, id))
-        if (is.null(meta)) return(NULL)
-        if (identical(meta$dds, current$proj) &&
-            identical(meta$assay_analysis, current$analysis)) {
-          list(id = id, meta = meta)
-        } else NULL
-      }))
+      matches <- Filter(
+        Negate(is.null),
+        lapply(all_ids, function(id) {
+          meta <- read_snap_meta(file.path(bookmark_root, id))
+          if (is.null(meta)) {
+            return(NULL)
+          }
+          if (
+            identical(meta$dds, current$proj) &&
+              identical(meta$assay_analysis, current$analysis)
+          ) {
+            list(id = id, meta = meta)
+          } else {
+            NULL
+          }
+        })
+      )
 
       if (length(matches) == 0) {
         return(tags$p('No saved views for this analysis yet.'))
       }
 
-      labels <- vapply(matches, function(m) {
-        nm <- if (!is.na(m$meta$label)) m$meta$label else m$meta$saved_at
-        paste0(nm, if (nzchar(m$meta$mode)) paste0(' [', m$meta$mode, ']') else '')
-      }, character(1))
+      labels <- vapply(
+        matches,
+        function(m) {
+          nm <- if (!is.na(m$meta$label)) m$meta$label else m$meta$saved_at
+          paste0(
+            nm,
+            if (nzchar(m$meta$mode)) paste0(' [', m$meta$mode, ']') else ''
+          )
+        },
+        character(1)
+      )
 
       ids <- vapply(matches, function(m) m$id, character(1))
-      choices <- setNames(ids, labels)   # value = Shiny's alphanumeric id
+      choices <- setNames(ids, labels) # value = Shiny's alphanumeric id
 
       tagList(
         selectInput('load_bookmark', 'Saved views', choices = choices),
@@ -1311,8 +1327,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     observeEvent(input$assay_do, {
       load_assay(input$dds, input$assay)
     })
-
-
 
 
 
