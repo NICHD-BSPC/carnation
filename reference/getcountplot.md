@@ -21,7 +21,8 @@ getcountplot(
   facet = NULL,
   legend = TRUE,
   boxes = TRUE,
-  rotate_x_labels = 30
+  rotate_x_labels = 30,
+  box_dodge = "identity"
 )
 ```
 
@@ -90,6 +91,10 @@ getcountplot(
 - rotate_x_labels:
 
   angle to rotate x-axis labels (default=30)
+
+- box_dodge:
+
+  box position if enabled, can be 'identity' (default) or 'dodge'
 
 ## Value
 

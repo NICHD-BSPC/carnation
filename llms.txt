@@ -77,34 +77,18 @@ Carnation can be installed using
 [`BiocManager::install`](https://bioconductor.github.io/BiocManager/reference/install.html).
 First, start R (version: 4.6) and then run:
 
-``` r
-
-# first check to see if BiocManager is available
-if(!requireNamespace('BiocManager', quietly=TRUE)){
-  install.packages('BiocManager')
-}
-
-BiocManager::install('carnation')
-```
+`# first check to see if BiocManager is available`` ``if``(``!`[`requireNamespace`](https://rdrr.io/r/base/ns-load.html)`(``'BiocManager'``, quietly``=``TRUE``)``)``{`` `` `[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``'BiocManager'``)`` ``}`` `` ``BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``'carnation'``)`
 
 To install the ‘devel’ version
 
-``` r
-
-BiocManager::install('carnation', version='devel')
-```
+`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``'carnation'``, version``=``'devel'``)`
 
 ### remotes
 
 You can install the developmental version of carnation from github using
 the `remotes` package:
 
-``` r
-
-install.packages('remotes')
-remotes::install_github('NICHD-BSPC/carnation',
-                        dependencies=TRUE, build_vignettes=TRUE)
-```
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``'remotes'``)`` ``remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation'``,`` `` dependencies``=``TRUE``, build_vignettes``=``TRUE``)`
 
 ### conda
 
@@ -122,10 +106,7 @@ Then install the package with the `remotes` package. Here we set
 `upgrade='never'` to make sure the conda-installed package versions
 remain unchanged.
 
-``` r
-
-remotes::install_github('NICHD-BSPC/carnation@r4.3', upgrade='never')
-```
+`remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation@r4.3'``, upgrade``=``'never'``)`
 
 Note:
 
@@ -153,19 +134,11 @@ navigate:
 
 Load the library and install required Python dependencies:
 
-``` r
-
-library(carnation)
-install_carnation()  # Installs plotly and kaleido for PDF export
-run_carnation()
-```
+[`library`](https://rdrr.io/r/base/library.html)`(`[`carnation`](https://nichd-bspc.github.io/carnation/)`)`` `[`install_carnation`](https://nichd-bspc.github.io/carnation/reference/install_carnation.md)`(``)`` ``# Installs plotly and kaleido for PDF export`` `[`run_carnation`](https://nichd-bspc.github.io/carnation/reference/run_carnation.md)`(``)`
 
 For remote servers with SSH port forwarding:
 
-``` r
-
-run_carnation(options=list(port=12345, launch.browser=FALSE))
-```
+[`run_carnation`](https://nichd-bspc.github.io/carnation/reference/run_carnation.md)`(``options``=`[`list`](https://rdrr.io/r/base/list.html)`(``port``=``12345``, launch.browser``=``FALSE``)``)`
 
 Then access Carnation at `http://127.0.0.1:12345`
 
