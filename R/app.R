@@ -236,6 +236,14 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
             ), # conditionalPanel
 
+            ######################### Volcano plot #######################################
+
+            conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Volcano plot'",
+
+                volcanoPlotUI('volcano_plot', panel='sidebar')
+
+            ), # conditionalPanel
+
             ######################### Scatter plot ########################################
 
             conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Scatter plot'",
@@ -571,6 +579,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               tabPanel('MA plot',
                 maPlotUI('maplot', panel='main')
               ), # tabPanel ma_plot
+
+              tabPanel('Volcano plot',
+                volcanoPlotUI('volcano_plot', panel='main')
+              ),
 
               tabPanel('Scatter plot',
                 scatterPlotUI('scatterplot', panel='main')
@@ -1607,6 +1619,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     })
 
     maPlotServer('maplot', app_object, maplot_args, config)
+
+    ##################### Volcano plot #############################
+    volcano_plot_args <- reactive({
+      list(fdr.thres=input$fdr.thres,
+           fc.thres=input$fc.thres,
+           gene.to.plot=gene_scratchpad())
+    })
+    
+    volcanoPlotServer('volcano_plot', app_object, volcano_plot_args, config)
 
     ####################### Scatter plot #############################
 
