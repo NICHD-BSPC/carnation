@@ -200,6 +200,9 @@ server:
   # subdirectory name to hold staged datasets
   staging_dir: staged
 
+  # subdirectory to hold bookmarks
+  bookmar_dir: ""
+
   # these are metadata columns that will not be shown
   # in tables
   cols.to.drop:
