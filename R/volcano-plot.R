@@ -51,6 +51,14 @@ volcanoPlotUI <- function(id, panel) {
             ) # column
           ), # fluidRow
 
+          ## alpha-slider ##########################
+          fluidRow(
+            column(
+              8,
+              sliderInput(ns('volcano_alpha'), 'Opacity/Alpha value', 0, 1, 0.6)
+            )
+          ),
+
           ## x-axis limits ##########################
           tags$label(class = 'control-label', 'x-axis limits'),
           fluidRow(
@@ -245,7 +253,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           input$volcano_ymin,
           input$volcano_ymax,
           input$color_by,
-          plot_args()$gene.to.plot
+          plot_args()$gene.to.plot,
+          input$volcano_alpha
         ),
         {
           # Checks that the required inputs exist and are valid
@@ -285,7 +294,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
             color_by = input$color_by,
-            lab.genes = plot_args()$gene.to.plot
+            lab.genes = plot_args()$gene.to.plot,
+            alpha = input$volcano_alpha
           )
         }
       )
@@ -303,7 +313,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           input$volcano_ymin,
           input$volcano_ymax,
           input$color_by,
-          plot_args()$gene.to.plot
+          plot_args()$gene.to.plot,
+          input$volcano_alpha
         ),
         {
           # Checks that the required inputs exist and are valid
@@ -344,7 +355,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
             neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
             color_by = input$color_by,
-            lab.genes = plot_args()$gene.to.plot
+            lab.genes = plot_args()$gene.to.plot,
+            alpha = input$volcano_alpha
           )
         }
       )
