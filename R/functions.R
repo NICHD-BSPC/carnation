@@ -575,6 +575,7 @@ get_gene_counts <- function (dds,
 #' @param legend show legend?
 #' @param boxes show boxes?
 #' @param rotate_x_labels angle to rotate x-axis labels (default=30)
+#' @param box_dodge box position if enabled, can be 'identity' (default) or 'dodge'
 #'
 #' @return ggplot handle
 #'
@@ -595,7 +596,7 @@ get_gene_counts <- function (dds,
 #' @export
 getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
                          ylab='Normalized counts', color='gene', nrow=2, ymin=NULL, ymax=NULL,
-                         log=TRUE, freey=FALSE, trendline='smooth', facet=NULL, legend=TRUE, boxes=TRUE, rotate_x_labels=30){
+                         log=TRUE, freey=FALSE, trendline='smooth', facet=NULL, legend=TRUE, boxes=TRUE, rotate_x_labels=30, box_dodge='identity'){
   idx <- df[,intgroup] %in% factor.levels
 
   df <- df[idx,]
@@ -613,13 +614,14 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   ymin <- ifelse(is.null(ymin), min(df$count), ymin)
   ymax <- ifelse(is.null(ymax), max(df$count), ymax)
 
-  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]], name=.data$sample)) +
+  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]], text=paste('sample:', .data$sample))) +
     geom_point(position=position_jitterdodge(dodge.width=0.2),
                  size=2, alpha=0.5)
 
-  if(boxes)
-    p <- p + geom_boxplot(alpha=0, notch=TRUE,
-                          outlier.size=0, outlier.shape=NA)
+  if(boxes){
+      p <- p + geom_boxplot(aes(group=.data[[color]]), alpha=0, notch=FALSE, position=box_dodge,
+                            outlier.size=0, outlier.shape=NA)
+  }
 
   p <- p +
     theme_bw() + ylab(ylab) + xlab('') +
@@ -2189,9 +2191,9 @@ summarize_res_list <- function(res.list, dds.list, dds_mapping, alpha, lfc.thres
     for (name in names(res.list)){
         x <- my.summary(res.list[[name]], dds.list[[ dds_mapping[[name]] ]], alpha, lfc.thresh)
         if(!is.null(labels)){
-            slist[[name]] <- cbind('comparison'=name, 'description'=labels[[name]], x)
+            slist[[name]] <- cbind('comparison'=name, 'description'=labels[[name]], dds_object=dds_mapping[[name]], x)
         } else {
-            slist[[name]] <- cbind('comparison'=name, x)
+            slist[[name]] <- cbind('comparison'=name, dds_object=dds_mapping[[name]], x)
         }
     }
     slist <- do.call(rbind, slist)

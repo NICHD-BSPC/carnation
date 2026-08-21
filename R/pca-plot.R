@@ -384,10 +384,13 @@ pcaPlotServer <- function(id, obj, coldata, config){
                           choices=column.names,
                           selected=selected)
 
-        if(is.null(input$pca_color)) selected <- column.names[1]
-        else if (input$pca_color %in% column.names)
-          selected <- input$pca_color
-        else selected <- column.names[1]
+        if(all(is.null(input$pca_color))){
+          selected <- column.names[1]
+        } else {
+          shared <- intersect(input$pca_color, column.names)
+          if(length(shared) > 0) selected <- shared
+          else selected <- column.names[1]
+        }
         updateSelectInput(session, 'pca_color',
                           choices=column.names,
                           selected=selected)

@@ -64,8 +64,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     titlePanel(
       fluidRow(
         # add spacer to center heading
-        column(4, span()),
-        column(4,
+        column(2, span()),
+        column(8,
           tags$div(
             HTML(
               paste0(
@@ -78,12 +78,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
           align='center',
           style='font-family: Helvetica; font-size: 40px;'
         ), # column
-        column(2,
+        column(1,
           actionButton('intro', label='Take a tour!',
                        icon=icon('info'))
         ), # column
 
-        column(2,
+        column(1,
           introBox(
             saveUI('save_object'),
             data.step=11,
@@ -430,7 +430,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               column(2,
                 introBox(
                   selectInput('data_type', label='Type of data',
-                              choices=c('Existing', 'New', 'Edit')),
+                              choices=c('Existing', 'New', 'Edit'),
+                              width="100%"),
                   data.step=1,
                   data.intro='Choose whether you want to load an existing project, create a new one, or edit the currently loaded object.'
                 ),
@@ -1122,7 +1123,21 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       )
 
       # load data from RDS object
-      obj <- readRDS(input$assay)
+      obj <- tryCatch(
+               readRDS(input$assay),
+               error = function(e){ e })
+
+      if(inherits(obj, 'error')){
+        showNotification(
+          paste0('Error reading object:', obj$message, '. Reload carnation and try again'),
+          type = 'error'
+        )
+      }
+
+      validate(
+        need(!inherits(obj, 'error'), 'Error reading object')
+      )
+
       original$obj <- obj
       original$path <- input$assay
 
