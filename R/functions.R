@@ -1830,9 +1830,10 @@ plotVolcano.label_ly <- function(
   df.left <- df %>% filter(.data$shape == 'left')
   df.right <- df %>% filter(.data$shape == 'right')
 
-  # Set the values to be used for coloring either by base mean or significance. The
-  # base mean color scale legend is fed into the plot at this point as well. The legend
-  # for significance is a bolt on trace in the main part of the plotting function.
+  # Set the values used for base mean coloring. Significance mode uses
+  # separate traces so that its two categories can be toggled from the legend.
+  sig_colors <- c('yes' = 'red', 'no' = '#999999')
+  color.args <- list(showscale = FALSE)
   if (color_by == 'baseMean') {
     color.rest <- df.rest$log_baseMean
     color.below <- df.below$log_baseMean
@@ -1846,39 +1847,23 @@ plotVolcano.label_ly <- function(
       showscale = TRUE,
       colorbar = list(title = "log10(baseMean)", len = 0.75)
     )
-  } else if (color_by == 'significance') {
-    sig_colors <- c('yes' = 'red', 'no' = 'grey60')
-    color.rest <- sig_colors[as.character(df.rest$significant)]
-    color.below <- sig_colors[as.character(df.below$significant)]
-    color.above <- sig_colors[as.character(df.above$significant)]
-    color.left <- sig_colors[as.character(df.left$significant)]
-    color.right <- sig_colors[as.character(df.right$significant)]
-    color.args <- list(showscale = FALSE)
   }
+
+  plotly_shapes <- c(
+    'in' = 'circle',
+    'above' = 'triangle-up',
+    'below' = 'triangle-down',
+    'left' = 'triangle-left',
+    'right' = 'triangle-right'
+  )
+  df$plotly_shape <- unname(plotly_shapes[as.character(df$shape)])
 
   # A visual margin so points on the edge of the graph arent clipped.
   x.edge.pad <- 0.1
   y.edge.pad <- 0.3
 
-  # Main plotting function
-  p <- plot_ly(
-    x = df.rest$log2FoldChange,
-    y = df.rest$log_padj,
-    type = 'scatter',
-    text = df.rest$symbol,
-    hoverinfo = 'text',
-    mode = 'markers',
-    showlegend = FALSE,
-    marker = c(
-      list(
-        color = color.rest,
-        symbol = 'circle',
-        size = 6,
-        line = list(width = 1, color = 'rgba(0,0,0,0.1)')
-      ),
-      color.args
-    )
-  ) %>%
+  # Initialize the plot and apply the layout shared by both color modes.
+  p <- plot_ly() %>%
     layout(
       xaxis = list(
         title = 'log2FoldChange',
@@ -1897,115 +1882,175 @@ plotVolcano.label_ly <- function(
       showlegend = TRUE
     )
 
-  # points below y limits
-  if (nrow(df.below) > 0) {
+  if (color_by == 'baseMean') {
     p <- p %>%
       add_markers(
-        x = df.below$log2FoldChange,
-        y = df.below$log_padj,
-        text = df.below$symbol,
-        showlegend = FALSE,
+        x = df.rest$log2FoldChange,
+        y = df.rest$log_padj,
+        text = df.rest$symbol,
         hoverinfo = 'text',
         mode = 'markers',
+        showlegend = FALSE,
         marker = c(
           list(
-            color = color.below,
-            symbol = 'triangle-down',
+            color = color.rest,
+            symbol = 'circle',
             size = 6,
             line = list(width = 1, color = 'rgba(0,0,0,0.1)')
           ),
           color.args
         )
       )
-  }
-  # points above y limits
-  if (nrow(df.above) > 0) {
-    p <- p %>%
-      add_markers(
-        x = df.above$log2FoldChange,
-        y = df.above$log_padj,
-        text = df.above$symbol,
-        hoverinfo = 'text',
-        mode = 'markers',
-        showlegend = FALSE,
-        marker = c(
-          list(
-            color = color.above,
-            symbol = 'triangle-up',
-            size = 6,
-            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
-          ),
-          color.args
-        )
-      )
-  }
-  # points left of x limits
-  if (nrow(df.left) > 0) {
-    p <- p %>%
-      add_markers(
-        x = df.left$log2FoldChange,
-        y = df.left$log_padj,
-        text = df.left$symbol,
-        hoverinfo = 'text',
-        mode = 'markers',
-        showlegend = FALSE,
-        marker = c(
-          list(
-            color = color.left,
-            symbol = 'triangle-left',
-            size = 6,
-            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
-          ),
-          color.args
-        )
-      )
-  }
-  # points right of x limits
-  if (nrow(df.right) > 0) {
-    p <- p %>%
-      add_markers(
-        x = df.right$log2FoldChange,
-        y = df.right$log_padj,
-        text = df.right$symbol,
-        hoverinfo = 'text',
-        mode = 'markers',
-        showlegend = FALSE,
-        marker = c(
-          list(
-            color = color.right,
-            symbol = 'triangle-right',
-            size = 6,
-            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
-          ),
-          color.args
-        )
-      )
-  }
 
-  # Exists to make legends entries for
-  # significance mode
-  if (color_by == 'significance') {
-    p <- p %>%
-      add_trace(
-        x = list(NA),
-        y = list(NA),
-        type = 'scatter',
-        mode = 'markers+text',
-        marker = list(color = I('red'), size = 8),
-        name = 'Significant',
-        showlegend = TRUE,
-        inherit = TRUE
-      ) %>%
-      add_trace(
-        x = list(NA),
-        y = list(NA),
-        type = 'scatter',
-        mode = 'markers+text',
-        marker = list(color = I('grey60'), size = 8),
-        name = 'Not significant',
-        showlegend = TRUE,
-        inherit = TRUE
-      )
+    # points below y limits
+    if (nrow(df.below) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.below$log2FoldChange,
+          y = df.below$log_padj,
+          text = df.below$symbol,
+          showlegend = FALSE,
+          hoverinfo = 'text',
+          mode = 'markers',
+          marker = c(
+            list(
+              color = color.below,
+              symbol = 'triangle-down',
+              size = 6,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+    # points above y limits
+    if (nrow(df.above) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.above$log2FoldChange,
+          y = df.above$log_padj,
+          text = df.above$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          showlegend = FALSE,
+          marker = c(
+            list(
+              color = color.above,
+              symbol = 'triangle-up',
+              size = 6,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+    # points left of x limits
+    if (nrow(df.left) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.left$log2FoldChange,
+          y = df.left$log_padj,
+          text = df.left$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          showlegend = FALSE,
+          marker = c(
+            list(
+              color = color.left,
+              symbol = 'triangle-left',
+              size = 6,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+    # points right of x limits
+    if (nrow(df.right) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.right$log2FoldChange,
+          y = df.right$log_padj,
+          text = df.right$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          showlegend = FALSE,
+          marker = c(
+            list(
+              color = color.right,
+              symbol = 'triangle-right',
+              size = 6,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+  } else {
+    df.sig <- df %>% filter(.data$significant == 'yes')
+    df.nonsig <- df %>% filter(.data$significant == 'no')
+
+    if (nrow(df.sig) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.sig$log2FoldChange,
+          y = df.sig$log_padj,
+          text = df.sig$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          name = 'Significant',
+          legendgroup = 'significant',
+          showlegend = FALSE,
+          marker = list(
+            color = 'red',
+            symbol = df.sig$plotly_shape,
+            size = 6,
+            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+          )
+        ) %>%
+        add_trace(
+          x = list(NA),
+          y = list(NA),
+          type = 'scatter',
+          mode = 'markers',
+          marker = list(color = 'red', symbol = 'circle', size = 8),
+          name = 'Significant',
+          legendgroup = 'significant',
+          showlegend = TRUE,
+          inherit = FALSE
+        )
+    }
+
+    if (nrow(df.nonsig) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.nonsig$log2FoldChange,
+          y = df.nonsig$log_padj,
+          text = df.nonsig$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          name = 'Not significant',
+          legendgroup = 'not_significant',
+          showlegend = FALSE,
+          marker = list(
+            color = '#999999',
+            symbol = df.nonsig$plotly_shape,
+            size = 6,
+            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+          )
+        ) %>%
+        add_trace(
+          x = list(NA),
+          y = list(NA),
+          type = 'scatter',
+          mode = 'markers',
+          marker = list(color = '#999999', symbol = 'circle', size = 8),
+          name = 'Not significant',
+          legendgroup = 'not_significant',
+          showlegend = TRUE,
+          inherit = FALSE
+        )
+    }
   }
 
   #
