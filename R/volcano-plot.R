@@ -367,10 +367,6 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           p <- volcano_plot_ly() %>% toWebGL()
 
           p <- plotly::plotly_build(p)
-          # There was an inconsistency with how WebGL was updating the
-          # gene labels when switching between significance and baseMean.
-          # This applies the labels outside of WebGL while keeping the
-          # majority of the plot in it.
 
           output$plot1 <- renderPlotly({
             p
