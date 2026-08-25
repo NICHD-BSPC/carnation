@@ -798,6 +798,290 @@ test_that("MA plot functions handle symbol columns correctly", {
   expect_true(heatmaply::is.plotly(p3_ly))
 })
 
+## Volcano module unit tests ###################
+
+# Test plotVolcano.label function
+test_that("plotVolcano.label creates correct Volcano plot", {
+  # Create mock results data
+  mock_res <- create_mock_results(50)
+
+  # Make some genes significantly differentially expressed
+  mock_res$padj[1:10] <- 0.001  # Significant genes
+  mock_res$log2FoldChange[1:5] <- c(2, 3, -2, -3, 2.5)  # Up and down regulated
+  mock_res$log2FoldChange[6:10] <- c(-1.5, 1.8, -2.2, 2.8, -1.2)
+
+  # Test basic Volcano plot generation
+  p <- plotVolcano.label(mock_res, fdr.thres = 0.01, fc.thres = 0)
+
+  # Test that a ggplot object is returned
+  expect_true(is_ggplot(p))
+
+  # Test that the plot has the expected layers
+  expect_true(length(p$layers) > 0)
+
+  # Test with custom parameters
+  p_custom <- plotVolcano.label(mock_res, fdr.thres = 0.05, fc.thres = 1,
+                                fc.lim = c(-4, 4),
+                                neg_log_padj.lim = c(0, 10),
+                                color_by = "baseMean", colorscale = "magma",
+                                alpha = 0.4)
+  expect_true(is_ggplot(p_custom))
+
+  # Test coloring by significance
+  p_significance <- plotVolcano.label(mock_res, color_by = "significance")
+  expect_true(is_ggplot(p_significance))
+
+  # Test with gene labels
+  lab_genes <- c("GENE1", "GENE2", "GENE3")
+  p_labeled <- plotVolcano.label(mock_res, fdr.thres = 0.01, fc.thres = 0,
+                                 lab.genes = lab_genes)
+  expect_true(is_ggplot(p_labeled))
+
+  # Test that the plot has more layers when genes are labeled
+  expect_true(length(p_labeled$layers) >= length(p$layers))
+})
+
+test_that("plotVolcano.label handles edge cases correctly", {
+  # Test with minimal data
+  minimal_res <- data.frame(
+    baseMean = c(100, 200, 300),
+    log2FoldChange = c(1, -1, 0),
+    padj = c(0.001, 0.05, 0.5),
+    symbol = c("GENE1", "GENE2", "GENE3"),
+    row.names = c("gene1", "gene2", "gene3")
+  )
+
+  p <- plotVolcano.label(minimal_res)
+  expect_true(is_ggplot(p))
+
+  # Test with missing symbol column
+  no_symbol_res <- minimal_res
+  no_symbol_res$symbol <- NULL
+
+  p_no_symbol <- plotVolcano.label(no_symbol_res)
+  expect_true(is_ggplot(p_no_symbol))
+
+  # Test with NA and infinite -log10 adjusted p-values
+  na_res <- minimal_res
+  na_res$log2FoldChange[1] <- NA
+  na_res$padj[2] <- NA
+  na_res$padj[3] <- 0
+
+  p_na <- plotVolcano.label(na_res, neg_log_padj.lim = c(0, 10))
+  expect_true(is_ggplot(p_na))
+})
+
+test_that("plotVolcano.label throws errors for invalid inputs", {
+  # Test with missing required columns
+  invalid_res <- data.frame(
+    baseMean = c(100, 200),
+    pvalue = c(0.01, 0.05)
+  )
+
+  expect_error(plotVolcano.label(invalid_res),
+               'DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+
+  # Test with missing padj column
+  missing_padj <- data.frame(
+    baseMean = c(100, 200),
+    log2FoldChange = c(1, -1)
+  )
+
+  expect_error(plotVolcano.label(missing_padj),
+               'DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+
+  # Test with missing baseMean column
+  missing_base_mean <- data.frame(
+    log2FoldChange = c(1, -1),
+    padj = c(0.01, 0.05)
+  )
+
+  expect_error(plotVolcano.label(missing_base_mean),
+               'DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+
+  # Test with invalid color and alpha parameters
+  valid_res <- create_mock_results(10)
+  expect_error(plotVolcano.label(valid_res, color_by = "unknown"))
+  expect_error(plotVolcano.label(valid_res, alpha = -0.1),
+               "between 0 and 1")
+})
+
+# Test plotVolcano.label_ly function (interactive plotly version)
+test_that("plotVolcano.label_ly creates correct interactive Volcano plot", {
+  # Create mock results data
+  mock_res <- create_mock_results(50)
+
+  # Make some genes significantly differentially expressed
+  mock_res$padj[1:10] <- 0.001  # Significant genes
+  mock_res$log2FoldChange[1:5] <- c(2, 3, -2, -3, 2.5)  # Up and down regulated
+  mock_res$log2FoldChange[6:10] <- c(-1.5, 1.8, -2.2, 2.8, -1.2)
+
+  # Test basic interactive Volcano plot generation
+  p <- plotVolcano.label_ly(mock_res, fdr.thres = 0.01, fc.thres = 0)
+
+  # Test that a plotly object is returned
+  expect_true(heatmaply::is.plotly(p))
+
+  # Test with custom parameters
+  p_custom <- plotVolcano.label_ly(mock_res, fdr.thres = 0.05, fc.thres = 1,
+                                   fc.lim = c(-4, 4),
+                                   neg_log_padj.lim = c(0, 10),
+                                   color_by = "baseMean", colorscale = "magma",
+                                   alpha = 0.4)
+  expect_true(heatmaply::is.plotly(p_custom))
+
+  # Test coloring by significance
+  p_significance <- plotVolcano.label_ly(mock_res, color_by = "significance")
+  expect_true(heatmaply::is.plotly(p_significance))
+
+  # Test with gene labels
+  lab_genes <- c("GENE1", "GENE2", "GENE3")
+  p_labeled <- plotVolcano.label_ly(mock_res, fdr.thres = 0.01, fc.thres = 0,
+                                    lab.genes = lab_genes)
+  expect_true(heatmaply::is.plotly(p_labeled))
+})
+
+test_that("plotVolcano.label_ly handles edge cases correctly", {
+  # Test with minimal data
+  minimal_res <- data.frame(
+    baseMean = c(100, 200, 300),
+    log2FoldChange = c(1, -1, 0),
+    padj = c(0.001, 0.05, 0.5),
+    symbol = c("GENE1", "GENE2", "GENE3"),
+    row.names = c("gene1", "gene2", "gene3")
+  )
+
+  p <- plotVolcano.label_ly(minimal_res)
+  expect_true(heatmaply::is.plotly(p))
+
+  # Test with missing symbol column
+  no_symbol_res <- minimal_res
+  no_symbol_res$symbol <- NULL
+
+  p_no_symbol <- plotVolcano.label_ly(no_symbol_res)
+  expect_true(heatmaply::is.plotly(p_no_symbol))
+
+  # Test with NA and infinite -log10 adjusted p-values
+  na_res <- minimal_res
+  na_res$log2FoldChange[1] <- NA
+  na_res$padj[2] <- NA
+  na_res$padj[3] <- 0
+
+  p_na <- plotVolcano.label_ly(na_res, neg_log_padj.lim = c(0, 10))
+  expect_true(heatmaply::is.plotly(p_na))
+})
+
+test_that("plotVolcano.label_ly throws errors for invalid inputs", {
+  # Test with missing required columns
+  invalid_res <- data.frame(
+    baseMean = c(100, 200),
+    pvalue = c(0.01, 0.05)
+  )
+
+  expect_error(plotVolcano.label_ly(invalid_res),
+               'DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+
+  # Test with missing log2FoldChange column
+  missing_lfc <- data.frame(
+    baseMean = c(100, 200),
+    padj = c(0.01, 0.05)
+  )
+
+  expect_error(plotVolcano.label_ly(missing_lfc),
+               'DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+
+  # Test with missing baseMean column
+  missing_base_mean <- data.frame(
+    log2FoldChange = c(1, -1),
+    padj = c(0.01, 0.05)
+  )
+
+  expect_error(plotVolcano.label_ly(missing_base_mean),
+               'DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+
+  # Test with invalid color and alpha parameters
+  valid_res <- create_mock_results(10)
+  expect_error(plotVolcano.label_ly(valid_res, color_by = "unknown"))
+  expect_error(plotVolcano.label_ly(valid_res, alpha = 1.1),
+               "between 0 and 1")
+})
+
+# Test Volcano plot data processing logic
+test_that("Volcano plot functions process data correctly", {
+  # Create test data with known values
+  test_res <- data.frame(
+    baseMean = c(100, 200, 300, 400, 500),
+    log2FoldChange = c(2, -2, 0.5, -0.5, 10),  # Include extreme value
+    padj = c(0.001, 0.001, 0.1, 0.1, 1e-20),  # Include extreme value
+    symbol = c("UP1", "DOWN1", "NS1", "NS2", "EXTREME"),
+    row.names = c("gene1", "gene2", "gene3", "gene4", "gene5")
+  )
+
+  # Test that extreme values are handled (should be clipped to plot limits)
+  p_ggplot <- plotVolcano.label(test_res, fdr.thres = 0.01, fc.thres = 0,
+                                fc.lim = c(-5, 5), neg_log_padj.lim = c(0, 5))
+  expect_true(is_ggplot(p_ggplot))
+
+  p_plotly <- plotVolcano.label_ly(test_res, fdr.thres = 0.01, fc.thres = 0,
+                                   fc.lim = c(-5, 5), neg_log_padj.lim = c(0, 5))
+  expect_true(heatmaply::is.plotly(p_plotly))
+
+  # Test with different significance thresholds
+  p_strict <- plotVolcano.label(test_res, fdr.thres = 0.0001, fc.thres = 1)
+  expect_true(is_ggplot(p_strict))
+
+  p_lenient <- plotVolcano.label(test_res, fdr.thres = 0.1, fc.thres = 0)
+  expect_true(is_ggplot(p_lenient))
+})
+
+# Test symbol column handling
+test_that("Volcano plot functions handle symbol columns correctly", {
+  # Test with SYMBOL column (uppercase)
+  res_symbol <- data.frame(
+    baseMean = c(100, 200),
+    log2FoldChange = c(1, -1),
+    padj = c(0.01, 0.05),
+    SYMBOL = c("GENE1", "GENE2"),
+    row.names = c("gene1", "gene2")
+  )
+
+  p1 <- plotVolcano.label(res_symbol)
+  expect_true(is_ggplot(p1))
+
+  p1_ly <- plotVolcano.label_ly(res_symbol)
+  expect_true(heatmaply::is.plotly(p1_ly))
+
+  # Test with ALIAS column
+  res_alias <- data.frame(
+    baseMean = c(100, 200),
+    log2FoldChange = c(1, -1),
+    padj = c(0.01, 0.05),
+    ALIAS = c("ALIAS1", "ALIAS2"),
+    row.names = c("gene1", "gene2")
+  )
+
+  p2 <- plotVolcano.label(res_alias)
+  expect_true(is_ggplot(p2))
+
+  p2_ly <- plotVolcano.label_ly(res_alias)
+  expect_true(heatmaply::is.plotly(p2_ly))
+
+  # Test with NA symbols
+  res_na_symbol <- data.frame(
+    baseMean = c(100, 200),
+    log2FoldChange = c(1, -1),
+    padj = c(0.01, 0.05),
+    symbol = c("GENE1", NA),
+    row.names = c("gene1", "gene2")
+  )
+
+  p3 <- plotVolcano.label(res_na_symbol)
+  expect_true(is_ggplot(p3))
+
+  p3_ly <- plotVolcano.label_ly(res_na_symbol)
+  expect_true(heatmaply::is.plotly(p3_ly))
+})
+
 # Helper function to create mock gene count data for getcountplot
 create_mock_gene_counts <- function(n_samples = 6, genes = c("gene1", "gene2")) {
   # Create sample metadata

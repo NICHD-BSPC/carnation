@@ -1794,7 +1794,7 @@ plotVolcano.label_ly <- function(
 
   # clamp y (log_padj)
   df <- df %>%
-    mutate(log_padj = replace(.data$log_padj, is.na(.data$log_padj), 0)) %>%
+    filter(!is.na(.data$padj)) %>%
     mutate(
       log_padj = replace(
         .data$log_padj,
@@ -2290,7 +2290,7 @@ plotVolcano.label <- function(
 
   # Clamp y
   df <- df %>%
-    mutate(log_padj = replace(.data$log_padj, is.na(.data$log_padj), 0)) %>%
+    filter(!is.na(.data$padj)) %>%
     mutate(
       log_padj = replace(
         .data$log_padj,

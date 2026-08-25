@@ -244,6 +244,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       # eventreactive for the static volcano plot
       volcano_plot <- eventReactive(
         c(
+          app_object()$res,
           input$comp_all,
           curr_thres$fdr.thres,
           curr_thres$fc.thres,
@@ -294,6 +295,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
             color_by = input$color_by,
+            colorscale= tolower(curr_thres$colorscale),
             lab.genes = plot_args()$gene.to.plot,
             alpha = input$volcano_alpha
           )
