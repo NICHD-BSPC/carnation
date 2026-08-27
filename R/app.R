@@ -29,7 +29,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
   oopt <- options(spinner.type = 4)
   options(shiny.maxRequestSize = cfg$max_upload_size*1024^2)
 
-  # server side bookmark storage
+  # Server side bookmark storage.
+  # Uses path in config, but falls back to
+  # "carnation_bookmarks" if unset
   if (is.null(cfg$server$bookmark_dir)) {
       bookmark_root <-  "carnation_bookmarks"
   } else {
@@ -1139,8 +1141,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     # Captures the reloaded inputs after restore, so they can be
     # overwritten as the data is reloaded and applied again
     restored_inputs_store <- reactiveVal(NULL)
+    gene_scratchpad_store <- reactiveVal(NULL)
 
-    setBookmarkExclude(c('assay_do', 'bookmark'))
+    setBookmarkExclude(c('assay_do', 'bookmark', 'gene.to.plot'))
 
     observeEvent(
       input$bookmark,
@@ -1169,6 +1172,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       state$values$mode <- input$mode
       state$values$comp <- paste(input$comp_all, collapse = ", ")
       state$values$saved_at <- as.character(Sys.time())
+      state$values$gene.to.plot <- input$gene.to.plot
     })
 
     # Runs after the bookmark has been generated
@@ -1180,6 +1184,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     # Runs at start of loading bookmark/state
     onRestore(function(state) {
       restored_inputs_store(as.list(state$input))
+      gene_scratchpad_store(as.list(state$values$gene.to.plot))
     })
 
     # Restores the dds and analysis from
@@ -1206,14 +1211,20 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       app_object$res,
       {
         if (isolate(restoring())) {
+          gene_scratchpad_values <- isolate(gene_scratchpad_store())
           input_values <- isolate(restored_inputs_store())
-          later::later(
-            function() {
-              apply_restored_inputs(input_values)
-              restoring(FALSE)
-            },
-            delay = 0.2
+          apply_restored_inputs(input_values)
+          updateSelectizeInput(
+            session,
+            "gene.to.plot",
+            choices = gene.id$gene,
+            selected = gene_scratchpad_values,
+            server = TRUE
           )
+
+          restoring(FALSE)
+
+
         }
       },
       priority = -100
@@ -1555,12 +1566,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       validate(
         need(!is.null(gene.id$gene), 'Waiting for selection')
       )
-
       # update gene selector with genes in object
       updateSelectizeInput(session, 'gene.to.plot',
                            choices=gene.id$gene,
                            selected='',
                            server=TRUE)
+
     }) # observeEvent
 
     ############### Summary table #################
