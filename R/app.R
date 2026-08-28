@@ -1163,20 +1163,60 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     restored_inputs_store <- reactiveVal(NULL)
     gene_scratchpad_store <- reactiveVal(NULL)
 
-    setBookmarkExclude(c('assay_do', 'bookmark', 'gene.to.plot'))
+    setBookmarkExclude(c('assay_do',
+                        'bookmark',
+                        'gene.to.plot',
+                        'confirm_bookmark',
+                        'bookmark_name'
+                      ))
 
-    # Calls Shiny's actual bookmarking function.
+    # Spawns a modal to take bookmark name and confirmation.
     observeEvent(
       input$bookmark,
       {
         if (isolate(restore_phase() != 'idle')) {
           return()
         }
+
+        showModal(
+          modalDialog(
+            title = 'Make a bookmark of the current view',
+            textInput(
+              'bookmark_name',
+              'Bookmark name',
+              placeholder = 'Enter a descriptive name'
+            ),
+            footer = tagList(
+              modalButton('Cancel'),
+              actionButton(
+                'confirm_bookmark',
+                'Save Bookmark',
+                class = 'btn-primary'
+              )
+            ),
+            easyClose = TRUE
+          )
+        )
         reactiveValuesToList(input)
         session$doBookmark()
       },
       ignoreInit = TRUE
     )
+
+    bookmark_label <- reactiveVal(NULL)
+
+    observeEvent(input$confirm_bookmark, {
+      label <- trimws(input$bookmark_name %||% '')
+
+      bookmark_label(
+        if (nzchar(label)) label else NA_character_
+      )
+
+      removeModal()
+
+      reactiveValuesToList(input)
+      session$doBookmark()
+    }, ignoreInit = TRUE)
 
 
     # Updates the current bookmark directory whenever a new dataset is
@@ -1192,10 +1232,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
           dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           callback(dir)
         }
-        # load.interface = function(id, callback) {
-        #   dir <- file.path(bookmarks_root, id)
-        #   callback(dir)
-        # }
       )
     })
 
@@ -1204,13 +1240,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       state$values$dds <- current$proj
       state$values$assay <- original$path
       state$values$assay_analysis <- current$analysis
-      state$values$label <- if (
-        is.null(input$bookmark_name) || input$bookmark_name == ''
-      ) {
-        NA_character_
-      } else {
-        input$bookmark_name
-      }
+      state$values$label <- bookmark_label()
       state$values$mode <- input$mode
       state$values$comp <- paste(input$comp_all, collapse = ", ")
       state$values$saved_at <- as.character(Sys.time())
