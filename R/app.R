@@ -29,29 +29,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
   oopt <- options(spinner.type = 4)
   options(shiny.maxRequestSize = cfg$max_upload_size*1024^2)
 
-  # Server side bookmark storage.
-  # Uses path in config, but falls back to
-  # "carnation_bookmarks" if unset
-  if (is.null(cfg$server$bookmark_dir)) {
-      bookmark_root <-  "carnation_bookmarks"
-  } else {
-    bookmark_root <- cfg$server$bookmark_dir
-  }
+  bookmarks_root <- get_bookmarks_root_path()
 
-  dir.create(bookmark_root, recursive = TRUE, showWarnings = FALSE)
-
-
-  shinyOptions(
-    save.interface = function(id, callback) {
-      dir <- file.path(bookmark_root, id)
-      dir.create(dir, recursive = TRUE, showWarnings = FALSE)
-      callback(dir)
-    },
-    load.interface = function(id, callback) {
-      dir <- file.path(bookmark_root, id)
-      callback(dir)
-    }
-  )
 
   # reset to previous options on exit
   on.exit(options(oopt))
@@ -72,6 +51,39 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       )
     }
   }
+  shinyOptions(
+  # Function that runs when shiny recieves a load bookmark request.
+    load.interface = function(id, callback) {
+
+      if (
+        length(id) != 1 ||
+        is.na(id) ||
+        !grepl("^[A-Za-z0-9]+$", id)
+      ) {
+        stop('Saved view is unavailable.')
+      }
+
+
+      input_files <- list.files(
+        bookmarks_root,
+        pattern = '^input\\.rds$',
+        recursive = TRUE,
+        full.names = TRUE
+      )
+
+      bookmark_dirs <- dirname(input_files)
+
+      matches <- bookmark_dirs[
+        basename(bookmark_dirs) == id
+      ]
+
+      if (length(matches) != 1) {
+        stop('Saved view is uunavailable.')
+      }
+
+      callback(matches[[1]])
+    }
+  )
 
   ui <- function(request) {
     fluidPage(
@@ -1018,7 +1030,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       updateSelectizeInput(session, 'assay',
                            choices=assay.choices,
-                           selected= if (isolate(restoring())) isolate(input$assay) else assay.choices[1])
+                           selected= if (isolate(restore_phase() != 'idle')) isolate(input$assay) else assay.choices[1])
 
     }) # observeEvent
 
@@ -1136,7 +1148,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     })
     ######################### bookmarking logic ##################
 
-    restoring <- reactiveVal(FALSE)
+
+    pending_restore <- reactiveVal(NULL)
+
+    # Has states: 'idle', 'loading_data', and 'restoring_inputs'
+    restore_phase <- reactiveVal('idle')
+
+    # Prevent loading the bookmarked dataset until Shiny has completed
+    # its native input restoration.
+    native_restore_complete <- reactiveVal(FALSE)
 
     # Captures the reloaded inputs after restore, so they can be
     # overwritten as the data is reloaded and applied again
@@ -1145,10 +1165,11 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     setBookmarkExclude(c('assay_do', 'bookmark', 'gene.to.plot'))
 
+    # Calls Shiny's actual bookmarking function.
     observeEvent(
       input$bookmark,
       {
-        if (isolate(restoring())) {
+        if (isolate(restore_phase() != 'idle')) {
           return()
         }
         reactiveValuesToList(input)
@@ -1157,9 +1178,30 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       ignoreInit = TRUE
     )
 
-    # Runs as an early effect of bookmarking
+
+    # Updates the current bookmark directory whenever a new dataset is
+    # loaded.
+    observeEvent(list(current$proj, current$analysis), {
+      req(current$proj, current$analysis)
+      current_bookmarks_dir <- get_current_bookmarks_path(current$proj,
+                                                         current$analysis,
+                                                         bookmarks_root)
+      shinyOptions(
+        save.interface = function(id, callback) {
+          dir <- file.path(current_bookmarks_dir, id)
+          dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+          callback(dir)
+        }
+        # load.interface = function(id, callback) {
+        #   dir <- file.path(bookmarks_root, id)
+        #   callback(dir)
+        # }
+      )
+    })
+
+    # Runs just before bookmarking
     onBookmark(function(state) {
-      state$values$dds <- input$dds
+      state$values$dds <- current$proj
       state$values$assay <- original$path
       state$values$assay_analysis <- current$analysis
       state$values$label <- if (
@@ -1183,49 +1225,84 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # Runs at start of loading bookmark/state
     onRestore(function(state) {
+      restore_phase('loading_data')
+      native_restore_complete(FALSE)
+
+      pending_restore(list(
+        project = state$values$dds,
+        analysis = state$values$assay_analysis
+      ))
       restored_inputs_store(as.list(state$input))
       gene_scratchpad_store(as.list(state$values$gene.to.plot))
     })
 
-    # Restores the dds and analysis from
-    # metadata stored in state$values.
+    # Shiny has now finished restoring its native input state. Dataset
+    # loading remains gated on the authenticated assay list below.
     onRestored(function(state) {
-      restoring(TRUE)
-      dds_id <- state$values$dds
-      assay_path <- state$values$assay
-      if (
-        !is.null(dds_id) &&
-          dds_id != '' &&
-          !is.null(assay_path) &&
-          assay_path != '' &&
-          assay_path != 'Choose one'
-      ) {
-        updateSelectizeInput(session, 'assay', selected = assay_path)
-        load_assay(dds_id, assay_path)
-      }
+      native_restore_complete(TRUE)
     })
+
+    observe({
+      pending <- pending_restore()
+      # Uses existing authentication to determine what data should be available
+      allowed_list <- assay.list$l
+
+      req(native_restore_complete())
+      req(pending)
+      req(allowed_list)
+
+      project_assays <- allowed_list[[pending$project]]
+
+      if (is.null(project_assays)) {
+        return()
+      }
+
+      matches <- which(names(project_assays) == pending$analysis)
+
+      if (length(matches) != 1) {
+        return()
+      }
+
+      allowed_path <- unname(project_assays[matches])
+
+      pending_restore(NULL)
+      native_restore_complete(FALSE)
+
+      load_assay(
+        pending$project,
+        pending$analysis,
+        allowed_path
+      )
+
+      restore_phase('restoring_inputs')
+    })
+
 
     # Reapplies the stored inputs after the data has
     # been reloaded
     observeEvent(
-      app_object$res,
+      restore_phase(),
       {
-        if (isolate(restoring())) {
-          gene_scratchpad_values <- isolate(gene_scratchpad_store())
-          input_values <- isolate(restored_inputs_store())
-          apply_restored_inputs(input_values)
-          updateSelectizeInput(
-            session,
-            "gene.to.plot",
-            choices = gene.id$gene,
-            selected = gene_scratchpad_values,
-            server = TRUE
-          )
+        restore_phase_val <- restore_phase()
 
-          restoring(FALSE)
-
-
+        if (restore_phase_val != 'restoring_inputs') {
+          return()
         }
+
+        gene_scratchpad_values <- isolate(gene_scratchpad_store())
+        input_values <- isolate(restored_inputs_store())
+
+        apply_restored_inputs(input_values)
+        updateSelectizeInput(
+          session,
+          "gene.to.plot",
+          choices = gene.id$gene,
+          selected = gene_scratchpad_values,
+          server = TRUE
+        )
+
+        restore_phase('idle')
+
       },
       priority = -100
     )
@@ -1281,7 +1358,13 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     output$saved_bookmarks_ui <- renderUI({
       req(current$proj, current$analysis)
 
-      all_ids <- list.dirs(bookmark_root, recursive = FALSE, full.names = FALSE)
+      current_bookmarks_dir <- get_current_bookmarks_path(
+        current$proj,
+        current$analysis,
+        bookmarks_root
+      )
+
+      all_ids <- list.dirs(current_bookmarks_dir, recursive = FALSE, full.names = FALSE)
       if (length(all_ids) == 0) {
         return(tags$p('No saved views yet.'))
       }
@@ -1289,7 +1372,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       matches <- Filter(
         Negate(is.null),
         lapply(all_ids, function(id) {
-          meta <- read_snap_meta(file.path(bookmark_root, id))
+          meta <- read_snap_meta(file.path(current_bookmarks_dir, id))
           if (is.null(meta)) {
             return(NULL)
           }
@@ -1336,12 +1419,26 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     })
 
     observeEvent(input$assay_do, {
-      load_assay(input$dds, input$assay)
+      project_id <- input$dds
+      assay_path <- input$assay
+
+      project_assays <- assay.list$l[[project_id]]
+      idx <- match(assay_path, unname(project_assays))
+
+      validate(
+        need(!is.na(idx), "Selected analysis is unavailable.")
+      )
+
+      analysis_id <- names(project_assays)[idx]
+
+      load_assay(project_id, analysis_id, assay_path)
+
+      restore_phase('idle')
     })
 
 
 
-    load_assay <- function(dds_id, assay_path) {
+    load_assay <- function(project_id, analysis_id,  assay_path) {
 
       if (is.null(assay_path) || assay_path == "" || assay_path == "Choose one") {
         showNotification("No assay selected!", type = "error")
@@ -1460,19 +1557,22 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       removeModal()
 
-      if (!isolate(restoring())) {
+      if (isolate(restore_phase() == 'idle')) {
       updateTabsetPanel(session, inputId='mode',
                         selected='DE analysis')
       updateTabsetPanel(session, inputId='de_mode',
                         selected='Summary')
       }
 
-      # update current project
-      current$proj <- input$dds
+      # # update current project
+      # current$proj <- input$dds
 
-      al <- assay.list$l[[ dds_id ]]
-      idx <- which(unname(al) == assay_path)
-      current$analysis <- names(assay.list$l[[ dds_id ]])[idx]
+      # al <- assay.list$l[[ dds_id ]]
+      # idx <- which(unname(al) == assay_path)
+      # current$analysis <- names(assay.list$l[[ dds_id ]])[idx]
+
+      current$proj <- project_id
+      current$analysis <- analysis_id
 
     }
 
