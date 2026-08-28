@@ -22,7 +22,7 @@ get_bookmarks_root_path <- function() {
 #'
 #' @return Generates a path of bookmarks_root/lab/project/analysis
 #'
-get_current_bookmarks_path <- function(lab_project, analysis, bookmarks_root) {
+get_bookmarks_path <- function(lab_project, analysis, bookmarks_root) {
     lab_project_split <- strsplit(
     lab_project,
     .Platform$file.sep,

@@ -1183,7 +1183,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     # loaded.
     observeEvent(list(current$proj, current$analysis), {
       req(current$proj, current$analysis)
-      current_bookmarks_dir <- get_current_bookmarks_path(current$proj,
+      current_bookmarks_dir <- get_bookmarks_path(current$proj,
                                                          current$analysis,
                                                          bookmarks_root)
       shinyOptions(
@@ -1353,32 +1353,47 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       }
     }
 
+    selected_assay <- reactive({
+      req(input$dds, input$assay)
+
+      project_assays <- assay.list$l[[input$dds]]
+      idx <- match(input$assay, unname(project_assays))
+
+      req(!is.na(idx))
+
+      list(
+        project = input$dds,
+        analysis = names(project_assays)[idx],
+        path = unname(project_assays[idx])
+      )
+    })
+
     # Scans bookmark directories and presents them as a
     # selectInput and button
     output$saved_bookmarks_ui <- renderUI({
-      req(current$proj, current$analysis)
+      selected <- selected_assay()
 
-      current_bookmarks_dir <- get_current_bookmarks_path(
-        current$proj,
-        current$analysis,
+      selected_bookmarks_dir <- get_bookmarks_path(
+        selected$project,
+        selected$analysis,
         bookmarks_root
       )
 
-      all_ids <- list.dirs(current_bookmarks_dir, recursive = FALSE, full.names = FALSE)
+      all_ids <- list.dirs(selected_bookmarks_dir, recursive = FALSE, full.names = FALSE)
       if (length(all_ids) == 0) {
-        return(tags$p('No saved views yet.'))
+        return(tags$p('No saved bookmarks yet.'))
       }
 
       matches <- Filter(
         Negate(is.null),
         lapply(all_ids, function(id) {
-          meta <- read_snap_meta(file.path(current_bookmarks_dir, id))
+          meta <- read_snap_meta(file.path(selected_bookmarks_dir, id))
           if (is.null(meta)) {
             return(NULL)
           }
           if (
-            identical(meta$dds, current$proj) &&
-              identical(meta$assay_analysis, current$analysis)
+            identical(meta$dds, selected$project) &&
+              identical(meta$assay_analysis, selected$analysis)
           ) {
             list(id = id, meta = meta)
           } else {
@@ -1388,7 +1403,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       )
 
       if (length(matches) == 0) {
-        return(tags$p('No saved views for this analysis yet.'))
+        return(tags$p('No saved bookmarks for this analysis yet.'))
       }
 
       labels <- vapply(
@@ -1407,8 +1422,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       choices <- setNames(ids, labels) # value = Shiny's alphanumeric id
 
       tagList(
-        selectInput('load_bookmark', 'Saved views', choices = choices),
-        actionButton('go_bookmark', 'Load view', class = 'btn-primary')
+        selectInput('load_bookmark', 'Saved Bookmarks', choices = choices),
+        actionButton('go_bookmark', 'Load Bookmark', class = 'btn-primary')
       )
     })
 
