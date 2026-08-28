@@ -54,34 +54,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
   shinyOptions(
   # Function that runs when shiny recieves a load bookmark request.
     load.interface = function(id, callback) {
-
-      if (
-        length(id) != 1 ||
-        is.na(id) ||
-        !grepl("^[A-Za-z0-9]+$", id)
-      ) {
-        stop('Saved view is unavailable.')
-      }
-
-
-      input_files <- list.files(
-        bookmarks_root,
-        pattern = '^input\\.rds$',
-        recursive = TRUE,
-        full.names = TRUE
-      )
-
-      bookmark_dirs <- dirname(input_files)
-
-      matches <- bookmark_dirs[
-        basename(bookmark_dirs) == id
-      ]
-
-      if (length(matches) != 1) {
-        stop('Saved view is uunavailable.')
-      }
-
-      callback(matches[[1]])
+      callback(find_bookmark_dir(id, bookmarks_root))
     }
   )
 
@@ -1030,7 +1003,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       updateSelectizeInput(session, 'assay',
                            choices=assay.choices,
-                           selected= if (isolate(restore_phase() != 'idle')) isolate(input$assay) else assay.choices[1])
+                           selected= if (!is.null(isolate(restore_context()))) isolate(input$assay) else assay.choices[1])
 
     }) # observeEvent
 
@@ -1149,19 +1122,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     ######################### bookmarking logic ##################
 
 
-    pending_restore <- reactiveVal(NULL)
-
-    # Has states: 'idle', 'loading_data', and 'restoring_inputs'
-    restore_phase <- reactiveVal('idle')
-
-    # Prevent loading the bookmarked dataset until Shiny has completed
-    # its native input restoration.
-    native_restore_complete <- reactiveVal(FALSE)
-
-    # Captures the reloaded inputs after restore, so they can be
-    # overwritten as the data is reloaded and applied again
-    restored_inputs_store <- reactiveVal(NULL)
-    gene_scratchpad_store <- reactiveVal(NULL)
+    # NULL during normal operation. During bookmark restoration, this holds
+    # the current stage and all data needed across Shiny's restore callback funcions.
+    restore_context <- reactiveVal(NULL)
 
     setBookmarkExclude(c('assay_do',
                         'bookmark',
@@ -1174,7 +1137,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     observeEvent(
       input$bookmark,
       {
-        if (isolate(restore_phase() != 'idle')) {
+        if (!is.null(isolate(restore_context()))) {
           return()
         }
 
@@ -1197,8 +1160,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
             easyClose = TRUE
           )
         )
-        reactiveValuesToList(input)
-        session$doBookmark()
       },
       ignoreInit = TRUE
     )
@@ -1255,39 +1216,42 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # Runs at start of loading bookmark/state
     onRestore(function(state) {
-      restore_phase('loading_data')
-      native_restore_complete(FALSE)
-
-      pending_restore(list(
+      restore_context(list(
+        stage = 'native_restore',
         project = state$values$dds,
-        analysis = state$values$assay_analysis
+        analysis = state$values$assay_analysis,
+        inputs = as.list(state$input),
+        genes = as.list(state$values$gene.to.plot)
       ))
-      restored_inputs_store(as.list(state$input))
-      gene_scratchpad_store(as.list(state$values$gene.to.plot))
     })
 
-    # Shiny has now finished restoring its native input state. Dataset
-    # loading remains gated on the authenticated assay list below.
+    # At this point shiny has loaded in the bookmarked input state from
+    # the rds object. When the data is loaded side effects will overwrite these,
+    # so we snapshot them now.
     onRestored(function(state) {
-      native_restore_complete(TRUE)
+      context <- isolate(restore_context())
+      req(context)
+
+      context$stage <- 'load_data'
+      restore_context(context)
     })
 
     observe({
-      pending <- pending_restore()
+      context <- restore_context()
       # Uses existing authentication to determine what data should be available
       allowed_list <- assay.list$l
 
-      req(native_restore_complete())
-      req(pending)
+      req(context)
+      req(identical(context$stage, 'load_data'))
       req(allowed_list)
 
-      project_assays <- allowed_list[[pending$project]]
+      project_assays <- allowed_list[[context$project]]
 
       if (is.null(project_assays)) {
         return()
       }
 
-      matches <- which(names(project_assays) == pending$analysis)
+      matches <- which(names(project_assays) == context$analysis)
 
       if (length(matches) != 1) {
         return()
@@ -1295,67 +1259,42 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       allowed_path <- unname(project_assays[matches])
 
-      pending_restore(NULL)
-      native_restore_complete(FALSE)
-
       load_assay(
-        pending$project,
-        pending$analysis,
+        context$project,
+        context$analysis,
         allowed_path
       )
 
-      restore_phase('restoring_inputs')
+      context$stage <- 'apply_inputs'
+      restore_context(context)
     })
 
 
     # Reapplies the stored inputs after the data has
     # been reloaded
     observeEvent(
-      restore_phase(),
+      restore_context(),
       {
-        restore_phase_val <- restore_phase()
+        context <- restore_context()
 
-        if (restore_phase_val != 'restoring_inputs') {
+        if (is.null(context) || !identical(context$stage, 'apply_inputs')) {
           return()
         }
 
-        gene_scratchpad_values <- isolate(gene_scratchpad_store())
-        input_values <- isolate(restored_inputs_store())
-
-        apply_restored_inputs(input_values)
+        apply_restored_inputs(context$inputs)
         updateSelectizeInput(
           session,
           "gene.to.plot",
           choices = gene.id$gene,
-          selected = gene_scratchpad_values,
+          selected = context$genes,
           server = TRUE
         )
 
-        restore_phase('idle')
+        restore_context(NULL)
 
       },
       priority = -100
     )
-
-    # Returns a list of metadata
-    read_snap_meta <- function(dir) {
-      values_file <- file.path(dir, 'values.rds')
-      if (!file.exists(values_file)) {
-        return(NULL)
-      }
-      values <- tryCatch(readRDS(values_file), error = function(e) NULL)
-      if (is.null(values)) {
-        return(NULL)
-      }
-      list(
-        dds = values$dds %||% NA_character_,
-        assay_analysis = values$assay_analysis %||% NA_character_,
-        label = values$label %||% NA_character_,
-        mode = values$mode %||% NA_character_,
-        comp = values$comp %||% '',
-        saved_at = values$saved_at %||% ''
-      )
-    }
 
     apply_restored_inputs <- function(values) {
       if (is.null(values) || length(values) == 0) {
@@ -1409,50 +1348,26 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         bookmarks_root
       )
 
-      all_ids <- list.dirs(selected_bookmarks_dir, recursive = FALSE, full.names = FALSE)
-      if (length(all_ids) == 0) {
+      saved <- get_saved_bookmark_choices(
+        selected_bookmarks_dir,
+        selected$project,
+        selected$analysis
+      )
+
+      if (!saved$has_bookmarks) {
         return(tags$p('No saved bookmarks yet.'))
       }
 
-      matches <- Filter(
-        Negate(is.null),
-        lapply(all_ids, function(id) {
-          meta <- read_snap_meta(file.path(selected_bookmarks_dir, id))
-          if (is.null(meta)) {
-            return(NULL)
-          }
-          if (
-            identical(meta$dds, selected$project) &&
-              identical(meta$assay_analysis, selected$analysis)
-          ) {
-            list(id = id, meta = meta)
-          } else {
-            NULL
-          }
-        })
-      )
-
-      if (length(matches) == 0) {
+      if (length(saved$choices) == 0) {
         return(tags$p('No saved bookmarks for this analysis yet.'))
       }
 
-      labels <- vapply(
-        matches,
-        function(m) {
-          nm <- if (!is.na(m$meta$label)) m$meta$label else m$meta$saved_at
-          paste0(
-            nm,
-            if (nzchar(m$meta$mode)) paste0(' [', m$meta$mode, ']') else ''
-          )
-        },
-        character(1)
-      )
-
-      ids <- vapply(matches, function(m) m$id, character(1))
-      choices <- setNames(ids, labels) # value = Shiny's alphanumeric id
-
       tagList(
-        selectInput('load_bookmark', 'Saved Bookmarks', choices = choices),
+        selectInput(
+          'load_bookmark',
+          'Saved Bookmarks',
+          choices = saved$choices
+        ),
         actionButton('go_bookmark', 'Load Bookmark', class = 'btn-primary')
       )
     })
@@ -1477,8 +1392,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       analysis_id <- names(project_assays)[idx]
 
       load_assay(project_id, analysis_id, assay_path)
-
-      restore_phase('idle')
     })
 
 
@@ -1602,7 +1515,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       removeModal()
 
-      if (isolate(restore_phase() == 'idle')) {
+      if (is.null(isolate(restore_context()))) {
       updateTabsetPanel(session, inputId='mode',
                         selected='DE analysis')
       updateTabsetPanel(session, inputId='de_mode',
