@@ -270,6 +270,15 @@ genePlotUI <- function(id, panel){
           bsCollapsePanel('More options',
 
             fluidRow(
+              column(4, h5('plots per row')),
+              column(8, align='left',
+                selectInput(ns('ncol'), label=NULL,
+                  choices=c('auto', as.character(seq_len(10)))
+                ) # selectInput
+              ) # column
+            ), # fluidRow
+
+            fluidRow(
               column(4, h5('trendline')),
               column(8, align='left',
                 selectInput(ns('trendline'), label=NULL,
@@ -917,7 +926,7 @@ genePlotServer <- function(id, obj,
         color <- input$color
         trendline <- input$trendline
         xvar <- input$xvar
-        gene_nrow <- config()$ui$de_analysis$gene_plot$nrow
+        gene_ncol <- config()$ui$de_analysis$gene_plot$ncol
         legend <- as.logical(input$legend)
         ymax <- input$ymax
         ymin <- input$ymin
@@ -955,23 +964,21 @@ genePlotServer <- function(id, obj,
           # number of subplots
           plot_num <- length(unique(facet_pasted))
 
-          # fix number of plots per row
-          # - free y-axis: 6 (since y-axis labels are drawn for every plot)
-          # - otherwise: 8
-          if(freey) gene_nrow <- ceiling(plot_num/6)
-          else gene_nrow <- ceiling(plot_num/8)
-
-          nrow_def <- config()$ui$de_analysis$gene_plot$nrow
-          if(gene_nrow == 0 | is.na(gene_nrow)){
-            gene_nrow <- nrow_def
-            showNotification(
-              'Invalid number of rows. Resetting to default',
-              type='warning'
-            )
-          } else if(gene_nrow > nrow_def*2){
-            # adjust height for many rows
-            ht <- ht*(gene_nrow/(nrow_def*2))
+          if(input$ncol == 'auto'){
+            # fix number of plots per row
+            # - free y-axis: 6 (since y-axis labels are drawn for every plot)
+            # - otherwise: 8
+            if(freey) gene_ncol <- 6
+            else gene_ncol <- 8
+          } else {
+            gene_ncol <- as.numeric(input$ncol)
           }
+
+          gene_nrow <- ceiling(plot_num/gene_ncol)
+          if(gene_nrow > 4){
+            ht <- ht*(gene_nrow/4)
+          }
+
         }
 
         # set default x axis order; later take from bucket list
@@ -1001,7 +1008,7 @@ genePlotServer <- function(id, obj,
                      log=logy, freey=freey,
                      color=color, ymax=ymax, ymin=ymin,
                      factor.levels=x_order, rotate_x_labels=rotate_x_labels,
-                     nrow=gene_nrow, trendline=trendline,
+                     ncol=gene_ncol, trendline=trendline,
                      facet=facet, legend=legend, boxes=boxes, box_dodge=box_dodge)
 
         if(input$txt_scale == 0 | is.na(input$txt_scale)){
