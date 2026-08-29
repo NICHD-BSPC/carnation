@@ -87,7 +87,7 @@ ui:
       x_rotate: 30
       logy: TRUE
       freey: FALSE
-      nrow: 2
+      ncol: 5
       boxes: TRUE
       legend: TRUE
       height: 600
