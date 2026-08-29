@@ -565,7 +565,7 @@ get_gene_counts <- function (dds,
 #' @param title title of plot
 #' @param ylab y-axis label
 #' @param color metadata variable to color by
-#' @param nrow number of rows to plot if faceting
+#' @param ncol number of columns to plot if faceting
 #' @param ymin y-axis lower limit
 #' @param ymax y-axis upper limit
 #' @param log should y-axis be log10-transformed?
@@ -595,7 +595,7 @@ get_gene_counts <- function (dds,
 #'
 #' @export
 getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
-                         ylab='Normalized counts', color='gene', nrow=2, ymin=NULL, ymax=NULL,
+                         ylab='Normalized counts', color='gene', ncol=2, ymin=NULL, ymax=NULL,
                          log=TRUE, freey=FALSE, trendline='smooth', facet=NULL, legend=TRUE, boxes=TRUE, rotate_x_labels=30, box_dodge='identity'){
   idx <- df[,intgroup] %in% factor.levels
 
@@ -657,8 +657,13 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
     if(freey) scales <- 'free_y'
     else scales <- 'fixed'
 
-    if(length(facet) == 1) p <- p + facet_wrap(as.formula(paste('~', facet)), nrow=nrow, scales=scales)
-    else p <- p + facet_wrap(as.formula(paste('~', paste(facet, collapse=' + '))), nrow=nrow, scales=scales)
+    if(length(facet) == 1){
+      p <- p + facet_wrap(as.formula(paste('~', facet)),
+                          ncol=ncol, scales=scales)
+    } else {
+      p <- p + facet_wrap(as.formula(paste('~', paste(facet, collapse=' + '))),
+                          ncol=ncol, scales=scales)
+    }
   }
 
   if(!legend) p <- p + theme(legend.position='none')
