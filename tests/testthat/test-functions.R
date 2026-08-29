@@ -923,7 +923,7 @@ test_that("getcountplot handles faceting correctly", {
     factor.levels = c("control", "treatment"),
     color = "gene",
     facet = c("batch", "gene"),
-    nrow = 2
+    ncol = 2
   )
   expect_true(is_ggplot(p_multi_facet))
 
