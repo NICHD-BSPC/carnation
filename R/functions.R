@@ -614,12 +614,16 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   ymin <- ifelse(is.null(ymin), min(df$count), ymin)
   ymax <- ifelse(is.null(ymax), max(df$count), ymax)
 
-  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]], text=paste('sample:', .data$sample))) +
-    geom_point(position=position_jitterdodge(dodge.width=0.2),
-                 size=2, alpha=0.5)
+  # add sample group column
+  df$sample_group <- paste(df[[ color ]], df[[ intgroup ]])
+
+  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]],
+                      group=.data[[ 'sample_group' ]], text=paste('sample:', .data$sample))) +
+         geom_point(position=position_jitterdodge(dodge.width=0.2),
+                      size=2, alpha=0.5)
 
   if(boxes){
-      p <- p + geom_boxplot(aes(group=.data[[color]]), alpha=0, notch=FALSE, position=box_dodge,
+      p <- p + geom_boxplot(alpha=0, notch=FALSE, position=box_dodge,
                             outlier.size=0, outlier.shape=NA)
   }
 
