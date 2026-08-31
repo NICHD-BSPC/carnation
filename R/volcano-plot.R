@@ -55,7 +55,12 @@ volcanoPlotUI <- function(id, panel) {
           fluidRow(
             column(
               8,
-              sliderInput(ns('volcano_alpha'), 'Opacity/Alpha value', 0, 1, 0.6)
+              sliderInput(ns('volcano_alpha'),
+                         label = 'Opacity/Alpha value',
+                         min = 0,
+                         max = 1,
+                         value = 0.6,
+                         ticks = FALSE)
             )
           ),
 
@@ -182,26 +187,6 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         cs <- config()$ui$de_analysis$volcano_plot$colorscale
         curr_thres$colorscale <- if (!is.null(cs)) cs else 'viridis'
 
-        updateNumericInput(
-          session,
-          'volcano_xmax',
-          value = config()$ui$de_analysis$volcano_plot$log2fc_limits$max
-        )
-        updateNumericInput(
-          session,
-          'volcano_xmin',
-          value = config()$ui$de_analysis$volcano_plot$log2fc_limits$min
-        )
-        updateNumericInput(
-          session,
-          'volcano_ymax',
-          value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$max
-        )
-        updateNumericInput(
-          session,
-          'volcano_ymin',
-          value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$min
-        )
       })
 
       # Syncs thresholds when plot_args() changes
@@ -221,25 +206,147 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         curr_thres$fc.thres <- fc.thres
       })
 
-      # Server logic for the autoscaler button
-      observeEvent(input$volcano_auto, {
-        showNotification('autoscaling axis limits')
-        df <- app_object()$res[[input$comp_all]]
-        filtered_lfc <- df$log2FoldChange[is.finite(df$log2FoldChange)]
-        df.x_max <- round(max(filtered_lfc, na.rm = TRUE) * 1.05, digits = 3)
-        df.x_min <- round(min(filtered_lfc, na.rm = TRUE) * 1.05, digits = 3)
 
-        # Computes the values the plot will use for the
-        # y-axis and updated the fields.
+      x_limits <- reactiveVal(NULL)
+
+      calculate_x_limits <- function(df) {
+        filtered_lfc <- df$log2FoldChange[is.finite(df$log2FoldChange)]
+
+        c(
+          min = round(min(filtered_lfc, na.rm = TRUE) * 1.05, digits = 3),
+          max = round(max(filtered_lfc, na.rm = TRUE) * 1.05, digits = 3)
+        )
+      }
+
+      configured_x_limits <- function() {
+        c(
+          min = config()$ui$de_analysis$volcano_plot$log2fc_limits$min,
+          max = config()$ui$de_analysis$volcano_plot$log2fc_limits$max
+        )
+      }
+
+      set_x_limits <- function(value) {
+        x_limits(value)
+        updateNumericInput(
+          session,
+          'volcano_xmin',
+          value = unname(value['min'])
+        )
+        updateNumericInput(
+          session,
+          'volcano_xmax',
+          value = unname(value['max'])
+        )
+      }
+
+      # Resets the x-axis to configured limits when the data changes
+      observe({
+        res <- app_object()$res
+        req(input$comp_all, input$comp_all %in% names(res), config())
+
+        set_x_limits(configured_x_limits())
+      }, priority = 100) %>%
+        bindEvent(app_object()$res[[input$comp_all]])
+
+      # x-axis autoscale observer, only reacts to button press
+      observe({
+        res <- app_object()$res
+        req(input$comp_all, input$comp_all %in% names(res))
+
+        set_x_limits(calculate_x_limits(res[[input$comp_all]]))
+      }, priority = 100) %>%
+        bindEvent(input$volcano_auto)
+
+      # Allows manual changes to override either automatic x-axis limit
+      observe({
+        req(!is.null(x_limits()), input$volcano_xmin)
+
+        if (!isTRUE(all.equal(
+          unname(x_limits()['min']),
+          input$volcano_xmin
+        ))) {
+          updated_x_limits <- x_limits()
+          updated_x_limits['min'] <- input$volcano_xmin
+          x_limits(updated_x_limits)
+        }
+      }) %>%
+        bindEvent(input$volcano_xmin, ignoreInit = TRUE)
+
+      observe({
+        req(!is.null(x_limits()), input$volcano_xmax)
+
+        if (!isTRUE(all.equal(
+          unname(x_limits()['max']),
+          input$volcano_xmax
+        ))) {
+          updated_x_limits <- x_limits()
+          updated_x_limits['max'] <- input$volcano_xmax
+          x_limits(updated_x_limits)
+        }
+      }) %>%
+        bindEvent(input$volcano_xmax, ignoreInit = TRUE)
+
+      y_limits <- reactiveVal(NULL)
+
+      calculate_y_limits <- function(df) {
         log_padj <- -log10(df$padj)
         log_padj <- log_padj[is.finite(log_padj)]
-        df.y_max <- round(max(log_padj, na.rm = TRUE) * 1.1, digits = 3)
-        df.y_min <- round(min(log_padj, na.rm = TRUE) * 1.05, digits = 3)
-        updateNumericInput(session, 'volcano_xmin', value = df.x_min)
-        updateNumericInput(session, 'volcano_xmax', value = df.x_max)
-        updateNumericInput(session, 'volcano_ymin', value = df.y_min)
-        updateNumericInput(session, 'volcano_ymax', value = df.y_max)
-      })
+
+        c(
+          min = round(min(log_padj, na.rm = TRUE) * 1.05, digits = 3),
+          max = round(max(log_padj, na.rm = TRUE) * 1.1, digits = 3)
+        )
+      }
+
+
+      # y-axis autoscale observer, reacts to button press and data loading
+      observe({
+        res <- app_object()$res
+        req(input$comp_all, input$comp_all %in% names(res))
+
+        y_limits(calculate_y_limits(res[[input$comp_all]]))
+        updateNumericInput(
+          session,
+          'volcano_ymin',
+          value = unname(y_limits()['min'])
+        )
+        updateNumericInput(
+          session,
+          'volcano_ymax',
+          value = unname(y_limits()['max'])
+        )
+      }, priority = 100) %>%
+        bindEvent(input$volcano_auto, app_object()$res[[input$comp_all]])
+
+      # Allows manual changes to override either automatic y-axis limit
+      observe({
+        req(!is.null(y_limits()), input$volcano_ymin)
+
+        if (!isTRUE(all.equal(
+          unname(y_limits()['min']),
+          input$volcano_ymin
+        ))) {
+          updated_y_limits <- y_limits()
+          updated_y_limits['min'] <- input$volcano_ymin
+          y_limits(updated_y_limits)
+        }
+      }) %>%
+        bindEvent(input$volcano_ymin, ignoreInit = TRUE)
+
+      observe({
+        req(!is.null(y_limits()), input$volcano_ymax)
+
+        if (!isTRUE(all.equal(
+          unname(y_limits()['max']),
+          input$volcano_ymax
+        ))) {
+          updated_y_limits <- y_limits()
+          updated_y_limits['max'] <- input$volcano_ymax
+          y_limits(updated_y_limits)
+        }
+      }) %>%
+        bindEvent(input$volcano_ymax, ignoreInit = TRUE)
+
 
       # eventreactive for the static volcano plot
       volcano_plot <- eventReactive(
@@ -249,15 +356,14 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           curr_thres$fdr.thres,
           curr_thres$fc.thres,
           curr_thres$colorscale,
-          input$volcano_xmin,
-          input$volcano_xmax,
-          input$volcano_ymin,
-          input$volcano_ymax,
+          x_limits(),
+          y_limits(),
           input$color_by,
           plot_args()$gene.to.plot,
           input$volcano_alpha
         ),
         {
+
           # Checks that the required inputs exist and are valid
           validate(
             need(
@@ -271,19 +377,19 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
               'selection not found in data'
             ),
             need(
-              input$volcano_xmin != '' & input$volcano_xmax != '',
+              !is.null(x_limits()) & length(x_limits()) == 2,
               'x-axis limits missing'
             ),
             need(
-              input$volcano_xmin < input$volcano_xmax,
+              x_limits()['min'] < x_limits()['max'],
               'x-axis min must be less than max'
             ),
             need(
-              input$volcano_ymin != '' & input$volcano_ymax != '',
+              !is.null(y_limits()) & length(y_limits()) == 2,
               'y-axis limits missing'
             ),
             need(
-              input$volcano_ymin < input$volcano_ymax,
+              y_limits()['min'] < y_limits()['max'],
               'y-axis min must be less than max'
             )
           )
@@ -292,8 +398,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             app_object()$res[[input$comp_all]],
             fc.thres = curr_thres$fc.thres,
             fdr.thres = curr_thres$fdr.thres,
-            neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
-            fc.lim = c(input$volcano_xmin, input$volcano_xmax),
+            neg_log_padj.lim = unname(y_limits()),
+            fc.lim = unname(x_limits()),
             color_by = input$color_by,
             colorscale= tolower(curr_thres$colorscale),
             lab.genes = plot_args()$gene.to.plot,
@@ -310,10 +416,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           curr_thres$fdr.thres,
           curr_thres$fc.thres,
           curr_thres$colorscale,
-          input$volcano_xmin,
-          input$volcano_xmax,
-          input$volcano_ymin,
-          input$volcano_ymax,
+          x_limits(),
+          y_limits(),
           input$color_by,
           plot_args()$gene.to.plot,
           input$volcano_alpha
@@ -332,19 +436,19 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
               'selection not found in data'
             ),
             need(
-              input$volcano_xmin != '' & input$volcano_xmax != '',
+              !is.null(x_limits()) & length(x_limits()) == 2,
               'x-axis limits missing'
             ),
             need(
-              input$volcano_xmin < input$volcano_xmax,
+              x_limits()['min'] < x_limits()['max'],
               'x-axis min must be < x-axis max'
             ),
             need(
-              input$volcano_ymin != '' & input$volcano_ymax != '',
+              !is.null(y_limits()) & length(y_limits()) == 2,
               'y-axis limits missing'
             ),
             need(
-              input$volcano_ymin < input$volcano_ymax,
+              y_limits()['min'] < y_limits()['max'],
               'y-axis min must be < y-axis max'
             )
           )
@@ -354,8 +458,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             fc.thres = curr_thres$fc.thres,
             fdr.thres = curr_thres$fdr.thres,
             colorscale = curr_thres$colorscale,
-            fc.lim = c(input$volcano_xmin, input$volcano_xmax),
-            neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
+            fc.lim = unname(x_limits()),
+            neg_log_padj.lim = unname(y_limits()),
             color_by = input$color_by,
             lab.genes = plot_args()$gene.to.plot,
             alpha = input$volcano_alpha
