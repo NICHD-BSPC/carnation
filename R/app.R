@@ -1136,6 +1136,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     # NULL during normal operation. During bookmark restoration, this holds
     # the current stage and all data needed across Shiny's restore callback funcions.
     restore_context <- reactiveVal(NULL)
+    bookmark_restore_tick <- reactiveVal(0L)
 
     setBookmarkExclude(c('assay_do',
                         'bookmark',
@@ -1247,6 +1248,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       restore_context(context)
     })
 
+    # Data loading phase
     observe({
       context <- restore_context()
       # Uses existing authentication to determine what data should be available
@@ -1293,12 +1295,29 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         }
 
         apply_restored_inputs(context$inputs)
+
         updateSelectizeInput(
           session,
           "gene.to.plot",
           choices = gene.id$gene,
           selected = context$genes,
           server = TRUE
+        )
+
+        session$onFlushed(
+          function() {
+            later::later(
+              function() {
+                if (!session$isClosed()) {
+                  bookmark_restore_tick(
+                    isolate(bookmark_restore_tick()) + 1L
+                  )
+                }
+              },
+              delay = 2.5
+            )
+          },
+          once = TRUE
         )
 
         restore_context(NULL)
@@ -1618,13 +1637,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       updateTabsetPanel(session, inputId='de_mode',
                         selected='Summary')
       }
-
-      # # update current project
-      # current$proj <- input$dds
-
-      # al <- assay.list$l[[ dds_id ]]
-      # idx <- which(unname(al) == assay_path)
-      # current$analysis <- names(assay.list$l[[ dds_id ]])[idx]
 
       current$proj <- project_id
       current$analysis <- analysis_id
@@ -2019,7 +2031,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                                       scatterplot_args,
                                       gene_scratchpad,
                                       reactive({ input$reset.genes }),
-                                      config)
+                                      config,
+                                      bookmark_restore_tick)
 
     observeEvent(scatter_data(), {
       g <- scatter_data()$genes

@@ -10,6 +10,7 @@
 #' @param gene_scratchpad reactive containing gene scratchpad genes
 #' @param reset_genes reactive to reset gene scratchpad selection
 #' @param config reactive list with config settings passed to server
+#' @param bookmark_restore_tick reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with scatter plot UI.
@@ -347,7 +348,8 @@ scatterPlotUI <- function(id, panel){
 
 #' @rdname scattermod
 #' @export
-scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
+scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes,
+                              config, bookmark_restore_tick){
 
   moduleServer(
     id,
@@ -491,7 +493,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
 
       # --------- Generate universal scatter data frame ---------- #
- 
+
       observeEvent({
         list(input$compare,
              input$x_axis_comp,
@@ -954,7 +956,8 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
       # -------------------- renerDataTable  ------------------ #
       scatter_dt <- eventReactive(c(df_react(), input$x_axis_comp, input$y_axis_comp,
-                                    input$filter_tbl_do, filter_tbl_by_sel_genes()), {
+                                    input$filter_tbl_do, filter_tbl_by_sel_genes(),
+                                    bookmark_restore_tick()), {
         validate(
           need(!is.null(df_full()), '')
         )
