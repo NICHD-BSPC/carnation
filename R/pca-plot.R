@@ -217,7 +217,7 @@ pcaPlotUI <- function(id, panel){
 #'
 #' @rdname pcamod
 #' @export
-pcaPlotServer <- function(id, obj, coldata, config){
+pcaPlotServer <- function(id, obj, coldata, config, bookmark_restore_tick){
 
   moduleServer(
     id,
@@ -273,7 +273,7 @@ pcaPlotServer <- function(id, obj, coldata, config){
                           choices=c('none', pc_choices))
 
       })
- 
+
       # get plot data & update menus at first load
       observeEvent(c(app_object()$dds_mapping, coldata.all()), {
         validate(
@@ -447,7 +447,7 @@ pcaPlotServer <- function(id, obj, coldata, config){
 
       # reactive to generate pca plot
       pca_plot <- eventReactive(c(data_loaded$flag,
-                                  input$plot_do), {
+                                  input$plot_do, bookmark_restore_tick()), {
         validate(
           need(!is.null(plot_data$rld), 'Waiting for selection')
         )

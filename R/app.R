@@ -68,7 +68,23 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       tags$head(
         tags$style(
           HTML(cfg$style$global)
-        )  # tags$style
+        ),  # tags$style
+        tags$script(
+          HTML("
+            Shiny.addCustomMessageHandler(
+              'bookmark_restore_probe',
+              function(message) {
+                window.requestAnimationFrame(function() {
+                  Shiny.setInputValue(
+                    'bookmark_restore_ack',
+                    message,
+                    { priority: 'event' }
+                  );
+                });
+              }
+            );
+          ")
+        ) # tags$script
       ), # tags$head
 
       titlePanel(
@@ -1142,7 +1158,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                         'bookmark',
                         'gene.to.plot',
                         'confirm_bookmark',
-                        'bookmark_name'
+                        'bookmark_name',
+                        'bookmark_restore_ack'
                       ))
 
     # Spawns a modal to take bookmark name and confirmation.
@@ -1304,26 +1321,78 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
           server = TRUE
         )
 
-        session$onFlushed(
-          function() {
-            later::later(
-              function() {
-                if (!session$isClosed()) {
-                  bookmark_restore_tick(
-                    isolate(bookmark_restore_tick()) + 1L
-                  )
-                }
-              },
-              delay = 2.5
-            )
-          },
-          once = TRUE
+        restore_token <- as.character(
+          isolate(bookmark_restore_tick()) + 1L
         )
 
-        restore_context(NULL)
+        context$stage <- 'awaiting_client_ack'
+        context$restore_token <- restore_token
+        context$restore_round <- 1L
+        restore_context(context)
+
+        session$onFlushed(
+          function() {
+            if (!session$isClosed()) {
+              session$sendCustomMessage(
+                'bookmark_restore_probe',
+                list(token=restore_token, round=1L)
+              )
+            }
+          },
+          once=TRUE
+        )
 
       },
       priority = -100
+    )
+
+    observeEvent(
+      input$bookmark_restore_ack,
+      {
+        context <- isolate(restore_context())
+        ack <- input$bookmark_restore_ack
+
+        if (
+          is.null(context) ||
+          !identical(context$stage, 'awaiting_client_ack') ||
+          !is.list(ack) ||
+          is.null(ack$token) ||
+          !identical(ack$token, context$restore_token) ||
+          !isTRUE(ack$round == context$restore_round)
+        ) {
+          return()
+        }
+
+        if(isTRUE(ack$round == 1L)){
+          restore_token <- context$restore_token
+          context$restore_round <- 2L
+          restore_context(context)
+
+          session$onFlushed(
+            function() {
+              if (!session$isClosed()) {
+                session$sendCustomMessage(
+                  'bookmark_restore_probe',
+                  list(token=restore_token, round=2L)
+                )
+              }
+            },
+            once=TRUE
+          )
+
+          return()
+        }
+
+        if(isTRUE(ack$round == 2L)){
+          bookmark_restore_tick(
+            isolate(bookmark_restore_tick()) + 1L
+          )
+
+          restore_context(NULL)
+        }
+      },
+      ignoreInit=TRUE,
+      priority=-100
     )
 
     apply_restored_inputs <- function(values) {
@@ -1332,12 +1401,33 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       }
 
       skip_pat <- "(-help_btn|-dload_btn|_do$|^intro$|^bookmark|^go_bookmark|^load_bookmark|^assay_do|^dds$|^assay$|^data_type$|select_all|select_none)"
+      rank_list_inputs <- c(
+        'upset_plot-upset_comps',
+        'upset_plot-upset_other'
+      )
 
       for (name in names(values)) {
         if (grepl(skip_pat, name)) {
           next
         }
         value <- values[[name]]
+
+        if (name %in% rank_list_inputs) {
+          labels <- if (is.null(value) || length(value) == 0) {
+            list()
+          } else {
+            value
+          }
+
+          sortable::update_rank_list(
+            css_id=name,
+            labels=labels,
+            session=session
+          )
+
+          next
+        }
+
         if (is.null(value)) {
           next
         }
@@ -2006,7 +2096,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     ####################### PCA Plot ###########################
 
-    pcaPlotServer('pcaplot', app_object, coldata.all, config)
+    pcaPlotServer('pcaplot', app_object, coldata.all, config, bookmark_restore_tick)
 
     ####################### MA plot #############################
 
@@ -2059,7 +2149,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                                   upset_plot_args,
                                   gene_scratchpad,
                                   reactive({ input$reset.genes }),
-                                  config)
+                                  config,
+                                  bookmark_restore_tick)
 
     upset_table <- reactiveValues(tbl=NULL, intersections=NULL, set_labels=NULL)
 

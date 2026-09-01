@@ -632,8 +632,15 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes,
                         'Both - opposite LFC sign', 'Both - same LFC sign')
         df$significance <- factor(df$significance, levels = sig_levels)
 
-        # Store the dataframe in the df_react reactiveVal
-        updateSelectizeInput(session, 'filter_tbl', choices=sig_levels, selected=sig_levels)
+        # Preserve a valid existing selection when refreshing the choices
+        selected_filters <- isolate(input$filter_tbl)
+        if(is.null(selected_filters)){
+          selected_filters <- sig_levels
+        } else {
+          selected_filters <- intersect(selected_filters, sig_levels)
+        }
+        updateSelectizeInput(session, 'filter_tbl', choices=sig_levels,
+                             selected=selected_filters)
 
         df_react(df)
         df_full(df_full)
