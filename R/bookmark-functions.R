@@ -111,31 +111,53 @@ get_saved_bookmark_choices <- function(bookmarks_dir, project, analysis) {
       })
     )
 
-    labels <- vapply(
-      matches,
-      function(match) {
-        name <- if (!is.na(match$meta$label)) {
-          match$meta$label
-        } else {
-          match$meta$saved_at
-        }
+    if (length(matches) == 0) {
+      return(data.frame(
+        id = character(),
+        label = character(),
+        saved_at = character(),
+        comp = character(),
+        mode = character()
+      ))
+    }
 
-        paste0(
-          name,
-          if (nzchar(match$meta$mode)) {
-            paste0(' [', match$meta$mode, ']')
+    # Data frame that is easily consumable by anything downstream.
+    bookmarks_df <- data.frame(
+      id = vapply(matches, function(match) match$id, character(1)),
+      label = vapply(
+        matches,
+        function(match) {
+          if (!is.na(match$meta$label)) {
+            match$meta$label
           } else {
-            ''
+            match$meta$saved_at
           }
-        )
-      },
-      character(1)
+        },
+        character(1)
+      ),
+      saved_at = vapply(
+        matches,
+        function(match) match$meta$saved_at,
+        character(1)
+      ),
+      comp = vapply(
+        matches,
+        function(match) match$meta$comp,
+        character(1)
+      ),
+      mode = vapply(
+        matches,
+        function(match) match$meta$mode,
+        character(1)
+      )
     )
 
-    ids <- vapply(matches, function(match) match$id, character(1))
+    bookmarks_df <- bookmarks_df[
+      order(bookmarks_df$saved_at, decreasing = TRUE),
+      ,
+      drop = FALSE
+    ]
+    rownames(bookmarks_df) <- NULL
 
-    list(
-      has_bookmarks = length(all_ids) > 0,
-      choices = setNames(ids, labels)
-    )
+    bookmarks_df
 }

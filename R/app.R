@@ -476,13 +476,16 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                         data.intro='Next, select the analysis to load for the chosen project.'
                       ),
                       introBox(
-                        uiOutput('saved_bookmarks_ui')
-                      ),
-                      introBox(
                         actionButton('assay_do', label='Go!',
                                      class='btn-primary'),
                         data.step=6,
                         data.intro='Finally, click this button to load the selected project and analysis into carnation.'
+                      ),
+
+                      br(),
+
+                      introBox(
+                        uiOutput('saved_bookmarks_ui')
                       ),
 
                       br(), br(),
@@ -502,6 +505,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                         data.step=3,
                         data.intro='Alternatively, use this table to review available projects and click a row to update the project dropdown.'
                       )
+
                     ),
                     conditionalPanel('input.dds != "" & input.dds != "Choose one"',
                       column(6,
@@ -511,6 +515,13 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                           ),
                           data.step=5,
                           data.intro='Or, use this table to review analyses for the selected project and click a row to populate the analysis dropdown.'
+                        ),
+                        br(),
+                        introBox(
+                          tags$div(
+                            DTOutput('bookmarks_desc')
+                          )
+
                         )
                       )
                     )
@@ -1322,7 +1333,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       }
     }
 
-    selected_assay <- reactive({
+    ui_selected_assay <- reactive({
       req(input$dds, input$assay)
 
       project_assays <- assay.list$l[[input$dds]]
@@ -1337,10 +1348,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       )
     })
 
-    # Scans bookmark directories and presents them as a
-    # selectInput and button
-    output$saved_bookmarks_ui <- renderUI({
-      selected <- selected_assay()
+    ui_selected_assay_bookmarks <- reactive({
+      req(ui_selected_assay())
+
+      selected <- ui_selected_assay()
 
       selected_bookmarks_dir <- get_bookmarks_path(
         selected$project,
@@ -1348,25 +1359,111 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         bookmarks_root
       )
 
-      saved <- get_saved_bookmark_choices(
+      saved_bookmarks_df <- get_saved_bookmark_choices(
         selected_bookmarks_dir,
         selected$project,
         selected$analysis
       )
 
-      if (!saved$has_bookmarks) {
-        return(tags$p('No saved bookmarks yet.'))
-      }
+    })
 
-      if (length(saved$choices) == 0) {
+    # UI for bookmarks description dataTable
+    output$bookmarks_desc <- renderDT({
+      bookmarks_df <- ui_selected_assay_bookmarks()
+
+      hidden_columns <- match(
+        c("id", "comp", "mode"),
+        names(bookmarks_df)
+      ) - 1
+
+      datatable(bookmarks_df,
+                  rownames = FALSE,
+                  selection = 'single',
+                  caption=tags$caption(style='font-weight: bold; font-size: 15px;',
+                                                       'Available bookmarks'),
+                  options = list(
+                    columnDefs = list(
+                      list(
+                        visible = FALSE,
+                        targets = hidden_columns
+                      )
+                    )
+                  )
+                )
+
+    })
+
+    bookmarks_desc_proxy <- dataTableProxy("bookmarks_desc")
+
+    table_bookmark_selected <- eventReactive(input$bookmarks_desc_rows_selected, {
+      bookmarks_df <- ui_selected_assay_bookmarks()
+
+      selection <- input$bookmarks_desc_rows_selected
+
+      selected_bookmark <- bookmarks_df[selection, ]
+      selected_bookmark$id
+    })
+
+    observeEvent(table_bookmark_selected(), {
+      selection <- input$bookmarks_desc_rows_selected
+      req(length(selection) == 1)
+      updateSelectizeInput(
+                            inputId = 'load_bookmark',
+                            selected = table_bookmark_selected()
+                          )
+    })
+
+    # update bookmark table selection based on dropdown selection
+    observeEvent(
+      list(input$load_bookmark, input$bookmarks_desc_rows_all),
+      {
+        bookmarks_df <- ui_selected_assay_bookmarks()
+        row_idx <- match(input$load_bookmark, bookmarks_df$id)
+
+        req(!is.na(row_idx))
+
+        displayed_position <- match(
+          row_idx,
+          input$bookmarks_desc_rows_all
+        )
+
+        if (is.na(displayed_position)) {
+          bookmarks_desc_proxy %>% selectRows(NULL)
+          return()
+        }
+
+        page_length <- input$bookmarks_desc_state$length
+        if (
+          is.null(page_length) ||
+          !is.numeric(page_length) ||
+          page_length < 1
+        ) {
+          page_length <- 10
+        }
+        page_idx <- floor((displayed_position - 1) / page_length) + 1
+
+        bookmarks_desc_proxy %>%
+          selectRows(NULL) %>%
+          selectRows(row_idx) %>%
+          selectPage(page_idx)
+      }
+    )
+
+    # UI for the dropdown bookmarks list
+    output$saved_bookmarks_ui <- renderUI({
+    bookmarks_df <- ui_selected_assay_bookmarks()
+
+      if (nrow(bookmarks_df) == 0) {
         return(tags$p('No saved bookmarks for this analysis yet.'))
       }
+
+      choices <- setNames(bookmarks_df$id, bookmarks_df$label)
 
       tagList(
         selectInput(
           'load_bookmark',
           'Saved Bookmarks',
-          choices = saved$choices
+          choices = choices
         ),
         actionButton('go_bookmark', 'Load Bookmark', class = 'btn-primary')
       )
