@@ -34,38 +34,39 @@ volcanoPlotUI <- function(id, panel) {
 
       ############## Plot Options Menu ###############
 
+      fluidRow(
+        column(4, h5('Color by')),
+        column(
+          8,
+          selectInput(
+            ns('color_by'),
+            label = NULL,
+            choices = c('baseMean', 'significance'),
+            selected = 'baseMean'
+          )
+        ) # column
+      ), # fluidRow
+
+      ## alpha-slider ##########################
+      fluidRow(
+        column(4, h5('Opacity')),
+        column(
+          8,
+          sliderInput(ns('volcano_alpha'),
+                     label = NULL,
+                     min = 0,
+                     max = 1,
+                     value = 0.6,
+                     ticks = FALSE)
+        )
+      ),
+
       bsCollapse(
         id = ns('plot_opts'),
         bsCollapsePanel(
-          'Plot options',
-          fluidRow(
-            column(4, h5('Color by')),
-            column(
-              8,
-              selectInput(
-                ns('color_by'),
-                label = NULL,
-                choices = c('baseMean', 'significance'),
-                selected = 'baseMean'
-              )
-            ) # column
-          ), # fluidRow
-
-          ## alpha-slider ##########################
-          fluidRow(
-            column(
-              8,
-              sliderInput(ns('volcano_alpha'),
-                         label = 'Opacity/Alpha value',
-                         min = 0,
-                         max = 1,
-                         value = 0.6,
-                         ticks = FALSE)
-            )
-          ),
-
+          'Axis limits',
           ## x-axis limits ##########################
-          tags$label(class = 'control-label', 'x-axis limits'),
+          tags$label(class = 'control-label', 'x-axis'),
           fluidRow(
             column(4, h5('max')),
             column(
@@ -90,7 +91,7 @@ volcanoPlotUI <- function(id, panel) {
           ), # fluidRow
 
           ## y-axis limits ########################
-          tags$label(class = 'control-label', 'y-axis limits'),
+          tags$label(class = 'control-label', 'y-axis'),
           fluidRow(
             column(4, h5('max')),
             column(
