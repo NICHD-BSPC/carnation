@@ -2190,7 +2190,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                            labels=upset_table$set_labels))
     })
 
-    heatmapServer('heatmap', app_object, coldata.all, hmap_plot_args, gene_scratchpad, config)
+    heatmapServer('heatmap', app_object, coldata.all, hmap_plot_args, gene_scratchpad, config, bookmark_restore_tick)
 
     #################### Functional enrichment #######################
 
