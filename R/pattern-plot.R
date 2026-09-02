@@ -377,7 +377,8 @@ patternPlotServer <- function(id,
                               coldata,
                               gene_scratchpad,
                               upset_data,
-                              config){
+                              config,
+                              bookmark_restore_tick){
   moduleServer(
     id,
 
@@ -730,7 +731,7 @@ patternPlotServer <- function(id,
       ############################################################
 
       # reactive to make degPatterns plot
-      degplot <- eventReactive(c(deg_plot_data$obj, input$plot_do), {
+      degplot <- eventReactive(c(deg_plot_data$obj, input$plot_do, bookmark_restore_tick()), {
 
         validate(
             need(!is.null(deg_plot_data$obj),
@@ -848,7 +849,8 @@ patternPlotServer <- function(id,
       })
 
       get_label_tbl <- eventReactive(c(deg_plot_data$obj,
-                                       input$plot_do), {
+                                       input$plot_do,
+                                      bookmark_restore_tick()), {
 
         validate(
           need(!is.null(deg_plot_data$obj), '')
