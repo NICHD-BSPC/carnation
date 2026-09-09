@@ -78,6 +78,7 @@
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #' @param type string, if 'comp' then show the comparison view
 #'
 #' @returns
@@ -202,7 +203,8 @@ sumovPlotUI <- function(id, panel, type=''){
 
 #' @rdname sumovmod
 #' @export
-sumovPlotServer <- function(id, obj, config, type=''){
+sumovPlotServer <- function(id, obj, config,
+                            type='', bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -226,7 +228,8 @@ sumovPlotServer <- function(id, obj, config, type=''){
       })
 
       enrichplot <- eventReactive(c(obj(),
-                                    input$plot_do), {
+                                    input$plot_do,
+                                    bookmark_restore_tick()), {
         # get defaults from reactive config
         defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
 
@@ -394,6 +397,7 @@ sumovPlotServer <- function(id, obj, config, type=''){
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -491,7 +495,8 @@ enrichmapUI <- function(id, panel){
 
 #' @rdname emapmod
 #' @export
-enrichmapServer <- function(id, obj, res_obj, config){
+enrichmapServer <- function(id, obj, res_obj, config,
+                            bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -510,7 +515,8 @@ enrichmapServer <- function(id, obj, res_obj, config){
       })
 
       enrichplot <- eventReactive(c(obj(),
-                                    input$plot_do), {
+                                    input$plot_do,
+                                    bookmark_restore_tick()), {
         # get defaults from reactive config
         defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
 
@@ -590,6 +596,7 @@ set_graph_attr <- function(gg){
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactive, dataframe containing enrichment results
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -713,7 +720,8 @@ cnetPlotUI <- function(id, panel){
 
 #' @rdname cnetmod
 #' @export
-cnetPlotServer <- function(id, obj, config){
+cnetPlotServer <- function(id, obj, config,
+                           bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -740,7 +748,8 @@ cnetPlotServer <- function(id, obj, config){
       })
 
       enrichplot <- eventReactive(c(obj(),
-                                    input$plot_do), {
+                                    input$plot_do,
+                                    bookmark_restore_tick()), {
         l <- obj()
 
         # get defaults from reactive config
@@ -803,6 +812,7 @@ cnetPlotServer <- function(id, obj, config){
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #' @param type string, if 'comp' then show the comparison view
 #'
 #' @returns
@@ -921,7 +931,8 @@ radarUI <- function(id, panel, type=''){
 
 #' @rdname radarmod
 #' @export
-radarServer <- function(id, obj, config, type=''){
+radarServer <- function(id, obj, config,
+                        type='', bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -944,7 +955,8 @@ radarServer <- function(id, obj, config, type=''){
       })
 
       enrichplot <- eventReactive(c(obj(),
-                                    input$plot_do), {
+                                    input$plot_do,
+                                    bookmark_restore_tick()), {
         # get defaults from reactive config
         defaults <- config()$ui$functional_enrichment$plots[[plottype]]
 
@@ -1109,6 +1121,7 @@ radarServer <- function(id, obj, config, type=''){
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1209,7 +1222,8 @@ alluvialUI <- function(id, panel){
 
 #' @rdname alluvialmod
 #' @export
-alluvialServer <- function(id, obj, res_obj, config){
+alluvialServer <- function(id, obj, res_obj, config,
+                           bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -1227,7 +1241,8 @@ alluvialServer <- function(id, obj, res_obj, config){
       })
 
       enrichplot <- eventReactive(c(obj(),
-                                    input$plot_do), {
+                                    input$plot_do,
+                                    bookmark_restore_tick()), {
         l_gs <- obj()$l_gs
         anno_df <- obj()$anno_df
         res <- res_obj()
@@ -1274,6 +1289,7 @@ alluvialServer <- function(id, obj, res_obj, config){
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1377,7 +1393,8 @@ dendrogramUI <- function(id, panel){
 
 #' @rdname dendromod
 #' @export
-dendrogramServer <- function(id, obj, config){
+dendrogramServer <- function(id, obj, config,
+                             bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -1398,7 +1415,8 @@ dendrogramServer <- function(id, obj, config){
       })
 
       enrichplot <- eventReactive(c(obj(),
-                                    input$plot_do), {
+                                    input$plot_do,
+                                    bookmark_restore_tick()), {
         l_gs <- obj()$l_gs
 
         validate(
@@ -1474,6 +1492,7 @@ dendrogramServer <- function(id, obj, config){
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing two GeneTonic objects
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1597,7 +1616,8 @@ horizonUI <- function(id, panel){
 
 #' @rdname horizonmod
 #' @export
-horizonServer <- function(id, obj, config){
+horizonServer <- function(id, obj, config,
+                          bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -1630,7 +1650,8 @@ horizonServer <- function(id, obj, config){
       })
 
       enrichplot <- eventReactive(c(obj(),
-                                    input$plot_do), {
+                                    input$plot_do,
+                                    bookmark_restore_tick()), {
 
         # get defaults from reactive config
         defaults <- config()$ui$functional_enrichment$plots[[ plottype ]]
@@ -1722,6 +1743,7 @@ horizonServer <- function(id, obj, config){
 #' @param obj reactive containing 'distilled' enrichment results
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1827,7 +1849,8 @@ distillPlotUI <- function(id, panel){
 
 #' @rdname distillmod
 #' @export
-distillPlotServer <- function(id, obj, args, config){
+distillPlotServer <- function(id, obj, args, config,
+                              bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -1886,7 +1909,8 @@ distillPlotServer <- function(id, obj, args, config){
         }
       })
 
-      enrichplot <- eventReactive(c(obj(), input$plot_do), {
+      enrichplot <- eventReactive(c(obj(), input$plot_do,
+                                    bookmark_restore_tick()), {
         p <- obj()$distilled_em
 
         # defining a color palette for nicer display
@@ -1943,6 +1967,7 @@ distillPlotServer <- function(id, obj, args, config){
 #' @param obj reactive containing 'distilled' enrichment results
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -2040,7 +2065,8 @@ fuzzyPlotUI <- function(id, panel){
 
 #' @rdname fuzzymod
 #' @export
-fuzzyPlotServer <- function(id, obj, args, config){
+fuzzyPlotServer <- function(id, obj, args, config,
+                            bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -2099,7 +2125,8 @@ fuzzyPlotServer <- function(id, obj, args, config){
         }
       })
 
-      enrichplot <- eventReactive(c(obj(), input$plot_do), {
+      enrichplot <- eventReactive(c(obj(), input$plot_do,
+                                    bookmark_restore_tick()), {
         l <- obj()
 
         # find p.adjust column and stop if not present
@@ -2183,4 +2210,3 @@ fuzzyPlotServer <- function(id, obj, args, config){
     } # function
   ) # moduleServer
 } # function
-

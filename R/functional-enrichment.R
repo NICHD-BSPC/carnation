@@ -13,6 +13,7 @@
 #' @param gene_scratchpad reactive, genes selected in gene scratchpad
 #' @param reset_genes reactive to reset genes in scratchpad
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -531,7 +532,8 @@ enrichUI <- function(id, panel, tab='none'){
 #' @rdname funenrichmod
 #' @export
 enrichServer <- function(id, obj, upset_table,
-                         gene_scratchpad, reset_genes, config){
+                         gene_scratchpad, reset_genes, config,
+                         bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -1623,13 +1625,17 @@ enrichServer <- function(id, obj, upset_table,
       })
 
       # plot modules
-      sumovPlotServer('sumov', genetonic_obj, config)
-      enrichmapServer('enrichmap', genetonic_obj, enrich_obj, config)
-      cnetPlotServer('cnetplot', enrich_obj, config)
-      radarServer('radar', genetonic_obj, config)
+      sumovPlotServer('sumov', genetonic_obj, config,
+                      bookmark_restore_tick=bookmark_restore_tick)
+      enrichmapServer('enrichmap', genetonic_obj, enrich_obj, config,
+                      bookmark_restore_tick)
+      cnetPlotServer('cnetplot', enrich_obj, config, bookmark_restore_tick)
+      radarServer('radar', genetonic_obj, config,
+                  bookmark_restore_tick=bookmark_restore_tick)
       alluvialServer('alluvial', genetonic_obj,
-                     enrich_obj, config)
-      dendrogramServer('dendrogram', genetonic_obj, config)
+                     enrich_obj, config, bookmark_restore_tick)
+      dendrogramServer('dendrogram', genetonic_obj, config,
+                       bookmark_restore_tick)
 
       ##################### Distill plot ####################
 
@@ -1640,7 +1646,8 @@ enrichServer <- function(id, obj, upset_table,
       distill_data <- distillPlotServer('emap_distill',
                                         reactive({ enrich_data$distill$tbl }),
                                         distill_args,
-                                        config)
+                                        config,
+                                        bookmark_restore_tick)
 
       observeEvent(distill_data(), {
         numcat <- distill_data()
@@ -1660,7 +1667,8 @@ enrichServer <- function(id, obj, upset_table,
       fuzzy_data <- fuzzyPlotServer('emap_fuzzy',
                                     reactive({ enrich_data$fuzzy$tbl }),
                                     fuzzy_args,
-                                    config)
+                                    config,
+                                    bookmark_restore_tick)
 
       observeEvent(fuzzy_data(), {
         numcat <- fuzzy_data()
@@ -1789,9 +1797,12 @@ enrichServer <- function(id, obj, upset_table,
       ###################### Compare functional enrichment ############################
 
       # plot modules
-      sumovPlotServer('sumov_comp', genetonic_comp_obj, config, type='comp')
-      radarServer('radar_comp', genetonic_comp_obj, config, type='comp')
-      horizonServer('horizon', genetonic_comp_obj, config)
+      sumovPlotServer('sumov_comp', genetonic_comp_obj, config,
+                      type='comp', bookmark_restore_tick=bookmark_restore_tick)
+      radarServer('radar_comp', genetonic_comp_obj, config,
+                  type='comp', bookmark_restore_tick=bookmark_restore_tick)
+      horizonServer('horizon', genetonic_comp_obj, config,
+                    bookmark_restore_tick)
 
       # enrichment objects
       genetonic_comp_obj <- reactive({
@@ -2092,5 +2103,3 @@ enrichServer <- function(id, obj, upset_table,
     } # function
   ) # moduleServer
 } # enrichServer
-
-

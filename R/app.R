@@ -1146,7 +1146,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       updateSelectizeInput(session, 'dds',
                            selected=proj_from_tbl())
     })
-    ######################### bookmarking  ##################
+    ################ Bookmarking  ##################
 
     bookmark_handlers <- register_bookmark_handlers(
       input,
@@ -1157,7 +1157,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       load_assay = function(...) load_assay(...),
       current = current,
       original = original,
-      bookmarks_root = bookmarks_root
+      bookmarks_root = bookmarks_root,
+      settings = settings
     )
 
     restore_context <- bookmark_handlers$restore_context
@@ -1671,7 +1672,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     genePlotServer('gene_plot', app_object,
                    coldata=coldata.all,
                    gene_plot_args,
-                   config)
+                   config,
+                   bookmark_restore_tick)
 
     ####################### PCA Plot ###########################
 
@@ -1777,7 +1779,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                                 upset_table,
                                 gene_scratchpad,
                                 reactive({ input$reset.genes }),
-                                config)
+                                config,
+                                bookmark_restore_tick)
 
     observeEvent(enrich_data(), {
       g <- enrich_data()$genes

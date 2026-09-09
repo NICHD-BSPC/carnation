@@ -309,7 +309,8 @@ genePlotUI <- function(id, panel){
 genePlotServer <- function(id, obj,
                            coldata,
                            plot_args,
-                           config){
+                           config,
+                           bookmark_restore_tick){
   moduleServer(
     id,
 
@@ -725,7 +726,8 @@ genePlotServer <- function(id, obj,
           input$ymin,
           gene_plot_data$all,
           plot_args(),
-          input$plot_do
+          input$plot_do,
+          bookmark_restore_tick()
         )
       })
 

@@ -503,7 +503,13 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes,
              genes_clicked$g)
       }, {
 
-        req(app_object()$res)
+        req(app_object()$res,
+            input$x_axis_comp,
+            input$y_axis_comp,
+            input$compare,
+            input$x_axis_comp %in% names(app_object()$res),
+            input$y_axis_comp %in% names(app_object()$res)
+        )
 
         res_i <- as.data.frame(app_object()$res[[input$x_axis_comp]])
         res_j <- as.data.frame(app_object()$res[[input$y_axis_comp]])
