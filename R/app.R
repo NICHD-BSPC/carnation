@@ -29,7 +29,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
   oopt <- options(spinner.type = 4)
   options(shiny.maxRequestSize = cfg$max_upload_size*1024^2)
 
-  bookmarks_root <- get_bookmarks_root_path()
 
 
   # reset to previous options on exit
@@ -51,6 +50,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       )
     }
   }
+
+  bookmarks_root <- get_bookmarks_root_path()
   shinyOptions(
   # Function that runs when shiny recieves a load bookmark request.
     load.interface = function(id, callback) {
@@ -1146,44 +1147,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       updateSelectizeInput(session, 'dds',
                            selected=proj_from_tbl())
     })
-    ################ Bookmarking  ##################
 
-    bookmark_handlers <- register_bookmark_handlers(
-      input,
-      output,
-      session,
-      assay.list = assay.list,
-      gene.id = gene.id,
-      load_assay = function(...) load_assay(...),
-      current = current,
-      original = original,
-      bookmarks_root = bookmarks_root,
-      settings = settings
-    )
-
-    restore_context <- bookmark_handlers$restore_context
-    bookmark_restore_tick <- bookmark_handlers$restore_tick
-
-    observeEvent(input$assay_do, {
-      project_id <- input$dds
-      assay_path <- input$assay
-
-      project_assays <- assay.list$l[[project_id]]
-      idx <- match(assay_path, unname(project_assays))
-
-      validate(
-        need(!is.na(idx), "Selected analysis is unavailable.")
-      )
-
-      analysis_id <- names(project_assays)[idx]
-
-      load_assay(project_id, analysis_id, assay_path)
-    })
-
-
-
-    load_assay <- function(project_id, analysis_id,  assay_path) {
-
+    # loads the analysis data, kept in app.R in order to close over some values
+    # and be able to pass them into the register_bookmark_handlers function without
+    load_assay <- function(project_id, analysis_id,  assay_path, reset_tabs = TRUE) {
       if (is.null(assay_path) || assay_path == "" || assay_path == "Choose one") {
         showNotification("No assay selected!", type = "error")
         return(invisible())
@@ -1301,7 +1268,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       removeModal()
 
-      if (is.null(isolate(restore_context()))) {
+      if (reset_tabs) {
       updateTabsetPanel(session, inputId='mode',
                         selected='DE analysis')
       updateTabsetPanel(session, inputId='de_mode',
@@ -1312,6 +1279,42 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       current$analysis <- analysis_id
 
     }
+
+    ################ Bookmarking ##################
+
+    bookmark_handlers <- register_bookmark_handlers(
+      input,
+      output,
+      session,
+      assay.list = assay.list,
+      gene.id = gene.id,
+      load_assay = load_assay,
+      current = current,
+      original = original,
+      bookmarks_root = bookmarks_root,
+      settings = settings
+    )
+
+    restore_context <- bookmark_handlers$restore_context
+    bookmark_restore_tick <- bookmark_handlers$restore_tick
+
+    ##############################################
+    observeEvent(input$assay_do, {
+      project_id <- input$dds
+      assay_path <- input$assay
+
+      project_assays <- assay.list$l[[project_id]]
+      idx <- match(assay_path, unname(project_assays))
+
+      validate(
+        need(!is.na(idx), "Selected analysis is unavailable.")
+      )
+
+      analysis_id <- names(project_assays)[idx]
+
+      load_assay(project_id, analysis_id, assay_path)
+    })
+
 
     # show loaded dataset
     output$current_obj <- renderUI({
