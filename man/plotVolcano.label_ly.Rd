@@ -25,7 +25,9 @@ plotVolcano.label_ly(
 
 \item{fc.thres}{log2FoldChange threshold}
 
-\item{neg_log_padj.lim}{y-axis limits}
+\item{neg_log_padj.lim}{y-axis limits for negative log10 padj}
+
+\item{fc.lim}{x-axis limits for log2FoldChange}
 
 \item{lab.genes}{genes to label on MA plot}
 
