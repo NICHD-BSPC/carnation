@@ -1655,7 +1655,8 @@ plotMA.label_ly <- function(res,
 #'  "padj", "log2FoldChange", & "baseMean" columns
 #' @param fdr.thres False discovery rate (FDR) threshold
 #' @param fc.thres log2FoldChange threshold
-#' @param neg_log_padj.lim y-axis limits
+#' @param neg_log_padj.lim y-axis limits for negative log10 padj
+#' @param fc.lim x-axis limits for log2FoldChange
 #' @param lab.genes genes to label on MA plot
 #' @param tolower.cols column names that will be converted to
 #'  lower case
@@ -1826,7 +1827,7 @@ plotVolcano.label_ly <- function(
     mutate(shape = as.factor(.data$shape))
 
   # Makes the range of values to be used for base mean coloring.
-  df <- df %>% mutate(log_baseMean = log(baseMean + 1))
+  df <- df %>% mutate(log_baseMean = log(.data$baseMean + 1))
   color_min <- min(df$log_baseMean, na.rm = TRUE)
   color_max <- max(df$log_baseMean, na.rm = TRUE)
 
@@ -2322,7 +2323,7 @@ plotVolcano.label <- function(
     mutate(shape = as.factor(.data$shape))
 
 
-  df <- df %>% mutate(log_baseMean = log(baseMean + 1))
+  df <- df %>% mutate(log_baseMean = log(.data$baseMean + 1))
 
   shape.vals <- c(
     'in' = 16,
