@@ -25,9 +25,8 @@ Description: Highly interactive & modular shiny app to
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Depends:
-    R (>= 4.6.0)
+    R (>= 4.3.0)
 Imports:
     BiocParallel,
     colorspace,
@@ -80,3 +79,4 @@ biocViews:
     GUI, GeneExpression, Software, ShinyApps, GO, Transcription,
     Transcriptomics, Visualization, DifferentialExpression,
     Pathways, GeneSetEnrichment
+Config/roxygen2/version: 8.0.0
