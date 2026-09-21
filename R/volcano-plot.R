@@ -244,9 +244,11 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       # Instantiates the reactive values used in making the plots
       curr_thres <- reactiveValues(
         fdr.thres = 0.1,
-        fc.thres = 0.0,
-        colorscale = 'viridis'
+        fc.thres = 0.0
       )
+
+      # save colorscale to separate reactiveVal
+      colorscale <- reactiveVal('viridis')
 
       # Watches the app_object to update the drop down menu with the correct
       # options
@@ -259,15 +261,6 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         )
         reset_axes()
       })
-
-      # Loads in the settings from the config
-      observeEvent(config(), {
-        curr_thres$fdr.thres <- config()$ui$de_analysis$filters$fdr_threshold
-        curr_thres$fc.thres <- config()$ui$de_analysis$filters$log2fc_threshold
-
-        # gets colorscale from config and falls back to viridis if it is not found
-        cs <- config()$ui$de_analysis$volcano_plot$colorscale
-        curr_thres$colorscale <- if (!is.null(cs)) cs else 'viridis'
 
       reset_axes <- function(){
         updateNumericInput(
@@ -291,6 +284,16 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$min
         )
       }
+
+      # Loads in the settings from the config
+      observeEvent(config(), {
+        curr_thres$fdr.thres <- config()$ui$de_analysis$filters$fdr_threshold
+        curr_thres$fc.thres <- config()$ui$de_analysis$filters$log2fc_threshold
+
+        # gets colorscale from config and falls back to viridis if it is not found
+        cs <- config()$ui$de_analysis$volcano_plot$colorscale
+        if (is.null(cs)) cs <- 'viridis'
+        colorscale(cs)
 
         reset_axes()
       })
@@ -366,7 +369,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
             color_by = input$color_by,
-            colorscale= tolower(curr_thres$colorscale),
+            colorscale= tolower(colorscale()),
             lab.genes = plot_args()$gene.to.plot,
             alpha = input$volcano_alpha
           )
@@ -424,7 +427,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             app_object()$res[[input$comp_all]],
             fc.thres = curr_thres$fc.thres,
             fdr.thres = curr_thres$fdr.thres,
-            colorscale = curr_thres$colorscale,
+            colorscale = colorscale(),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
             neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
             color_by = input$color_by,
