@@ -1886,7 +1886,8 @@ plotVolcano.label_ly <- function(
           neg_log_padj.lim[2] + y.edge.pad
         )
       ),
-      showlegend = TRUE
+      showlegend = TRUE,
+      legend=list(title=list(text='<b> significant </b>'))
     )
 
   if (color_by == 'baseMean') {
@@ -2010,7 +2011,7 @@ plotVolcano.label_ly <- function(
           text = df.sig$symbol,
           hoverinfo = 'text',
           mode = 'markers',
-          name = 'Significant',
+          name = 'yes',
           legendgroup = 'significant',
           showlegend = FALSE,
           marker = list(
@@ -2027,7 +2028,7 @@ plotVolcano.label_ly <- function(
           type = 'scatter',
           mode = 'markers',
           marker = list(color = 'red', symbol = 'circle', size = 8),
-          name = 'Significant',
+          name = 'yes',
           legendgroup = 'significant',
           showlegend = TRUE,
           inherit = FALSE
@@ -2042,7 +2043,7 @@ plotVolcano.label_ly <- function(
           text = df.nonsig$symbol,
           hoverinfo = 'text',
           mode = 'markers',
-          name = 'Not significant',
+          name = 'no',
           legendgroup = 'not_significant',
           showlegend = FALSE,
           marker = list(
@@ -2059,7 +2060,7 @@ plotVolcano.label_ly <- function(
           type = 'scatter',
           mode = 'markers',
           marker = list(color = '#999999', symbol = 'circle', size = 8),
-          name = 'Not significant',
+          name = 'no',
           legendgroup = 'not_significant',
           showlegend = TRUE,
           inherit = FALSE
