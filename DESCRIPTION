@@ -7,10 +7,10 @@ Authors@R:
                role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3279-0054")),
         person(c("Matthew", "Tyler"), "Menold", , "matthew.menold@gmail.com",
                role = c("ctb"), comment = c(ORCID = "0009-0007-4728-2470")),
-        person("Ryan", "Dale", , "ryan.dale@nih.gov",
-               role = c("fnd"), comment = c(ORCID = "0000-0003-2664-3744")),
         person(c("Dale", "McCauley"), "McCauley", , "dalelmccauley@gmail.com",
-               role = c("ctb"), comment = c(ORCID = "0009-0005-7550-6916"))
+               role = c("ctb"), comment = c(ORCID = "0009-0005-7550-6916")),
+        person("Ryan", "Dale", , "ryan.dale@nih.gov",
+               role = c("fnd"), comment = c(ORCID = "0000-0003-2664-3744"))
     )
 Description: Highly interactive & modular shiny app to
     explore three facets of RNA-Seq analysis: differential expression (DE),
