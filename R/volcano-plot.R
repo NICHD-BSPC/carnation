@@ -131,6 +131,17 @@ volcanoPlotUI <- function(id, panel) {
         )
       ),
 
+      fluidRow(
+        column(4, h5('Aspect ratio')),
+        column(
+          8,
+          selectInput(ns('volcano_aspect'),
+            label = NULL,
+            choices = c('wide', 'narrow')
+          )
+        )
+      ),
+
       bsCollapse(
         id = ns('plot_opts'),
         bsCollapsePanel(
@@ -419,6 +430,11 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       )
 
       output$volcano_plot_out <- renderUI({
+        # isolate this to not trigger plot redraw
+        isolate({
+          aspect <- input$volcano_aspect
+        })
+
         # Renders interactive plot
         if (input$plot_interactive == 'yes') {
           p <- volcano_plot_ly() %>% toWebGL()
@@ -429,17 +445,29 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             p
           })
 
-          withSpinner(
-            plotlyOutput(ns('plot1'), height = '600px')
+          # set width based on aspect ratio
+          if(aspect == 'narrow') width <- '900px'
+          else width <- 'auto'
+
+          div(align='center',
+            withSpinner(
+              plotlyOutput(ns('plot1'), height = '600px', width=width)
+            )
           )
         } else if (input$plot_interactive == 'no') {
           # Renders non-interactive plot
           p <- volcano_plot() + theme(text = element_text(size = 18))
+
+          # set aspect ratio
+          if(aspect == 'narrow') p <- p + theme(aspect.ratio=0.75)
+
           output$plot2 <- renderPlot({
             p
           })
-          withSpinner(
-            plotOutput(ns('plot2'), height = '600px')
+          div(align='center',
+            withSpinner(
+              plotOutput(ns('plot2'), height = '600px')
+            )
           )
         }
       })
