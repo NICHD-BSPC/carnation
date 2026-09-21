@@ -206,7 +206,15 @@ volcanoPlotUI <- function(id, panel) {
             ) # column
           ) # fluidRow
         ) # bsCollapsePanel
-      ) # bsCollapse
+      ), # bsCollapse
+
+      fluidRow(align='center',
+        actionButton(ns('plot_do'),
+                     label='Refresh plot',
+                     icon=icon('arrows-rotate'),
+                     class='btn-primary',
+                     style='margin-bottom: 10px;')
+      ) # fluidRow
     )
 
     ################# MAIN ##########################
@@ -227,7 +235,6 @@ volcanoPlotUI <- function(id, panel) {
   }
 }
 
-################# SERVER ######################
 #' @rdname volcanoplotmod
 #' @export
 volcanoPlotServer <- function(id, obj, plot_args, config) {
@@ -318,18 +325,11 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       # eventreactive for the static volcano plot
       volcano_plot <- eventReactive(
         c(
-          app_object()$res,
           input$comp_all,
           curr_thres$fdr.thres,
           curr_thres$fc.thres,
-          curr_thres$colorscale,
-          input$volcano_xmin,
-          input$volcano_xmax,
-          input$volcano_ymin,
-          input$volcano_ymax,
-          input$color_by,
           plot_args()$gene.to.plot,
-          input$volcano_alpha
+          input$plot_do
         ),
         {
           # Checks that the required inputs exist and are valid
@@ -379,18 +379,11 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       # eventreactive for the plot_ly
       volcano_plot_ly <- eventReactive(
         c(
-          app_object()$res,
           input$comp_all,
           curr_thres$fdr.thres,
           curr_thres$fc.thres,
-          curr_thres$colorscale,
-          input$volcano_xmin,
-          input$volcano_xmax,
-          input$volcano_ymin,
-          input$volcano_ymax,
-          input$color_by,
           plot_args()$gene.to.plot,
-          input$volcano_alpha
+          input$plot_do
         ),
         {
           # Checks that the required inputs exist and are valid
