@@ -1866,8 +1866,9 @@ plotVolcano.label_ly <- function(
   df$plotly_shape <- unname(plotly_shapes[as.character(df$shape)])
 
   # A visual margin so points on the edge of the graph arent clipped.
-  x.edge.pad <- 0.1
-  y.edge.pad <- 0.3
+  # - This is a proportion to handle large ranges
+  x.edge.pad <- 0.01
+  y.edge.pad <- 0.01
 
   # Initialize the plot and apply the layout shared by both color modes.
   p <- plot_ly() %>%
@@ -1876,14 +1877,14 @@ plotVolcano.label_ly <- function(
         title = 'log2FoldChange',
         showgrid = FALSE,
         zeroline = FALSE,
-        range = c(fc.lim[1] - x.edge.pad, fc.lim[2] + x.edge.pad)
+        range = c(fc.lim[1]*(1 - x.edge.pad), fc.lim[2]*(1 + x.edge.pad))
       ),
       yaxis = list(
         title = '-log10 adjusted p-value',
         showgrid = FALSE,
         range = c(
-          neg_log_padj.lim[1] - y.edge.pad,
-          neg_log_padj.lim[2] + y.edge.pad
+          neg_log_padj.lim[1]*(1 - y.edge.pad),
+          neg_log_padj.lim[2]*(1 + y.edge.pad)
         )
       ),
       showlegend = TRUE,
