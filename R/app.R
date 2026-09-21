@@ -916,6 +916,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       # reset de table
       res_data$tbl <- NULL
+
+      # reset gene scratchpad
+      updateSelectizeInput(session,
+                           'gene.to.plot',
+                           choices=NULL,
+                           selected=NULL)
     }
 
     ############### Initial load #################
