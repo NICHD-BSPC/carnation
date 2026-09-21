@@ -100,6 +100,10 @@ volcanoPlotUI <- function(id, panel) {
 
       ############## Plot Options Menu ###############
 
+      div(style='margin-bottom: 10px',
+        strong('Plot settings'),
+      ),
+
       fluidRow(
         column(4, h5('Color by')),
         column(
