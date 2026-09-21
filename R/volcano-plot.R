@@ -257,6 +257,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           'comp_all',
           choices = names(app_object()$res)
         )
+        reset_axes()
       })
 
       # Loads in the settings from the config
@@ -268,6 +269,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         cs <- config()$ui$de_analysis$volcano_plot$colorscale
         curr_thres$colorscale <- if (!is.null(cs)) cs else 'viridis'
 
+      reset_axes <- function(){
         updateNumericInput(
           session,
           'volcano_xmax',
@@ -288,6 +290,9 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           'volcano_ymin',
           value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$min
         )
+      }
+
+        reset_axes()
       })
 
       # Syncs thresholds when plot_args() changes
