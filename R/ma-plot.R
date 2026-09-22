@@ -97,6 +97,10 @@ maPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
+      div(style='margin-bottom: 10px',
+        strong('Plot settings'),
+      ),
+
       fluidRow(
         column(4, h5('Opacity')),
         column(
