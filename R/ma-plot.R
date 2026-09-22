@@ -97,6 +97,19 @@ maPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
+      fluidRow(
+        column(4, h5('Opacity')),
+        column(
+          8,
+          sliderInput(ns('alpha'),
+                     label = NULL,
+                     min = 0,
+                     max = 1,
+                     value = 0.6,
+                     ticks = FALSE)
+        )
+      ),
+
       bsCollapse(
         id=ns('plot_opts'),
         bsCollapsePanel('Plot options',
@@ -231,7 +244,7 @@ maPlotServer <- function(id, obj, plot_args, config){
                      fdr.thres=curr_thres$fdr.thres,
                      fc.thres=curr_thres$fc.thres,
                      fc.lim=c(input$ma_ymin, input$ma_ymax),
-                     lab.genes=lab.genes)
+                     lab.genes=lab.genes, opacity=input$alpha)
       }) # eventReactive maplot
 
       # observer for maplot ylim autoscale btn
@@ -285,7 +298,7 @@ maPlotServer <- function(id, obj, plot_args, config){
                  fdr.thres=curr_thres$fdr.thres,
                  fc.thres=curr_thres$fc.thres,
                  fc.lim=c(input$ma_ymin, input$ma_ymax),
-                 lab.genes=lab.genes)
+                 lab.genes=lab.genes, opacity=input$alpha)
       }) # eventReactive maplot_ly
 
       output$maplot_out <- renderUI({
