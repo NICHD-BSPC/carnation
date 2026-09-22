@@ -114,9 +114,20 @@ maPlotUI <- function(id, panel){
         )
       ),
 
+      fluidRow(
+        column(4, h5('Aspect ratio')),
+        column(
+          8,
+          selectInput(ns('aspect'),
+            label = NULL,
+            choices = c('wide', 'narrow')
+          )
+        )
+      ),
+
       bsCollapse(
         id=ns('plot_opts'),
-        bsCollapsePanel('Plot options',
+        bsCollapsePanel('Axis limits',
 
           tags$label(class='control-label',
                      'y-axis limits'),
@@ -306,21 +317,37 @@ maPlotServer <- function(id, obj, plot_args, config){
       }) # eventReactive maplot_ly
 
       output$maplot_out <- renderUI({
+        # isolate this to not trigger plot redraw
+        isolate({
+          aspect <- input$aspect
+        })
+
         if(input$plot_interactive == 'yes'){
           p <- maplot_ly() %>% toWebGL()
 
           output$plot1 <- renderPlotly({ p })
 
-          withSpinner(
-            plotlyOutput(ns('plot1'), height='600px')
+          # set width based on aspect ratio
+          if(aspect == 'narrow') width <- '900px'
+          else width <- 'auto'
+
+          div(align='center',
+            withSpinner(
+              plotlyOutput(ns('plot1'), height='600px', width=width)
+            )
           )
         } else if(input$plot_interactive == 'no'){
           p <- maplot() + theme(text=element_text(size=18))
 
+          # set aspect ratio
+          if(aspect == 'narrow') p <- p + theme(aspect.ratio=0.75)
+
           output$plot2 <- renderPlot({ p })
 
-          withSpinner(
-            plotOutput(ns('plot2'), height='600px')
+          div(align='center',
+            withSpinner(
+              plotOutput(ns('plot2'), height='600px')
+            )
           )
         }
       })
