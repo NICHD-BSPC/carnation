@@ -155,7 +155,15 @@ maPlotUI <- function(id, panel){
           ) # fluidRow
 
         ) # bsCollapsePanel
-      ) # bsCollapse
+      ), # bsCollapse
+
+      fluidRow(align='center',
+        actionButton(ns('plot_do'),
+                     label='Refresh plot',
+                     icon=icon('arrows-rotate'),
+                     class='btn-primary',
+                     style='margin-bottom: 10px;')
+      ) # fluidRow
 
     ) # tagList
   } else if(panel == 'main'){
@@ -230,7 +238,7 @@ maPlotServer <- function(id, obj, plot_args, config){
       # NOTE: this is used only for the downloaded plot
       maplot <- eventReactive(c(input$comp_all, plot_args()$gene.to.plot,
                                 curr_thres$fdr.thres, curr_thres$fc.thres,
-                                input$ma_ymax, input$ma_ymin), {
+                                input$plot_do), {
         validate(
           need(!is.null(app_object()$res) & !is.null(input$comp_all) & input$comp_all != '',
                'Waiting for selection')
@@ -282,7 +290,7 @@ maPlotServer <- function(id, obj, plot_args, config){
       # this is the interactive plot_ly version
       maplot_ly <- eventReactive(c(app_object()$res, input$comp_all, plot_args()$gene.to.plot,
                                 curr_thres$fdr.thres, curr_thres$fc.thres,
-                                input$ma_ymin, input$ma_ymax), {
+                                input$plot_do), {
         validate(
           need(!is.null(app_object()$res) & !is.null(input$comp_all) & input$comp_all != '',
                'Waiting for selection')
