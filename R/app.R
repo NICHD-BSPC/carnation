@@ -240,7 +240,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
             conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Volcano plot'",
 
-                volcanoPlotUI('volcano_plot', panel='sidebar')
+              volcanoPlotUI('volcano_plot', panel='sidebar')
 
             ), # conditionalPanel
 
@@ -1647,7 +1647,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
            fc.thres=input$fc.thres,
            gene.to.plot=gene_scratchpad())
     })
-    
+
     volcanoPlotServer('volcano_plot', app_object, volcano_plot_args, config)
 
     ####################### Scatter plot #############################
