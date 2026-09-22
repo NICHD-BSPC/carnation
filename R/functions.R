@@ -1340,8 +1340,8 @@ plotMA.label <- function(res,
   p <- df %>%
     ggplot(aes(.data$baseMean, .data$log2FoldChange, color=.data$significant,
                shape=.data$shape, name=.data$symbol)) +
-    ylim(fc.lim[1]-0.1, fc.lim[2]+0.1) +
     geom_point(alpha=opacity) +
+    ylim(fc.lim[1]*0.99, fc.lim[2]*1.01) +
     scale_x_log10()
 
   # add scales
