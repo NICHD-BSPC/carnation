@@ -1257,6 +1257,7 @@ enrich_to_genetonic <- function(enrich, res){
 #' @param fc.thres log2FoldChange threshold
 #' @param fc.lim y-axis limits
 #' @param lab.genes genes to label on MA plot
+#' @param alpha point opacity between 0 and 1
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
@@ -1284,6 +1285,7 @@ plotMA.label <- function(res,
                          fc.thres=0,
                          fc.lim=NULL,
                          lab.genes=NULL,
+                         opacity=0.8,
                          tolower.cols=c('SYMBOL','ALIAS')){
   # convert res to data frame
   res <- data.frame(res)
@@ -1338,8 +1340,8 @@ plotMA.label <- function(res,
   p <- df %>%
     ggplot(aes(.data$baseMean, .data$log2FoldChange, color=.data$significant,
                shape=.data$shape, name=.data$symbol)) +
-    geom_point(alpha=0.8) +
     ylim(fc.lim[1]-0.1, fc.lim[2]+0.1) +
+    geom_point(alpha=opacity) +
     scale_x_log10()
 
   # add scales
@@ -1453,6 +1455,7 @@ add.set.column <- function(df){
 #' @param fc.thres log2FoldChange threshold
 #' @param fc.lim y-axis limits
 #' @param lab.genes genes to label on MA plot
+#' @param opacity point opacity between 0 and 1
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
@@ -1480,6 +1483,7 @@ plotMA.label_ly <- function(res,
                          fc.thres=0,
                          fc.lim=NULL,
                          lab.genes=NULL,
+                         opacity=0.3,
                          tolower.cols=c('SYMBOL','ALIAS')){
   # convert res to data frame
   res <- data.frame(res)
@@ -1558,7 +1562,7 @@ plotMA.label_ly <- function(res,
               mode='markers',
               hoverinfo='text',
               name='no',
-              marker=list(color='gray', alpha=0.3)) %>%
+              marker=list(color='gray', opacity=opacity)) %>%
         layout(xaxis=list(type='log',
                           title='baseMean',
                           showgrid=FALSE),
@@ -1574,7 +1578,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='gray', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-down-open'),
                   showlegend=FALSE)
   }
@@ -1586,7 +1590,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='gray', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-up-open'),
                   showlegend=FALSE)
   }
@@ -1598,7 +1602,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='red', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-down-open'),
                   showlegend=FALSE)
   }
@@ -1610,7 +1614,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='red', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-up-open'),
                   showlegend=FALSE)
   }
@@ -1622,7 +1626,7 @@ plotMA.label_ly <- function(res,
                     name='yes',
                     text=de.rest$symbol,
                     hoverinfo='text',
-                    marker=list(color='red', alpha=0.3))
+                    marker=list(color='red', opacity=opacity))
   }
 
 
@@ -1650,7 +1654,7 @@ plotMA.label_ly <- function(res,
                          x0 = 0, x1 = 1,
                          xref = "paper",
                          y0 = 0, y1 = 0,
-                         line = list(color = 'red', width=3, alpha=0.3)))
+                         line = list(color = 'red', width=3, opacity=0.3)))
 
   return(p)
 

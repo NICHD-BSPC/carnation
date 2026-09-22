@@ -10,6 +10,7 @@ plotMA.label(
   fc.thres = 0,
   fc.lim = NULL,
   lab.genes = NULL,
+  opacity = 0.8,
   tolower.cols = c("SYMBOL", "ALIAS")
 )
 }
@@ -27,6 +28,8 @@ plotMA.label(
 
 \item{tolower.cols}{column names that will be converted to
 lower case}
+
+\item{alpha}{point opacity between 0 and 1}
 }
 \value{
 ggplot handle
