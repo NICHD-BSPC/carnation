@@ -177,9 +177,9 @@ maPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      withSpinner(
+      div(align='center',
         uiOutput(ns('maplot_out'))
-      ) # withSpinner
+      )
     ) # tagList
   }
 }
