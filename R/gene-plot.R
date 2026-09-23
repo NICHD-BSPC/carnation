@@ -372,6 +372,7 @@ genePlotServer <- function(id, obj,
       xchoices <- reactiveValues(all=NULL, current=NULL)
 
       gene_plot_data <- reactiveValues(all=NULL, plotted=NULL, handle=NULL)
+      data_loaded <- reactiveVal(0)
 
       gene_coldata <- eventReactive(c(coldata$curr, input$samples), {
         validate(
@@ -469,6 +470,7 @@ genePlotServer <- function(id, obj,
                              selected=colnames(rld.i))
 
         gene_plot_data$all <- rld.i
+        data_loaded(data_loaded() + 1)
       })
 
       observeEvent(input$sample_all, {
@@ -808,6 +810,7 @@ genePlotServer <- function(id, obj,
           input$ymin,
           gene_plot_data$all,
           plot_args(),
+          data_loaded(),
           input$plot_do
         )
       })
