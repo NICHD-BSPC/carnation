@@ -84,6 +84,7 @@ ui:
       norm_method:
         'library size': libsize
         'vst': vst
+        'none': none
       x_rotate: 30
       logy: TRUE
       freey: FALSE

@@ -509,7 +509,7 @@ get_gene_counts <- function (dds,
 
   if(norm_method == 'libsize'){
     normalized <-TRUE
-  } else if(norm_method == 'vst'){
+  } else if(norm_method == 'vst' | norm_method == 'none'){
     normalized <- FALSE
   }
 
@@ -1716,7 +1716,7 @@ plotVolcano.label_ly <- function(
     stop('`alpha` must be a single numeric value between 0 and 1')
   }
   if (is.null(colorscale)) {
-    colorscale <- 'viridis'
+    colorscale <- 'Viridis'
   }
 
   res <- data.frame(res)

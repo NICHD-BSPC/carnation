@@ -459,10 +459,10 @@ genePlotServer <- function(id, obj,
         sample_grp <- input$samples
         if(sample_grp != 'all_samples'){
             if(input$norm_method == 'vst') rld.i <- app_object()$rld[[ sample_grp ]]
-            else if(input$norm_method == 'libsize') rld.i <- app_object()$dds[[ sample_grp ]]
+            else if(input$norm_method %in% c('libsize', 'none')) rld.i <- app_object()$dds[[ sample_grp ]]
         } else if(sample_grp == 'all_samples'){
             if(input$norm_method == 'vst') rld.i <- app_object()$all_rld
-            else if(input$norm_method == 'libsize') rld.i <- app_object()$all_dds
+            else if(input$norm_method %in% c('libsize', 'none')) rld.i <- app_object()$all_dds
         }
 
         updateSelectizeInput(session, 'sample_levels',
