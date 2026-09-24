@@ -509,7 +509,7 @@ get_gene_counts <- function (dds,
 
   if(norm_method == 'libsize'){
     normalized <-TRUE
-  } else if(norm_method == 'vst'){
+  } else if(norm_method == 'vst' | norm_method == 'none'){
     normalized <- FALSE
   }
 
@@ -565,7 +565,7 @@ get_gene_counts <- function (dds,
 #' @param title title of plot
 #' @param ylab y-axis label
 #' @param color metadata variable to color by
-#' @param nrow number of rows to plot if faceting
+#' @param ncol number of columns to plot if faceting
 #' @param ymin y-axis lower limit
 #' @param ymax y-axis upper limit
 #' @param log should y-axis be log10-transformed?
@@ -595,7 +595,7 @@ get_gene_counts <- function (dds,
 #'
 #' @export
 getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
-                         ylab='Normalized counts', color='gene', nrow=2, ymin=NULL, ymax=NULL,
+                         ylab='Normalized counts', color='gene', ncol=2, ymin=NULL, ymax=NULL,
                          log=TRUE, freey=FALSE, trendline='smooth', facet=NULL, legend=TRUE, boxes=TRUE, rotate_x_labels=30, box_dodge='identity'){
   idx <- df[,intgroup] %in% factor.levels
 
@@ -614,12 +614,16 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   ymin <- ifelse(is.null(ymin), min(df$count), ymin)
   ymax <- ifelse(is.null(ymax), max(df$count), ymax)
 
-  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]], text=paste('sample:', .data$sample))) +
-    geom_point(position=position_jitterdodge(dodge.width=0.2),
-                 size=2, alpha=0.5)
+  # add sample group column
+  df$sample_group <- paste(df[[ color ]], df[[ intgroup ]])
+
+  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]],
+                      group=.data[[ 'sample_group' ]], text=paste('sample:', .data$sample))) +
+         geom_point(position=position_jitterdodge(dodge.width=0.2),
+                      size=2, alpha=0.5)
 
   if(boxes){
-      p <- p + geom_boxplot(aes(group=.data[[color]]), alpha=0, notch=FALSE, position=box_dodge,
+      p <- p + geom_boxplot(alpha=0, notch=FALSE, position=box_dodge,
                             outlier.size=0, outlier.shape=NA)
   }
 
@@ -657,8 +661,13 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
     if(freey) scales <- 'free_y'
     else scales <- 'fixed'
 
-    if(length(facet) == 1) p <- p + facet_wrap(as.formula(paste('~', facet)), nrow=nrow, scales=scales)
-    else p <- p + facet_wrap(as.formula(paste('~', paste(facet, collapse=' + '))), nrow=nrow, scales=scales)
+    if(length(facet) == 1){
+      p <- p + facet_wrap(as.formula(paste('~', facet)),
+                          ncol=ncol, scales=scales)
+    } else {
+      p <- p + facet_wrap(as.formula(paste('~', paste(facet, collapse=' + '))),
+                          ncol=ncol, scales=scales)
+    }
   }
 
   if(!legend) p <- p + theme(legend.position='none')
@@ -1248,6 +1257,7 @@ enrich_to_genetonic <- function(enrich, res){
 #' @param fc.thres log2FoldChange threshold
 #' @param fc.lim y-axis limits
 #' @param lab.genes genes to label on MA plot
+#' @param opacity point opacity between 0 and 1
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
@@ -1275,6 +1285,7 @@ plotMA.label <- function(res,
                          fc.thres=0,
                          fc.lim=NULL,
                          lab.genes=NULL,
+                         opacity=0.8,
                          tolower.cols=c('SYMBOL','ALIAS')){
   # convert res to data frame
   res <- data.frame(res)
@@ -1329,8 +1340,8 @@ plotMA.label <- function(res,
   p <- df %>%
     ggplot(aes(.data$baseMean, .data$log2FoldChange, color=.data$significant,
                shape=.data$shape, name=.data$symbol)) +
-    geom_point(alpha=0.8) +
-    ylim(fc.lim[1]-0.1, fc.lim[2]+0.1) +
+    geom_point(alpha=opacity) +
+    ylim(fc.lim[1]*0.99, fc.lim[2]*1.01) +
     scale_x_log10()
 
   # add scales
@@ -1444,6 +1455,7 @@ add.set.column <- function(df){
 #' @param fc.thres log2FoldChange threshold
 #' @param fc.lim y-axis limits
 #' @param lab.genes genes to label on MA plot
+#' @param opacity point opacity between 0 and 1
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
@@ -1471,6 +1483,7 @@ plotMA.label_ly <- function(res,
                          fc.thres=0,
                          fc.lim=NULL,
                          lab.genes=NULL,
+                         opacity=0.3,
                          tolower.cols=c('SYMBOL','ALIAS')){
   # convert res to data frame
   res <- data.frame(res)
@@ -1549,7 +1562,7 @@ plotMA.label_ly <- function(res,
               mode='markers',
               hoverinfo='text',
               name='no',
-              marker=list(color='gray', alpha=0.3)) %>%
+              marker=list(color='gray', opacity=opacity)) %>%
         layout(xaxis=list(type='log',
                           title='baseMean',
                           showgrid=FALSE),
@@ -1565,7 +1578,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='gray', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-down-open'),
                   showlegend=FALSE)
   }
@@ -1577,7 +1590,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='gray', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-up-open'),
                   showlegend=FALSE)
   }
@@ -1589,7 +1602,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='red', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-down-open'),
                   showlegend=FALSE)
   }
@@ -1601,7 +1614,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='red', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-up-open'),
                   showlegend=FALSE)
   }
@@ -1613,7 +1626,7 @@ plotMA.label_ly <- function(res,
                     name='yes',
                     text=de.rest$symbol,
                     hoverinfo='text',
-                    marker=list(color='red', alpha=0.3))
+                    marker=list(color='red', opacity=opacity))
   }
 
 
@@ -1641,7 +1654,7 @@ plotMA.label_ly <- function(res,
                          x0 = 0, x1 = 1,
                          xref = "paper",
                          y0 = 0, y1 = 0,
-                         line = list(color = 'red', width=3, alpha=0.3)))
+                         line = list(color = 'red', width=3, opacity=0.3)))
 
   return(p)
 
@@ -1703,7 +1716,7 @@ plotVolcano.label_ly <- function(
     stop('`alpha` must be a single numeric value between 0 and 1')
   }
   if (is.null(colorscale)) {
-    colorscale <- 'viridis'
+    colorscale <- 'Viridis'
   }
 
   res <- data.frame(res)

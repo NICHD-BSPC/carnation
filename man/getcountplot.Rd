@@ -11,7 +11,7 @@ getcountplot(
   title = NULL,
   ylab = "Normalized counts",
   color = "gene",
-  nrow = 2,
+  ncol = 2,
   ymin = NULL,
   ymax = NULL,
   log = TRUE,
@@ -37,7 +37,7 @@ getcountplot(
 
 \item{color}{metadata variable to color by}
 
-\item{nrow}{number of rows to plot if faceting}
+\item{ncol}{number of columns to plot if faceting}
 
 \item{ymin}{y-axis lower limit}
 

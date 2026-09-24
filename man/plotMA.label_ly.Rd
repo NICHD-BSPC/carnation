@@ -10,6 +10,7 @@ plotMA.label_ly(
   fc.thres = 0,
   fc.lim = NULL,
   lab.genes = NULL,
+  opacity = 0.3,
   tolower.cols = c("SYMBOL", "ALIAS")
 )
 }
@@ -24,6 +25,8 @@ plotMA.label_ly(
 \item{fc.lim}{y-axis limits}
 
 \item{lab.genes}{genes to label on MA plot}
+
+\item{opacity}{point opacity between 0 and 1}
 
 \item{tolower.cols}{column names that will be converted to
 lower case}
