@@ -618,7 +618,7 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   df$sample_group <- paste(df[[ color ]], df[[ intgroup ]])
 
   p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]],
-                      group=.data[[ 'sample_group' ]], text=paste('sample:', .data$sample))) +
+                      group=.data[[ 'sample_group' ]], text=factor(paste('sample:', .data$sample)))) +
          geom_point(position=position_jitterdodge(dodge.width=0.2),
                       size=2, alpha=0.5)
 
@@ -2649,7 +2649,7 @@ fromList.with.names <- function(lst){
     data$symbol <- element_names$symbol
   else
     data$symbol <- element_names$id
-  data <- data %>% relocate(.data$symbol)
+  data <- data[, c('symbol', setdiff(colnames(data), 'symbol'))]
 
   return(data)
 }
