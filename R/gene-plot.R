@@ -270,15 +270,6 @@ genePlotUI <- function(id, panel){
           bsCollapsePanel('More options',
 
             fluidRow(
-              column(4, h5('plots per row')),
-              column(8, align='left',
-                selectInput(ns('ncol'), label=NULL,
-                  choices=c('auto', as.character(seq_len(10)))
-                ) # selectInput
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
               column(4, h5('trendline')),
               column(8, align='left',
                 selectInput(ns('trendline'), label=NULL,
@@ -967,17 +958,14 @@ genePlotServer <- function(id, obj,
           # number of subplots
           plot_num <- length(unique(facet_pasted))
 
-          if(input$ncol == 'auto'){
-            # fix number of plots per row
-            # - free y-axis: 6 (since y-axis labels are drawn for every plot)
-            # - otherwise: 8
-            if(freey) gene_ncol <- 6
-            else gene_ncol <- 8
-          } else {
-            gene_ncol <- as.numeric(input$ncol)
-          }
+          # fix number of plots per row
+          # - free y-axis: 6 (since y-axis labels are drawn for every plot)
+          # - otherwise: 8
+          if(freey) gene_ncol <- 6
+          else gene_ncol <- 8
 
           gene_nrow <- ceiling(plot_num/gene_ncol)
+
           if(gene_nrow > 4){
             ht <- ht*(gene_nrow/4)
           }
@@ -1011,7 +999,7 @@ genePlotServer <- function(id, obj,
                      log=logy, freey=freey,
                      color=color, ymax=ymax, ymin=ymin,
                      factor.levels=x_order, rotate_x_labels=rotate_x_labels,
-                     ncol=gene_ncol, trendline=trendline,
+                     nrow=gene_nrow, trendline=trendline,
                      facet=facet, legend=legend, boxes=boxes, box_dodge=box_dodge)
 
         if(input$txt_scale == 0 | is.na(input$txt_scale)){
