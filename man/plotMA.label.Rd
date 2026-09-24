@@ -26,10 +26,10 @@ plotMA.label(
 
 \item{lab.genes}{genes to label on MA plot}
 
+\item{opacity}{point opacity between 0 and 1}
+
 \item{tolower.cols}{column names that will be converted to
 lower case}
-
-\item{alpha}{point opacity between 0 and 1}
 }
 \value{
 ggplot handle

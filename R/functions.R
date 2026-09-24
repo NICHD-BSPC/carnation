@@ -1257,7 +1257,7 @@ enrich_to_genetonic <- function(enrich, res){
 #' @param fc.thres log2FoldChange threshold
 #' @param fc.lim y-axis limits
 #' @param lab.genes genes to label on MA plot
-#' @param alpha point opacity between 0 and 1
+#' @param opacity point opacity between 0 and 1
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
