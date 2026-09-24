@@ -565,7 +565,7 @@ get_gene_counts <- function (dds,
 #' @param title title of plot
 #' @param ylab y-axis label
 #' @param color metadata variable to color by
-#' @param ncol number of columns to plot if faceting
+#' @param nrow number of rows to plot if faceting
 #' @param ymin y-axis lower limit
 #' @param ymax y-axis upper limit
 #' @param log should y-axis be log10-transformed?
@@ -595,7 +595,7 @@ get_gene_counts <- function (dds,
 #'
 #' @export
 getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
-                         ylab='Normalized counts', color='gene', ncol=2, ymin=NULL, ymax=NULL,
+                         ylab='Normalized counts', color='gene', nrow=2, ymin=NULL, ymax=NULL,
                          log=TRUE, freey=FALSE, trendline='smooth', facet=NULL, legend=TRUE, boxes=TRUE, rotate_x_labels=30, box_dodge='identity'){
   idx <- df[,intgroup] %in% factor.levels
 
@@ -618,7 +618,7 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   df$sample_group <- paste(df[[ color ]], df[[ intgroup ]])
 
   p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]],
-                      group=.data[[ 'sample_group' ]], text=paste('sample:', .data$sample))) +
+                      group=.data[[ 'sample_group' ]], text=factor(paste('sample:', .data$sample)))) +
          geom_point(position=position_jitterdodge(dodge.width=0.2),
                       size=2, alpha=0.5)
 
@@ -663,10 +663,10 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
 
     if(length(facet) == 1){
       p <- p + facet_wrap(as.formula(paste('~', facet)),
-                          ncol=ncol, scales=scales)
+                          nrow=nrow, scales=scales)
     } else {
       p <- p + facet_wrap(as.formula(paste('~', paste(facet, collapse=' + '))),
-                          ncol=ncol, scales=scales)
+                          nrow=nrow, scales=scales)
     }
   }
 
@@ -2649,7 +2649,7 @@ fromList.with.names <- function(lst){
     data$symbol <- element_names$symbol
   else
     data$symbol <- element_names$id
-  data <- data %>% relocate(.data$symbol)
+  data <- data[, c('symbol', setdiff(colnames(data), 'symbol'))]
 
   return(data)
 }
