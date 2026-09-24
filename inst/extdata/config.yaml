@@ -84,10 +84,11 @@ ui:
       norm_method:
         'library size': libsize
         'vst': vst
+        'none': none
       x_rotate: 30
       logy: TRUE
       freey: FALSE
-      nrow: 2
+      ncol: 5
       boxes: TRUE
       legend: TRUE
       height: 600
@@ -96,6 +97,16 @@ ui:
       log2fc_limits:
         min: -5
         max: 5
+
+    volcano_plot:
+      log2fc_limits:
+        min: -5
+        max: 5
+      colorscale: Viridis
+      neg_log_padj_limits:
+        min: 0
+        max: 20
+
     upset_plot:
       n_intersections: 40
       min_size: 5

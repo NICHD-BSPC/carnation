@@ -363,6 +363,7 @@ genePlotServer <- function(id, obj,
       xchoices <- reactiveValues(all=NULL, current=NULL)
 
       gene_plot_data <- reactiveValues(all=NULL, plotted=NULL, handle=NULL)
+      data_loaded <- reactiveVal(0)
 
       gene_coldata <- eventReactive(c(coldata$curr, input$samples), {
         validate(
@@ -449,10 +450,10 @@ genePlotServer <- function(id, obj,
         sample_grp <- input$samples
         if(sample_grp != 'all_samples'){
             if(input$norm_method == 'vst') rld.i <- app_object()$rld[[ sample_grp ]]
-            else if(input$norm_method == 'libsize') rld.i <- app_object()$dds[[ sample_grp ]]
+            else if(input$norm_method %in% c('libsize', 'none')) rld.i <- app_object()$dds[[ sample_grp ]]
         } else if(sample_grp == 'all_samples'){
             if(input$norm_method == 'vst') rld.i <- app_object()$all_rld
-            else if(input$norm_method == 'libsize') rld.i <- app_object()$all_dds
+            else if(input$norm_method %in% c('libsize', 'none')) rld.i <- app_object()$all_dds
         }
 
         updateSelectizeInput(session, 'sample_levels',
@@ -460,6 +461,7 @@ genePlotServer <- function(id, obj,
                              selected=colnames(rld.i))
 
         gene_plot_data$all <- rld.i
+        data_loaded(data_loaded() + 1)
       })
 
       observeEvent(input$sample_all, {
@@ -799,6 +801,7 @@ genePlotServer <- function(id, obj,
           input$ymin,
           gene_plot_data$all,
           plot_args(),
+          data_loaded(),
           input$plot_do
         )
       })
@@ -917,7 +920,7 @@ genePlotServer <- function(id, obj,
         color <- input$color
         trendline <- input$trendline
         xvar <- input$xvar
-        gene_nrow <- config()$ui$de_analysis$gene_plot$nrow
+        gene_ncol <- config()$ui$de_analysis$gene_plot$ncol
         legend <- as.logical(input$legend)
         ymax <- input$ymax
         ymin <- input$ymin
@@ -958,20 +961,15 @@ genePlotServer <- function(id, obj,
           # fix number of plots per row
           # - free y-axis: 6 (since y-axis labels are drawn for every plot)
           # - otherwise: 8
-          if(freey) gene_nrow <- ceiling(plot_num/6)
-          else gene_nrow <- ceiling(plot_num/8)
+          if(freey) gene_ncol <- 6
+          else gene_ncol <- 8
 
-          nrow_def <- config()$ui$de_analysis$gene_plot$nrow
-          if(gene_nrow == 0 | is.na(gene_nrow)){
-            gene_nrow <- nrow_def
-            showNotification(
-              'Invalid number of rows. Resetting to default',
-              type='warning'
-            )
-          } else if(gene_nrow > nrow_def*2){
-            # adjust height for many rows
-            ht <- ht*(gene_nrow/(nrow_def*2))
+          gene_nrow <- ceiling(plot_num/gene_ncol)
+
+          if(gene_nrow > 4){
+            ht <- ht*(gene_nrow/4)
           }
+
         }
 
         # set default x axis order; later take from bucket list

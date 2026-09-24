@@ -509,7 +509,7 @@ get_gene_counts <- function (dds,
 
   if(norm_method == 'libsize'){
     normalized <-TRUE
-  } else if(norm_method == 'vst'){
+  } else if(norm_method == 'vst' | norm_method == 'none'){
     normalized <- FALSE
   }
 
@@ -614,12 +614,16 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
   ymin <- ifelse(is.null(ymin), min(df$count), ymin)
   ymax <- ifelse(is.null(ymax), max(df$count), ymax)
 
-  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]], text=paste('sample:', .data$sample))) +
-    geom_point(position=position_jitterdodge(dodge.width=0.2),
-                 size=2, alpha=0.5)
+  # add sample group column
+  df$sample_group <- paste(df[[ color ]], df[[ intgroup ]])
+
+  p <- ggplot(df, aes(y=.data$count, x=.data[[ intgroup ]], color=.data[[ color ]],
+                      group=.data[[ 'sample_group' ]], text=factor(paste('sample:', .data$sample)))) +
+         geom_point(position=position_jitterdodge(dodge.width=0.2),
+                      size=2, alpha=0.5)
 
   if(boxes){
-      p <- p + geom_boxplot(aes(group=.data[[color]]), alpha=0, notch=FALSE, position=box_dodge,
+      p <- p + geom_boxplot(alpha=0, notch=FALSE, position=box_dodge,
                             outlier.size=0, outlier.shape=NA)
   }
 
@@ -657,8 +661,13 @@ getcountplot <- function(df, intgroup='group', factor.levels, title=NULL,
     if(freey) scales <- 'free_y'
     else scales <- 'fixed'
 
-    if(length(facet) == 1) p <- p + facet_wrap(as.formula(paste('~', facet)), nrow=nrow, scales=scales)
-    else p <- p + facet_wrap(as.formula(paste('~', paste(facet, collapse=' + '))), nrow=nrow, scales=scales)
+    if(length(facet) == 1){
+      p <- p + facet_wrap(as.formula(paste('~', facet)),
+                          nrow=nrow, scales=scales)
+    } else {
+      p <- p + facet_wrap(as.formula(paste('~', paste(facet, collapse=' + '))),
+                          nrow=nrow, scales=scales)
+    }
   }
 
   if(!legend) p <- p + theme(legend.position='none')
@@ -1248,6 +1257,7 @@ enrich_to_genetonic <- function(enrich, res){
 #' @param fc.thres log2FoldChange threshold
 #' @param fc.lim y-axis limits
 #' @param lab.genes genes to label on MA plot
+#' @param opacity point opacity between 0 and 1
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
@@ -1275,6 +1285,7 @@ plotMA.label <- function(res,
                          fc.thres=0,
                          fc.lim=NULL,
                          lab.genes=NULL,
+                         opacity=0.8,
                          tolower.cols=c('SYMBOL','ALIAS')){
   # convert res to data frame
   res <- data.frame(res)
@@ -1329,8 +1340,8 @@ plotMA.label <- function(res,
   p <- df %>%
     ggplot(aes(.data$baseMean, .data$log2FoldChange, color=.data$significant,
                shape=.data$shape, name=.data$symbol)) +
-    geom_point(alpha=0.8) +
-    ylim(fc.lim[1]-0.1, fc.lim[2]+0.1) +
+    geom_point(alpha=opacity) +
+    ylim(fc.lim[1]*0.99, fc.lim[2]*1.01) +
     scale_x_log10()
 
   # add scales
@@ -1357,6 +1368,8 @@ plotMA.label <- function(res,
   return(p)
 
 }
+
+
 
 #' Add set column to UpSet plot matrix
 #'
@@ -1442,6 +1455,7 @@ add.set.column <- function(df){
 #' @param fc.thres log2FoldChange threshold
 #' @param fc.lim y-axis limits
 #' @param lab.genes genes to label on MA plot
+#' @param opacity point opacity between 0 and 1
 #' @param tolower.cols column names that will be converted to
 #'  lower case
 #'
@@ -1469,6 +1483,7 @@ plotMA.label_ly <- function(res,
                          fc.thres=0,
                          fc.lim=NULL,
                          lab.genes=NULL,
+                         opacity=0.3,
                          tolower.cols=c('SYMBOL','ALIAS')){
   # convert res to data frame
   res <- data.frame(res)
@@ -1547,7 +1562,7 @@ plotMA.label_ly <- function(res,
               mode='markers',
               hoverinfo='text',
               name='no',
-              marker=list(color='gray', alpha=0.3)) %>%
+              marker=list(color='gray', opacity=opacity)) %>%
         layout(xaxis=list(type='log',
                           title='baseMean',
                           showgrid=FALSE),
@@ -1563,7 +1578,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='gray', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-down-open'),
                   showlegend=FALSE)
   }
@@ -1575,7 +1590,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='gray', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-up-open'),
                   showlegend=FALSE)
   }
@@ -1587,7 +1602,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='red', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-down-open'),
                   showlegend=FALSE)
   }
@@ -1599,7 +1614,7 @@ plotMA.label_ly <- function(res,
                   hoverinfo='text',
                   marker=list(
                       color='red', size=5,
-                      alpha=0.3,
+                      opacity=opacity,
                       symbol='triangle-up-open'),
                   showlegend=FALSE)
   }
@@ -1611,7 +1626,7 @@ plotMA.label_ly <- function(res,
                     name='yes',
                     text=de.rest$symbol,
                     hoverinfo='text',
-                    marker=list(color='red', alpha=0.3))
+                    marker=list(color='red', opacity=opacity))
   }
 
 
@@ -1639,11 +1654,792 @@ plotMA.label_ly <- function(res,
                          x0 = 0, x1 = 1,
                          xref = "paper",
                          y0 = 0, y1 = 0,
-                         line = list(color = 'red', width=3, alpha=0.3)))
+                         line = list(color = 'red', width=3, opacity=0.3)))
 
   return(p)
 
 }
+
+
+#' Create an interactive labeled Volcano plot
+#'
+#' This function creates an Volcano plot from a data.frame
+#' containing DE analysis results using plot_ly
+#'
+#' @param res data.frame with DE analysis results. Must contain
+#'  "padj", "log2FoldChange", & "baseMean" columns
+#' @param fdr.thres False discovery rate (FDR) threshold
+#' @param fc.thres log2FoldChange threshold
+#' @param neg_log_padj.lim y-axis limits for negative log10 padj
+#' @param fc.lim x-axis limits for log2FoldChange
+#' @param lab.genes genes to label on MA plot
+#' @param tolower.cols column names that will be converted to
+#'  lower case
+#' @param color_by variable to color points by ('baseMean' or 'significance')
+#' @param colorscale ggplot-compatible continuous colorscale name
+#'  (viridis option), only used when color_by='baseMean'
+#' @param alpha point opacity between 0 and 1
+#' @return plotly handle
+#'
+#' @examples
+#' # make mock results df
+#' n_genes <- 100
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
+#'
+#' plotVolcano.label_ly(res, lab.genes = c("gene1", "gene2"))
+#'
+#' @export
+plotVolcano.label_ly <- function(
+  res,
+  fdr.thres = 0.1,
+  fc.thres = 0,
+  neg_log_padj.lim = NULL,
+  fc.lim = c(-4.0, 4.0),
+  lab.genes = NULL,
+  tolower.cols = c('SYMBOL', 'ALIAS'),
+  color_by = c('baseMean', 'significance'),
+  colorscale = NULL,
+  alpha = 0.6
+) {
+  color_by <- match.arg(color_by)
+  if (!is.numeric(alpha) || length(alpha) != 1 ||
+      is.na(alpha) || alpha < 0 || alpha > 1) {
+    stop('`alpha` must be a single numeric value between 0 and 1')
+  }
+  if (is.null(colorscale)) {
+    colorscale <- 'Viridis'
+  }
+
+  res <- data.frame(res)
+
+  if (!all(c('padj', 'log2FoldChange', 'baseMean') %in% colnames(res))) {
+    stop('DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+  }
+
+  res$log_padj <- -log10(res$padj)
+  # if y limits not specified, takes the range and applies that as
+  # limits.
+  if (is.null(neg_log_padj.lim)) {
+    neg_log_padj.lim <- range(res$log_padj, na.rm = TRUE)
+    neg_log_padj.lim[1] <- floor(neg_log_padj.lim[1])
+    neg_log_padj.lim[2] <- ceiling(neg_log_padj.lim[2])
+  }
+
+  # change specific colnames to lower case
+  idx <- colnames(res) %in% tolower.cols
+  colnames(res)[idx] <- tolower(colnames(res)[idx])
+
+  # change NA symbols to gene ID
+  if ('symbol' %in% colnames(res)) {
+    df <- res %>%
+      mutate(geneid = rownames(res)) %>%
+      mutate(symbol = as.character(.data$symbol)) %>%
+      mutate(
+        symbol = replace(
+          .data$symbol,
+          is.na(.data$symbol),
+          .data$geneid[is.na(.data$symbol)]
+        )
+      )
+  } else {
+    df <- res
+    df$symbol <- rownames(res)
+  }
+
+  # create column with plotting character based on neg_log_padj.lim
+  # change plotted values for those outside plot limits
+  # to the limits
+
+  # Shape tracks whether each point falls in the plot limits or where it falls outside.
+  # so that the correct shape can be attached to it.
+  df$shape <- 'in'
+
+  # Assign a significance factor
+  df <- df %>%
+    mutate(
+      original_log2FoldChange = .data$log2FoldChange,
+      significant = ifelse(
+        !is.na(.data$padj) &
+        .data$padj < fdr.thres &
+        !is.na(.data$original_log2FoldChange) &
+        abs(.data$original_log2FoldChange) >= fc.thres,
+        'yes',
+        'no'
+      ),
+      significant = factor(.data$significant)
+    )
+
+  # Clamp x if out of bounds
+  df <- df %>%
+    mutate(
+      log2FoldChange = replace(
+        .data$log2FoldChange,
+        is.na(.data$log2FoldChange),
+        0
+      )
+    ) %>%
+    mutate(
+      log2FoldChange = replace(
+        .data$log2FoldChange,
+        .data$log2FoldChange > fc.lim[2],
+        fc.lim[2]
+      )
+    ) %>%
+    mutate(
+      log2FoldChange = replace(
+        .data$log2FoldChange,
+        .data$log2FoldChange < fc.lim[1],
+        fc.lim[1]
+      )
+    ) %>%
+    mutate(
+      shape = replace(.data$shape, .data$log2FoldChange == fc.lim[2], 'right')
+    ) %>%
+    mutate(
+      shape = replace(.data$shape, .data$log2FoldChange == fc.lim[1], 'left')
+    )
+
+  # clamp y (log_padj)
+  df <- df %>%
+    filter(!is.na(.data$padj)) %>%
+    mutate(
+      log_padj = replace(
+        .data$log_padj,
+        .data$log_padj > neg_log_padj.lim[2],
+        neg_log_padj.lim[2]
+      )
+    ) %>%
+    mutate(
+      log_padj = replace(
+        .data$log_padj,
+        .data$log_padj < neg_log_padj.lim[1],
+        neg_log_padj.lim[1]
+      )
+    ) %>%
+    mutate(
+      shape = replace(
+        .data$shape,
+        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[2],
+        'above'
+      )
+    ) %>%
+    mutate(
+      shape = replace(
+        .data$shape,
+        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[1],
+        'below'
+      )
+    ) %>%
+    mutate(shape = as.factor(.data$shape))
+
+  # Makes the range of values to be used for base mean coloring.
+  df <- df %>% mutate(log_baseMean = log(.data$baseMean + 1))
+  color_min <- min(df$log_baseMean, na.rm = TRUE)
+  color_max <- max(df$log_baseMean, na.rm = TRUE)
+
+  df.rest <- df %>% filter(.data$shape == 'in')
+  df.below <- df %>% filter(.data$shape == 'below')
+  df.above <- df %>% filter(.data$shape == 'above')
+  df.left <- df %>% filter(.data$shape == 'left')
+  df.right <- df %>% filter(.data$shape == 'right')
+
+  # Set the values used for base mean coloring. Significance mode uses
+  # separate traces so that its two categories can be toggled from the legend.
+  sig_colors <- c('yes' = 'red', 'no' = '#999999')
+  color.args <- list(showscale = FALSE)
+  if (color_by == 'baseMean') {
+    color.rest <- df.rest$log_baseMean
+    color.below <- df.below$log_baseMean
+    color.above <- df.above$log_baseMean
+    color.left <- df.left$log_baseMean
+    color.right <- df.right$log_baseMean
+    color.args <- list(
+      colorscale = colorscale,
+      cmin = color_min,
+      cmax = color_max,
+      showscale = TRUE,
+      colorbar = list(title = "log10(baseMean)", len = 0.75)
+    )
+  }
+
+  plotly_shapes <- c(
+    'in' = 'circle',
+    'above' = 'triangle-up',
+    'below' = 'triangle-down',
+    'left' = 'triangle-left',
+    'right' = 'triangle-right'
+  )
+  df$plotly_shape <- unname(plotly_shapes[as.character(df$shape)])
+
+  # A visual margin so points on the edge of the graph arent clipped.
+  # - This is a proportion to handle large ranges
+  x.edge.pad <- 0.01
+  y.edge.pad <- 0.01
+
+  # Initialize the plot and apply the layout shared by both color modes.
+  p <- plot_ly() %>%
+    layout(
+      xaxis = list(
+        title = 'log2FoldChange',
+        showgrid = FALSE,
+        zeroline = FALSE,
+        range = c(fc.lim[1]*(1 - x.edge.pad), fc.lim[2]*(1 + x.edge.pad))
+      ),
+      yaxis = list(
+        title = '-log10 adjusted p-value',
+        showgrid = FALSE,
+        range = c(
+          neg_log_padj.lim[1]*(1 - y.edge.pad),
+          neg_log_padj.lim[2]*(1 + y.edge.pad)
+        )
+      ),
+      showlegend = TRUE,
+      legend=list(title=list(text='<b> significant </b>'))
+    )
+
+  if (color_by == 'baseMean') {
+    p <- p %>%
+      add_markers(
+        x = df.rest$log2FoldChange,
+        y = df.rest$log_padj,
+        text = df.rest$symbol,
+        hoverinfo = 'text',
+        mode = 'markers',
+        showlegend = FALSE,
+        marker = c(
+          list(
+            color = color.rest,
+            symbol = 'circle',
+            size = 6,
+            opacity = alpha,
+            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+          ),
+          color.args
+        )
+      )
+
+    # points below y limits
+    if (nrow(df.below) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.below$log2FoldChange,
+          y = df.below$log_padj,
+          text = df.below$symbol,
+          showlegend = FALSE,
+          hoverinfo = 'text',
+          mode = 'markers',
+          marker = c(
+            list(
+              color = color.below,
+              symbol = 'triangle-down',
+              size = 6,
+              opacity = alpha,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+    # points above y limits
+    if (nrow(df.above) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.above$log2FoldChange,
+          y = df.above$log_padj,
+          text = df.above$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          showlegend = FALSE,
+          marker = c(
+            list(
+              color = color.above,
+              symbol = 'triangle-up',
+              size = 6,
+              opacity = alpha,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+    # points left of x limits
+    if (nrow(df.left) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.left$log2FoldChange,
+          y = df.left$log_padj,
+          text = df.left$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          showlegend = FALSE,
+          marker = c(
+            list(
+              color = color.left,
+              symbol = 'triangle-left',
+              size = 6,
+              opacity = alpha,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+    # points right of x limits
+    if (nrow(df.right) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.right$log2FoldChange,
+          y = df.right$log_padj,
+          text = df.right$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          showlegend = FALSE,
+          marker = c(
+            list(
+              color = color.right,
+              symbol = 'triangle-right',
+              size = 6,
+              opacity = alpha,
+              line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+            ),
+            color.args
+          )
+        )
+    }
+  } else {
+    df.sig <- df %>% filter(.data$significant == 'yes')
+    df.nonsig <- df %>% filter(.data$significant == 'no')
+
+    if (nrow(df.sig) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.sig$log2FoldChange,
+          y = df.sig$log_padj,
+          text = df.sig$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          name = 'yes',
+          legendgroup = 'significant',
+          showlegend = FALSE,
+          marker = list(
+            color = 'red',
+            symbol = df.sig$plotly_shape,
+            size = 6,
+            opacity = alpha,
+            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+          )
+        ) %>%
+        add_trace(
+          x = list(NA),
+          y = list(NA),
+          type = 'scatter',
+          mode = 'markers',
+          marker = list(color = 'red', symbol = 'circle', size = 8),
+          name = 'yes',
+          legendgroup = 'significant',
+          showlegend = TRUE,
+          inherit = FALSE
+        )
+    }
+
+    if (nrow(df.nonsig) > 0) {
+      p <- p %>%
+        add_markers(
+          x = df.nonsig$log2FoldChange,
+          y = df.nonsig$log_padj,
+          text = df.nonsig$symbol,
+          hoverinfo = 'text',
+          mode = 'markers',
+          name = 'no',
+          legendgroup = 'not_significant',
+          showlegend = FALSE,
+          marker = list(
+            color = '#999999',
+            symbol = df.nonsig$plotly_shape,
+            size = 6,
+            opacity = alpha,
+            line = list(width = 1, color = 'rgba(0,0,0,0.1)')
+          )
+        ) %>%
+        add_trace(
+          x = list(NA),
+          y = list(NA),
+          type = 'scatter',
+          mode = 'markers',
+          marker = list(color = '#999999', symbol = 'circle', size = 8),
+          name = 'no',
+          legendgroup = 'not_significant',
+          showlegend = TRUE,
+          inherit = FALSE
+        )
+    }
+  }
+
+  #
+  # add labels if any
+  if (!is.null(lab.genes)) {
+    # get data frame of genes to be labeled
+    lab.list <- df %>% filter(.data$symbol %in% lab.genes)
+    if (nrow(lab.list) > 0) {
+      lab_shapes <- c(
+        'in' = 'circle',
+        'above' = 'triangle-up',
+        'below' = 'triangle-down',
+        'left' = 'triangle-left',
+        'right' = 'triangle-right'
+      )
+      if (color_by == 'baseMean') {
+        lab.color <- lab.list$log_baseMean
+      } else {
+        lab.color <- sig_colors[as.character(lab.list$significant)]
+      }
+      p <- p %>%
+        add_trace(
+          x = lab.list$log2FoldChange,
+          y = lab.list$log_padj,
+          type = 'scatter',
+          text = lab.list$symbol,
+          hoverinfo = 'marker+text',
+          name = 'labeled',
+          showlegend = FALSE,
+          mode = 'markers+text',
+          textposition = 'bottom',
+          textfont = list(size = 10),
+          marker = c(
+            list(
+              color = lab.color,
+              symbol = lab_shapes[as.character(lab.list$shape)],
+              size = 10,
+              line = list(width = 1.5, color = 'rgba(0,0,0,1.0)')
+            ),
+            color.args
+          )
+        )
+    }
+  }
+
+  fdr.line.y <- if (fdr.thres > 0) -log10(fdr.thres) else NA
+
+  sig.shapes <- list(
+    list(
+      type = 'line',
+      x0 = fc.thres,
+      x1 = fc.thres,
+      y0 = 0,
+      y1 = 1,
+      yref = 'paper',
+      line = list(color = 'black', dash = 'dash', width = 1)
+    ),
+    list(
+      type = 'line',
+      x0 = -fc.thres,
+      x1 = -fc.thres,
+      y0 = 0,
+      y1 = 1,
+      yref = 'paper',
+      line = list(color = 'black', dash = 'dash', width = 1)
+    )
+  )
+
+  if (!is.na(fdr.line.y)) {
+    sig.shapes <- c(
+      sig.shapes,
+      list(
+        list(
+          type = 'line',
+          x0 = 0,
+          x1 = 1,
+          xref = 'paper',
+          y0 = fdr.line.y,
+          y1 = fdr.line.y,
+          line = list(color = 'black', dash = 'dash', width = 1)
+        )
+      )
+    )
+  }
+
+  # Adds in the lines
+  p <- p %>% layout(shapes = sig.shapes)
+
+  return(p)
+}
+
+#' Create a static labeled Volcano plot
+#'
+#' This function creates a static ggplot Volcano plot from a data.frame
+#' containing DE analysis results. Mirrors plotVolcano.label_ly but
+#' renders with ggplot2 for use in downloads.
+#'
+#' @param res data.frame with DE analysis results. Must contain
+#'  "padj", "baseMean" & "log2FoldChange" columns
+#' @param fdr.thres False discovery rate (FDR) threshold
+#' @param fc.thres log2FoldChange threshold
+#' @param neg_log_padj.lim y-axis limits
+#' @param fc.lim x-axis limits
+#' @param lab.genes genes to label on plot
+#' @param tolower.cols column names that will be converted to lower case
+#' @param color_by variable to color points by ('baseMean' or 'significance')
+#' @param colorscale ggplot-compatible continuous colorscale name
+#'  (viridis option), only used when color_by='baseMean'
+#' @param alpha point opacity between 0 and 1
+#'
+#' @return ggplot handle
+#'
+#' @examples
+#' n_genes <- 100
+#' res <- data.frame(
+#'          baseMean = runif(n_genes, 10, 1000),
+#'          log2FoldChange = rnorm(n_genes, 0, 2),
+#'          lfcSE = runif(n_genes, 0.1, 0.5),
+#'          stat = rnorm(n_genes, 0, 3),
+#'          pvalue = runif(n_genes, 0, 1),
+#'          padj = runif(n_genes, 0, 1),
+#'          symbol = paste0("GENE", 1:n_genes),
+#'          row.names = paste0("gene", 1:n_genes)
+#'        )
+#'
+#' plotVolcano.label(res, lab.genes = c("gene1", "gene2"))
+#'
+#' @export
+plotVolcano.label <- function(
+  res,
+  fdr.thres = 0.1,
+  fc.thres = 0,
+  neg_log_padj.lim = NULL,
+  fc.lim = c(-4.0, 4.0),
+  lab.genes = NULL,
+  tolower.cols = c('SYMBOL', 'ALIAS'),
+  color_by = c('baseMean', 'significance'),
+  colorscale = 'viridis',
+  alpha = 0.6
+) {
+  color_by <- match.arg(color_by)
+  if (!is.numeric(alpha) || length(alpha) != 1 ||
+      is.na(alpha) || alpha < 0 || alpha > 1) {
+    stop('`alpha` must be a single numeric value between 0 and 1')
+  }
+
+  res <- data.frame(res)
+
+  if (!all(c('padj', 'baseMean', 'log2FoldChange') %in% colnames(res))) {
+    stop('DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
+  }
+
+  res$log_padj <- -log10(res$padj)
+  if (is.null(neg_log_padj.lim)) {
+    neg_log_padj.lim <- range(res$log_padj, na.rm = TRUE)
+    neg_log_padj.lim[1] <- floor(neg_log_padj.lim[1])
+    neg_log_padj.lim[2] <- ceiling(neg_log_padj.lim[2])
+  }
+
+  idx <- colnames(res) %in% tolower.cols
+  colnames(res)[idx] <- tolower(colnames(res)[idx])
+
+  if ('symbol' %in% colnames(res)) {
+    df <- res %>%
+      mutate(geneid = rownames(res)) %>%
+      mutate(symbol = as.character(.data$symbol)) %>%
+      mutate(
+        symbol = replace(
+          .data$symbol,
+          is.na(.data$symbol),
+          .data$geneid[is.na(.data$symbol)]
+        )
+      )
+  } else {
+    df <- res
+    df$symbol <- rownames(res)
+  }
+
+  # Assign a significance factor
+  df <- df %>%
+    mutate(
+      original_log2FoldChange = .data$log2FoldChange,
+      significant = ifelse(
+        !is.na(.data$padj) &
+        .data$padj < fdr.thres &
+        !is.na(.data$original_log2FoldChange) &
+        abs(.data$original_log2FoldChange) >= fc.thres,
+        'yes',
+        'no'
+      ),
+      significant = factor(.data$significant)
+    )
+
+  # Clamp x
+  df$shape <- 'in'
+  df <- df %>%
+    mutate(
+      log2FoldChange = replace(
+        .data$log2FoldChange,
+        is.na(.data$log2FoldChange),
+        0
+      )
+    ) %>%
+    mutate(
+      log2FoldChange = replace(
+        .data$log2FoldChange,
+        .data$log2FoldChange > fc.lim[2],
+        fc.lim[2]
+      )
+    ) %>%
+    mutate(
+      log2FoldChange = replace(
+        .data$log2FoldChange,
+        .data$log2FoldChange < fc.lim[1],
+        fc.lim[1]
+      )
+    ) %>%
+    mutate(
+      shape = replace(.data$shape, .data$log2FoldChange == fc.lim[2], 'right')
+    ) %>%
+    mutate(
+      shape = replace(.data$shape, .data$log2FoldChange == fc.lim[1], 'left')
+    )
+
+  # Clamp y
+  df <- df %>%
+    filter(!is.na(.data$padj)) %>%
+    mutate(
+      log_padj = replace(
+        .data$log_padj,
+        .data$log_padj > neg_log_padj.lim[2],
+        neg_log_padj.lim[2]
+      )
+    ) %>%
+    mutate(
+      log_padj = replace(
+        .data$log_padj,
+        .data$log_padj < neg_log_padj.lim[1],
+        neg_log_padj.lim[1]
+      )
+    ) %>%
+    mutate(
+      shape = replace(
+        .data$shape,
+        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[2],
+        'above'
+      )
+    ) %>%
+    mutate(
+      shape = replace(
+        .data$shape,
+        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[1],
+        'below'
+      )
+    ) %>%
+    mutate(shape = as.factor(.data$shape))
+
+
+  df <- df %>% mutate(log_baseMean = log(.data$baseMean + 1))
+
+  shape.vals <- c(
+    'in' = 16,
+    'above' = 17,
+    'below' = 25,
+    'left' = 9,
+    'right' = 9
+  )
+
+  edge.pad <- 0.1
+
+  p <- ggplot(
+    df,
+    aes(
+      x = .data$log2FoldChange,
+      y = .data$log_padj,
+      shape = .data$shape,
+      name = .data$symbol
+    )
+  )
+
+  if (color_by == 'baseMean') {
+    p <- p +
+      geom_point(aes(color = .data$log_baseMean), alpha = alpha, size = 1.8) +
+      scale_color_viridis_c(option = colorscale, name = 'log(baseMean)')
+  } else {
+    p <- p +
+      geom_point(aes(color = .data$significant), alpha = alpha, size = 1.8) +
+      scale_color_manual(
+        breaks = c('no', 'yes'),
+        values = c('grey60', 'red'),
+        name = 'Significant'
+      )
+  }
+
+  p <- p +
+    scale_shape_manual(
+      breaks = names(shape.vals),
+      values = shape.vals,
+      guide = 'none'
+    )
+
+  p <- p +
+    xlim(fc.lim[1] - edge.pad, fc.lim[2] + edge.pad) +
+    ylim(neg_log_padj.lim[1] - edge.pad, neg_log_padj.lim[2] + edge.pad) +
+    xlab('log2FoldChange') +
+    ylab('-log10 adjusted p-value') +
+    theme_bw() +
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank()
+    )
+
+  # threshold lines, mirroring plotVolcano.label_ly's sig.shapes
+  p <- p +
+    geom_vline(
+      xintercept = fc.thres,
+      linetype = 'dashed',
+      color = 'black',
+      linewidth = 0.4
+    )
+  p <- p +
+    geom_vline(
+      xintercept = -fc.thres,
+      linetype = 'dashed',
+      color = 'black',
+      linewidth = 0.4
+    )
+  if (fdr.thres > 0) {
+    p <- p +
+      geom_hline(
+        yintercept = -log10(fdr.thres),
+        linetype = 'dashed',
+        color = 'black',
+        linewidth = 0.4
+      )
+  }
+  # y=0 line for clarity
+  p <- p + geom_hline(yintercept = 0, col = 'black', linewidth = 0.5)
+
+  if (!is.null(lab.genes)) {
+    lab.list <- df %>% filter(.data$symbol %in% lab.genes)
+    if (nrow(lab.list) > 0) {
+      p <- p + geom_point(data = lab.list, col = 'black', pch = 1, size = 3)
+      p <- p +
+        geom_label_repel(
+          data = lab.list,
+          aes(label = .data$symbol),
+          fontface = 'italic',
+          show.legend = FALSE,
+          max.overlaps = Inf
+        )
+    }
+  }
+
+  return(p)
+}
+
+
 
 #' Get top DE genes by log2FoldChange or adjusted p-value
 #'
@@ -1853,7 +2649,7 @@ fromList.with.names <- function(lst){
     data$symbol <- element_names$symbol
   else
     data$symbol <- element_names$id
-  data <- data %>% relocate(.data$symbol)
+  data <- data[, c('symbol', setdiff(colnames(data), 'symbol'))]
 
   return(data)
 }
