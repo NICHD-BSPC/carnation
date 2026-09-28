@@ -14,7 +14,8 @@ plotVolcano.label_ly(
   tolower.cols = c("SYMBOL", "ALIAS"),
   color_by = c("baseMean", "significance"),
   colorscale = NULL,
-  alpha = 0.6
+  alpha = 0.6,
+  pvalue_padj_switch = c("pvalue", "padj")
 )
 }
 \arguments{
@@ -40,6 +41,9 @@ lower case}
 (viridis option), only used when color_by='baseMean'}
 
 \item{alpha}{point opacity between 0 and 1}
+
+\item{pvalue_padj_switch}{Switches between having the y-axis display raw p-values or FDR adjusted p-values.
+Significance is always determined by adjusted values.}
 }
 \value{
 plotly handle

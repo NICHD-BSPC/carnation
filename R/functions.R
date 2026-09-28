@@ -2303,6 +2303,18 @@ plotVolcano.label <- function(
       significant = factor(.data$significant)
     )
 
+  if (pvalue_padj_switch == 'padj') {
+    significance_line_y <- -log10(fdr.thres)
+  } else {
+    significant_pvalues <- df$plot_pvalue[
+      df$significant == 'yes' &
+      !is.na(df$plot_pvalue) &
+      is.finite(df$plot_pvalue) &
+      df$plot_pvalue > 0
+    ]
+    significance_line_y <- -log10(max(significant_pvalues))
+  }
+
   # Clamp x
   df$shape <- 'in'
   df <- df %>%
@@ -2445,7 +2457,7 @@ plotVolcano.label <- function(
   if (fdr.thres > 0) {
     p <- p +
       geom_hline(
-        yintercept = -log10(fdr.thres),
+        yintercept = significance_line_y,
         linetype = 'dashed',
         color = 'black',
         linewidth = 0.4
