@@ -268,7 +268,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       )
 
       # save colorscale to separate reactiveVal
-      colorscale <- reactiveVal('viridis')
+      colorscale <- reactiveVal('Viridis')
 
       # Watches the app_object to update the drop down menu with the correct
       # options
@@ -312,7 +312,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
 
         # gets colorscale from config and falls back to viridis if it is not found
         cs <- config()$ui$de_analysis$volcano_plot$colorscale
-        if (is.null(cs)) cs <- 'viridis'
+        if (is.null(cs)) cs <- 'Viridis'
         colorscale(cs)
 
         reset_axes()
