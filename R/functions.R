@@ -1679,6 +1679,9 @@ plotMA.label_ly <- function(res,
 #' @param colorscale ggplot-compatible continuous colorscale name
 #'  (viridis option), only used when color_by='baseMean'
 #' @param alpha point opacity between 0 and 1
+#' @param pvalue_padj_switch Switches between having the y-axis display raw p-values or FDR adjusted p-values.
+#'  Significance is always determined by adjusted values.
+#'
 #' @return plotly handle
 #'
 #' @examples
@@ -1708,8 +1711,11 @@ plotVolcano.label_ly <- function(
   tolower.cols = c('SYMBOL', 'ALIAS'),
   color_by = c('baseMean', 'significance'),
   colorscale = NULL,
-  alpha = 0.6
+  alpha = 0.6,
+  pvalue_padj_switch = c('pvalue', 'padj')
 ) {
+  pvalue_padj_switch <- match.arg(pvalue_padj_switch)
+
   color_by <- match.arg(color_by)
   if (!is.numeric(alpha) || length(alpha) != 1 ||
       is.na(alpha) || alpha < 0 || alpha > 1) {
@@ -1721,15 +1727,17 @@ plotVolcano.label_ly <- function(
 
   res <- data.frame(res)
 
-  if (!all(c('padj', 'log2FoldChange', 'baseMean') %in% colnames(res))) {
+  if (!all(c(pvalue_padj_switch, 'padj', 'log2FoldChange', 'baseMean') %in% colnames(res))) {
     stop('DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
   }
 
-  res$log_padj <- -log10(res$padj)
+  res$plot_pvalue <- res[[pvalue_padj_switch]]
+  res$neg_log_pvalue <- -log10(res$plot_pvalue)
+
   # if y limits not specified, takes the range and applies that as
   # limits.
   if (is.null(neg_log_padj.lim)) {
-    neg_log_padj.lim <- range(res$log_padj, na.rm = TRUE)
+    neg_log_padj.lim <- range(res$neg_log_pvalue, na.rm = TRUE)
     neg_log_padj.lim[1] <- floor(neg_log_padj.lim[1])
     neg_log_padj.lim[2] <- ceiling(neg_log_padj.lim[2])
   }
@@ -1778,6 +1786,18 @@ plotVolcano.label_ly <- function(
       significant = factor(.data$significant)
     )
 
+  if (pvalue_padj_switch == 'padj') {
+    significance_line_y <- -log10(fdr.thres)
+  } else {
+    significant_pvalues <- df$plot_pvalue[
+      df$significant == 'yes' &
+      !is.na(df$plot_pvalue) &
+      is.finite(df$plot_pvalue) &
+      df$plot_pvalue > 0
+    ]
+    significance_line_y <- -log10(max(significant_pvalues))
+  }
+
   # Clamp x if out of bounds
   df <- df %>%
     mutate(
@@ -1808,34 +1828,34 @@ plotVolcano.label_ly <- function(
       shape = replace(.data$shape, .data$log2FoldChange == fc.lim[1], 'left')
     )
 
-  # clamp y (log_padj)
+  # clamp y (neg_log_pvalue)
   df <- df %>%
-    filter(!is.na(.data$padj)) %>%
+    filter(!is.na(.data$plot_pvalue)) %>%
     mutate(
-      log_padj = replace(
-        .data$log_padj,
-        .data$log_padj > neg_log_padj.lim[2],
+      neg_log_pvalue = replace(
+        .data$neg_log_pvalue,
+        .data$neg_log_pvalue > neg_log_padj.lim[2],
         neg_log_padj.lim[2]
       )
     ) %>%
     mutate(
-      log_padj = replace(
-        .data$log_padj,
-        .data$log_padj < neg_log_padj.lim[1],
+      neg_log_pvalue = replace(
+        .data$neg_log_pvalue,
+        .data$neg_log_pvalue < neg_log_padj.lim[1],
         neg_log_padj.lim[1]
       )
     ) %>%
     mutate(
       shape = replace(
         .data$shape,
-        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[2],
+        .data$shape == 'in' & .data$neg_log_pvalue == neg_log_padj.lim[2],
         'above'
       )
     ) %>%
     mutate(
       shape = replace(
         .data$shape,
-        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[1],
+        .data$shape == 'in' & .data$neg_log_pvalue == neg_log_padj.lim[1],
         'below'
       )
     ) %>%
@@ -1884,6 +1904,11 @@ plotVolcano.label_ly <- function(
   # - This is a proportion to handle large ranges
   x.edge.pad <- 0.01
   y.edge.pad <- 0.01
+  y_axis_label <- if (pvalue_padj_switch == 'pvalue') {
+    '-log10 p-value'
+  } else {
+    '-log10 adjusted p-value'
+  }
 
   # Initialize the plot and apply the layout shared by both color modes.
   p <- plot_ly() %>%
@@ -1895,7 +1920,7 @@ plotVolcano.label_ly <- function(
         range = c(fc.lim[1]*(1 - x.edge.pad), fc.lim[2]*(1 + x.edge.pad))
       ),
       yaxis = list(
-        title = '-log10 adjusted p-value',
+        title = y_axis_label,
         showgrid = FALSE,
         range = c(
           neg_log_padj.lim[1]*(1 - y.edge.pad),
@@ -1910,7 +1935,7 @@ plotVolcano.label_ly <- function(
     p <- p %>%
       add_markers(
         x = df.rest$log2FoldChange,
-        y = df.rest$log_padj,
+        y = df.rest$neg_log_pvalue,
         text = df.rest$symbol,
         hoverinfo = 'text',
         mode = 'markers',
@@ -1932,7 +1957,7 @@ plotVolcano.label_ly <- function(
       p <- p %>%
         add_markers(
           x = df.below$log2FoldChange,
-          y = df.below$log_padj,
+          y = df.below$neg_log_pvalue,
           text = df.below$symbol,
           showlegend = FALSE,
           hoverinfo = 'text',
@@ -1954,7 +1979,7 @@ plotVolcano.label_ly <- function(
       p <- p %>%
         add_markers(
           x = df.above$log2FoldChange,
-          y = df.above$log_padj,
+          y = df.above$neg_log_pvalue,
           text = df.above$symbol,
           hoverinfo = 'text',
           mode = 'markers',
@@ -1976,7 +2001,7 @@ plotVolcano.label_ly <- function(
       p <- p %>%
         add_markers(
           x = df.left$log2FoldChange,
-          y = df.left$log_padj,
+          y = df.left$neg_log_pvalue,
           text = df.left$symbol,
           hoverinfo = 'text',
           mode = 'markers',
@@ -1998,7 +2023,7 @@ plotVolcano.label_ly <- function(
       p <- p %>%
         add_markers(
           x = df.right$log2FoldChange,
-          y = df.right$log_padj,
+          y = df.right$neg_log_pvalue,
           text = df.right$symbol,
           hoverinfo = 'text',
           mode = 'markers',
@@ -2023,7 +2048,7 @@ plotVolcano.label_ly <- function(
       p <- p %>%
         add_markers(
           x = df.sig$log2FoldChange,
-          y = df.sig$log_padj,
+          y = df.sig$neg_log_pvalue,
           text = df.sig$symbol,
           hoverinfo = 'text',
           mode = 'markers',
@@ -2055,7 +2080,7 @@ plotVolcano.label_ly <- function(
       p <- p %>%
         add_markers(
           x = df.nonsig$log2FoldChange,
-          y = df.nonsig$log_padj,
+          y = df.nonsig$neg_log_pvalue,
           text = df.nonsig$symbol,
           hoverinfo = 'text',
           mode = 'markers',
@@ -2105,7 +2130,7 @@ plotVolcano.label_ly <- function(
       p <- p %>%
         add_trace(
           x = lab.list$log2FoldChange,
-          y = lab.list$log_padj,
+          y = lab.list$neg_log_pvalue,
           type = 'scatter',
           text = lab.list$symbol,
           hoverinfo = 'marker+text',
@@ -2127,7 +2152,6 @@ plotVolcano.label_ly <- function(
     }
   }
 
-  fdr.line.y <- if (fdr.thres > 0) -log10(fdr.thres) else NA
 
   sig.shapes <- list(
     list(
@@ -2150,22 +2174,20 @@ plotVolcano.label_ly <- function(
     )
   )
 
-  if (!is.na(fdr.line.y)) {
-    sig.shapes <- c(
-      sig.shapes,
+  sig.shapes <- c(
+    sig.shapes,
+    list(
       list(
-        list(
-          type = 'line',
-          x0 = 0,
-          x1 = 1,
-          xref = 'paper',
-          y0 = fdr.line.y,
-          y1 = fdr.line.y,
-          line = list(color = 'black', dash = 'dash', width = 1)
-        )
+        type = 'line',
+        x0 = 0,
+        x1 = 1,
+        xref = 'paper',
+        y0 = significance_line_y,
+        y1 = significance_line_y,
+        line = list(color = 'black', dash = 'dash', width = 1)
       )
     )
-  }
+  )
 
   # Adds in the lines
   p <- p %>% layout(shapes = sig.shapes)
@@ -2191,6 +2213,8 @@ plotVolcano.label_ly <- function(
 #' @param colorscale ggplot-compatible continuous colorscale name
 #'  (viridis option), only used when color_by='baseMean'
 #' @param alpha point opacity between 0 and 1
+#' @param pvalue_padj_switch Switches between having the y-axis display raw p-values or FDR adjusted p-values.
+#'  Significance is always determined by adjusted values.
 #'
 #' @return ggplot handle
 #'
@@ -2220,8 +2244,11 @@ plotVolcano.label <- function(
   tolower.cols = c('SYMBOL', 'ALIAS'),
   color_by = c('baseMean', 'significance'),
   colorscale = 'viridis',
-  alpha = 0.6
+  alpha = 0.6,
+  pvalue_padj_switch = c('pvalue', 'padj')
 ) {
+  pvalue_padj_switch <- match.arg(pvalue_padj_switch)
+
   color_by <- match.arg(color_by)
   if (!is.numeric(alpha) || length(alpha) != 1 ||
       is.na(alpha) || alpha < 0 || alpha > 1) {
@@ -2230,13 +2257,14 @@ plotVolcano.label <- function(
 
   res <- data.frame(res)
 
-  if (!all(c('padj', 'baseMean', 'log2FoldChange') %in% colnames(res))) {
+  if (!all(c(pvalue_padj_switch, 'padj', 'baseMean', 'log2FoldChange') %in% colnames(res))) {
     stop('DE analysis results must contain "padj", "baseMean" & "log2FoldChange" columns')
   }
 
-  res$log_padj <- -log10(res$padj)
+  res$plot_pvalue <- res[[pvalue_padj_switch]]
+  res$neg_log_pvalue <- -log10(res$plot_pvalue)
   if (is.null(neg_log_padj.lim)) {
-    neg_log_padj.lim <- range(res$log_padj, na.rm = TRUE)
+    neg_log_padj.lim <- range(res$neg_log_pvalue, na.rm = TRUE)
     neg_log_padj.lim[1] <- floor(neg_log_padj.lim[1])
     neg_log_padj.lim[2] <- ceiling(neg_log_padj.lim[2])
   }
@@ -2308,32 +2336,32 @@ plotVolcano.label <- function(
 
   # Clamp y
   df <- df %>%
-    filter(!is.na(.data$padj)) %>%
+    filter(!is.na(.data$plot_pvalue)) %>%
     mutate(
-      log_padj = replace(
-        .data$log_padj,
-        .data$log_padj > neg_log_padj.lim[2],
+      neg_log_pvalue = replace(
+        .data$neg_log_pvalue,
+        .data$neg_log_pvalue > neg_log_padj.lim[2],
         neg_log_padj.lim[2]
       )
     ) %>%
     mutate(
-      log_padj = replace(
-        .data$log_padj,
-        .data$log_padj < neg_log_padj.lim[1],
+      neg_log_pvalue = replace(
+        .data$neg_log_pvalue,
+        .data$neg_log_pvalue < neg_log_padj.lim[1],
         neg_log_padj.lim[1]
       )
     ) %>%
     mutate(
       shape = replace(
         .data$shape,
-        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[2],
+        .data$shape == 'in' & .data$neg_log_pvalue == neg_log_padj.lim[2],
         'above'
       )
     ) %>%
     mutate(
       shape = replace(
         .data$shape,
-        .data$shape == 'in' & .data$log_padj == neg_log_padj.lim[1],
+        .data$shape == 'in' & .data$neg_log_pvalue == neg_log_padj.lim[1],
         'below'
       )
     ) %>%
@@ -2351,12 +2379,17 @@ plotVolcano.label <- function(
   )
 
   edge.pad <- 0.1
+  y_axis_label <- if (pvalue_padj_switch == 'pvalue') {
+    '-log10 p-value'
+  } else {
+    '-log10 adjusted p-value'
+  }
 
   p <- ggplot(
     df,
     aes(
       x = .data$log2FoldChange,
-      y = .data$log_padj,
+      y = .data$neg_log_pvalue,
       shape = .data$shape,
       name = .data$symbol
     )
@@ -2387,7 +2420,7 @@ plotVolcano.label <- function(
     xlim(fc.lim[1] - edge.pad, fc.lim[2] + edge.pad) +
     ylim(neg_log_padj.lim[1] - edge.pad, neg_log_padj.lim[2] + edge.pad) +
     xlab('log2FoldChange') +
-    ylab('-log10 adjusted p-value') +
+    ylab(y_axis_label) +
     theme_bw() +
     theme(
       panel.grid.major = element_blank(),

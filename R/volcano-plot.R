@@ -105,6 +105,19 @@ volcanoPlotUI <- function(id, panel) {
       ),
 
       fluidRow(
+        column(4, h5('Plot adjusted values?')),
+        column(
+          8,
+          selectInput(
+            ns('adjusted_toggle'),
+            label = NULL,
+            choices = c('Raw P-Value' = 'pvalue', 'FDR Adjusted' = 'padj'),
+            selected = 'pvalue'
+          )
+        ) # column
+      ), # fluidRow
+
+      fluidRow(
         column(4, h5('Color by')),
         column(
           8,
@@ -371,7 +384,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             color_by = input$color_by,
             colorscale= tolower(colorscale()),
             lab.genes = plot_args()$gene.to.plot,
-            alpha = input$volcano_alpha
+            alpha = input$volcano_alpha,
+            pvalue_padj_switch = input$adjusted_toggle
           )
         }
       )
@@ -425,7 +439,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
             color_by = input$color_by,
             lab.genes = plot_args()$gene.to.plot,
-            alpha = input$volcano_alpha
+            alpha = input$volcano_alpha,
+            pvalue_padj_switch = input$adjusted_toggle
           )
         }
       )
