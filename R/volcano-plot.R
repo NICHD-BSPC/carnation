@@ -6,7 +6,7 @@
 #' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing carnation object
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
+#' @param plot_args reactive containing 'fdr.thres' (FDR threshold), 'fc.thres' (log2FC threshold)
 #' & 'gene.to.plot' (genes selected in scratchpad)
 #' @param config reactive list with config settings
 #'
@@ -193,7 +193,7 @@ volcanoPlotUI <- function(id, panel) {
               numericInput(
                 ns('volcano_ymax'),
                 label = NULL,
-                value = config$ui$de_analysis$volcano_plot$neg_log_padj_limits$max
+                value = config$ui$de_analysis$volcano_plot$y_axis_limits$max
               )
             ) # column
           ), # fluidRow
@@ -204,7 +204,7 @@ volcanoPlotUI <- function(id, panel) {
               numericInput(
                 ns('volcano_ymin'),
                 label = NULL,
-                value = config$ui$de_analysis$volcano_plot$neg_log_padj_limits$min
+                value = config$ui$de_analysis$volcano_plot$y_axis_limits$min
               )
             ) # column
           ), # fluidRow
@@ -296,12 +296,12 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         updateNumericInput(
           session,
           'volcano_ymax',
-          value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$max
+          value = config()$ui$de_analysis$volcano_plot$y_axis_limits$max
         )
         updateNumericInput(
           session,
           'volcano_ymin',
-          value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$min
+          value = config()$ui$de_analysis$volcano_plot$y_axis_limits$min
         )
       }
 
@@ -371,7 +371,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             ),
             need(
               input$volcano_ymin < input$volcano_ymax,
-              'y-axis min must be less than max. Manually set the y-axis limits.'
+              'y-axis min must be less than max'
             )
           )
 
@@ -398,7 +398,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             app_object()$res[[input$comp_all]],
             fc.thres = curr_thres$fc.thres,
             fdr.thres = curr_thres$fdr.thres,
-            neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
+            y.axis.lim = c(input$volcano_ymin, input$volcano_ymax),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
             color_by = input$color_by,
             colorscale= tolower(colorscale()),
@@ -445,7 +445,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             ),
             need(
               input$volcano_ymin < input$volcano_ymax,
-              'y-axis min must be < y-axis max. Manually set the y-axis limits.'
+              'y-axis min must be < y-axis max'
             )
           )
 
@@ -475,7 +475,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             fdr.thres = curr_thres$fdr.thres,
             colorscale = colorscale(),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
-            neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
+            y.axis.lim = c(input$volcano_ymin, input$volcano_ymax),
             color_by = input$color_by,
             lab.genes = plot_args()$gene.to.plot,
             alpha = input$volcano_alpha,
@@ -542,7 +542,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
 
         if (length(unique(log_pvalue)) <= 1) {
           showNotification(
-            'Cannot autoscale the y-axis because all plotted p-values are identical. Manually set the y-axis limits.',
+            'Cannot autoscale the y-axis because all plotted p-values are identical. Manually set the axis limits.',
             type = 'error'
           )
           return()

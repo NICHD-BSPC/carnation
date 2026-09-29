@@ -8,7 +8,7 @@ plotVolcano.label_ly(
   res,
   fdr.thres = 0.1,
   fc.thres = 0,
-  neg_log_padj.lim = NULL,
+  y.axis.lim = NULL,
   fc.lim = c(-4, 4),
   lab.genes = NULL,
   tolower.cols = c("SYMBOL", "ALIAS"),
@@ -20,17 +20,17 @@ plotVolcano.label_ly(
 }
 \arguments{
 \item{res}{data.frame with DE analysis results. Must contain
-"padj", "log2FoldChange", & "baseMean" columns}
+"pvalue", "padj", "log2FoldChange", & "baseMean" columns}
 
 \item{fdr.thres}{False discovery rate (FDR) threshold}
 
 \item{fc.thres}{log2FoldChange threshold}
 
-\item{neg_log_padj.lim}{y-axis limits for negative log10 padj}
+\item{y.axis.lim}{y-axis limits for negative log10 p-values}
 
 \item{fc.lim}{x-axis limits for log2FoldChange}
 
-\item{lab.genes}{genes to label on MA plot}
+\item{lab.genes}{genes to label on volcano plot}
 
 \item{tolower.cols}{column names that will be converted to
 lower case}
@@ -42,7 +42,7 @@ lower case}
 
 \item{alpha}{point opacity between 0 and 1}
 
-\item{pvalue_padj_switch}{Switches between having the y-axis display raw p-values or FDR adjusted p-values.
+\item{pvalue_padj_switch}{Switches between having the y-axis display raw or adjusted p-values.
 Significance is always determined by adjusted values.}
 }
 \value{
