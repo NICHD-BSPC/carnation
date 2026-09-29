@@ -1788,6 +1788,9 @@ plotVolcano.label_ly <- function(
 
   if (pvalue_padj_switch == 'padj') {
     significance_line_y <- -log10(fdr.thres)
+    if (!is.finite(significance_line_y)) {
+      significance_line_y <- NULL
+    }
   } else {
     significant_pvalues <- df$plot_pvalue[
       df$significant == 'yes' &
@@ -1795,7 +1798,11 @@ plotVolcano.label_ly <- function(
       is.finite(df$plot_pvalue) &
       df$plot_pvalue > 0
     ]
-    significance_line_y <- -log10(max(significant_pvalues))
+    if (length(significant_pvalues) > 0) {
+      significance_line_y <- -log10(max(significant_pvalues))
+    } else {
+      significance_line_y <- NULL
+    }
   }
 
   # Clamp x if out of bounds
@@ -1964,7 +1971,7 @@ plotVolcano.label_ly <- function(
           mode = 'markers',
           marker = c(
             list(
-              color = color.below,
+              color = unname(as.list(color.below)),
               symbol = 'triangle-down',
               size = 6,
               opacity = alpha,
@@ -1986,7 +1993,7 @@ plotVolcano.label_ly <- function(
           showlegend = FALSE,
           marker = c(
             list(
-              color = color.above,
+              color = unname(as.list(color.above)),
               symbol = 'triangle-up',
               size = 6,
               opacity = alpha,
@@ -2008,7 +2015,7 @@ plotVolcano.label_ly <- function(
           showlegend = FALSE,
           marker = c(
             list(
-              color = color.left,
+              color = unname(as.list(color.left)),
               symbol = 'triangle-left',
               size = 6,
               opacity = alpha,
@@ -2030,7 +2037,7 @@ plotVolcano.label_ly <- function(
           showlegend = FALSE,
           marker = c(
             list(
-              color = color.right,
+              color = unname(as.list(color.right)),
               symbol = 'triangle-right',
               size = 6,
               opacity = alpha,
@@ -2174,20 +2181,22 @@ plotVolcano.label_ly <- function(
     )
   )
 
-  sig.shapes <- c(
-    sig.shapes,
-    list(
+  if (!is.null(significance_line_y)) {
+    sig.shapes <- c(
+      sig.shapes,
       list(
-        type = 'line',
-        x0 = 0,
-        x1 = 1,
-        xref = 'paper',
-        y0 = significance_line_y,
-        y1 = significance_line_y,
-        line = list(color = 'black', dash = 'dash', width = 1)
+        list(
+          type = 'line',
+          x0 = 0,
+          x1 = 1,
+          xref = 'paper',
+          y0 = significance_line_y,
+          y1 = significance_line_y,
+          line = list(color = 'black', dash = 'dash', width = 1)
+        )
       )
     )
-  )
+  }
 
   # Adds in the lines
   p <- p %>% layout(shapes = sig.shapes)
@@ -2305,6 +2314,9 @@ plotVolcano.label <- function(
 
   if (pvalue_padj_switch == 'padj') {
     significance_line_y <- -log10(fdr.thres)
+    if (!is.finite(significance_line_y)) {
+      significance_line_y <- NULL
+    }
   } else {
     significant_pvalues <- df$plot_pvalue[
       df$significant == 'yes' &
@@ -2312,7 +2324,11 @@ plotVolcano.label <- function(
       is.finite(df$plot_pvalue) &
       df$plot_pvalue > 0
     ]
-    significance_line_y <- -log10(max(significant_pvalues))
+    if (length(significant_pvalues) > 0) {
+      significance_line_y <- -log10(max(significant_pvalues))
+    } else {
+      significance_line_y <- NULL
+    }
   }
 
   # Clamp x
@@ -2454,7 +2470,7 @@ plotVolcano.label <- function(
       color = 'black',
       linewidth = 0.4
     )
-  if (fdr.thres > 0) {
+  if (fdr.thres > 0 && !is.null(significance_line_y)) {
     p <- p +
       geom_hline(
         yintercept = significance_line_y,

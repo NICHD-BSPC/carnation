@@ -310,7 +310,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         curr_thres$fdr.thres <- config()$ui$de_analysis$filters$fdr_threshold
         curr_thres$fc.thres <- config()$ui$de_analysis$filters$log2fc_threshold
 
-        # gets colorscale from config and falls back to viridis if it is not found
+        # gets colorscale from config and falls back to Viridis if it is not found
         cs <- config()$ui$de_analysis$volcano_plot$colorscale
         if (is.null(cs)) cs <- 'Viridis'
         colorscale(cs)
@@ -371,7 +371,26 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             ),
             need(
               input$volcano_ymin < input$volcano_ymax,
-              'y-axis min must be less than max'
+              'y-axis min must be less than max. Manually set the y-axis limits.'
+            )
+          )
+
+          plot_data <- app_object()$res[[input$comp_all]]
+          plot_y <- -log10(plot_data[[input$adjusted_toggle]])
+
+          has_visible_point <- any(
+            is.finite(plot_data$log2FoldChange) &
+            is.finite(plot_y) &
+            plot_data$log2FoldChange >= input$volcano_xmin &
+            plot_data$log2FoldChange <= input$volcano_xmax &
+            plot_y >= input$volcano_ymin  &
+            plot_y <= input$volcano_ymax
+          )
+
+          validate(
+            need(
+              has_visible_point,
+              'No points fall within the current axis limits. Use Autoscale or manually adjust the axis limits.'
             )
           )
 
@@ -426,9 +445,29 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             ),
             need(
               input$volcano_ymin < input$volcano_ymax,
-              'y-axis min must be < y-axis max'
+              'y-axis min must be < y-axis max. Manually set the y-axis limits.'
             )
           )
+
+          plot_data <- app_object()$res[[input$comp_all]]
+          plot_y <- -log10(plot_data[[input$adjusted_toggle]])
+
+          has_visible_point <- any(
+            is.finite(plot_data$log2FoldChange) &
+            is.finite(plot_y) &
+            plot_data$log2FoldChange >= input$volcano_xmin &
+            plot_data$log2FoldChange <= input$volcano_xmax &
+            plot_y >= input$volcano_ymin  &
+            plot_y <= input$volcano_ymax
+          )
+
+          validate(
+            need(
+              has_visible_point,
+              'No points fall within the current axis limits. Use Autoscale or manually adjust the axis limits.'
+            )
+          )
+
 
           plotVolcano.label_ly(
             app_object()$res[[input$comp_all]],
@@ -498,10 +537,19 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
 
         # Computes the values the plot will use for the
         # y-axis and updated the fields.
-        log_padj <- -log10(df$padj)
-        log_padj <- log_padj[is.finite(log_padj)]
-        df.y_max <- round(max(log_padj, na.rm = TRUE) * 1.1, digits = 3)
-        df.y_min <- round(min(log_padj, na.rm = TRUE) * 1.05, digits = 3)
+        log_pvalue <- -log10(df[[input$adjusted_toggle]])
+        log_pvalue <- log_pvalue[is.finite(log_pvalue)]
+
+        if (length(unique(log_pvalue)) <= 1) {
+          showNotification(
+            'Cannot autoscale the y-axis because all plotted p-values are identical. Manually set the y-axis limits.',
+            type = 'error'
+          )
+          return()
+        }
+
+        df.y_max <- round(max(log_pvalue, na.rm = TRUE) * 1.1, digits = 3)
+        df.y_min <- round(min(log_pvalue, na.rm = TRUE) * 1.05, digits = 3)
         updateNumericInput(session, 'volcano_xmin', value = df.x_min)
         updateNumericInput(session, 'volcano_xmax', value = df.x_max)
         updateNumericInput(session, 'volcano_ymin', value = df.y_min)
