@@ -1,0 +1,26 @@
+name: Sync devel into r4.3
+on:
+  push:
+    branches:
+      - devel  # Trigger whenever devel is updated
+
+jobs:
+  sync-branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for pushing changes
+    steps:
+      - name: Checkout r4.3 branch
+        uses: actions/checkout@v4
+        with:
+          ref: r4.3  # The branch you want to merge devel into
+          fetch-depth: 0
+
+      - name: Merge devel into r4.3
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin devel
+          git merge origin/devel --no-edit
+          git push origin r4.3
+

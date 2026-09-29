@@ -234,6 +234,10 @@ validate_carnation_object <- function(res_list,
     gene_idx <- which(toupper(colnames(res)) %in% "GENE")
     if (length(gene_idx) == 0 && is.null(rownames(res))) {
       stop("DE results '", res_name, "' must have a 'gene' column or row names")
+    } else if(length(gene_idx) > 1){
+      stop("DE results '", res_name, "' must have a single 'gene' column: ",
+           "currently has ", length(gene_idx), " - ",
+           paste(colnames(res)[gene_idx], collapse=","))
     }
 
     if (length(gene_idx) == 0) {

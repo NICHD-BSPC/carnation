@@ -622,6 +622,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                   maPlotUI('maplot', panel='main')
                 ), # tabPanel ma_plot
 
+                tabPanel('Volcano plot',
+                  volcanoPlotUI('volcano_plot', panel='main')
+                ),
+
                 tabPanel('Scatter plot',
                   scatterPlotUI('scatterplot', panel='main')
                 ), # tabPanel scatterplot
@@ -966,6 +970,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       # reset de table
       res_data$tbl <- NULL
+
+      # reset gene scratchpad
+      updateSelectizeInput(session,
+                           'gene.to.plot',
+                           choices=NULL,
+                           selected=NULL)
     }
 
     ############### Initial load #################
@@ -1173,7 +1183,21 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       )
 
       # load data from RDS object
-      obj <- readRDS(assay_path)
+      obj <- tryCatch(
+               readRDS(input$assay),
+               error = function(e){ e })
+
+      if(inherits(obj, 'error')){
+        showNotification(
+          paste0('Error reading object:', obj$message, '. Reload carnation and try again'),
+          type = 'error'
+        )
+      }
+
+      validate(
+        need(!inherits(obj, 'error'), 'Error reading object')
+      )
+
       original$obj <- obj
       original$path <- assay_path
 
@@ -1691,6 +1715,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     })
 
     maPlotServer('maplot', app_object, maplot_args, config)
+
+    ##################### Volcano plot #############################
+    volcano_plot_args <- reactive({
+      list(fdr.thres=input$fdr.thres,
+           fc.thres=input$fc.thres,
+           gene.to.plot=gene_scratchpad())
+    })
+
+    volcanoPlotServer('volcano_plot', app_object, volcano_plot_args, config)
 
     ####################### Scatter plot #############################
 

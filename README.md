@@ -1,9 +1,9 @@
 # Carnation
 
-[![](https://bioconductor.org/shields/availability/devel/carnation.svg)](https://bioconductor.org/packages/devel/bioc/html/carnation.html#archives)
-[![](https://bioconductor.org/shields/lastcommit/devel/bioc/carnation.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/carnation/)
-[![](https://bioconductor.org/shields/build/devel/bioc/carnation.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/carnation/)
-[![](https://bioconductor.org/shields/years-in-bioc/carnation.svg)](https://bioconductor.org/packages/devel/bioc/html/carnation.html#since)
+[![](https://bioconductor.org/shields/availability/release/carnation.svg)](https://bioconductor.org/packages/release/bioc/html/carnation.html#archives)
+[![](https://bioconductor.org/shields/lastcommit/release/bioc/carnation.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/carnation/)
+[![](https://bioconductor.org/shields/build/release/bioc/carnation.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/carnation/)
+[![](https://bioconductor.org/shields/years-in-bioc/carnation.svg)](https://bioconductor.org/packages/release/bioc/html/carnation.html#since)
 
 **Less Code, More Biology: Carnation for Collaborative Multi-Omics Exploration**
 
@@ -27,9 +27,9 @@ genomics analyses, transforming static analysis into a collaborative,
 interactive experience, enabling research teams to spend less time navigating
 data and more time generating biological insight.
 
-**Carnation is now on Bioconductor devel (Official release: April 2026)**
+**Carnation is now on Bioconductor (Official release: April 2026)**
 
-Check out the official bioconductor page [here](https://bioconductor.org/packages/devel/bioc/html/carnation.html)
+Check out the official bioconductor page [here](https://bioconductor.org/packages/release/bioc/html/carnation.html)
 for more details.
 
 ## Key Features

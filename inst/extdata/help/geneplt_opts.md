@@ -1,22 +1,31 @@
 ### Gene Plot Controls
 ----------------------
 
-#### Main Controls
+#### Sample options
 
 - `sample group`: which data subset should be used for the plot?
   - If a particular sample group was used for the selected comparison, then the gene plot uses it by default
   - Alternatively, we can use data from `all_samples`
 
+- `normalization`: choose normalization method
+  - `library size` (default): normalizes by sequencing depth
+  - `vst` (variance stabilizing transformation): reduces dependence of variance on mean
+
+#### Plot options
+
 - `x-axis variable`: which variable should be shown on the x-axis?
   - All variables available in the metadata (including custom columns) can be used here
   - The variable `group` (if present) is selected by default
+
+- `color by`: how should the samples be colored?
+  - All variables in the metadata plus `gene` (default) are options here
 
 - `facet by`: how should the plot be faceted (split)?
   - All variables in the metadata can be selected here. In addition, the plot can be faceted by `gene`
   - By default, this is empty and up to two faceting variables can be selected
 
-- `color by`: how should the samples be colored?
-  - All variables in the metadata plus `gene` (default) are options here
+- `free y axes`: should the y-axis of the faceted plots be scaled independently?
+  - ignored if no faceting variables are set
 
 #### X-axis Settings
 
@@ -40,14 +49,12 @@
 
 #### More Options
 
-- `normalization`: choose normalization method
-  - `library size` (default): normalizes by sequencing depth
-  - `vst` (variance stabilizing transformation): reduces dependence of variance on mean
-
-- `# of rows`: change the number of rows the plots are shown on (default: 2)
-
 - `trendline`: choose line type to connect groups
-  - `smooth` curve (default): shows smoothed trend with confidence interval
-  - `line`: connects group means with straight lines
+  - `line` (default): connects group means with straight lines
+  - `smooth` : shows smoothed trend
 
+- `boxes`: show boxes on plot to show variability of groups
+- `box position`: how should boxes be shown? can be 'identity' (default) where
+  boxes can overlap or 'dodge' where boxes are shown side-by-side.
 - `legend`: toggle the legend in the gene plot (default: on)
+- `text scale`: scaling factor for text on plot (default: 1)

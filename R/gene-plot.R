@@ -76,7 +76,7 @@ genePlotUI <- function(id, panel){
       tagList(
 
         fluidRow(
-          column(6, strong('Plot options')),
+          column(6, strong('Sample options')),
           column(6, align='right',
             helpButtonUI(ns('geneplt_opts_help'))
           ) # column
@@ -92,11 +92,34 @@ genePlotUI <- function(id, panel){
         ), # fluidRow
 
         fluidRow(
+          column(4, h5('normalization')),
+          column(8,
+            selectInput(ns('norm_method'), label=NULL,
+              choices=unlist(config$ui$de_analysis$gene_plot$norm_method)
+            ) # selectInput
+          ) # column
+        ), # fluidRow
+
+        fluidRow(
+          column(12, strong('Plot options'))
+        ), # fluidRow
+
+        fluidRow(
           column(4, h5('x-axis variable')),
           column(8,
             selectInput(ns('xvar'), label=NULL,
                         choices=NULL
             ) # selectInput
+          ) # column
+        ), # fluidRow
+
+        fluidRow(
+          column(4, h5('color by')),
+          column(8,
+            selectizeInput(ns('color'), label=NULL,
+                           choices=NULL,
+                           selected=NULL
+            ) # selectizeInput
           ) # column
         ), # fluidRow
 
@@ -111,12 +134,12 @@ genePlotUI <- function(id, panel){
         ), # fluidRow
 
         fluidRow(
-          column(4, h5('color by')),
-          column(8,
-            selectizeInput(ns('color'), label=NULL,
-                           choices=NULL,
-                           selected=NULL
-            ) # selectizeInput
+          column(4, h5('free y axes')),
+          column(8, align='left',
+            selectInput(ns('freey'), label=NULL,
+              choices=c(TRUE, FALSE),
+              selected=config$ui$de_analysis$gene_plot$freey
+            ) # selectInput
           ) # column
         ), # fluidRow
 
@@ -178,20 +201,13 @@ genePlotUI <- function(id, panel){
             fluidRow(
               column(4, h5('log scale')),
               column(8, align='left',
-                checkboxInput(ns('logy'), label=NULL,
-                  value=config$ui$de_analysis$gene_plot$logy
-                ) # checkboxInput
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
-              column(4, h5('free y axes')),
-              column(8, align='left',
-                checkboxInput(ns('freey'), label=NULL,
-                  value=config$ui$de_analysis$gene_plot$freey
-                ) # checkboxInput
+                selectInput(ns('logy'), label=NULL,
+                  choices=c(TRUE, FALSE),
+                  selected=config$ui$de_analysis$gene_plot$logy
+                ) # selectInput
               ) # column
             ) # fluidRow
+
           ), # bsCollapsePanel
 
           bsCollapsePanel('facet settings',
@@ -226,16 +242,32 @@ genePlotUI <- function(id, panel){
 
           ), # bsCollapsePanel
 
-          bsCollapsePanel('More options',
+          bsCollapsePanel('sample settings',
 
             fluidRow(
-              column(4, h5('normalization')),
+              column(4, 'samples'),
               column(8,
-                selectInput(ns('norm_method'), label=NULL,
-                  choices=unlist(config$ui$de_analysis$gene_plot$norm_method)
-                ) # selectInput
+                selectizeInput(ns('sample_levels'),
+                               label=NULL,
+                               choices=NULL,
+                               selected=NULL,
+                               multiple=TRUE
+                ) # selectizeInput
               ) # column
             ), # fluidRow
+            fluidRow(
+              column(6, align='center',
+                     style='margin-bottom: 10px;',
+                actionButton(ns('sample_all'), 'Select all')
+              ), # column
+              column(6, align='center',
+                     style='margin-bottom: 10px;',
+                actionButton(ns('sample_none'), 'Select none')
+              ) # column
+            ) # fluidRow
+          ), # bsCollapsePanel
+
+          bsCollapsePanel('More options',
 
             fluidRow(
               column(4, h5('trendline')),
@@ -249,18 +281,29 @@ genePlotUI <- function(id, panel){
             fluidRow(
               column(4, h5('boxes')),
               column(8, align='left',
-                checkboxInput(ns('boxes'), label=NULL,
-                  value=config$ui$de_analysis$gene_plot$boxes
-                ) # checkboxInput
+                selectInput(ns('boxes'), label=NULL,
+                  choices=c(TRUE, FALSE),
+                  selected=config$ui$de_analysis$gene_plot$boxes
+                ) # selectInput
               ) # column
             ), # fluidRow
 
             fluidRow(
+              column(4, h5('box position')),
+              column(8, align='left',
+                selectInput(ns('box_dodge'), label=NULL,
+                  choices=c('dodge', 'identity'),
+                  selected='identity'
+                ) # selectInput
+              ) # column
+            ), # fluidRow
+            fluidRow(
               column(4, h5('legend')),
               column(8, align='left',
-                checkboxInput(ns('legend'), label=NULL,
-                  value=config$ui$de_analysis$gene_plot$legend
-                ) # checkboxInput
+                selectInput(ns('legend'), label=NULL,
+                  choices=c(TRUE, FALSE),
+                  selected=config$ui$de_analysis$gene_plot$legend
+                ) # selectInput
               ) # column
             ), # fluidRow
 
@@ -321,6 +364,7 @@ genePlotServer <- function(id, obj,
       xchoices <- reactiveValues(all=NULL, current=NULL)
 
       gene_plot_data <- reactiveValues(all=NULL, plotted=NULL, handle=NULL)
+      data_loaded <- reactiveVal(0)
 
       gene_coldata <- eventReactive(c(coldata$curr, input$samples), {
         validate(
@@ -352,10 +396,10 @@ genePlotServer <- function(id, obj,
         updateNumericInput(session, 'x_rotate',
                            value=config()$ui$de_analysis$gene_plot$x_rotate)
 
-        # update checkbox inputs
+        # update select inputs
         for(name in c('logy', 'freey', 'boxes', 'legend')){
-          updateCheckboxInput(session, name,
-                              value=config()$ui$de_analysis$gene_plot[[ name ]])
+          updateSelectInput(session, name,
+                            selected=config()$ui$de_analysis$gene_plot[[ name ]])
         }
       })
 
@@ -407,13 +451,28 @@ genePlotServer <- function(id, obj,
         sample_grp <- input$samples
         if(sample_grp != 'all_samples'){
             if(input$norm_method == 'vst') rld.i <- app_object()$rld[[ sample_grp ]]
-            else if(input$norm_method == 'libsize') rld.i <- app_object()$dds[[ sample_grp ]]
+            else if(input$norm_method %in% c('libsize', 'none')) rld.i <- app_object()$dds[[ sample_grp ]]
         } else if(sample_grp == 'all_samples'){
             if(input$norm_method == 'vst') rld.i <- app_object()$all_rld
-            else if(input$norm_method == 'libsize') rld.i <- app_object()$all_dds
+            else if(input$norm_method %in% c('libsize', 'none')) rld.i <- app_object()$all_dds
         }
 
+        updateSelectizeInput(session, 'sample_levels',
+                             choices=colnames(rld.i),
+                             selected=colnames(rld.i))
+
         gene_plot_data$all <- rld.i
+        data_loaded(data_loaded() + 1)
+      })
+
+      observeEvent(input$sample_all, {
+        updateSelectizeInput(session, 'sample_levels',
+                             selected=colnames(gene_plot_data$all))
+      })
+
+      observeEvent(input$sample_none, {
+        updateSelectizeInput(session, 'sample_levels',
+                             selected='')
       })
 
       # update gene plot controls when col.data changes
@@ -435,7 +494,24 @@ genePlotServer <- function(id, obj,
             updateSelectizeInput(session, 'xvar',
                                  choices=int.cols,
                                  selected=input$xvar)
+            selected <- input$xvar
         }
+
+        # get initial x-axis labels
+        xvar <- gene_coldata()[, selected]
+
+        # if factor, use existing levels
+        # if numeric, sort ascending
+        # else, use unique values
+        if(is.factor(xvar)){
+          xchoices$all <- levels(xvar)
+        } else if(is.numeric(xvar)){
+          lvls <- unique(xvar)
+          xchoices$all <- lvls[order(lvls)]
+        } else {
+          xchoices$all <- unique(xvar)
+        }
+        xchoices$current <- xchoices$all
 
         # update color choices
         if(is.null(input$color) || !(input$color %in% c(int.cols, 'sample', 'gene'))){
@@ -489,7 +565,7 @@ genePlotServer <- function(id, obj,
         facet.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% c(input$xvar, cols.to.drop())]
         facet.cols <- c(facet.extra, facet.cols)
         if(length(facet.cols) > 0){
-            if(is.null(input$facet) || !(input$facet %in% facet.cols)){
+            if(is.null(input$facet) || !any(input$facet %in% facet.cols)){
                 updateSelectizeInput(session, 'facet',
                                      choices=facet.cols,
                                      selected='')
@@ -726,6 +802,7 @@ genePlotServer <- function(id, obj,
           input$ymin,
           gene_plot_data$all,
           plot_args(),
+          data_loaded(),
           input$plot_do,
           bookmark_restore_tick()
         )
@@ -801,6 +878,10 @@ genePlotServer <- function(id, obj,
         df <- get_gene_counts(rld.i, g, input$xvar,
                               norm_method=input$norm_method)
 
+        if(!is.null(input$sample_levels) & all(input$sample_levels %in% df[['sample']])){
+          df <- df[df$sample %in% input$sample_levels, ]
+        }
+
         # add pseudocount
         pseudocount <- config()$server$de_analysis$gene_plot$pseudocount
         df$count <- df$count + pseudocount
@@ -835,19 +916,20 @@ genePlotServer <- function(id, obj,
         }
 
         # gather params for gene plot
-        logy <- input$logy
-        freey <- input$freey
+        logy <- as.logical(input$logy)
+        freey <- as.logical(input$freey)
         rotate_x_labels <- input$x_rotate
         color <- input$color
         trendline <- input$trendline
         xvar <- input$xvar
-        gene_nrow <- config()$ui$de_analysis$gene_plot$nrow
-        legend <- input$legend
+        gene_ncol <- config()$ui$de_analysis$gene_plot$ncol
+        legend <- as.logical(input$legend)
         ymax <- input$ymax
         ymin <- input$ymin
         ylab <- config()$server$de_analysis$gene_plot$y_labels
-        boxes <- input$boxes
+        boxes <- as.logical(input$boxes)
         ht <- config()$ui$de_analysis$gene_plot$height
+        box_dodge <- input$box_dodge
 
         if(logy){
           validate(
@@ -881,20 +963,15 @@ genePlotServer <- function(id, obj,
           # fix number of plots per row
           # - free y-axis: 6 (since y-axis labels are drawn for every plot)
           # - otherwise: 8
-          if(freey) gene_nrow <- ceiling(plot_num/6)
-          else gene_nrow <- ceiling(plot_num/8)
+          if(freey) gene_ncol <- 6
+          else gene_ncol <- 8
 
-          nrow_def <- config()$ui$de_analysis$gene_plot$nrow
-          if(gene_nrow == 0 | is.na(gene_nrow)){
-            gene_nrow <- nrow_def
-            showNotification(
-              'Invalid number of rows. Resetting to default',
-              type='warning'
-            )
-          } else if(gene_nrow > nrow_def*2){
-            # adjust height for many rows
-            ht <- ht*(gene_nrow/(nrow_def*2))
+          gene_nrow <- ceiling(plot_num/gene_ncol)
+
+          if(gene_nrow > 4){
+            ht <- ht*(gene_nrow/4)
           }
+
         }
 
         # set default x axis order; later take from bucket list
@@ -920,13 +997,12 @@ genePlotServer <- function(id, obj,
           need(pts_inside > 0, 'No points within y-axis limits. Please adjust limits in "y-axis settings" or click "Autoscale"')
         )
 
-        # if more than 2 faceting variables are specified
         p <- getcountplot(df, intgroup=xvar, ylab=ylab,
                      log=logy, freey=freey,
                      color=color, ymax=ymax, ymin=ymin,
                      factor.levels=x_order, rotate_x_labels=rotate_x_labels,
                      nrow=gene_nrow, trendline=trendline,
-                     facet=facet, legend=legend, boxes=boxes)
+                     facet=facet, legend=legend, boxes=boxes, box_dodge=box_dodge)
 
         if(input$txt_scale == 0 | is.na(input$txt_scale)){
           txt_scale <- 1
@@ -946,7 +1022,14 @@ genePlotServer <- function(id, obj,
 
         gene_plot_data$handle <- p
 
-        ggplotly(p, height=ht)
+
+        if(all(as.integer(names(grp_sizes)) >= 2) & boxes & box_dodge == "dodge"){
+          p2 <- ggplotly(p, height=ht) %>% layout(boxmode = "group")
+        } else {
+          p2 <- ggplotly(p, height=ht)
+        }
+        p2
+
       }) # eventReactive normplot
 
       output$normplot <- renderPlotly({
