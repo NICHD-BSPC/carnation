@@ -1162,6 +1162,15 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       # if 'carnation-ready' object is uploaded these elements will always be present
       all_obj_names <- c('res', 'dds', 'rld', 'labels', 'dds_mapping')
       if(all(all_obj_names %in% names(obj))){
+        # do a validation check on res columns
+        # - this is primarily for pre-made carnation objects to make
+        #   sure padj, pvalue, lfc columns are correctly named
+        obj$res <- lapply(obj$res,
+                     function(x)
+                       .check_res_columns(x,
+                          config()$server$de_analysis$column_names)$res
+                   )
+
         app_object$res <- obj$res
         app_object$dds <- obj$dds
         app_object$rld <- obj$rld

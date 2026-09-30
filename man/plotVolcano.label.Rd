@@ -8,24 +8,25 @@ plotVolcano.label(
   res,
   fdr.thres = 0.1,
   fc.thres = 0,
-  neg_log_padj.lim = NULL,
+  y.axis.lim = NULL,
   fc.lim = c(-4, 4),
   lab.genes = NULL,
   tolower.cols = c("SYMBOL", "ALIAS"),
   color_by = c("baseMean", "significance"),
   colorscale = "viridis",
-  alpha = 0.6
+  alpha = 0.6,
+  pvalue_padj_switch = c("pvalue", "padj")
 )
 }
 \arguments{
 \item{res}{data.frame with DE analysis results. Must contain
-"padj", "baseMean" & "log2FoldChange" columns}
+"pvalue", "padj", "baseMean" & "log2FoldChange" columns}
 
 \item{fdr.thres}{False discovery rate (FDR) threshold}
 
 \item{fc.thres}{log2FoldChange threshold}
 
-\item{neg_log_padj.lim}{y-axis limits}
+\item{y.axis.lim}{y-axis limits for negative log10 p-values}
 
 \item{fc.lim}{x-axis limits}
 
@@ -39,6 +40,9 @@ plotVolcano.label(
 (viridis option), only used when color_by='baseMean'}
 
 \item{alpha}{point opacity between 0 and 1}
+
+\item{pvalue_padj_switch}{Switches between having the y-axis display raw or adjusted p-values.
+Significance is always determined by adjusted values.}
 }
 \value{
 ggplot handle

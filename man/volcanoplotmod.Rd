@@ -17,7 +17,7 @@ volcanoPlotServer(id, obj, plot_args, config)
 
 \item{obj}{reactiveValues object containing carnation object}
 
-\item{plot_args}{reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
+\item{plot_args}{reactive containing 'fdr.thres' (FDR threshold), 'fc.thres' (log2FC threshold)
 & 'gene.to.plot' (genes selected in scratchpad)}
 
 \item{config}{reactive list with config settings}

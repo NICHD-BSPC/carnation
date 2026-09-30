@@ -6,7 +6,7 @@
 #' @param id Module id
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing carnation object
-#' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
+#' @param plot_args reactive containing 'fdr.thres' (FDR threshold), 'fc.thres' (log2FC threshold)
 #' & 'gene.to.plot' (genes selected in scratchpad)
 #' @param config reactive list with config settings
 #'
@@ -105,6 +105,19 @@ volcanoPlotUI <- function(id, panel) {
       ),
 
       fluidRow(
+        column(4, h5('y-axis')),
+        column(
+          8,
+          selectInput(
+            ns('adjusted_toggle'),
+            label = NULL,
+            choices = c('Raw P-Value' = 'pvalue', 'Adjusted p-value' = 'padj'),
+            selected = 'pvalue'
+          )
+        ) # column
+      ), # fluidRow
+
+      fluidRow(
         column(4, h5('Color by')),
         column(
           8,
@@ -180,7 +193,7 @@ volcanoPlotUI <- function(id, panel) {
               numericInput(
                 ns('volcano_ymax'),
                 label = NULL,
-                value = config$ui$de_analysis$volcano_plot$neg_log_padj_limits$max
+                value = config$ui$de_analysis$volcano_plot$y_axis_limits$max
               )
             ) # column
           ), # fluidRow
@@ -191,7 +204,7 @@ volcanoPlotUI <- function(id, panel) {
               numericInput(
                 ns('volcano_ymin'),
                 label = NULL,
-                value = config$ui$de_analysis$volcano_plot$neg_log_padj_limits$min
+                value = config$ui$de_analysis$volcano_plot$y_axis_limits$min
               )
             ) # column
           ), # fluidRow
@@ -228,9 +241,7 @@ volcanoPlotUI <- function(id, panel) {
           downloadButtonUI(ns('volcano_plot_download'))
         ),
       ), # fluidRow
-      withSpinner(
-        uiOutput(ns('volcano_plot_out'))
-      ) # withSpinner
+      uiOutput(ns('volcano_plot_out'))
     ) # tagList
   }
 }
@@ -255,7 +266,7 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       )
 
       # save colorscale to separate reactiveVal
-      colorscale <- reactiveVal('viridis')
+      colorscale <- reactiveVal('Viridis')
 
       # Watches the app_object to update the drop down menu with the correct
       # options
@@ -283,12 +294,12 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         updateNumericInput(
           session,
           'volcano_ymax',
-          value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$max
+          value = config()$ui$de_analysis$volcano_plot$y_axis_limits$max
         )
         updateNumericInput(
           session,
           'volcano_ymin',
-          value = config()$ui$de_analysis$volcano_plot$neg_log_padj_limits$min
+          value = config()$ui$de_analysis$volcano_plot$y_axis_limits$min
         )
       }
 
@@ -297,9 +308,9 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
         curr_thres$fdr.thres <- config()$ui$de_analysis$filters$fdr_threshold
         curr_thres$fc.thres <- config()$ui$de_analysis$filters$log2fc_threshold
 
-        # gets colorscale from config and falls back to viridis if it is not found
+        # gets colorscale from config and falls back to Viridis if it is not found
         cs <- config()$ui$de_analysis$volcano_plot$colorscale
-        if (is.null(cs)) cs <- 'viridis'
+        if (is.null(cs)) cs <- 'Viridis'
         colorscale(cs)
 
         reset_axes()
@@ -362,16 +373,41 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             )
           )
 
+          plot_data <- app_object()$res[[input$comp_all]]
+
+          validate(
+            need(input$adjusted_toggle %in% colnames(plot_data),
+                 paste0('"', input$adjusted_toggle, '" column not found in data. Please try selecting different option from x-axis menu!'))
+          )
+          plot_y <- -log10(plot_data[[input$adjusted_toggle]])
+
+          has_visible_point <- any(
+            is.finite(plot_data$log2FoldChange) &
+            is.finite(plot_y) &
+            plot_data$log2FoldChange >= input$volcano_xmin &
+            plot_data$log2FoldChange <= input$volcano_xmax &
+            plot_y >= input$volcano_ymin  &
+            plot_y <= input$volcano_ymax
+          )
+
+          validate(
+            need(
+              has_visible_point,
+              'No points fall within the current axis limits. Use Autoscale or manually adjust the axis limits.'
+            )
+          )
+
           plotVolcano.label(
             app_object()$res[[input$comp_all]],
             fc.thres = curr_thres$fc.thres,
             fdr.thres = curr_thres$fdr.thres,
-            neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
+            y.axis.lim = c(input$volcano_ymin, input$volcano_ymax),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
             color_by = input$color_by,
             colorscale= tolower(colorscale()),
             lab.genes = plot_args()$gene.to.plot,
-            alpha = input$volcano_alpha
+            alpha = input$volcano_alpha,
+            pvalue_padj_switch = input$adjusted_toggle
           )
         }
       )
@@ -416,16 +452,42 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
             )
           )
 
+          plot_data <- app_object()$res[[input$comp_all]]
+
+          validate(
+            need(input$adjusted_toggle %in% colnames(plot_data),
+                 paste0('"', input$adjusted_toggle, '" column not found in data. Please try selecting different option from x-axis menu!'))
+          )
+          plot_y <- -log10(plot_data[[input$adjusted_toggle]])
+
+          has_visible_point <- any(
+            is.finite(plot_data$log2FoldChange) &
+            is.finite(plot_y) &
+            plot_data$log2FoldChange >= input$volcano_xmin &
+            plot_data$log2FoldChange <= input$volcano_xmax &
+            plot_y >= input$volcano_ymin  &
+            plot_y <= input$volcano_ymax
+          )
+
+          validate(
+            need(
+              has_visible_point,
+              'No points fall within the current axis limits. Use Autoscale or manually adjust the axis limits.'
+            )
+          )
+
+
           plotVolcano.label_ly(
             app_object()$res[[input$comp_all]],
             fc.thres = curr_thres$fc.thres,
             fdr.thres = curr_thres$fdr.thres,
             colorscale = colorscale(),
             fc.lim = c(input$volcano_xmin, input$volcano_xmax),
-            neg_log_padj.lim = c(input$volcano_ymin, input$volcano_ymax),
+            y.axis.lim = c(input$volcano_ymin, input$volcano_ymax),
             color_by = input$color_by,
             lab.genes = plot_args()$gene.to.plot,
-            alpha = input$volcano_alpha
+            alpha = input$volcano_alpha,
+            pvalue_padj_switch = input$adjusted_toggle
           )
         }
       )
@@ -483,10 +545,19 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
 
         # Computes the values the plot will use for the
         # y-axis and updated the fields.
-        log_padj <- -log10(df$padj)
-        log_padj <- log_padj[is.finite(log_padj)]
-        df.y_max <- round(max(log_padj, na.rm = TRUE) * 1.1, digits = 3)
-        df.y_min <- round(min(log_padj, na.rm = TRUE) * 1.05, digits = 3)
+        log_pvalue <- -log10(df[[input$adjusted_toggle]])
+        log_pvalue <- log_pvalue[is.finite(log_pvalue)]
+
+        if (length(unique(log_pvalue)) <= 1) {
+          showNotification(
+            'Cannot autoscale the y-axis because all plotted p-values are identical. Manually set the axis limits.',
+            type = 'error'
+          )
+          return()
+        }
+
+        df.y_max <- round(max(log_pvalue, na.rm = TRUE) * 1.1, digits = 3)
+        df.y_min <- round(min(log_pvalue, na.rm = TRUE) * 1.05, digits = 3)
         updateNumericInput(session, 'volcano_xmin', value = df.x_min)
         updateNumericInput(session, 'volcano_xmax', value = df.x_max)
         updateNumericInput(session, 'volcano_ymin', value = df.y_min)
