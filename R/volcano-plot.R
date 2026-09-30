@@ -105,13 +105,13 @@ volcanoPlotUI <- function(id, panel) {
       ),
 
       fluidRow(
-        column(4, h5('Plot adjusted values?')),
+        column(4, h5('y-axis')),
         column(
           8,
           selectInput(
             ns('adjusted_toggle'),
             label = NULL,
-            choices = c('Raw P-Value' = 'pvalue', 'FDR Adjusted' = 'padj'),
+            choices = c('Raw P-Value' = 'pvalue', 'Adjusted p-value' = 'padj'),
             selected = 'pvalue'
           )
         ) # column
