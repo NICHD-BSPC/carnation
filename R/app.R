@@ -812,7 +812,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     pattern <- reactive({ config()$server$pattern })
 
     # reactive values to keep assay list
-    assay.list <- reactiveValues(l=NULL)
+    assay.list <- reactiveValues(l=NULL, info=NULL)
 
     settings <- settingsServer('settings',
                                details=reactive({ list(username=user_details$username, where=input$shinymanager_where) }),
@@ -845,6 +845,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       updateSelectizeInput(session, 'dds',
                            choices=dds_choices)
       assay.list$l <- l$assay_list
+      assay.list$info <- l$assay_info
 
       if(l$reload_parent) session$reload()
 
