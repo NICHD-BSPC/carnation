@@ -5,7 +5,7 @@ Interactive visualization that plots statistical significance against effect siz
 
 **What it shows:**
 - Log2 fold change (`log2FoldChange`) on the x-axis — the direction and magnitude of change
-- Negative log10 adjusted p-value on the y-axis — genes higher up are more statistically significant
+- Negative log10 raw or adjusted p-value on the y-axis — genes higher up are more statistically significant
 - Up-regulated genes sit to the right, down-regulated to the left, forming the characteristic two-winged "volcano" shape
 
 **When to use it:**
