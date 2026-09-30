@@ -712,6 +712,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # list to hold project/analysis descriptions
     project_info <- reactiveValues(descriptions=list(), current=NULL, df=NULL)
+    analysis_desc_df <- reactiveVal(NULL)
 
     #################### config updates ####################
 
@@ -1058,6 +1059,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         df$analysis_name <- rownames(df)
         df <- df[, c('analysis_name', cnames)]
       }
+
+      # cache state
+      analysis_desc_df(df)
+
 
       datatable(df,
                 rownames=FALSE,
