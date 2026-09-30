@@ -1013,10 +1013,51 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     output$analysis_desc <- renderDT({
       req(input$dds)
 
-      df <- data.frame(
-        'analysis_name'=names(project_info$descriptions[[ input$dds ]]),
-        'description'=unname(unlist(project_info$descriptions[[ input$dds ]]))
-      )
+      proj_desc <- project_info$descriptions[[ input$dds ]]
+
+      assay_choices <- names(assay.list$l[[ input$dds ]])
+
+      # get assay info, order by choices
+      assay_info <- assay.list$info[[ input$dds ]]
+      assay_info <- assay_info[ unname(assay.list$l[[ input$dds ]]), ]
+
+      # check fields present in descriptions
+      field_names <- unique(unlist(lapply(proj_desc, names)))
+
+      if(is.null(field_names)){
+        # here entries are a single string description
+        df <- data.frame(
+                row.names=assay_choices,
+                analysis_name=assay_choices,
+                description=NA
+              )
+
+        if(any(names(proj_desc) %in% rownames(df))){
+          names_present <- intersect(names(proj_desc), rownames(df))
+          desc_present <- unlist(proj_desc)[ names_present ]
+          df[ names_present, 'description' ] <- unname(desc_present)
+        }
+
+        df <- cbind(df, assay_info)
+
+      } else {
+        # here we handle multiple fields for each entry
+        df.i <- lapply(proj_desc, function(x){
+                 if(all(field_names %in% names(x))) x
+                 else {
+                   # check for missing fields and add NAs
+                   ff <- setdiff(field_names, names(x))
+                   ff <- c(x, setNames(rep(NA, length(ff)), ff))
+
+                   # reorder
+                   ff <- ff[ field_names ]
+                 }
+               })
+        df <- as.data.frame(do.call('rbind', df.i))
+        cnames <- colnames(df)
+        df$analysis_name <- rownames(df)
+        df <- df[, c('analysis_name', cnames)]
+      }
 
       datatable(df,
                 rownames=FALSE,
