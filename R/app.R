@@ -1078,17 +1078,24 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # return 'group/project' from table selection
     analysis_from_tbl <- eventReactive(input$analysis_desc_rows_selected, {
-      all_analysis <- names(project_info$descriptions[[ input$dds ]])
+      req(input$dds)
       sel <- input$analysis_desc_rows_selected
 
-      # these are the datasets for the current project
+      req(length(sel) > 0)
+
+      # current analysis table
+      df <- analysis_desc_df()
+
+      all_analysis <- rownames(df)
+
+      # these are the analyses for the current project
       current_assays <- assay.list$l[[ input$dds ]]
 
       # match the selected name to the current assays
       # since the order might be different (due to sorting)
       idx <- which(names(current_assays) %in% all_analysis[sel])
 
-      current_assays[idx]
+      current_assays[idx[1]]
     }) # observeEvent
 
     # update 'assay' input based on selection
