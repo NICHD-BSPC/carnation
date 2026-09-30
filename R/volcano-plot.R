@@ -241,9 +241,7 @@ volcanoPlotUI <- function(id, panel) {
           downloadButtonUI(ns('volcano_plot_download'))
         ),
       ), # fluidRow
-      withSpinner(
-        uiOutput(ns('volcano_plot_out'))
-      ) # withSpinner
+      uiOutput(ns('volcano_plot_out'))
     ) # tagList
   }
 }
