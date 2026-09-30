@@ -993,6 +993,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         anames <- c(pnames, setdiff(names(assay.choices), pnames))
         assay.choices <- assay.choices[anames]
       }
+
+      # reorder assay list
+      assay.list$l[[ input$dds ]] <- assay.choices
+
       # if more than one assay found & autoload_first_analysis not set
       if(length(assay.choices) > 1 & !config()$server$autoload_first_analysis){
         assay.choices <- c('Choose one', assay.choices)
