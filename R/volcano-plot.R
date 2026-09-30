@@ -374,6 +374,11 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           )
 
           plot_data <- app_object()$res[[input$comp_all]]
+
+          validate(
+            need(input$adjusted_toggle %in% colnames(plot_data),
+                 paste0('"', input$adjusted_toggle, '" column not found in data. Please try selecting different option from x-axis menu!'))
+          )
           plot_y <- -log10(plot_data[[input$adjusted_toggle]])
 
           has_visible_point <- any(
@@ -448,6 +453,11 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           )
 
           plot_data <- app_object()$res[[input$comp_all]]
+
+          validate(
+            need(input$adjusted_toggle %in% colnames(plot_data),
+                 paste0('"', input$adjusted_toggle, '" column not found in data. Please try selecting different option from x-axis menu!'))
+          )
           plot_y <- -log10(plot_data[[input$adjusted_toggle]])
 
           has_visible_point <- any(
