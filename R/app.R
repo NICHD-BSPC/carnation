@@ -1114,35 +1114,27 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       # get name of assay
       current_assays <- assay.list$l[[ input$dds ]]
       assay_idx <- which(unname(current_assays) %in% input$assay)
-      assay_name <- names(current_assays)[assay_idx]
 
-      # match to description
-      current_desc <- project_info$descriptions[[ input$dds ]]
-
-      validate(
-        need(length(current_desc) > 0, 'no project descriptions')
-      )
-      desc_idx <- which(names(current_desc) %in% assay_name)
-
-      if(length(desc_idx) == 0){
+      # if nothing selected, return NULL
+      if(length(assay_idx) == 0){
         analysis_desc_proxy %>% selectRows(NULL)
         return()
       }
 
-      # get idx relative to current sort order
-      current_idx <- which(input$analysis_desc_rows_all == desc_idx[1])
+      # now get index frm current analysis tbl
+      analysis_tbl <- analysis_desc_df()
+      analysis_name <- names(current_assays)[assay_idx[1]]
+      current_idx <- which(rownames(analysis_tbl) %in% analysis_name)
 
-      # get page index
-      page_length <- input$analysis_desc_state$length
-      if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
-        page_length <- 10
+      # if something is selected, go to that page to show it
+      if(length(current_idx) > 0){
+        page_length <- input$analysis_desc_state$length
+        if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
+          page_length <- 10
+        }
+        page_idx <- floor((current_idx[1] - 1) / page_length) + 1
+        DT::selectPage(analysis_desc_proxy, page_idx)
       }
-      page_idx <- floor((current_idx - 1) / page_length) + 1
-
-      # update tbl selection
-      analysis_desc_proxy %>% selectRows(NULL) %>%
-        selectRows(desc_idx[1]) %>% selectPage(page_idx)
-
     })
 
     #################### global project summary ####################
