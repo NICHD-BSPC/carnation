@@ -1069,7 +1069,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                 selection='single',
                 caption=tags$caption(style='font-weight: bold; font-size: 15px;',
                                      'Summary of available analyses'),
-                options=list(dom='tp', stateSave=TRUE))
+                options=list(dom='tp', stateSave=TRUE)) %>%
+        formatStyle(column="size", "white-space"="nowrap")
     })
 
     # proxy for analysis description table
