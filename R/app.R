@@ -1100,8 +1100,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # update 'assay' input based on selection
     observeEvent(analysis_from_tbl(), {
-      updateSelectizeInput(session, 'assay',
-                           selected=analysis_from_tbl())
+      if(input$assay != analysis_from_tbl()){
+        updateSelectizeInput(session, 'assay',
+                             selected=analysis_from_tbl())
+      }
     })
 
     # update selection based on 'assay'
@@ -1163,8 +1165,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # update 'dds' input based on table selection
     observeEvent(proj_from_tbl(), {
-      updateSelectizeInput(session, 'dds',
-                           selected=proj_from_tbl())
+      if(input$dds != proj_from_tbl()){
+        updateSelectizeInput(session, 'dds',
+                             selected=proj_from_tbl())
+      }
     })
 
     #################### observer to load data ####################
