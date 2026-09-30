@@ -479,7 +479,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               ), # column
               column(10, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
-                  column(6,
+                  column(5,
 
                     introBox(
                       tags$div(
@@ -491,7 +491,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                     )
                   ),
                   conditionalPanel('input.dds != "" & input.dds != "Choose one"',
-                    column(6,
+                    column(7,
                       introBox(
                         tags$div(
                           DTOutput('analysis_desc')
