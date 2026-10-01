@@ -59,7 +59,6 @@ test_that("genePlotServer handles gene selection correctly", {
       x_rotate = 30,
       color = "batch",
       trendline = "line",
-      gene_nrow = 1,
       legend = TRUE,
       txt_scale = 1,
       facet = "none",           # Set to 'none' to avoid faceting issues
