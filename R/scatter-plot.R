@@ -112,155 +112,151 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      wellPanel(
-        style='background: white',
+      div(style='margin-bottom: 10px; margin-top: 10px;',
+        strong('Plot settings'),
+      ),
 
-        div(style='margin-bottom: 10px',
-          strong('Plot settings'),
-        ),
+      fluidRow(
+        column(6, h5('Color palette')),
+        column(6,
+          selectInput(ns('color.palette'), label=NULL,
+                      choices=c('Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'),
+                      selected='Set2')
+        ) # column
+      ), # fluidRow
 
-        fluidRow(
-          column(6, h5('Color palette')),
-          column(6,
-            selectInput(ns('color.palette'), label=NULL,
-                        choices=c('Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'),
-                        selected='Set2')
-          ) # column
-        ), # fluidRow
+      fluidRow(
+        column(6, h5('Marker opacity')),
+        column(6,
+          numericInput(ns("alpha"), label=NULL,
+            value=0.7,
+            min=0,
+            max=1,
+            step=0.1
+          ) # numericInput
+        ) # column
+      ), # fluidRow
 
-        fluidRow(
-          column(6, h5('Marker opacity')),
-          column(6,
-            numericInput(ns("alpha"), label=NULL,
-              value=0.7,
-              min=0,
-              max=1,
-              step=0.1
-            ) # numericInput
-          ) # column
-        ), # fluidRow
+      fluidRow(
+        column(6, h5('Marker size')),
+        column(6,
+          numericInput(ns("size"), label=NULL,
+            value=4,
+            min=0,
+            max=10,
+            step=0.1
+          ) # numericInput
+        ) # column
+      ), # fluidRow
 
-        fluidRow(
-          column(6, h5('Marker size')),
-          column(6,
-            numericInput(ns("size"), label=NULL,
-              value=4,
-              min=0,
-              max=10,
-              step=0.1
-            ) # numericInput
-          ) # column
-        ), # fluidRow
+      bsCollapse(
+        bsCollapsePanel('Axes limits',
 
-        bsCollapse(
-          bsCollapsePanel('Axes limits',
+          tags$label(class='control-label',
+                     'x-axis limits'),
 
-            tags$label(class='control-label',
-                       'x-axis limits'),
+          fluidRow(
+            column(6, h5('max')),
+            column(6,
+              numericInput(ns('scatter_xmax'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('max')),
-              column(6,
-                numericInput(ns('scatter_xmax'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('min')),
+            column(6,
+              numericInput(ns('scatter_xmin'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('min')),
-              column(6,
-                numericInput(ns('scatter_xmin'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(4, align='left', style='margin-bottom: 10px;',
+              actionButton(ns('scatter_x_auto'), label='Autoscale')
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(4, align='left', style='margin-bottom: 10px;',
-                actionButton(ns('scatter_x_auto'), label='Autoscale')
-              ) # column
-            ), # fluidRow
+          tags$label(class='control-label',
+                     'y-axis limits'),
 
-            tags$label(class='control-label',
-                       'y-axis limits'),
+          fluidRow(
+            column(6, h5('max')),
+            column(6,
+              numericInput(ns('scatter_ymax'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('max')),
-              column(6,
-                numericInput(ns('scatter_ymax'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('min')),
+            column(6,
+              numericInput(ns('scatter_ymin'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('min')),
-              column(6,
-                numericInput(ns('scatter_ymin'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(4, align='left', style='margin-bottom: 10px;',
+              actionButton(ns('scatter_y_auto'), label='Autoscale')
+            ) # column
+          ) # fluidRow
+        ) # bsCollapsePanel
+      ), # bsCollapse
 
-            fluidRow(
-              column(4, align='left', style='margin-bottom: 10px;',
-                actionButton(ns('scatter_y_auto'), label='Autoscale')
-              ) # column
-            ) # fluidRow
-          ) # bsCollapsePanel
-        ), # bsCollapse
+      bsCollapse(
+        bsCollapsePanel('Grid lines',
 
-        bsCollapse(
-          bsCollapsePanel('Grid lines',
+          fluidRow(
+            column(6, h5('Show x=0?')),
+            column(6,
+              selectInput(ns("vline"), label=NULL,
+                choices=c('yes', 'no'),
+                selected='yes'
+              ) # selectInput
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('Show x=0?')),
-              column(6,
-                selectInput(ns("vline"), label=NULL,
-                  choices=c('yes', 'no'),
-                  selected='yes'
-                ) # selectInput
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('Show y=0?')),
+            column(6,
+              selectInput(ns("hline"), label=NULL,
+                          choices=c('yes', 'no'),
+                          selected='yes'
+              ) # selectInput
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('Show y=0?')),
-              column(6,
-                selectInput(ns("hline"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='yes'
-                ) # selectInput
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('Show grid?')),
+            column(6,
+              selectInput(ns("show_grid"), label=NULL,
+                          choices=c('yes', 'no'),
+                          selected='yes'
+              ) # selectInput
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('Show grid?')),
-              column(6,
-                selectInput(ns("show_grid"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='yes'
-                ) # selectInput
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('Show diagonal?')),
+            column(6,
+              selectInput(ns("dline"), label=NULL,
+                          choices=c('yes', 'no'),
+                          selected='yes'
+              ) # selectInput
+            ) # column
+          ) # fluidRow
 
-            fluidRow(
-              column(6, h5('Show diagonal?')),
-              column(6,
-                selectInput(ns("dline"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='yes'
-                ) # selectInput
-              ) # column
-            ) # fluidRow
+        ) # bsCollapsePanel
+      ), # bsCollapse
 
-          ) # bsCollapsePanel
-        ), # bsCollapse
-
-        fluidRow(align='center',
-          actionButton(ns('refresh'),
-                       label='Refresh plot',
-                       icon=icon('arrows-rotate'),
-                       class='btn-primary',
-                       style='margin-bottom: 10px;')
-        ) # fluidRow
-      ) # wellPanel
+      fluidRow(align='center',
+        actionButton(ns('refresh'),
+                     label='Refresh plot',
+                     icon=icon('arrows-rotate'),
+                     class='btn-primary',
+                     style='margin-bottom: 10px;')
+      ) # fluidRow
 
     ) # tagList
 
