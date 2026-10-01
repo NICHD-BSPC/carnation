@@ -97,7 +97,7 @@ scatterPlotUI <- function(id, panel){
         column(6,
           selectizeInput(ns('compare'),
                         label=NULL,
-                        choices=c('log2FoldChange'='log2FoldChange', 'padj'='padj', 'pvalue'='pvalue')
+                        choices=c('LFC'='log2FoldChange', 'padj'='padj', 'pvalue'='pvalue')
           ) # selectizeInput
         ) # column
       ), # fluidRow
@@ -1032,7 +1032,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
                      function(x) tags$th(class='dt-center', colspan=3, x))
             ),
             tags$tr(
-              lapply(rep(c('log2FoldChange', 'pvalue', 'padj'), 2), tags$th)
+              lapply(rep(c('LFC', 'pvalue', 'padj'), 2), tags$th)
             )
           )
         ))
