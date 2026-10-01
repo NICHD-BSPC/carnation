@@ -150,6 +150,16 @@ scatterPlotUI <- function(id, panel){
       ), # fluidRow
 
       fluidRow(
+        column(6, h5('Aspect ratio')),
+        column(6,
+          selectInput(ns('aspect'),
+            label = NULL,
+            choices = c('wide', 'narrow')
+          ) # selectInput
+        ) # column
+      ), # fluidRow
+
+      fluidRow(
         column(6, h5('Show grid?')),
         column(6,
           selectInput(ns("show_grid"), label=NULL,
@@ -841,6 +851,14 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           source='scatter'
         )
 
+        # for narrow layout, manually set plotly dimensions
+        if(input$aspect == 'narrow'){
+          p <- plotly::plotly_build(p)
+          p$x$layout$width <- 1000
+          p$x$layout$height <- 600
+          p$x$layout$autosize <- FALSE
+        }
+
         # save plot source to reactive
         plot_source('scatter')
 
@@ -855,7 +873,15 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
       })
 
       output$plot_out <- renderPlot({
-        scatterplot() + theme(text=element_text(size=18))
+        # isolate to not trigger redraw
+        isolate({
+          aspect <- input$aspect
+        })
+
+        p <- scatterplot() + theme(text=element_text(size=18))
+        if(aspect == 'narrow') p <- p + theme(aspect.ratio=0.75)
+
+        p
       })
 
       #################### point selection ####################
