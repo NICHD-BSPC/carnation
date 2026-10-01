@@ -39,7 +39,7 @@ test_that("genePlotServer handles gene selection correctly", {
       list(
         gene.to.plot = c("gene1", "gene2"),
         gene.id = rownames(mock_dds),
-        comp_all = "comp1"  # Fixed: should match the key in res list
+        comp_all = "comp1"
       )
     ),
     config = config
