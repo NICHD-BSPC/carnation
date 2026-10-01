@@ -7,6 +7,8 @@ Interactive visualization that plots statistical significance against effect siz
 - Log2 fold change (`log2FoldChange`) on the x-axis — the direction and magnitude of change
 - Negative log10 raw or adjusted p-value on the y-axis — genes higher up are more statistically significant
 - Up-regulated genes sit to the right, down-regulated to the left, forming the characteristic two-winged "volcano" shape
+- A horizontal dashed line shows the current FDR threshold set in global
+  settings. A vertical line shows the log2FoldChange = 0 line.
 
 **When to use it:**
 - To find genes that combine a large fold change with strong statistical support (the upper corners)
