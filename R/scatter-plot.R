@@ -97,7 +97,7 @@ scatterPlotUI <- function(id, panel){
         column(6,
           selectizeInput(ns('compare'),
                         label=NULL,
-                        choices=c('LFC'='log2FoldChange', 'P-adj'='padj')
+                        choices=c('log2FoldChange'='log2FoldChange', 'padj'='padj', 'pvalue'='pvalue')
           ) # selectizeInput
         ) # column
       ), # fluidRow
@@ -454,7 +454,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         x_column <- paste0(compare, '.x')
         y_column <- paste0(compare, '.y')
         df_temp <- df
-        if (compare == 'padj') {
+        if (compare %in% c('padj','pvalue')) {
           df_temp[[x_column]] <- -log10(df_temp[[x_column]])
           df_temp[[y_column]] <- -log10(df_temp[[y_column]])
         }
@@ -513,7 +513,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
         # Make a temp df that will be used to determine significance in the single column df
         # required for df_react() to react to changed in input$compare
-        cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+        cols.sub <- c('log2FoldChange', 'pvalue', 'padj', 'geneid')
         df_full <- dplyr::inner_join(
           dplyr::select(res_i, all_of(cols.sub)),
           dplyr::select(res_j, all_of(cols.sub)),
@@ -536,7 +536,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         df_temp <- df
 
         # Need to -log10 transform padj.x and padj.y to get proper limits
-        if(input$compare == 'padj'){
+        if(input$compare %in% c('padj', 'pvalue')){
           df_temp[[x_column]] <- -log10(df_temp[[x_column]])
           df_temp[[y_column]] <- -log10(df_temp[[y_column]])
         }
@@ -715,10 +715,10 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         xcol <- paste0(compare, '.x')
         ycol <- paste0(compare, '.y')
 
-        if (compare=='padj') {
+        if (compare %in% c('padj','pvalue')) {
           # Convert padj to -log10(padj) for x and y
-          df$padj.x <- -log10(df$padj.x)
-          df$padj.y <- -log10(df$padj.y)
+          df[[xcol]] <- -log10(df[[xcol]])
+          df[[ycol]] <- -log10(df[[ycol]])
         }
 
         # filter rows with NA values
@@ -1029,10 +1029,10 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
             tags$tr(
               lapply(c('geneid', 'significance'), function(x) tags$th(rowspan=2, x)),
               lapply(all_comps,
-                     function(x) tags$th(class='dt-center', colspan=2, x))
+                     function(x) tags$th(class='dt-center', colspan=3, x))
             ),
             tags$tr(
-              lapply(rep(c('log2FoldChange', 'padj'), 2), tags$th)
+              lapply(rep(c('log2FoldChange', 'pvalue', 'padj'), 2), tags$th)
             )
           )
         ))
