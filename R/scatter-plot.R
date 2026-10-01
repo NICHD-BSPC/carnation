@@ -149,6 +149,16 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
+      fluidRow(
+        column(6, h5('Show grid?')),
+        column(6,
+          selectInput(ns("show_grid"), label=NULL,
+                      choices=c('yes', 'no'),
+                      selected='yes'
+          ) # selectInput
+        ) # column
+      ), # fluidRow
+
       bsCollapse(
         bsCollapsePanel('Axes limits',
 
@@ -201,52 +211,6 @@ scatterPlotUI <- function(id, panel){
               actionButton(ns('scatter_y_auto'), label='Autoscale')
             ) # column
           ) # fluidRow
-        ) # bsCollapsePanel
-      ), # bsCollapse
-
-      bsCollapse(
-        bsCollapsePanel('Grid lines',
-
-          fluidRow(
-            column(6, h5('Show x=0?')),
-            column(6,
-              selectInput(ns("vline"), label=NULL,
-                choices=c('yes', 'no'),
-                selected='yes'
-              ) # selectInput
-            ) # column
-          ), # fluidRow
-
-          fluidRow(
-            column(6, h5('Show y=0?')),
-            column(6,
-              selectInput(ns("hline"), label=NULL,
-                          choices=c('yes', 'no'),
-                          selected='yes'
-              ) # selectInput
-            ) # column
-          ), # fluidRow
-
-          fluidRow(
-            column(6, h5('Show grid?')),
-            column(6,
-              selectInput(ns("show_grid"), label=NULL,
-                          choices=c('yes', 'no'),
-                          selected='yes'
-              ) # selectInput
-            ) # column
-          ), # fluidRow
-
-          fluidRow(
-            column(6, h5('Show diagonal?')),
-            column(6,
-              selectInput(ns("dline"), label=NULL,
-                          choices=c('yes', 'no'),
-                          selected='yes'
-              ) # selectInput
-            ) # column
-          ) # fluidRow
-
         ) # bsCollapsePanel
       ), # bsCollapse
 
@@ -838,7 +802,6 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           lim.y=params[['lim.y']],
           plot_all='yes',
           name.col='geneid',
-          lines=c(input$vline, input$hline, input$dline),
           alpha=input$alpha,
           size=input$size,
           show.grid=input$show_grid,
@@ -870,7 +833,6 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           lim.x=params[['lim.x']],
           lim.y=params[['lim.y']],
           name.col='geneid',
-          lines=c(input$vline, input$hline, input$dline),
           alpha=input$alpha,
           size=input$size,
           show.grid=input$show_grid,
