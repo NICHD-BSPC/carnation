@@ -39,7 +39,7 @@ test_that("genePlotServer handles gene selection correctly", {
       list(
         gene.to.plot = c("gene1", "gene2"),
         gene.id = rownames(mock_dds),
-        comp_all = "comp1"  # Fixed: should match the key in res list
+        comp_all = "comp1"
       )
     ),
     config = config
@@ -59,7 +59,6 @@ test_that("genePlotServer handles gene selection correctly", {
       x_rotate = 30,
       color = "batch",
       trendline = "line",
-      gene_nrow = 1,
       legend = TRUE,
       txt_scale = 1,
       facet = "none",           # Set to 'none' to avoid faceting issues

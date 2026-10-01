@@ -7,6 +7,8 @@ Authors@R:
                role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3279-0054")),
         person(c("Matthew", "Tyler"), "Menold", , "matthew.menold@gmail.com",
                role = c("ctb"), comment = c(ORCID = "0009-0007-4728-2470")),
+        person(c("Dale", "McCauley"), "McCauley", , "dalelmccauley@gmail.com",
+               role = c("ctb"), comment = c(ORCID = "0009-0005-7550-6916")),
         person("Ryan", "Dale", , "ryan.dale@nih.gov",
                role = c("fnd"), comment = c(ORCID = "0000-0003-2664-3744"))
     )
@@ -25,9 +27,6 @@ Description: Highly interactive & modular shiny app to
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
-Depends:
-    R (>= 4.6.0)
 Imports:
     BiocParallel,
     colorspace,
@@ -80,3 +79,4 @@ biocViews:
     GUI, GeneExpression, Software, ShinyApps, GO, Transcription,
     Transcriptomics, Visualization, DifferentialExpression,
     Pathways, GeneSetEnrichment
+Config/roxygen2/version: 8.0.0

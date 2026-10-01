@@ -97,7 +97,7 @@ scatterPlotUI <- function(id, panel){
         column(6,
           selectizeInput(ns('compare'),
                         label=NULL,
-                        choices=c('LFC'='log2FoldChange', 'P-adj'='padj')
+                        choices=c('LFC'='log2FoldChange', 'padj'='padj', 'pvalue'='pvalue')
           ) # selectizeInput
         ) # column
       ), # fluidRow
@@ -112,159 +112,125 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      wellPanel(
-        style='background: white',
+      div(style='margin-bottom: 10px; margin-top: 10px;',
+        strong('Plot settings'),
+      ),
 
-        h4('Plot settings', style='margin-bottom: 10px; font-weight: bold;'),
+      fluidRow(
+        column(6, h5('Color palette')),
+        column(6,
+          selectInput(ns('color.palette'), label=NULL,
+                      choices=c('Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'),
+                      selected='Set2')
+        ) # column
+      ), # fluidRow
 
-        bsCollapse(
-          bsCollapsePanel('Axes limits',
+      fluidRow(
+        column(6, h5('Marker opacity')),
+        column(6,
+          numericInput(ns("alpha"), label=NULL,
+            value=0.7,
+            min=0,
+            max=1,
+            step=0.1
+          ) # numericInput
+        ) # column
+      ), # fluidRow
 
-            tags$label(class='control-label',
-                       'x-axis limits'),
+      fluidRow(
+        column(6, h5('Marker size')),
+        column(6,
+          numericInput(ns("size"), label=NULL,
+            value=4,
+            min=0,
+            max=10,
+            step=0.1
+          ) # numericInput
+        ) # column
+      ), # fluidRow
 
-            fluidRow(
-              column(6, h5('max')),
-              column(6,
-                numericInput(ns('scatter_xmax'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+      fluidRow(
+        column(6, h5('Aspect ratio')),
+        column(6,
+          selectInput(ns('aspect'),
+            label = NULL,
+            choices = c('wide', 'narrow')
+          ) # selectInput
+        ) # column
+      ), # fluidRow
 
-            fluidRow(
-              column(6, h5('min')),
-              column(6,
-                numericInput(ns('scatter_xmin'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+      fluidRow(
+        column(6, h5('Show grid?')),
+        column(6,
+          selectInput(ns("show_grid"), label=NULL,
+                      choices=c('yes', 'no'),
+                      selected='yes'
+          ) # selectInput
+        ) # column
+      ), # fluidRow
 
-            fluidRow(
-              column(4, align='left', style='margin-bottom: 10px;',
-                actionButton(ns('scatter_x_auto'), label='Autoscale')
-              ) # column
-            ), # fluidRow
+      bsCollapse(
+        bsCollapsePanel('Axes limits',
 
-            tags$label(class='control-label',
-                       'y-axis limits'),
+          tags$label(class='control-label',
+                     'x-axis limits'),
 
-            fluidRow(
-              column(6, h5('max')),
-              column(6,
-                numericInput(ns('scatter_ymax'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('max')),
+            column(6,
+              numericInput(ns('scatter_xmax'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('min')),
-              column(6,
-                numericInput(ns('scatter_ymin'), label=NULL,
-                  value=NULL)
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('min')),
+            column(6,
+              numericInput(ns('scatter_xmin'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(4, align='left', style='margin-bottom: 10px;',
-                actionButton(ns('scatter_y_auto'), label='Autoscale')
-              ) # column
-            ) # fluidRow
-          ) # bsCollapsePanel
-        ), # bsCollapse
+          fluidRow(
+            column(4, align='left', style='margin-bottom: 10px;',
+              actionButton(ns('scatter_x_auto'), label='Autoscale')
+            ) # column
+          ), # fluidRow
 
-        bsCollapse(
-          bsCollapsePanel('Point aesthetics',
+          tags$label(class='control-label',
+                     'y-axis limits'),
 
-            fluidRow(
-              column(6, h5('Color palette')),
-              column(6,
-                selectInput(ns('color.palette'), label=NULL,
-                            choices=c('Accent', 'Dark2', 'Paired', 'Pastel1', 'Pastel2', 'Set1', 'Set2', 'Set3'),
-                            selected='Set2')
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('max')),
+            column(6,
+              numericInput(ns('scatter_ymax'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('Marker opacity')),
-              column(6,
-                numericInput(ns("alpha"), label=NULL,
-                  value=0.7,
-                  min=0,
-                  max=1,
-                  step=0.1
-                ) # numericInput
-              ) # column
-            ), # fluidRow
+          fluidRow(
+            column(6, h5('min')),
+            column(6,
+              numericInput(ns('scatter_ymin'), label=NULL,
+                value=NULL)
+            ) # column
+          ), # fluidRow
 
-            fluidRow(
-              column(6, h5('Marker size')),
-              column(6,
-                numericInput(ns("size"), label=NULL,
-                  value=4,
-                  min=0,
-                  max=10,
-                  step=0.1
-                ) # numericInput
-              ) # column
-            ) # fluidRow
+          fluidRow(
+            column(4, align='left', style='margin-bottom: 10px;',
+              actionButton(ns('scatter_y_auto'), label='Autoscale')
+            ) # column
+          ) # fluidRow
+        ) # bsCollapsePanel
+      ), # bsCollapse
 
-          ) # bsCollapsePanel
-        ), # bsCollapse
-
-        bsCollapse(
-          bsCollapsePanel('Grid lines',
-
-            fluidRow(
-              column(6, h5('Show x=0?')),
-              column(6,
-                selectInput(ns("vline"), label=NULL,
-                  choices=c('yes', 'no'),
-                  selected='yes'
-                ) # selectInput
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
-              column(6, h5('Show y=0?')),
-              column(6,
-                selectInput(ns("hline"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='yes'
-                ) # selectInput
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
-              column(6, h5('Show grid?')),
-              column(6,
-                selectInput(ns("show_grid"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='yes'
-                ) # selectInput
-              ) # column
-            ), # fluidRow
-
-            fluidRow(
-              column(6, h5('Show diagonal?')),
-              column(6,
-                selectInput(ns("dline"), label=NULL,
-                            choices=c('yes', 'no'),
-                            selected='yes'
-                ) # selectInput
-              ) # column
-            ) # fluidRow
-
-          ) # bsCollapsePanel
-        ), # bsCollapse
-
-        fluidRow(align='center',
-          actionButton(ns('refresh'),
-                       label='Refresh plot',
-                       icon=icon('arrows-rotate'),
-                       class='btn-primary',
-                       style='margin-bottom: 10px;')
-        ) # fluidRow
-      ) # wellPanel
+      fluidRow(align='center',
+        actionButton(ns('refresh'),
+                     label='Refresh plot',
+                     icon=icon('arrows-rotate'),
+                     class='btn-primary',
+                     style='margin-bottom: 10px;')
+      ) # fluidRow
 
     ) # tagList
 
@@ -279,26 +245,28 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "yes"'),
-        withSpinner(
-          plotlyOutput(ns('plotly_out'), height='600px')
-        )
-      ), # conditionalPanel
-      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "no"'),
-        withSpinner(
-          plotOutput(ns('plot_out'), height='600px')
-        )
-      ), # conditionalPanel
+      div(align='center',
+        conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "yes"'),
+          withSpinner(
+            plotlyOutput(ns('plotly_out'), height='600px')
+          )
+        ), # conditionalPanel
+        conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "no"'),
+          withSpinner(
+            plotOutput(ns('plot_out'), height='600px')
+          )
+        ) # conditionalPanel
+      ), # div
 
       fluidRow(
         column(3,
 
           h4('Selection settings'),
 
-          bsCollapse(open='Plot selection',
+          bsCollapse(id=ns('plt_sel'),
             bsCollapsePanel('Plot selection',
               fluidRow(style='margin-left: 2px;',
-                uiOutput(ns('pt_selected')),
+                textOutput(ns('pt_selected')),
                 actionButton(ns('filter_sel_do'),
                              label='Show in table'),
                 actionButton(ns('filter_sel_reset_do'),
@@ -310,7 +278,7 @@ scatterPlotUI <- function(id, panel){
             ) # bsCollapsePanel
           ), # bsCollapse
 
-          bsCollapse(open='Table selection',
+          bsCollapse(id=ns('tbl_sel'),
             bsCollapsePanel('Table selection',
               fluidRow(style='margin-left: 2px;',
                 actionButton(ns('add_selected'), 'Add to scratchpad'),
@@ -419,6 +387,9 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         selected_genes$g <- NULL
         filter_tbl_by_sel_genes(FALSE)
 
+        updateCollapse(session, 'plt_sel', close='Plot selection')
+        updateCollapse(session, 'tbl_sel', close='Table selection')
+
       })
       # -------------------------------------------------------------- #
 
@@ -486,7 +457,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         x_column <- paste0(compare, '.x')
         y_column <- paste0(compare, '.y')
         df_temp <- df
-        if (compare == 'padj') {
+        if (compare %in% c('padj','pvalue')) {
           df_temp[[x_column]] <- -log10(df_temp[[x_column]])
           df_temp[[y_column]] <- -log10(df_temp[[y_column]])
         }
@@ -545,7 +516,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
         # Make a temp df that will be used to determine significance in the single column df
         # required for df_react() to react to changed in input$compare
-        cols.sub <- c('log2FoldChange', 'padj', 'geneid')
+        cols.sub <- c('log2FoldChange', 'pvalue', 'padj', 'geneid')
         df_full <- dplyr::inner_join(
           dplyr::select(res_i, all_of(cols.sub)),
           dplyr::select(res_j, all_of(cols.sub)),
@@ -568,7 +539,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         df_temp <- df
 
         # Need to -log10 transform padj.x and padj.y to get proper limits
-        if(input$compare == 'padj'){
+        if(input$compare %in% c('padj', 'pvalue')){
           df_temp[[x_column]] <- -log10(df_temp[[x_column]])
           df_temp[[y_column]] <- -log10(df_temp[[y_column]])
         }
@@ -747,10 +718,10 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         xcol <- paste0(compare, '.x')
         ycol <- paste0(compare, '.y')
 
-        if (compare=='padj') {
+        if (compare %in% c('padj','pvalue')) {
           # Convert padj to -log10(padj) for x and y
-          df$padj.x <- -log10(df$padj.x)
-          df$padj.y <- -log10(df$padj.y)
+          df[[xcol]] <- -log10(df[[xcol]])
+          df[[ycol]] <- -log10(df[[ycol]])
         }
 
         # filter rows with NA values
@@ -846,7 +817,6 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           lim.y=params[['lim.y']],
           plot_all='yes',
           name.col='geneid',
-          lines=c(input$vline, input$hline, input$dline),
           alpha=input$alpha,
           size=input$size,
           show.grid=input$show_grid,
@@ -878,7 +848,6 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           lim.x=params[['lim.x']],
           lim.y=params[['lim.y']],
           name.col='geneid',
-          lines=c(input$vline, input$hline, input$dline),
           alpha=input$alpha,
           size=input$size,
           show.grid=input$show_grid,
@@ -886,6 +855,14 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           lab.genes=lab.genes,
           source='scatter'
         )
+
+        # for narrow layout, manually set plotly dimensions
+        if(input$aspect == 'narrow'){
+          p <- plotly::plotly_build(p)
+          p$x$layout$width <- 1000
+          p$x$layout$height <- 600
+          p$x$layout$autosize <- FALSE
+        }
 
         # save plot source to reactive
         plot_source('scatter')
@@ -901,7 +878,15 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
       })
 
       output$plot_out <- renderPlot({
-        scatterplot() + theme(text=element_text(size=18))
+        # isolate to not trigger redraw
+        isolate({
+          aspect <- input$aspect
+        })
+
+        p <- scatterplot() + theme(text=element_text(size=18))
+        if(aspect == 'narrow') p <- p + theme(aspect.ratio=0.75)
+
+        p
       })
 
       #################### point selection ####################
@@ -935,6 +920,9 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           )
 
           selected_genes$g[[ length(selected_genes$g) + 1 ]] <- new[new_idx]
+
+          updateCollapse(session, 'plt_sel', open='Plot selection')
+
         } else if(length(new) > 0){
           showNotification(
               paste0('All selected genes already in selection'),
@@ -943,17 +931,12 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         }
       })
 
-      output$pt_selected <- renderUI({
-        np <- length(unique(unlist(selected_genes$g)))
+      output$pt_selected <- renderText({
+        np <- unique(unlist(selected_genes$g))
 
-        tagList(
-          fluidRow(
-            column(12, style='margin-bottom: 10px;',
+        req(length(np) > 0)
 
-              paste(np, 'genes selected')
-            )
-          )
-        )
+        paste(length(np), 'genes selected')
       })
 
       observeEvent(input$reset_plt_selection, {
@@ -1031,8 +1014,8 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         df <- scatter_dt()
 
         # Define the columns to format to 3 sig figs
-        columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
-        which_cols <- which(colnames(df) %in% columns_to_format)
+        float_idx <- vapply(df, function(x) typeof(x) %in% c('double', 'float'), logical(1))
+        format_cols <- colnames(df)[float_idx]
         border_cols <- c(1, 2, grep('padj', colnames(df)))
 
         all_comps <- c(input$x_axis_comp, input$y_axis_comp)
@@ -1047,10 +1030,10 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
             tags$tr(
               lapply(c('geneid', 'significance'), function(x) tags$th(rowspan=2, x)),
               lapply(all_comps,
-                     function(x) tags$th(class='dt-center', colspan=2, x))
+                     function(x) tags$th(class='dt-center', colspan=3, x))
             ),
             tags$tr(
-              lapply(rep(c('log2FoldChange', 'padj'), 2), tags$th)
+              lapply(rep(c('LFC', 'pvalue', 'padj'), 2), tags$th)
             )
           )
         ))
@@ -1064,7 +1047,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
                                                       targets=seq_len((ncol(df)-1)))))) %>%
           formatStyle(columns=border_cols,
                       'border-right'='solid 1px') %>%
-          formatSignif(columns=which_cols, digits=5)
+          formatSignif(columns=format_cols, digits=4)
       }) # renderDT
       # ------------------------------------------------------- #
 
@@ -1076,13 +1059,15 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         scatter_proxy %>% selectRows(NULL)
       })
 
+      observeEvent(input$scatter_tbl_rows_selected, {
+        updateCollapse(session, 'tbl_sel', open='Table selection')
+      })
+
       observeEvent(input$add_selected, {
         tbl <- scatter_dt()
         sel <- input$scatter_tbl_rows_selected
 
-        # handle NAs in symbol
         s <- tbl$geneid
-        #s[is.na(s)] <- tbl$gene[is.na(s)]
 
         if(is.null(sel)){
           showNotification(

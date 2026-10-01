@@ -97,9 +97,37 @@ maPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
+      div(style='margin-bottom: 10px',
+        strong('Plot settings'),
+      ),
+
+      fluidRow(
+        column(4, h5('Opacity')),
+        column(
+          8,
+          sliderInput(ns('alpha'),
+                     label = NULL,
+                     min = 0,
+                     max = 1,
+                     value = 0.6,
+                     ticks = FALSE)
+        )
+      ),
+
+      fluidRow(
+        column(4, h5('Aspect ratio')),
+        column(
+          8,
+          selectInput(ns('aspect'),
+            label = NULL,
+            choices = c('wide', 'narrow')
+          )
+        )
+      ),
+
       bsCollapse(
         id=ns('plot_opts'),
-        bsCollapsePanel('Plot options',
+        bsCollapsePanel('Axis limits',
 
           tags$label(class='control-label',
                      'y-axis limits'),
@@ -127,7 +155,15 @@ maPlotUI <- function(id, panel){
           ) # fluidRow
 
         ) # bsCollapsePanel
-      ) # bsCollapse
+      ), # bsCollapse
+
+      fluidRow(align='center',
+        actionButton(ns('plot_do'),
+                     label='Refresh plot',
+                     icon=icon('arrows-rotate'),
+                     class='btn-primary',
+                     style='margin-bottom: 10px;')
+      ) # fluidRow
 
     ) # tagList
   } else if(panel == 'main'){
@@ -141,9 +177,9 @@ maPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      withSpinner(
+      div(align='center',
         uiOutput(ns('maplot_out'))
-      ) # withSpinner
+      )
     ) # tagList
   }
 }
@@ -202,7 +238,7 @@ maPlotServer <- function(id, obj, plot_args, config){
       # NOTE: this is used only for the downloaded plot
       maplot <- eventReactive(c(input$comp_all, plot_args()$gene.to.plot,
                                 curr_thres$fdr.thres, curr_thres$fc.thres,
-                                input$ma_ymax, input$ma_ymin), {
+                                input$plot_do), {
         validate(
           need(!is.null(app_object()$res) & !is.null(input$comp_all) & input$comp_all != '',
                'Waiting for selection')
@@ -231,7 +267,7 @@ maPlotServer <- function(id, obj, plot_args, config){
                      fdr.thres=curr_thres$fdr.thres,
                      fc.thres=curr_thres$fc.thres,
                      fc.lim=c(input$ma_ymin, input$ma_ymax),
-                     lab.genes=lab.genes)
+                     lab.genes=lab.genes, opacity=input$alpha)
       }) # eventReactive maplot
 
       # observer for maplot ylim autoscale btn
@@ -254,7 +290,7 @@ maPlotServer <- function(id, obj, plot_args, config){
       # this is the interactive plot_ly version
       maplot_ly <- eventReactive(c(app_object()$res, input$comp_all, plot_args()$gene.to.plot,
                                 curr_thres$fdr.thres, curr_thres$fc.thres,
-                                input$ma_ymin, input$ma_ymax), {
+                                input$plot_do), {
         validate(
           need(!is.null(app_object()$res) & !is.null(input$comp_all) & input$comp_all != '',
                'Waiting for selection')
@@ -285,25 +321,41 @@ maPlotServer <- function(id, obj, plot_args, config){
                  fdr.thres=curr_thres$fdr.thres,
                  fc.thres=curr_thres$fc.thres,
                  fc.lim=c(input$ma_ymin, input$ma_ymax),
-                 lab.genes=lab.genes)
+                 lab.genes=lab.genes, opacity=input$alpha)
       }) # eventReactive maplot_ly
 
       output$maplot_out <- renderUI({
+        # isolate this to not trigger plot redraw
+        isolate({
+          aspect <- input$aspect
+        })
+
         if(input$plot_interactive == 'yes'){
           p <- maplot_ly() %>% toWebGL()
 
           output$plot1 <- renderPlotly({ p })
 
-          withSpinner(
-            plotlyOutput(ns('plot1'), height='600px')
+          # set width based on aspect ratio
+          if(aspect == 'narrow') width <- '900px'
+          else width <- 'auto'
+
+          div(align='center',
+            withSpinner(
+              plotlyOutput(ns('plot1'), height='600px', width=width)
+            )
           )
         } else if(input$plot_interactive == 'no'){
           p <- maplot() + theme(text=element_text(size=18))
 
+          # set aspect ratio
+          if(aspect == 'narrow') p <- p + theme(aspect.ratio=0.75)
+
           output$plot2 <- renderPlot({ p })
 
-          withSpinner(
-            plotOutput(ns('plot2'), height='600px')
+          div(align='center',
+            withSpinner(
+              plotOutput(ns('plot2'), height='600px')
+            )
           )
         }
       })

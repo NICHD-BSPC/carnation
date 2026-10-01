@@ -24,6 +24,8 @@
   - default is 500 genes
   - increasing this number may capture more subtle patterns
   - decreasing this number focuses on the most variable genes
+- `Aspect ratio`: choose 'wide' or 'narrow' to switch between a wide or narrow view of the plot.
+
 
 #### Advanced Options
 
