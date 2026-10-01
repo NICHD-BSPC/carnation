@@ -479,7 +479,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               ), # column
               column(10, style='margin-top: 20px',
                 conditionalPanel('input.data_type == "Existing"',
-                  column(6,
+                  column(5,
 
                     introBox(
                       tags$div(
@@ -491,7 +491,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                     )
                   ),
                   conditionalPanel('input.dds != "" & input.dds != "Choose one"',
-                    column(6,
+                    column(7,
                       introBox(
                         tags$div(
                           DTOutput('analysis_desc')
@@ -712,6 +712,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # list to hold project/analysis descriptions
     project_info <- reactiveValues(descriptions=list(), current=NULL, df=NULL)
+    analysis_desc_df <- reactiveVal(NULL)
 
     #################### config updates ####################
 
@@ -812,7 +813,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     pattern <- reactive({ config()$server$pattern })
 
     # reactive values to keep assay list
-    assay.list <- reactiveValues(l=NULL)
+    assay.list <- reactiveValues(l=NULL, info=NULL)
 
     settings <- settingsServer('settings',
                                details=reactive({ list(username=user_details$username, where=input$shinymanager_where) }),
@@ -845,6 +846,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       updateSelectizeInput(session, 'dds',
                            choices=dds_choices)
       assay.list$l <- l$assay_list
+      assay.list$info <- l$assay_info
 
       if(l$reload_parent) session$reload()
 
@@ -992,6 +994,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         anames <- c(pnames, setdiff(names(assay.choices), pnames))
         assay.choices <- assay.choices[anames]
       }
+
+      # reorder assay list
+      assay.list$l[[ input$dds ]] <- assay.choices
+
       # if more than one assay found & autoload_first_analysis not set
       if(length(assay.choices) > 1 & !config()$server$autoload_first_analysis){
         assay.choices <- c('Choose one', assay.choices)
@@ -1008,17 +1014,63 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     output$analysis_desc <- renderDT({
       req(input$dds)
 
-      df <- data.frame(
-        'analysis_name'=names(project_info$descriptions[[ input$dds ]]),
-        'description'=unname(unlist(project_info$descriptions[[ input$dds ]]))
-      )
+      proj_desc <- project_info$descriptions[[ input$dds ]]
+
+      assay_choices <- names(assay.list$l[[ input$dds ]])
+
+      # get assay info, order by choices
+      assay_info <- assay.list$info[[ input$dds ]]
+      assay_info <- assay_info[ unname(assay.list$l[[ input$dds ]]), ]
+
+      # check fields present in descriptions
+      field_names <- unique(unlist(lapply(proj_desc, names)))
+
+      if(is.null(field_names)){
+        # here entries are a single string description
+        df <- data.frame(
+                row.names=assay_choices,
+                analysis_name=assay_choices,
+                description=NA
+              )
+
+        if(any(names(proj_desc) %in% rownames(df))){
+          names_present <- intersect(names(proj_desc), rownames(df))
+          desc_present <- unlist(proj_desc)[ names_present ]
+          df[ names_present, 'description' ] <- unname(desc_present)
+        }
+
+        df <- cbind(df, assay_info)
+
+      } else {
+        # here we handle multiple fields for each entry
+        df.i <- lapply(proj_desc, function(x){
+                 if(all(field_names %in% names(x))) x
+                 else {
+                   # check for missing fields and add NAs
+                   ff <- setdiff(field_names, names(x))
+                   ff <- c(x, setNames(rep(NA, length(ff)), ff))
+
+                   # reorder
+                   ff <- ff[ field_names ]
+                 }
+               })
+        df <- as.data.frame(do.call('rbind', df.i))
+        cnames <- colnames(df)
+        df$analysis_name <- rownames(df)
+        df <- df[, c('analysis_name', cnames)]
+      }
+
+      # cache state
+      analysis_desc_df(df)
+
 
       datatable(df,
                 rownames=FALSE,
                 selection='single',
                 caption=tags$caption(style='font-weight: bold; font-size: 15px;',
                                      'Summary of available analyses'),
-                options=list(dom='tp', stateSave=TRUE))
+                options=list(dom='tp', stateSave=TRUE)) %>%
+        formatStyle(columns="size", "white-space"="nowrap")
     })
 
     # proxy for analysis description table
@@ -1026,23 +1078,32 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # return 'group/project' from table selection
     analysis_from_tbl <- eventReactive(input$analysis_desc_rows_selected, {
-      all_analysis <- names(project_info$descriptions[[ input$dds ]])
+      req(input$dds)
       sel <- input$analysis_desc_rows_selected
 
-      # these are the datasets for the current project
+      req(length(sel) > 0)
+
+      # current analysis table
+      df <- analysis_desc_df()
+
+      all_analysis <- rownames(df)
+
+      # these are the analyses for the current project
       current_assays <- assay.list$l[[ input$dds ]]
 
       # match the selected name to the current assays
       # since the order might be different (due to sorting)
       idx <- which(names(current_assays) %in% all_analysis[sel])
 
-      current_assays[idx]
+      current_assays[idx[1]]
     }) # observeEvent
 
     # update 'assay' input based on selection
     observeEvent(analysis_from_tbl(), {
-      updateSelectizeInput(session, 'assay',
-                           selected=analysis_from_tbl())
+      if(input$assay != analysis_from_tbl()){
+        updateSelectizeInput(session, 'assay',
+                             selected=analysis_from_tbl())
+      }
     })
 
     # update selection based on 'assay'
@@ -1055,35 +1116,27 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       # get name of assay
       current_assays <- assay.list$l[[ input$dds ]]
       assay_idx <- which(unname(current_assays) %in% input$assay)
-      assay_name <- names(current_assays)[assay_idx]
 
-      # match to description
-      current_desc <- project_info$descriptions[[ input$dds ]]
-
-      validate(
-        need(length(current_desc) > 0, 'no project descriptions')
-      )
-      desc_idx <- which(names(current_desc) %in% assay_name)
-
-      if(length(desc_idx) == 0){
+      # if nothing selected, return NULL
+      if(length(assay_idx) == 0){
         analysis_desc_proxy %>% selectRows(NULL)
         return()
       }
 
-      # get idx relative to current sort order
-      current_idx <- which(input$analysis_desc_rows_all == desc_idx[1])
+      # now get index frm current analysis tbl
+      analysis_tbl <- analysis_desc_df()
+      analysis_name <- names(current_assays)[assay_idx[1]]
+      current_idx <- which(rownames(analysis_tbl) %in% analysis_name)
 
-      # get page index
-      page_length <- input$analysis_desc_state$length
-      if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
-        page_length <- 10
+      # if something is selected, go to that page to show it
+      if(length(current_idx) > 0){
+        page_length <- input$analysis_desc_state$length
+        if(is.null(page_length) || !is.numeric(page_length) || page_length < 1){
+          page_length <- 10
+        }
+        page_idx <- floor((current_idx[1] - 1) / page_length) + 1
+        DT::selectPage(analysis_desc_proxy, page_idx)
       }
-      page_idx <- floor((current_idx - 1) / page_length) + 1
-
-      # update tbl selection
-      analysis_desc_proxy %>% selectRows(NULL) %>%
-        selectRows(desc_idx[1]) %>% selectPage(page_idx)
-
     })
 
     #################### global project summary ####################
@@ -1112,8 +1165,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     # update 'dds' input based on table selection
     observeEvent(proj_from_tbl(), {
-      updateSelectizeInput(session, 'dds',
-                           selected=proj_from_tbl())
+      if(input$dds != proj_from_tbl()){
+        updateSelectizeInput(session, 'dds',
+                             selected=proj_from_tbl())
+      }
     })
 
     #################### observer to load data ####################

@@ -51,7 +51,8 @@ test_that("pcaPlotServer handles reactive inputs correctly", {
       pca_loadings_ngenes = 10,
       pca_color = "condition",
       pca_cols = "condition",
-      pca_col_levels = c("treatment", "control")
+      pca_col_levels = c("treatment", "control"),
+      aspect = 'wide'
     )
     session$flushReact()
 
