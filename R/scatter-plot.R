@@ -245,16 +245,18 @@ scatterPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "yes"'),
-        withSpinner(
-          plotlyOutput(ns('plotly_out'), height='600px')
-        )
-      ), # conditionalPanel
-      conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "no"'),
-        withSpinner(
-          plotOutput(ns('plot_out'), height='600px')
-        )
-      ), # conditionalPanel
+      div(align='center',
+        conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "yes"'),
+          withSpinner(
+            plotlyOutput(ns('plotly_out'), height='600px')
+          )
+        ), # conditionalPanel
+        conditionalPanel(paste0('input["', ns('plot_interactive'), '"] == "no"'),
+          withSpinner(
+            plotOutput(ns('plot_out'), height='600px')
+          )
+        ) # conditionalPanel
+      ), # div
 
       fluidRow(
         column(3,
