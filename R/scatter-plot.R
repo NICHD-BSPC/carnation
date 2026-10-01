@@ -263,10 +263,10 @@ scatterPlotUI <- function(id, panel){
 
           h4('Selection settings'),
 
-          bsCollapse(open='Plot selection',
+          bsCollapse(id=ns('plt_sel'),
             bsCollapsePanel('Plot selection',
               fluidRow(style='margin-left: 2px;',
-                uiOutput(ns('pt_selected')),
+                textOutput(ns('pt_selected')),
                 actionButton(ns('filter_sel_do'),
                              label='Show in table'),
                 actionButton(ns('filter_sel_reset_do'),
@@ -278,7 +278,7 @@ scatterPlotUI <- function(id, panel){
             ) # bsCollapsePanel
           ), # bsCollapse
 
-          bsCollapse(open='Table selection',
+          bsCollapse(id=ns('tbl_sel'),
             bsCollapsePanel('Table selection',
               fluidRow(style='margin-left: 2px;',
                 actionButton(ns('add_selected'), 'Add to scratchpad'),
@@ -386,6 +386,9 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         genes_clicked$g <- NULL
         selected_genes$g <- NULL
         filter_tbl_by_sel_genes(FALSE)
+
+        updateCollapse(session, 'plt_sel', close='Plot selection')
+        updateCollapse(session, 'tbl_sel', close='Table selection')
 
       })
       # -------------------------------------------------------------- #
@@ -917,6 +920,9 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
           )
 
           selected_genes$g[[ length(selected_genes$g) + 1 ]] <- new[new_idx]
+
+          updateCollapse(session, 'plt_sel', open='Plot selection')
+
         } else if(length(new) > 0){
           showNotification(
               paste0('All selected genes already in selection'),
@@ -925,17 +931,12 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         }
       })
 
-      output$pt_selected <- renderUI({
-        np <- length(unique(unlist(selected_genes$g)))
+      output$pt_selected <- renderText({
+        np <- unique(unlist(selected_genes$g))
 
-        tagList(
-          fluidRow(
-            column(12, style='margin-bottom: 10px;',
+        req(length(np) > 0)
 
-              paste(np, 'genes selected')
-            )
-          )
-        )
+        paste(length(np), 'genes selected')
       })
 
       observeEvent(input$reset_plt_selection, {
@@ -1056,6 +1057,10 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
       observeEvent(input$reset_tbl, {
         scatter_proxy %>% selectRows(NULL)
+      })
+
+      observeEvent(input$scatter_tbl_rows_selected, {
+        updateCollapse(session, 'tbl_sel', open='Table selection')
       })
 
       observeEvent(input$add_selected, {
