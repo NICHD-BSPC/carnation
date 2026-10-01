@@ -173,9 +173,7 @@ pcaPlotUI <- function(id, panel){
           actionButton(ns('reset_pca_cols'),'Reset',
                        class='btn-primary')
         ), # bsCollapsePanel
-      #), # bsCollapse
 
-      #bsCollapse(
         bsCollapsePanel('gene loadings',
           fluidRow(
             column(4, 'show loadings?'),
