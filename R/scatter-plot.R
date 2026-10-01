@@ -1062,9 +1062,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         tbl <- scatter_dt()
         sel <- input$scatter_tbl_rows_selected
 
-        # handle NAs in symbol
         s <- tbl$geneid
-        #s[is.na(s)] <- tbl$gene[is.na(s)]
 
         if(is.null(sel)){
           showNotification(
