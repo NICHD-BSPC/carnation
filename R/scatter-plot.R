@@ -1013,8 +1013,8 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
         df <- scatter_dt()
 
         # Define the columns to format to 3 sig figs
-        columns_to_format <- c("padj.x", "padj.y", "log2FoldChange.x", "log2FoldChange.y")
-        which_cols <- which(colnames(df) %in% columns_to_format)
+        float_idx <- vapply(df, function(x) typeof(x) %in% c('double', 'float'), logical(1))
+        format_cols <- colnames(df)[float_idx]
         border_cols <- c(1, 2, grep('padj', colnames(df)))
 
         all_comps <- c(input$x_axis_comp, input$y_axis_comp)
@@ -1046,7 +1046,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
                                                       targets=seq_len((ncol(df)-1)))))) %>%
           formatStyle(columns=border_cols,
                       'border-right'='solid 1px') %>%
-          formatSignif(columns=which_cols, digits=5)
+          formatSignif(columns=format_cols, digits=4)
       }) # renderDT
       # ------------------------------------------------------- #
 
