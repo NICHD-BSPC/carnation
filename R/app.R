@@ -70,22 +70,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         tags$style(
           HTML(cfg$style$global)
         ),  # tags$style
-        tags$script(
-          HTML("
-            Shiny.addCustomMessageHandler(
-              'bookmark_restore_probe',
-              function(message) {
-                window.requestAnimationFrame(function() {
-                  Shiny.setInputValue(
-                    'bookmark_restore_ack',
-                    message,
-                    { priority: 'event' }
-                  );
-                });
-              }
-            );
-          ")
-        ) # tags$script
+        bookmarkRestoreUI('bookmarking')
       ), # tags$head
 
       titlePanel(
@@ -120,8 +105,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               ), # column
               column(6, align='left',
                 introBox(
-                  actionButton('bookmark', label='Bookmark', class='btn-primary'),
-                  data.step=11,
+                  bookmarkButtonUI('bookmarking'),
+                  data.step=12,
                   data.intro='Save the current settings for your plots into the url to share with others'
                 )
               ) # column
@@ -502,7 +487,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                       br(),
 
                       introBox(
-                        uiOutput('saved_bookmarks_ui')
+                        savedBookmarksUI('bookmarking')
                       ),
 
                       br(), br(),
@@ -536,7 +521,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                         br(),
                         introBox(
                           tags$div(
-                            DTOutput('bookmarks_desc')
+                            bookmarksDescriptionUI('bookmarking')
                           )
 
                         )
@@ -1184,7 +1169,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       # load data from RDS object
       obj <- tryCatch(
-               readRDS(input$assay),
+               readRDS(assay_path),
                error = function(e){ e })
 
       if(inherits(obj, 'error')){
@@ -1306,15 +1291,12 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     ################ Bookmarking ##################
 
-    bookmark_handlers <- register_bookmark_handlers(
+    bookmark_handlers <- bookmarkingServer(
+      'bookmarking',
       input,
-      output,
-      session,
       assay.list = assay.list,
-      gene.id = gene.id,
       load_assay = load_assay,
       current = current,
-      original = original,
       bookmarks_root = bookmarks_root,
       settings = settings
     )

@@ -25,6 +25,7 @@
 #' @importFrom RColorBrewer brewer.pal
 #' @importFrom reticulate py_install use_virtualenv
 #' @importFrom rintrojs introjsUI introBox introjs
+#' @importFrom rlang %||%
 #' @importFrom scales alpha
 #' @rawNamespace import(shiny, except = c(dataTableOutput, renderDataTable))
 #' @importFrom shinyBS bsCollapse bsCollapsePanel updateCollapse
