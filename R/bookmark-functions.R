@@ -11,13 +11,79 @@ bookmarkButtonUI <- function(id) {
 savedBookmarksUI <- function(id) {
   ns <- NS(id)
 
-  uiOutput(ns('saved_bookmarks_ui'))
+  conditionalPanel(
+    'output.has_bookmarks', ns = ns,
+    selectInput(ns('bookmark_dropdown'), 'Saved Bookmarks', choices = NULL),
+    fluidRow(style='margin-bottom: 10px',
+      column(6, align='left',
+        actionButton(ns('go_bookmark'), 'Load Bookmark', class = 'btn-primary')
+      ), # column
+      column(6, align='right',
+        conditionalPanel(
+          'output.is_admin', ns = ns,
+          actionButton(ns('delete_bookmark'), 'Delete Bookmark', class = 'btn-primary')
+        )
+      ) # column
+    ) # fluidRow
+  )
 }
 
 bookmarksDescriptionUI <- function(id) {
   ns <- NS(id)
 
   DTOutput(ns('bookmarks_desc'))
+}
+
+bookmark_name_modal <- function(ns) {
+  modalDialog(
+    title = 'Make a bookmark of the current view',
+    textInput(
+      ns('bookmark_name'),
+      'Bookmark name',
+      placeholder = 'Enter a descriptive name'
+    ),
+    footer = tagList(
+      modalButton('Cancel'),
+      actionButton(
+        ns('confirm_bookmark'),
+        'Save Bookmark',
+        class = 'btn-primary'
+      )
+    ),
+    easyClose = TRUE
+  )
+}
+
+bookmark_loading_modal <- function() {
+  modalDialog(
+    icon('spinner', class = 'fa-spin'),
+    'Loading bookmark, please wait',
+    footer = NULL,
+    easyClose = FALSE
+  )
+}
+
+bookmark_access_denied_modal <- function() {
+  modalDialog(
+    title = 'You do not have access to this data area.',
+    easyClose = FALSE
+  )
+}
+
+bookmark_delete_modal <- function(ns) {
+  modalDialog(
+    title = 'Delete bookmark',
+    'Are you sure you want to delete this bookmark?',
+    footer = tagList(
+      modalButton('Cancel'),
+      actionButton(
+        ns('delete_bookmark_do'),
+        'Delete Bookmark',
+        class = 'btn-danger'
+      )
+    ),
+    easyClose = TRUE
+  )
 }
 
 bookmarkRestoreUI <- function(id) {
@@ -47,7 +113,181 @@ bookmarkRestoreUI <- function(id) {
   )
 }
 
+# Builds the bookmark description table displayed in the saved-bookmarks UI.
+bookmark_description_table <- function(bookmarks_df) {
+  hidden_columns <- match(
+    c('id', 'comp', 'mode'),
+    names(bookmarks_df)
+  ) - 1
+
+  datatable(
+    bookmarks_df,
+    rownames = FALSE,
+    selection = 'single',
+    caption = tags$caption(
+      style = 'font-weight: bold; font-size: 15px;',
+      'Available bookmarks'
+    ),
+    options = list(
+      dom = 'tlfip',
+      columnDefs = list(
+        list(
+          visible = FALSE,
+          targets = hidden_columns
+        )
+      )
+    )
+  )
+}
+
+# Registers the reactive outputs and observers used to keep the saved-bookmark
+# table and dropdown synchronized.
+setup_saved_bookmarks_ui <- function(
+  input,
+  output,
+  session,
+  bookmarks,
+  is_admin,
+  loaded_label = function() NULL
+) {
+  output$bookmarks_desc <- renderDT({
+    bookmark_description_table(bookmarks())
+  })
+
+  bookmarks_desc_proxy <- dataTableProxy(
+    'bookmarks_desc',
+    session = session
+  )
+
+  table_bookmark_selected <- eventReactive(
+    input$bookmarks_desc_rows_selected,
+    {
+      bookmarks_df <- bookmarks()
+      selection <- input$bookmarks_desc_rows_selected
+
+      selected_bookmark <- bookmarks_df[selection, ]
+      selected_bookmark$id
+    }
+  )
+
+  observeEvent(table_bookmark_selected(), {
+    selection <- input$bookmarks_desc_rows_selected
+    req(length(selection) == 1)
+    updateSelectizeInput(
+      session,
+      inputId = 'bookmark_dropdown',
+      selected = table_bookmark_selected()
+    )
+  })
+
+  # Updates the bookmark table selection based on dropdown selection.
+  observeEvent(
+    list(input$bookmark_dropdown, input$bookmarks_desc_rows_all),
+    {
+      bookmarks_df <- bookmarks()
+      row_idx <- match(input$bookmark_dropdown, bookmarks_df$id)
+
+      req(!is.na(row_idx))
+
+      displayed_position <- match(
+        row_idx,
+        input$bookmarks_desc_rows_all
+      )
+
+      if (is.na(displayed_position)) {
+        bookmarks_desc_proxy %>% selectRows(NULL)
+        return()
+      }
+
+      page_length <- input$bookmarks_desc_state$length
+      if (
+        is.null(page_length) ||
+          !is.numeric(page_length) ||
+          page_length < 1
+      ) {
+        page_length <- 10
+      }
+      page_idx <- floor((displayed_position - 1) / page_length) + 1
+
+      bookmarks_desc_proxy %>%
+        selectRows(NULL) %>%
+        selectRows(row_idx) %>%
+        selectPage(page_idx)
+    }
+  )
+
+  output$has_bookmarks <- reactive(nrow(bookmarks()) > 0)
+  output$is_admin <- is_admin
+  outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
+  outputOptions(output, 'is_admin', suspendWhenHidden = FALSE)
+
+  observe({
+    bookmarks_df <- bookmarks()
+    sel <- bookmarks_df$id[match(loaded_label(), bookmarks_df$label)]
+    updateSelectInput(
+      session,
+      'bookmark_dropdown',
+      choices = setNames(bookmarks_df$id, bookmarks_df$label),
+      selected = if (length(sel) == 1 && !is.na(sel)) sel else NULL
+    )
+  })
+
+  invisible(NULL)
+}
+
 ################# Helper Functions #######################
+
+# After the next server flush, asks the browser to confirm that it has reached
+# a render frame.
+send_bookmark_restore_probe <- function(session, root_session, round) {
+  root_session$onFlushed(
+    function() {
+      if (!root_session$isClosed()) {
+        session$sendCustomMessage(
+          'bookmark_restore_probe',
+          list(round = round)
+        )
+      }
+    },
+    once = TRUE
+  )
+}
+
+#' Resolves an assay selected in the load-data interface
+#'
+#' @param assay_list The named list of available assays per project.
+#' @param project The selected project identifier.
+#' @param assay_path The selected assay path.
+#'
+#' @return A list containing the project, analysis, and path, or `NULL` when
+#' the selection cannot be resolved.
+#'
+resolve_selected_assay <- function(assay_list, project, assay_path) {
+  if (
+    length(project) != 1L ||
+      is.na(project) ||
+      length(assay_path) != 1L ||
+      is.na(assay_path)
+  ) {
+    return(NULL)
+  }
+
+  project_assays <- assay_list[[project]]
+  if (is.null(project_assays)) {
+    return(NULL)
+  }
+
+  idx <- match(assay_path, unname(project_assays))
+  if (is.na(idx)) {
+    return(NULL)
+  }
+
+  list(
+    project = project,
+    analysis = names(project_assays)[idx],
+    path = unname(project_assays[idx])
+  )
+}
 
 #' Checks whether the given project and analysis are accessible
 #' in the assay list and returns the file path if so.
@@ -147,26 +387,35 @@ list_bookmark_dirs <- function(root, recursive = FALSE) {
 #' the bookmark root level or the project root level. But with a large
 #' number of bookmarks a smaller search area will be better.
 #'
-#' @return Gives the path to the requested bookmark directory.
+#' @return Gives the path to the requested bookmark directory, or `NULL`
+#' when the id is invalid or no single matching bookmark is found.
 #'
 find_bookmark_dir <- function(id, root) {
-  if (
-    length(id) != 1 ||
-      is.na(id) ||
-      !grepl("^[A-Za-z0-9]+$", id)
-  ) {
-    message('Saved view is unavailable.')
-    return()
+  if (length(id) != 1 || is.na(id) || !grepl('^[A-Za-z0-9]+$', id)) {
+    return(NULL)
   }
 
   bookmark_dirs <- list_bookmark_dirs(root, recursive = TRUE)
   matches <- bookmark_dirs[basename(bookmark_dirs) == id]
 
-  if (length(matches) != 1) {
-    stop('Saved view is unavailable.')
+  if (length(matches) == 1) matches[[1]] else NULL
+}
+
+#' Deletes a saved bookmark
+#'
+#' @param id The unique ID of the bookmark to delete.
+#' @param bookmarks_dir The bookmark directory to search.
+#'
+#' @return `TRUE` when the bookmark was deleted, otherwise `FALSE`.
+#'
+delete_saved_bookmark <- function(id, bookmarks_dir) {
+  dir <- find_bookmark_dir(id, bookmarks_dir)
+
+  if (is.null(dir)) {
+    return(FALSE)
   }
 
-  matches[[1]]
+  unlink(dir, recursive = TRUE) == 0
 }
 
 #' Extracts metadata from values.rds and returns it as a one-row data frame.
@@ -252,6 +501,113 @@ list_saved_bookmarks <- function(bookmarks_dir, project, analysis) {
   bookmarks_df
 }
 
+#' Canonicalizes whitespace in a bookmark label
+#'
+#' @param label A character vector of bookmark labels.
+#'
+#' @return Labels with surrounding whitespace removed and internal whitespace
+#' collapsed to single spaces.
+#'
+canonicalize_bookmark_label <- function(label) {
+  label <- trimws(label)
+  gsub('[[:space:]]+', ' ', label)
+}
+
+#' Normalizes a bookmark label for comparison
+#'
+#' @param label A character vector of bookmark labels.
+#'
+#' @return The canonicalized, lowercase labels.
+#'
+normalize_bookmark_label <- function(label) {
+  tolower(canonicalize_bookmark_label(label))
+}
+
+#' Checks whether a bookmark label is already in use
+#'
+#' @param label The proposed bookmark label.
+#' @param bookmarks A bookmark data frame returned by
+#'   `list_saved_bookmarks()`.
+#'
+#' @return `TRUE` when the normalized label already exists.
+#'
+bookmark_label_exists <- function(label, bookmarks) {
+  normalized_label <- normalize_bookmark_label(label)
+  existing_labels <- normalize_bookmark_label(bookmarks$label)
+
+  any(existing_labels == normalized_label, na.rm = TRUE)
+}
+
+#' Validates a label for a new bookmark
+#'
+#' @param label The proposed bookmark label.
+#' @param project The project containing the assay.
+#' @param analysis The assay analysis name.
+#' @param bookmarks_root The root bookmark storage directory.
+#'
+#' @return A list containing the validation result, canonicalized label, and
+#' an error message when validation fails.
+#'
+validate_new_bookmark_label <- function(
+  label,
+  project,
+  analysis,
+  bookmarks_root
+) {
+  label <- canonicalize_bookmark_label(label %||% '')
+
+  if (!nzchar(label)) {
+    return(list(
+      valid = FALSE,
+      label = label,
+      message = 'Enter a bookmark name.'
+    ))
+  }
+
+  bookmarks_dir <- get_bookmarks_path(
+    project,
+    analysis,
+    bookmarks_root
+  )
+
+  if (is.null(bookmarks_dir)) {
+    return(list(
+      valid = FALSE,
+      label = label,
+      message = 'Unable to determine the bookmark location.'
+    ))
+  }
+
+  existing_bookmarks <- list_saved_bookmarks(
+    bookmarks_dir,
+    project,
+    analysis
+  )
+
+  if (bookmark_label_exists(label, existing_bookmarks)) {
+    return(list(
+      valid = FALSE,
+      label = label,
+      message = paste(
+        'A bookmark with that name already exists',
+        'for this assay.'
+      )
+    ))
+  }
+
+  list(
+    valid = TRUE,
+    label = label,
+    message = NULL
+  )
+}
+
+# Checks whether the requested project/analysis is already the one
+# currently loaded, so bookmark restoration can skip reloading it.
+is_assay_already_loaded <- function(current, project, analysis) {
+  isTRUE(identical(isolate(current$proj), project)) &&
+    isTRUE(identical(isolate(current$analysis), analysis))
+}
 
 # Takes the stored inputs and reapplies them to each
 # type of field.

@@ -9,6 +9,7 @@
 #' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
 #' & 'gene.to.plot' (genes selected in scratchpad)
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with volcano plot UI.
@@ -237,7 +238,8 @@ volcanoPlotUI <- function(id, panel) {
 
 #' @rdname volcanoplotmod
 #' @export
-volcanoPlotServer <- function(id, obj, plot_args, config) {
+volcanoPlotServer <- function(id, obj, plot_args, config,
+                              bookmark_restore_tick = function() NULL) {
   moduleServer(
     id,
     function(input, output, session) {
@@ -329,7 +331,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           curr_thres$fdr.thres,
           curr_thres$fc.thres,
           plot_args()$gene.to.plot,
-          input$plot_do
+          input$plot_do,
+          bookmark_restore_tick()
         ),
         {
           # Checks that the required inputs exist and are valid
@@ -383,7 +386,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
           curr_thres$fdr.thres,
           curr_thres$fc.thres,
           plot_args()$gene.to.plot,
-          input$plot_do
+          input$plot_do,
+          bookmark_restore_tick()
         ),
         {
           # Checks that the required inputs exist and are valid
@@ -431,6 +435,8 @@ volcanoPlotServer <- function(id, obj, plot_args, config) {
       )
 
       output$volcano_plot_out <- renderUI({
+        req(input$plot_interactive, input$volcano_aspect)
+
         # isolate this to not trigger plot redraw
         isolate({
           aspect <- input$volcano_aspect

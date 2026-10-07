@@ -10,7 +10,7 @@
 #' @param gene_scratchpad reactive containing gene scratchpad genes
 #' @param reset_genes reactive to reset gene scratchpad selection
 #' @param config reactive list with config settings passed to server
-#' @param bookmark_restore_tick reactive counter incremented after bookmark inputs are restored
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with scatter plot UI.
@@ -351,7 +351,8 @@ scatterPlotUI <- function(id, panel){
 #' @rdname scattermod
 #' @export
 scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes,
-                              config, bookmark_restore_tick){
+                              config,
+                              bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,

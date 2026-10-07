@@ -78,7 +78,7 @@
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #' @param type string, if 'comp' then show the comparison view
 #'
 #' @returns
@@ -204,7 +204,7 @@ sumovPlotUI <- function(id, panel, type=''){
 #' @rdname sumovmod
 #' @export
 sumovPlotServer <- function(id, obj, config,
-                            type='', bookmark_restore_tick = function() NULL){
+                            bookmark_restore_tick = function() NULL, type=''){
 
   moduleServer(
     id,
@@ -397,7 +397,7 @@ sumovPlotServer <- function(id, obj, config,
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -596,7 +596,7 @@ set_graph_attr <- function(gg){
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactive, dataframe containing enrichment results
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -812,7 +812,7 @@ cnetPlotServer <- function(id, obj, config,
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #' @param type string, if 'comp' then show the comparison view
 #'
 #' @returns
@@ -932,7 +932,7 @@ radarUI <- function(id, panel, type=''){
 #' @rdname radarmod
 #' @export
 radarServer <- function(id, obj, config,
-                        type='', bookmark_restore_tick = function() NULL){
+                        bookmark_restore_tick = function() NULL, type=''){
 
   moduleServer(
     id,
@@ -1121,7 +1121,7 @@ radarServer <- function(id, obj, config,
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param res_obj reactive, dataframe containing enrichment results
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1289,7 +1289,7 @@ alluvialServer <- function(id, obj, res_obj, config,
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing GeneTonic object
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1492,7 +1492,7 @@ dendrogramServer <- function(id, obj, config,
 #' @param panel string, can be 'sidebar' or 'main'
 #' @param obj reactiveValues object containing two GeneTonic objects
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1743,7 +1743,7 @@ horizonServer <- function(id, obj, config,
 #' @param obj reactive containing 'distilled' enrichment results
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1967,7 +1967,7 @@ distillPlotServer <- function(id, obj, args, config,
 #' @param obj reactive containing 'distilled' enrichment results
 #' @param args reactive, list with plot arguments, 'numcat' (number of categories to plot)
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI

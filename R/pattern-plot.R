@@ -12,6 +12,7 @@
 #' @param gene_scratchpad reactive containing genes selected in scratchpad
 #' @param upset_data reactive containing list with data from upset plot module
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with module UI
@@ -378,7 +379,7 @@ patternPlotServer <- function(id,
                               gene_scratchpad,
                               upset_data,
                               config,
-                              bookmark_restore_tick){
+                              bookmark_restore_tick = function() NULL){
   moduleServer(
     id,
 

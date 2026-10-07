@@ -8,6 +8,7 @@
 #' @param obj reactiveValues object containing carnation object
 #' @param coldata reactiveValues object containing object metadata
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with PCA plot UI.
@@ -217,7 +218,8 @@ pcaPlotUI <- function(id, panel){
 #'
 #' @rdname pcamod
 #' @export
-pcaPlotServer <- function(id, obj, coldata, config, bookmark_restore_tick){
+pcaPlotServer <- function(id, obj, coldata, config,
+                          bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,

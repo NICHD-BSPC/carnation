@@ -10,7 +10,7 @@
 #' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad
 #' @param reset_genes reactive to reset gene scratchpad selection
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter incremented after bookmark inputs are restored
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with upset plot UI.
@@ -249,7 +249,8 @@ upsetPlotUI <- function(id, panel){
 
 #' @rdname upsetmod
 #' @export
-upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config, bookmark_restore_tick){
+upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes,
+                            config, bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,

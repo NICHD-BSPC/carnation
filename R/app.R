@@ -55,7 +55,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
   shinyOptions(
   # Function that runs when shiny recieves a load bookmark request.
     load.interface = function(id, callback) {
-      callback(find_bookmark_dir(id, bookmarks_root))
+      # Skips the restore when the bookmark can't be found. The user is
+      # notified from onRestored in bookmarkingServer.
+      dir <- find_bookmark_dir(id, bookmarks_root)
+      if (!is.null(dir)) callback(dir)
     }
   )
 
@@ -254,6 +257,14 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
               conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'MA plot'",
 
                 maPlotUI('maplot', panel='sidebar')
+
+              ), # conditionalPanel
+
+              ######################### Volcano plot ########################################
+
+              conditionalPanel("input.mode == 'DE analysis' & input.de_mode == 'Volcano plot'",
+
+                volcanoPlotUI('volcano_plot', panel='sidebar')
 
               ), # conditionalPanel
 
@@ -1303,6 +1314,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
     restore_context <- bookmark_handlers$restore_context
     bookmark_restore_tick <- bookmark_handlers$restore_tick
+    loaded_bookmark_label <- bookmark_handlers$loaded_label
 
     ##############################################
     observeEvent(input$assay_do, {
@@ -1330,7 +1342,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         class='div-stats-card',
         tags$p('Currently loaded:'),
         tags$p('  - Project: ', tags$i(current$proj)),
-        tags$p('  - Analysis: ', tags$i(current$analysis))
+        tags$p('  - Analysis: ', tags$i(current$analysis)),
+        if (!is.null(loaded_bookmark_label()) && nzchar(loaded_bookmark_label()))
+          tags$p('  - Bookmark: ', tags$i(loaded_bookmark_label()))
       )
     })
 
@@ -1696,7 +1710,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
            gene.to.plot=gene_scratchpad())
     })
 
-    maPlotServer('maplot', app_object, maplot_args, config)
+    maPlotServer('maplot', app_object, maplot_args, config, bookmark_restore_tick)
 
     ##################### Volcano plot #############################
     volcano_plot_args <- reactive({
@@ -1705,7 +1719,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
            gene.to.plot=gene_scratchpad())
     })
 
-    volcanoPlotServer('volcano_plot', app_object, volcano_plot_args, config)
+    volcanoPlotServer('volcano_plot', app_object, volcano_plot_args, config, bookmark_restore_tick)
 
     ####################### Scatter plot #############################
 

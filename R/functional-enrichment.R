@@ -13,7 +13,7 @@
 #' @param gene_scratchpad reactive, genes selected in gene scratchpad
 #' @param reset_genes reactive to reset genes in scratchpad
 #' @param config reactive list with config settings
-#' @param bookmark_restore_tick reactive counter updated after bookmark restoration
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with plot UI
@@ -1626,12 +1626,12 @@ enrichServer <- function(id, obj, upset_table,
 
       # plot modules
       sumovPlotServer('sumov', genetonic_obj, config,
-                      bookmark_restore_tick=bookmark_restore_tick)
+                      bookmark_restore_tick)
       enrichmapServer('enrichmap', genetonic_obj, enrich_obj, config,
                       bookmark_restore_tick)
       cnetPlotServer('cnetplot', enrich_obj, config, bookmark_restore_tick)
       radarServer('radar', genetonic_obj, config,
-                  bookmark_restore_tick=bookmark_restore_tick)
+                  bookmark_restore_tick)
       alluvialServer('alluvial', genetonic_obj,
                      enrich_obj, config, bookmark_restore_tick)
       dendrogramServer('dendrogram', genetonic_obj, config,
@@ -1798,9 +1798,9 @@ enrichServer <- function(id, obj, upset_table,
 
       # plot modules
       sumovPlotServer('sumov_comp', genetonic_comp_obj, config,
-                      type='comp', bookmark_restore_tick=bookmark_restore_tick)
+                      bookmark_restore_tick, type='comp')
       radarServer('radar_comp', genetonic_comp_obj, config,
-                  type='comp', bookmark_restore_tick=bookmark_restore_tick)
+                  bookmark_restore_tick, type='comp')
       horizonServer('horizon', genetonic_comp_obj, config,
                     bookmark_restore_tick)
 

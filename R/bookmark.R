@@ -12,6 +12,8 @@ bookmarkingServer <- function(
   moduleServer(
     id,
     function(input, output, session) {
+      ##### Shared State #####
+
       root_session <- session$rootScope()
       # NULL during normal operation. During bookmark restoration, this holds
       # the data needed across Shiny's restore functions.
@@ -41,7 +43,10 @@ bookmarkingServer <- function(
       # Used to hold the bookmark label when saving.
       bookmark_label <- reactiveVal(NULL)
 
+      # Holds the label and assay of the bookmark restored this session.
+      loaded_bookmark <- reactiveVal(NULL)
 
+      ##### Saving Bookmarks #####
 
       # Updates the current bookmark save directory whenever a new dataset is loaded.
       observeEvent(list(current$proj, current$analysis), {
@@ -61,6 +66,60 @@ bookmarkingServer <- function(
         )
       })
 
+      # Spawns a modal to take the bookmark name and confirmation.
+      observeEvent(
+        input$bookmark,
+        {
+          if (!is.null(isolate(restore_context()))) {
+            return()
+          }
+
+          showModal(bookmark_name_modal(session$ns))
+        },
+        ignoreInit = TRUE
+      )
+
+      # Is triggered by the bookmark modal and triggers the main cascade.
+      observeEvent(
+        input$confirm_bookmark,
+        {
+          req(current$proj, current$analysis)
+
+          label_validation <- validate_new_bookmark_label(
+            input$bookmark_name,
+            current$proj,
+            current$analysis,
+            bookmarks_root
+          )
+
+          if (!label_validation$valid) {
+            showNotification(
+              label_validation$message,
+              type = 'error'
+            )
+            return()
+          }
+
+          bookmark_label(label_validation$label)
+          removeModal()
+
+          # Prevents inputs from being saved by shiny bookmarking in the default fashion.
+          save_context(isolate(reactiveValuesToList(
+            root_input,
+            all.names = TRUE
+          )))
+          input_names <- names(save_context())
+          setBookmarkExclude(
+            input_names,
+            session = root_session
+          )
+
+          root_session$doBookmark()
+        },
+        ignoreInit = TRUE
+      )
+
+
       onBookmark(
         function(state) {
           # Stores metadata that isnt well captured by the inputs
@@ -70,7 +129,7 @@ bookmarkingServer <- function(
           state$values$label <- bookmark_label()
           state$values$mode <- root_input$mode
           state$values$comp <- paste(root_input$comp_all, collapse = ', ')
-          state$values$saved_at <- as.character(Sys.time())
+          state$values$saved_at <- format(Sys.time(), '%Y-%m-%d %H:%M:%S')
 
           state$values$inputs <- save_context()
         },
@@ -80,14 +139,28 @@ bookmarkingServer <- function(
       # Runs after the bookmark has been generated.
       onBookmarked(
         function(url) {
+          saved_label <- bookmark_label()
+
           updateQueryString(url)
+          loaded_bookmark(list(
+            label = saved_label,
+            project = isolate(current$proj),
+            analysis = isolate(current$analysis)
+          ))
           refresh_bookmarks_tick(
             isolate(refresh_bookmarks_tick()) + 1L
           )
+          showNotification(
+            paste0('Bookmark "', saved_label, '" saved.'),
+            type = 'message'
+          )
           save_context(NULL)
+          bookmark_label(NULL)
         },
         session = root_session
       )
+
+      ##### Restoring Bookmarks #####
 
       # Runs a the end of the initial session load. Captures
       # the server values loaded by the built-in portion of shiny's
@@ -95,6 +168,12 @@ bookmarkingServer <- function(
       # after auth check and data is loaded.
       onRestored(
         function(state) {
+          # Empty values mean load.interface couldn't find the bookmark.
+          if (length(state$values) == 0) {
+            showNotification('Bookmark is unavailable.', type = 'warning')
+            return()
+          }
+
           allowed_path <- resolve_bookmark_access(
             assay.list$l,
             state$values$project,
@@ -102,14 +181,15 @@ bookmarkingServer <- function(
           )
 
           if (is.null(allowed_path)) {
-            showModal(
-              modalDialog(
-                title='You do not have access to this data area.',
-                easyClose = FALSE
-              )
-            )
+            showModal(bookmark_access_denied_modal())
             return()
           }
+
+          loaded_bookmark(list(
+            label = state$values$label,
+            project = state$values$project,
+            analysis = state$values$assay_analysis
+          ))
 
           restore_context(list(
             stage = 'load_data',
@@ -129,42 +209,21 @@ bookmarkingServer <- function(
 
         context <- restore_context()
 
-        load_assay(
-          context$project,
-          context$analysis,
-          context$allowed_path,
-          reset_tabs = FALSE
-        )
-
-        showModal(
-          modalDialog(
-            icon('spinner', class = 'fa-spin'),
-            'Loading bookmark, please wait',
-            footer = NULL,
-            easyClose = FALSE
+        if (!is_assay_already_loaded(current, context$project, context$analysis)) {
+          load_assay(
+            context$project,
+            context$analysis,
+            context$allowed_path,
+            reset_tabs = FALSE
           )
-        )
+        }
+
+        showModal(bookmark_loading_modal())
 
         context <- restore_context()
         context$stage <- 'replaying_initial_inputs'
         restore_context(context)
       })
-
-      # After the next server flush send a message asking
-      # the browser to confirm it has reached a render frame.
-      send_restore_probe <- function(round) {
-        root_session$onFlushed(
-          function() {
-            if (!root_session$isClosed()) {
-              session$sendCustomMessage(
-                'bookmark_restore_probe',
-                list(round = round)
-              )
-            }
-          },
-          once = TRUE
-        )
-      }
 
       # Reapplies the stored inputs for the first time after the data has been reloaded,
       # then launches the flushing and input reapplying restore loop.
@@ -180,7 +239,9 @@ bookmarkingServer <- function(
           context$stage <- 'stabilizing_restore'
           context$restore_loop_i <- 1L
           restore_context(context)
-          send_restore_probe(
+          send_bookmark_restore_probe(
+            session,
+            root_session,
             context$restore_loop_i
           )
         },
@@ -240,92 +301,34 @@ bookmarkingServer <- function(
             )
           }
 
-          send_restore_probe(next_round)
+          send_bookmark_restore_probe(
+            session,
+            root_session,
+            next_round
+          )
         },
         ignoreInit = TRUE,
         priority = -100
       )
 
-      ########### Bookmark loading UI ###############
+      ##### Managing Saved Bookmarks #####
 
-      # Spawns a modal to take the bookmark name and confirmation.
-      observeEvent(
-        input$bookmark,
-        {
-          if (!is.null(isolate(restore_context()))) {
-            return()
-          }
-
-          showModal(
-            modalDialog(
-              title = 'Make a bookmark of the current view',
-              textInput(
-                session$ns('bookmark_name'),
-                'Bookmark name',
-                placeholder = 'Enter a descriptive name'
-              ),
-              footer = tagList(
-                modalButton('Cancel'),
-                actionButton(
-                  session$ns('confirm_bookmark'),
-                  'Save Bookmark',
-                  class = 'btn-primary'
-                )
-              ),
-              easyClose = TRUE
-            )
-          )
-        },
-        ignoreInit = TRUE
-      )
-
-      observeEvent(
-        input$confirm_bookmark,
-        {
-          label <- trimws(input$bookmark_name %||% '')
-          bookmark_label(
-            if (nzchar(label)) label else NA_character_
-          )
-
-          removeModal()
-
-          # Prevents inputs from being saved by shiny bookmarking as default.
-          save_context(isolate(reactiveValuesToList(
-            root_input,
-            all.names = TRUE
-          )))
-          input_names <- names(save_context())
-
-          setBookmarkExclude(
-            input_names,
-            session = root_session
-          )
-
-          root_session$doBookmark()
-        },
-        ignoreInit = TRUE
-      )
-
-      ui_selected_assay <- reactive({
+      assay_selection <- reactive({
         req(root_input$dds, root_input$assay)
 
-        project_assays <- assay.list$l[[root_input$dds]]
-        idx <- match(root_input$assay, unname(project_assays))
-
-        req(!is.na(idx))
-
-        list(
-          project = root_input$dds,
-          analysis = names(project_assays)[idx],
-          path = unname(project_assays[idx])
+        selected <- resolve_selected_assay(
+          assay.list$l,
+          root_input$dds,
+          root_input$assay
         )
+
+        req(selected)
+        selected
       })
 
-      ui_selected_assay_bookmarks <- reactive({
-        req(ui_selected_assay())
+      selected_assay_bookmarks <- reactive({
+        selected <- assay_selection()
         refresh_bookmarks_tick()
-
-        selected <- ui_selected_assay()
 
         selected_bookmarks_dir <- get_bookmarks_path(
           selected$project,
@@ -340,124 +343,35 @@ bookmarkingServer <- function(
         )
       })
 
-      # UI for bookmarks description data table.
-      output$bookmarks_desc <- renderDT({
-        bookmarks_df <- ui_selected_assay_bookmarks()
+      is_admin <- reactive(isTRUE(settings()$is_admin))
 
-        hidden_columns <- match(
-          c('id', 'comp', 'mode'),
-          names(bookmarks_df)
-        ) -
-          1
-
-        datatable(
-          bookmarks_df,
-          rownames = FALSE,
-          selection = 'single',
-          caption = tags$caption(
-            style = 'font-weight: bold; font-size: 15px;',
-            'Available bookmarks'
-          ),
-          options = list(
-            columnDefs = list(
-              list(
-                visible = FALSE,
-                targets = hidden_columns
-              )
-            )
-          )
-        )
+      # Label for the 'currently loaded' card. Only shown while the loaded
+      # assay is still the one the bookmark was restored into.
+      loaded_bookmark_label <- reactive({
+        b <- loaded_bookmark()
+        if (!is.null(b) &&
+            identical(b$project, current$proj) &&
+            identical(b$analysis, current$analysis)) b$label else NULL
       })
 
-      bookmarks_desc_proxy <- dataTableProxy('bookmarks_desc')
+      # Label for the picker. Only used when the dropdowns point at the
+      # assay the bookmark was restored into.
+      picker_bookmark_label <- reactive({
+        b <- loaded_bookmark()
+        sel <- assay_selection()
+        if (!is.null(b) &&
+            identical(b$project, sel$project) &&
+            identical(b$analysis, sel$analysis)) b$label else NULL
+      })
 
-      table_bookmark_selected <- eventReactive(
-        input$bookmarks_desc_rows_selected,
-        {
-          bookmarks_df <- ui_selected_assay_bookmarks()
-          selection <- input$bookmarks_desc_rows_selected
-
-          selected_bookmark <- bookmarks_df[selection, ]
-          selected_bookmark$id
-        }
+      setup_saved_bookmarks_ui(
+        input = input,
+        output = output,
+        session = session,
+        bookmarks = selected_assay_bookmarks,
+        is_admin = is_admin,
+        loaded_label = picker_bookmark_label
       )
-
-      observeEvent(table_bookmark_selected(), {
-        selection <- input$bookmarks_desc_rows_selected
-        req(length(selection) == 1)
-        updateSelectizeInput(
-          session,
-          inputId = 'bookmark_dropdown',
-          selected = table_bookmark_selected()
-        )
-      })
-
-      # Updates the bookmark table selection based on dropdown selection.
-      observeEvent(
-        list(input$bookmark_dropdown, input$bookmarks_desc_rows_all),
-        {
-          bookmarks_df <- ui_selected_assay_bookmarks()
-          row_idx <- match(input$bookmark_dropdown, bookmarks_df$id)
-
-          req(!is.na(row_idx))
-
-          displayed_position <- match(
-            row_idx,
-            input$bookmarks_desc_rows_all
-          )
-
-          if (is.na(displayed_position)) {
-            bookmarks_desc_proxy %>% selectRows(NULL)
-            return()
-          }
-
-          page_length <- input$bookmarks_desc_state$length
-          if (
-            is.null(page_length) ||
-              !is.numeric(page_length) ||
-              page_length < 1
-          ) {
-            page_length <- 10
-          }
-          page_idx <- floor((displayed_position - 1) / page_length) + 1
-
-          bookmarks_desc_proxy %>%
-            selectRows(NULL) %>%
-            selectRows(row_idx) %>%
-            selectPage(page_idx)
-        }
-      )
-
-      # UI for the dropdown bookmarks list.
-      output$saved_bookmarks_ui <- renderUI({
-        bookmarks_df <- ui_selected_assay_bookmarks()
-
-        if (nrow(bookmarks_df) == 0) {
-          return(NULL)
-        }
-
-        choices <- setNames(bookmarks_df$id, bookmarks_df$label)
-
-        tagList(
-          selectInput(
-            session$ns('bookmark_dropdown'),
-            'Saved Bookmarks',
-            choices = choices
-          ),
-          actionButton(
-            session$ns('go_bookmark'),
-            'Load Bookmark',
-            class = 'btn-primary'
-          ),
-          if (settings()$is_admin) {
-            actionButton(
-              session$ns('delete_bookmark'),
-              'Delete Bookmark',
-              class = 'btn-primary'
-            )
-          }
-        )
-      })
 
       observeEvent(input$go_bookmark, {
         req(input$bookmark_dropdown)
@@ -470,58 +384,39 @@ bookmarkingServer <- function(
 
       observeEvent(input$delete_bookmark, {
         req(input$bookmark_dropdown)
-        if (!settings()$is_admin) {
-          return()
-        }
-
-        showModal(
-          modalDialog(
-            title = 'Delete bookmark',
-            'Are you sure you want to delete this bookmark?',
-            footer = tagList(
-              modalButton('Cancel'),
-              actionButton(
-                session$ns('delete_bookmark_do'),
-                'Delete Bookmark',
-                class = 'btn-danger'
-              )
-            ),
-            easyClose = TRUE
-          )
-        )
+        showModal(bookmark_delete_modal(session$ns))
       })
 
       observeEvent(input$delete_bookmark_do, {
-        req(input$bookmark_dropdown)
-        if (!settings()$is_admin) {
-          return()
-        }
+        req(input$bookmark_dropdown, is_admin())
 
-        assay <- ui_selected_assay()
+        assay <- assay_selection()
         bookmarks_dir <- get_bookmarks_path(
           assay$project,
           assay$analysis,
           bookmarks_root
         )
-        dir <- find_bookmark_dir(input$bookmark_dropdown, bookmarks_dir)
-        delete_status <- unlink(dir, recursive = TRUE)
+        deleted <- delete_saved_bookmark(
+          input$bookmark_dropdown,
+          bookmarks_dir
+        )
 
-        if (delete_status == 0) {
-          removeModal()
-          refresh_bookmarks_tick(
-            isolate(refresh_bookmarks_tick()) + 1L
-          )
-          showNotification('Bookmark deleted.')
-        } else {
+        removeModal()
+        if (!deleted) {
           showNotification('Unable to delete bookmark.', type = 'error')
+          return()
         }
+        refresh_bookmarks_tick(isolate(refresh_bookmarks_tick()) + 1L)
+        showNotification('Bookmark deleted.')
       })
 
-      # reactiveVals returned and used by other parts of the
-      # dashboard.
+      ##### Public Module Values #####
+
+      # reactiveVals returned and used by other parts of the dashboard.
       list(
         restore_context = restore_context,
-        restore_tick = bookmark_restore_tick
+        restore_tick = bookmark_restore_tick,
+        loaded_label = loaded_bookmark_label
       )
     }
   )
