@@ -1,3 +1,86 @@
+#' Bookmarking module
+#'
+#' @description
+#' UI & server for module to save, restore and delete bookmarks of the
+#' dashboard state. Bookmarks are stored on the server, one set per
+#' project/analysis. `bookmarkButtonUI()` saves a bookmark, `savedBookmarksUI()`
+#' loads or deletes saved ones, `bookmarksDescriptionUI()` shows a table of
+#' saved bookmarks and `bookmarkRestoreScript()` is a hidden script needed for
+#' restoring.
+#'
+#' @param id Module id
+#' @param root_input the app's top-level `input` (not the module's own); all
+#' inputs are saved with the bookmark
+#' @param assay.list reactiveValues object with `l`, the list of assays the
+#' user can access
+#' @param load_assay function called as
+#' `load_assay(project, analysis, path, reset_tabs)` to load the bookmarked assay
+#' @param current reactiveValues object with 'proj' (lab/project) & 'analysis'
+#' of the loaded assay
+#' @param bookmarks_root root folder for bookmark storage, usually from
+#' `get_bookmarks_root_path()`
+#' @param settings reactive list with user settings; 'is_admin' allows deleting
+#' bookmarks
+#' @param input_applies number of times saved inputs are applied during a restore
+#' @param rounds_per_apply number of browser round trips after each apply
+#'
+#' @details
+#' The app must call `enableBookmarking("server")`, define `ui` as
+#' `function(request)` and set `shinyOptions(load.interface = ...)` using
+#' `find_bookmark_dir()`. `bookmarkRestoreScript()` must be included in the UI,
+#' otherwise restores never finish.
+#'
+#' @returns
+#' UI functions return tags with bookmarking UI.
+#' Server returns a list of reactives: 'is_restoring' (TRUE while a restore
+#' is running), 'bookmark_restore_tick' (counter incremented after a restore,
+#' passed to plot modules) & 'loaded_bookmark_label' (label of the loaded
+#' bookmark or NULL).
+#'
+#' @examplesIf interactive()
+#' library(shiny)
+#'
+#' bookmarks_root <- tempdir()
+#' shinyOptions(
+#'   load.interface = function(id, callback) {
+#'     dir <- find_bookmark_dir(id, bookmarks_root)
+#'     if (!is.null(dir)) callback(dir)
+#'   }
+#' )
+#'
+#' ui <- function(request) {
+#'   fluidPage(
+#'     bookmarkRestoreScript('bookmarking'),
+#'     bookmarkButtonUI('bookmarking'),
+#'     savedBookmarksUI('bookmarking'),
+#'     bookmarksDescriptionUI('bookmarking')
+#'   )
+#' }
+#'
+#' server <- function(input, output, session) {
+#'   # Simulate app state
+#'   current <- reactiveValues(proj = 'lab/project', analysis = 'main')
+#'   assay.list <- reactiveValues(l = NULL)
+#'   settings <- reactive(list(is_admin = TRUE))
+#'
+#'   bookmarkingServer(
+#'     'bookmarking', input,
+#'     assay.list = assay.list,
+#'     load_assay = function(...) NULL,
+#'     current = current,
+#'     bookmarks_root = bookmarks_root,
+#'     settings = settings
+#'   )
+#' }
+#'
+#' shinyApp(ui, server, enableBookmarking = 'server')
+#'
+#' @name bookmarkingmod
+#' @rdname bookmarkingmod
+NULL
+
+#' @rdname bookmarkingmod
+#' @export
 bookmarkingServer <- function(
   id,
   root_input,
@@ -6,7 +89,7 @@ bookmarkingServer <- function(
   current,
   bookmarks_root,
   settings,
-  restore_applies = 3L,
+  input_applies = 3L,
   rounds_per_apply = 2L
 ) {
   moduleServer(
@@ -15,36 +98,74 @@ bookmarkingServer <- function(
       ##### Shared State #####
 
       root_session <- session$rootScope()
-      # NULL during normal operation. During bookmark restoration, this holds
-      # the data needed across Shiny's restore functions.
+
+      # NULL when no restore is running. Otherwise holds the bookmark's project,
+      # analysis, allowed_path and inputs, plus the current stage and round.
+      # Stages, in order:
+      #   'loading_data'     load the bookmarked assay unless it's already loaded
+      #   'applying_inputs'  first replay of the saved inputs
+      #   'stabilizing'      browser round trips, re-applying inputs every
+      #                      rounds_per_apply rounds
+      # then back to NULL.
       restore_context <- reactiveVal(NULL)
 
-      # The stages held in restore_context$stage are 'load_data',
-      # 'replaying_initial_inputs', 'stabilizing_restore', then back to NULL
+      # Inputs are applied input_applies times in total, each followed by
+      # rounds_per_apply browser round trips.
+      total_restore_rounds <- input_applies * rounds_per_apply
 
+      # Label and copy of all inputs for the bookmark being saved; cleared in
+      # onBookmarked. Inputs are stored in values.rds instead of Shiny's
+      # input.rds so they only reach the browser after the access check.
+      pending_save <- reactiveVal(NULL)
 
-      # On the bookmark saving side of this process, stores all the inputs so
-      # that they can be excluded from being saved into the inputs.RDS object
-      # and therefore from being automatically reapplied on restore. They are
-      # saved into the state values object instead so we can control what is
-      # sent to the browser as we load them manually after auth.
-      save_context <- reactiveVal(NULL)
-
-      # Is returned into the main app and fed into plotting modules that use a
-      # refresh button to gate updating their plots or have potential race conditions
-      # when all of their inputs are updated at once. This is used as a reactive
-      # dependency and updated/invalidated after a server flushing loop.
+      # Incremented when a restore finishes; plot modules use it to refresh.
       bookmark_restore_tick <- reactiveVal(0L)
 
-      # Is used to repopulate saved bookmark lists when the assay is changed
-      # or one is deleted.
-      refresh_bookmarks_tick <- reactiveVal(0L)
+      # Incremented on save/delete to refresh the saved-bookmarks list.
+      saved_list_tick <- reactiveVal(0L)
 
-      # Used to hold the bookmark label when saving.
-      bookmark_label <- reactiveVal(NULL)
-
-      # Holds the label and assay of the bookmark restored this session.
+      # id, label, project and analysis of the bookmark last saved or restored.
       loaded_bookmark <- reactiveVal(NULL)
+
+      ##### Selected Assay #####
+
+      # The assay picked in the load-data dropdowns (not necessarily the one
+      # loaded). Only resolves for assays present in the user's assay.list$l.
+      assay_selection <- reactive({
+        req(root_input$dds, root_input$assay)
+
+        project_assays <- assay.list$l[[root_input$dds]]
+        idx <- match(root_input$assay, unname(project_assays))
+        req(!is.na(idx))
+
+        list(project = root_input$dds, analysis = names(project_assays)[idx])
+      })
+
+      # Bookmark folder for the selected assay
+      # (bookmarks_root/lab/project/analysis).
+      selected_bookmarks_dir <- reactive({
+        selected <- assay_selection()
+        dir <- get_bookmarks_path(
+          selected$project,
+          selected$analysis,
+          bookmarks_root
+        )
+        req(dir)
+        dir
+      })
+
+      # Saved bookmarks directly inside the selected assay's folder whose
+      # values.rds matches that assay. Refreshes on save/delete.
+      selected_assay_bookmarks <- reactive({
+        selected <- assay_selection()
+        saved_list_tick()
+
+        list_saved_bookmarks(
+          selected_bookmarks_dir(),
+          selected$project,
+          selected$analysis
+        )
+      })
 
       ##### Saving Bookmarks #####
 
@@ -70,16 +191,14 @@ bookmarkingServer <- function(
       observeEvent(
         input$bookmark,
         {
-          if (!is.null(isolate(restore_context()))) {
+          if (!is.null(restore_context())) {
             return()
           }
-
           showModal(bookmark_name_modal(session$ns))
         },
         ignoreInit = TRUE
       )
 
-      # Is triggered by the bookmark modal and triggers the main cascade.
       observeEvent(
         input$confirm_bookmark,
         {
@@ -100,17 +219,20 @@ bookmarkingServer <- function(
             return()
           }
 
-          bookmark_label(label_validation$label)
           removeModal()
 
-          # Prevents inputs from being saved by shiny bookmarking in the default fashion.
-          save_context(isolate(reactiveValuesToList(
-            root_input,
-            all.names = TRUE
-          )))
-          input_names <- names(save_context())
+          # Excludes all inputs from Shiny's input.rds; onBookmark stores them
+          # in values.rds instead. This module's own inputs (dropdown, table
+          # selection) are left out so a restore doesn't overwrite the
+          # loaded-bookmark selection with stale values.
+          all_inputs <- reactiveValuesToList(root_input, all.names = TRUE)
+          own_inputs <- startsWith(names(all_inputs), session$ns(''))
+          pending_save(list(
+            label = label_validation$label,
+            inputs = all_inputs[!own_inputs]
+          ))
           setBookmarkExclude(
-            input_names,
+            names(all_inputs),
             session = root_session
           )
 
@@ -119,19 +241,15 @@ bookmarkingServer <- function(
         ignoreInit = TRUE
       )
 
-
       onBookmark(
         function(state) {
-          # Stores metadata that isnt well captured by the inputs
-          # snapshot.
           state$values$project <- current$proj
           state$values$assay_analysis <- current$analysis
-          state$values$label <- bookmark_label()
+          state$values$label <- pending_save()$label
           state$values$mode <- root_input$mode
           state$values$comp <- paste(root_input$comp_all, collapse = ', ')
           state$values$saved_at <- format(Sys.time(), '%Y-%m-%d %H:%M:%S')
-
-          state$values$inputs <- save_context()
+          state$values$inputs <- pending_save()$inputs
         },
         session = root_session
       )
@@ -139,74 +257,70 @@ bookmarkingServer <- function(
       # Runs after the bookmark has been generated.
       onBookmarked(
         function(url) {
-          saved_label <- bookmark_label()
+          saved_label <- pending_save()$label
 
           updateQueryString(url)
           loaded_bookmark(list(
+            id = parseQueryString(sub('^[^?]*', '', url))[['_state_id_']],
             label = saved_label,
             project = isolate(current$proj),
             analysis = isolate(current$analysis)
           ))
-          refresh_bookmarks_tick(
-            isolate(refresh_bookmarks_tick()) + 1L
-          )
+          saved_list_tick(isolate(saved_list_tick()) + 1L)
           showNotification(
             paste0('Bookmark "', saved_label, '" saved.'),
             type = 'message'
           )
-          save_context(NULL)
-          bookmark_label(NULL)
+          pending_save(NULL)
         },
         session = root_session
       )
 
       ##### Restoring Bookmarks #####
 
-      # Runs a the end of the initial session load. Captures
-      # the server values loaded by the built-in portion of shiny's
-      # bookmarking so it can be applied and stablized
-      # after auth check and data is loaded.
+      # Single entry point for every bookmark restore, whether from a URL
+      # (onRestored) or from the saved bookmarks UI within the current session.
+      start_bookmark_restore <- function(values, id) {
+        access <- check_bookmark_access(values, isolate(assay.list$l))
+        switch(
+          access$status,
+          unavailable = showNotification(
+            'Bookmark is unavailable.',
+            type = 'warning'
+          ),
+          denied = showModal(bookmark_access_denied_modal()),
+          ok = {
+            loaded_bookmark(list(
+              id = id,
+              label = access$label,
+              project = access$bookmark$project,
+              analysis = access$bookmark$analysis
+            ))
+            restore_context(c(
+              access$bookmark,
+              list(stage = 'loading_data', round = 0L)
+            ))
+          }
+        )
+      }
+
+      # Runs once after a URL load or page reload. Hands Shiny's restored values
+      # to start_bookmark_restore(), which checks access before anything is applied.
       onRestored(
         function(state) {
-          # Empty values mean load.interface couldn't find the bookmark.
-          if (length(state$values) == 0) {
-            showNotification('Bookmark is unavailable.', type = 'warning')
-            return()
-          }
-
-          allowed_path <- resolve_bookmark_access(
-            assay.list$l,
-            state$values$project,
-            state$values$assay_analysis
+          # state$dir is the bookmark folder, named for its id. It is NULL
+          # when load.interface couldn't find the bookmark.
+          start_bookmark_restore(
+            state$values,
+            if (!is.null(state$dir)) basename(state$dir)
           )
-
-          if (is.null(allowed_path)) {
-            showModal(bookmark_access_denied_modal())
-            return()
-          }
-
-          loaded_bookmark(list(
-            label = state$values$label,
-            project = state$values$project,
-            analysis = state$values$assay_analysis
-          ))
-
-          restore_context(list(
-            stage = 'load_data',
-            project = state$values$project,
-            analysis = state$values$assay_analysis,
-            allowed_path = allowed_path,
-            inputs = state$values$inputs,
-            restore_loop_i = 0L
-          ))
         },
         session = root_session
       )
 
-      # Data loading phase.
-      observe({
-        req(restore_context()$stage ==  'load_data')
-
+      # Loads the bookmarked assay, unless it's already loaded.
+      observeEvent(restore_context(), {
+        req(restore_context()$stage == 'loading_data')
         context <- restore_context()
 
         if (!is_assay_already_loaded(current, context$project, context$analysis)) {
@@ -219,167 +333,96 @@ bookmarkingServer <- function(
         }
 
         showModal(bookmark_loading_modal())
-
-        context <- restore_context()
-        context$stage <- 'replaying_initial_inputs'
+        context$stage <- 'applying_inputs'
         restore_context(context)
       })
 
-      # Reapplies the stored inputs for the first time after the data has been reloaded,
-      # then launches the flushing and input reapplying restore loop.
-      observeEvent(
-        restore_context(),
-        {
-          req(restore_context()$stage == 'replaying_initial_inputs')
-          apply_restored_inputs(
-            restore_context()$inputs,
-            root_session
-          )
-          context <- restore_context()
-          context$stage <- 'stabilizing_restore'
-          context$restore_loop_i <- 1L
-          restore_context(context)
-          send_bookmark_restore_probe(
-            session,
-            root_session,
-            context$restore_loop_i
-          )
-        },
-        #
-        priority = -100
-      )
+      # Applies the saved inputs for the first time, then starts the
+      # browser round trips.
+      observeEvent(restore_context(), {
+        req(restore_context()$stage == 'applying_inputs')
+        context <- restore_context()
 
-      # Handles and advances the server-flush/browser update one
-      # round trip at a time. Ignores stale, duplicate or out of order
-      # acknowledgements.
+        apply_restored_inputs(context$inputs, root_session)
+        context$stage <- 'stabilizing'
+        context$round <- 1L
+        restore_context(context)
+        send_bookmark_restore_probe(session, root_session, context$round)
+      })
+
+      # Each ack means the browser has rendered the previous flush. Ignores acks
+      # that are stale, duplicated, or arrive when no restore is running.
       observeEvent(
         input$bookmark_restore_ack,
         {
-          context <- isolate(restore_context())
+          context <- restore_context()
           ack <- input$bookmark_restore_ack
 
           if (
-            is.null(context) ||
-              !identical(context$stage, 'stabilizing_restore') ||
+            !identical(context$stage, 'stabilizing') ||
               !is.list(ack) ||
-              !isTRUE(ack$round == context$restore_loop_i)
+              !isTRUE(ack$round == context$round)
           ) {
             return()
           }
 
-          current_round <- as.integer(ack$round)
-
-          # When the correct number of roundtrips is reached,
-          # increment bookmark_restore tick to trigger all the
-          # plot refreshes and other things that depend on it.
-          # This completes the session restore
-          restore_roundtrips <- (restore_applies - 1L) * rounds_per_apply
-
-          if (current_round >= restore_roundtrips) {
-            bookmark_restore_tick(
-              isolate(bookmark_restore_tick()) + 1L
-            )
-
+          # Done: tell plot modules to refresh and end the restore.
+          if (context$round >= total_restore_rounds) {
+            bookmark_restore_tick(bookmark_restore_tick() + 1L)
             restore_context(NULL)
             removeModal()
             return()
           }
 
-          next_round <- current_round + 1L
-          context$restore_loop_i <- next_round
-          restore_context(context)
-
-          # This allows to the system to reach settings that are gated
-          # by other settings being needed to be selected first by reapplying
-          # inputs after allowing earlier settings to be selected first.
-          # When and the number of times this happens may need to
-          # be tuned.
-          if (current_round %% rounds_per_apply == 0) {
-            apply_restored_inputs(
-              context$inputs,
-              root_session
-            )
+          # Re-apply so inputs whose choices depend on earlier inputs can take
+          # their saved values.
+          if (context$round %% rounds_per_apply == 0) {
+            apply_restored_inputs(context$inputs, root_session)
           }
 
-          send_bookmark_restore_probe(
-            session,
-            root_session,
-            next_round
-          )
+          context$round <- context$round + 1L
+          restore_context(context)
+          send_bookmark_restore_probe(session, root_session, context$round)
         },
-        ignoreInit = TRUE,
-        priority = -100
+        ignoreInit = TRUE
       )
 
-      ##### Managing Saved Bookmarks #####
-
-      assay_selection <- reactive({
-        req(root_input$dds, root_input$assay)
-
-        selected <- resolve_selected_assay(
-          assay.list$l,
-          root_input$dds,
-          root_input$assay
-        )
-
-        req(selected)
-        selected
-      })
-
-      selected_assay_bookmarks <- reactive({
-        selected <- assay_selection()
-        refresh_bookmarks_tick()
-
-        selected_bookmarks_dir <- get_bookmarks_path(
-          selected$project,
-          selected$analysis,
-          bookmarks_root
-        )
-
-        list_saved_bookmarks(
-          selected_bookmarks_dir,
-          selected$project,
-          selected$analysis
-        )
-      })
+      ##### Saved Bookmarks UI and Actions #####
 
       is_admin <- reactive(isTRUE(settings()$is_admin))
 
-      # Label for the 'currently loaded' card. Only shown while the loaded
-      # assay is still the one the bookmark was restored into.
-      loaded_bookmark_label <- reactive({
-        b <- loaded_bookmark()
-        if (!is.null(b) &&
-            identical(b$project, current$proj) &&
-            identical(b$analysis, current$analysis)) b$label else NULL
-      })
-
-      # Label for the picker. Only used when the dropdowns point at the
-      # assay the bookmark was restored into.
-      picker_bookmark_label <- reactive({
-        b <- loaded_bookmark()
-        sel <- assay_selection()
-        if (!is.null(b) &&
-            identical(b$project, sel$project) &&
-            identical(b$analysis, sel$analysis)) b$label else NULL
-      })
-
+      # Keeps the saved-bookmarks table and dropdown in sync.
       setup_saved_bookmarks_ui(
         input = input,
         output = output,
         session = session,
         bookmarks = selected_assay_bookmarks,
         is_admin = is_admin,
-        loaded_label = picker_bookmark_label
+        # Ids are unique across assays, so no assay check is needed.
+        loaded_id = reactive(loaded_bookmark()$id)
       )
 
+      # Loads a bookmark picked from the UI. Restores in-session when the
+      # bookmarked assay is already loaded, otherwise reloads via the URL path.
+      # No access checks here: both paths go through start_bookmark_restore().
       observeEvent(input$go_bookmark, {
-        req(input$bookmark_dropdown)
+        req(input$bookmark_dropdown, is.null(restore_context()))
+
+        values <- read_bookmark_values(
+          find_bookmark_dir(input$bookmark_dropdown, selected_bookmarks_dir())
+        )
+
         updateQueryString(
           paste0('?_state_id_=', input$bookmark_dropdown),
           mode = 'push'
         )
-        session$reload()
+
+        if (!is.null(values) &&
+            is_assay_already_loaded(current, values$project, values$assay_analysis)) {
+          start_bookmark_restore(values, input$bookmark_dropdown)
+        } else {
+          session$reload()
+        }
       })
 
       observeEvent(input$delete_bookmark, {
@@ -387,18 +430,14 @@ bookmarkingServer <- function(
         showModal(bookmark_delete_modal(session$ns))
       })
 
+      # Deleting is a separate rule from restoring: admin only, and limited to
+      # the selected assay's bookmark folder.
       observeEvent(input$delete_bookmark_do, {
         req(input$bookmark_dropdown, is_admin())
 
-        assay <- assay_selection()
-        bookmarks_dir <- get_bookmarks_path(
-          assay$project,
-          assay$analysis,
-          bookmarks_root
-        )
         deleted <- delete_saved_bookmark(
           input$bookmark_dropdown,
-          bookmarks_dir
+          selected_bookmarks_dir()
         )
 
         removeModal()
@@ -406,17 +445,29 @@ bookmarkingServer <- function(
           showNotification('Unable to delete bookmark.', type = 'error')
           return()
         }
-        refresh_bookmarks_tick(isolate(refresh_bookmarks_tick()) + 1L)
+        saved_list_tick(saved_list_tick() + 1L)
         showNotification('Bookmark deleted.')
       })
 
-      ##### Public Module Values #####
+      ##### Loaded Bookmark Label #####
 
-      # reactiveVals returned and used by other parts of the dashboard.
+      # Label for the 'currently loaded' card (returned to app.R). Only shown
+      # while the loaded assay is still the one the bookmark belongs to, since
+      # loaded_bookmark isn't cleared when another assay is loaded.
+      loaded_bookmark_label <- reactive({
+        bookmark <- loaded_bookmark()
+        if (!is.null(bookmark) &&
+            identical(bookmark$project, current$proj) &&
+            identical(bookmark$analysis, current$analysis)) bookmark$label else NULL
+      })
+
+      ##### Returned Values #####
+
+      # Reactives used by other parts of the dashboard.
       list(
-        restore_context = restore_context,
-        restore_tick = bookmark_restore_tick,
-        loaded_label = loaded_bookmark_label
+        is_restoring = reactive(!is.null(restore_context())),
+        bookmark_restore_tick = bookmark_restore_tick,
+        loaded_bookmark_label = loaded_bookmark_label
       )
     }
   )

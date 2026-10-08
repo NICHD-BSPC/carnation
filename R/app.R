@@ -53,7 +53,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
   bookmarks_root <- get_bookmarks_root_path()
   shinyOptions(
-  # Function that runs when shiny recieves a load bookmark request.
+  # Function that runs when shiny receives a load bookmark request.
     load.interface = function(id, callback) {
       # Skips the restore when the bookmark can't be found. The user is
       # notified from onRestored in bookmarkingServer.
@@ -73,7 +73,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         tags$style(
           HTML(cfg$style$global)
         ),  # tags$style
-        bookmarkRestoreUI('bookmarking')
+        bookmarkRestoreScript('bookmarking')
       ), # tags$head
 
       titlePanel(
@@ -1037,7 +1037,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
 
       updateSelectizeInput(session, 'assay',
                            choices=assay.choices,
-                           selected= if (!is.null(isolate(restore_context()))) isolate(input$assay) else assay.choices[1])
+                           selected= if (isolate(is_restoring())) isolate(input$assay) else assay.choices[1])
 
     }) # observeEvent
 
@@ -1312,9 +1312,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       settings = settings
     )
 
-    restore_context <- bookmark_handlers$restore_context
-    bookmark_restore_tick <- bookmark_handlers$restore_tick
-    loaded_bookmark_label <- bookmark_handlers$loaded_label
+    is_restoring <- bookmark_handlers$is_restoring
+    bookmark_restore_tick <- bookmark_handlers$bookmark_restore_tick
+    loaded_bookmark_label <- bookmark_handlers$loaded_bookmark_label
 
     ##############################################
     observeEvent(input$assay_do, {
