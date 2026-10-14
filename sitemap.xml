@@ -64,6 +64,8 @@
 <url><loc>https://nichd-bspc.github.io/carnation/reference/plotPCA.san.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/plotScatter.label.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/plotScatter.label_ly.html</loc></url>
+<url><loc>https://nichd-bspc.github.io/carnation/reference/plotVolcano.label.html</loc></url>
+<url><loc>https://nichd-bspc.github.io/carnation/reference/plotVolcano.label_ly.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/radarmod.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/read_access_yaml.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/res_cell.html</loc></url>
@@ -79,5 +81,6 @@
 <url><loc>https://nichd-bspc.github.io/carnation/reference/top.genes.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/upsetmod.html</loc></url>
 <url><loc>https://nichd-bspc.github.io/carnation/reference/validate_carnation_object.html</loc></url>
+<url><loc>https://nichd-bspc.github.io/carnation/reference/volcanoplotmod.html</loc></url>
 </urlset>
 

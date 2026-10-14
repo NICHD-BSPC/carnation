@@ -193,6 +193,12 @@
 - [`plotScatter.label_ly()`](https://nichd-bspc.github.io/carnation/reference/plotScatter.label_ly.md)
   : Plot an interactive scatterplot to compare two contrasts
 
+- [`plotVolcano.label()`](https://nichd-bspc.github.io/carnation/reference/plotVolcano.label.md)
+  : Create a static labeled Volcano plot
+
+- [`plotVolcano.label_ly()`](https://nichd-bspc.github.io/carnation/reference/plotVolcano.label_ly.md)
+  : Create an interactive labeled Volcano plot
+
 - [`radarUI()`](https://nichd-bspc.github.io/carnation/reference/radarmod.md)
   [`radarServer()`](https://nichd-bspc.github.io/carnation/reference/radarmod.md)
   : Radar plot module
@@ -249,3 +255,7 @@
 
 - [`validate_carnation_object()`](https://nichd-bspc.github.io/carnation/reference/validate_carnation_object.md)
   : Validate a carnation object
+
+- [`volcanoPlotUI()`](https://nichd-bspc.github.io/carnation/reference/volcanoplotmod.md)
+  [`volcanoPlotServer()`](https://nichd-bspc.github.io/carnation/reference/volcanoplotmod.md)
+  : Volcano plot module

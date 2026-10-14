@@ -12,6 +12,7 @@ plotMA.label(
   fc.thres = 0,
   fc.lim = NULL,
   lab.genes = NULL,
+  opacity = 0.8,
   tolower.cols = c("SYMBOL", "ALIAS")
 )
 ```
@@ -38,6 +39,10 @@ plotMA.label(
 - lab.genes:
 
   genes to label on MA plot
+
+- opacity:
+
+  point opacity between 0 and 1
 
 - tolower.cols:
 

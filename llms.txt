@@ -1,9 +1,9 @@
 # Carnation
 
-[![](https://bioconductor.org/shields/availability/devel/carnation.svg)](https://bioconductor.org/packages/devel/bioc/html/carnation.html#archives)
-[![](https://bioconductor.org/shields/lastcommit/devel/bioc/carnation.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/carnation/)
-[![](https://bioconductor.org/shields/build/devel/bioc/carnation.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/carnation/)
-[![](https://bioconductor.org/shields/years-in-bioc/carnation.svg)](https://bioconductor.org/packages/devel/bioc/html/carnation.html#since)
+[![](https://bioconductor.org/shields/availability/release/carnation.svg)](https://bioconductor.org/packages/release/bioc/html/carnation.html#archives)
+[![](https://bioconductor.org/shields/lastcommit/release/bioc/carnation.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/carnation/)
+[![](https://bioconductor.org/shields/build/release/bioc/carnation.svg)](https://bioconductor.org/checkResults/release/bioc-LATEST/carnation/)
+[![](https://bioconductor.org/shields/years-in-bioc/carnation.svg)](https://bioconductor.org/packages/release/bioc/html/carnation.html#since)
 
 **Less Code, More Biology: Carnation for Collaborative Multi-Omics
 Exploration**
@@ -28,11 +28,10 @@ multi-omic genomics analyses, transforming static analysis into a
 collaborative, interactive experience, enabling research teams to spend
 less time navigating data and more time generating biological insight.
 
-**Carnation is now on Bioconductor devel (Official release: April
-2026)**
+**Carnation is now on Bioconductor (Official release: April 2026)**
 
 Check out the official bioconductor page
-[here](https://bioconductor.org/packages/devel/bioc/html/carnation.html)
+[here](https://bioconductor.org/packages/release/bioc/html/carnation.html)
 for more details.
 
 ## Key Features
@@ -77,18 +76,28 @@ Carnation can be installed using
 [`BiocManager::install`](https://bioconductor.github.io/BiocManager/reference/install.html).
 First, start R (version: 4.6) and then run:
 
-`# first check to see if BiocManager is available`` ``if``(``!`[`requireNamespace`](https://rdrr.io/r/base/ns-load.html)`(``'BiocManager'``, quietly``=``TRUE``)``)``{`` `` `[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``'BiocManager'``)`` ``}`` `` ``BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``'carnation'``)`
+\
+`# first check to see if BiocManager is available`\
+`if``(``!`[`requireNamespace`](https://rdrr.io/r/base/ns-load.html)`(``'BiocManager'``, quietly``=``TRUE``)``)``{`\
+`  `[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``'BiocManager'``)`\
+`}`\
+\
+`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``'carnation'``)`
 
 To install the ‘devel’ version
 
-`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``'carnation'``, version``=``'devel'``)`
+\
+`BiocManager``::`[`install`](https://bioconductor.github.io/BiocManager/reference/install.html)`(``'carnation'``, version``=``'devel'``)`
 
 ### remotes
 
 You can install the developmental version of carnation from github using
 the `remotes` package:
 
-[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``'remotes'``)`` ``remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation'``,`` `` dependencies``=``TRUE``, build_vignettes``=``TRUE``)`
+\
+[`install.packages`](https://rdrr.io/r/utils/install.packages.html)`(``'remotes'``)`\
+`remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation'``,`\
+`                        dependencies``=``TRUE``, build_vignettes``=``TRUE``)`
 
 ### conda
 
@@ -106,7 +115,8 @@ Then install the package with the `remotes` package. Here we set
 `upgrade='never'` to make sure the conda-installed package versions
 remain unchanged.
 
-`remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation@r4.3'``, upgrade``=``'never'``)`
+\
+`remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation@r4.3'``, upgrade``=``'never'``)`
 
 Note:
 
@@ -134,11 +144,15 @@ navigate:
 
 Load the library and install required Python dependencies:
 
-[`library`](https://rdrr.io/r/base/library.html)`(`[`carnation`](https://nichd-bspc.github.io/carnation/)`)`` `[`install_carnation`](https://nichd-bspc.github.io/carnation/reference/install_carnation.md)`(``)`` ``# Installs plotly and kaleido for PDF export`` `[`run_carnation`](https://nichd-bspc.github.io/carnation/reference/run_carnation.md)`(``)`
+\
+[`library`](https://rdrr.io/r/base/library.html)`(`[`carnation`](https://nichd-bspc.github.io/carnation/)`)`\
+[`install_carnation`](https://nichd-bspc.github.io/carnation/reference/install_carnation.md)`(``)``  ``# Installs plotly and kaleido for PDF export`\
+[`run_carnation`](https://nichd-bspc.github.io/carnation/reference/run_carnation.md)`(``)`
 
 For remote servers with SSH port forwarding:
 
-[`run_carnation`](https://nichd-bspc.github.io/carnation/reference/run_carnation.md)`(``options``=`[`list`](https://rdrr.io/r/base/list.html)`(``port``=``12345``, launch.browser``=``FALSE``)``)`
+\
+[`run_carnation`](https://nichd-bspc.github.io/carnation/reference/run_carnation.md)`(``options``=`[`list`](https://rdrr.io/r/base/list.html)`(``port``=``12345``, launch.browser``=``FALSE``)``)`
 
 Then access Carnation at `http://127.0.0.1:12345`
 
@@ -353,6 +367,12 @@ Carnation is available under the MIT license.
 - [`plotScatter.label_ly()`](https://nichd-bspc.github.io/carnation/reference/plotScatter.label_ly.md)
   : Plot an interactive scatterplot to compare two contrasts
 
+- [`plotVolcano.label()`](https://nichd-bspc.github.io/carnation/reference/plotVolcano.label.md)
+  : Create a static labeled Volcano plot
+
+- [`plotVolcano.label_ly()`](https://nichd-bspc.github.io/carnation/reference/plotVolcano.label_ly.md)
+  : Create an interactive labeled Volcano plot
+
 - [`radarUI()`](https://nichd-bspc.github.io/carnation/reference/radarmod.md)
   [`radarServer()`](https://nichd-bspc.github.io/carnation/reference/radarmod.md)
   : Radar plot module
@@ -409,6 +429,10 @@ Carnation is available under the MIT license.
 
 - [`validate_carnation_object()`](https://nichd-bspc.github.io/carnation/reference/validate_carnation_object.md)
   : Validate a carnation object
+
+- [`volcanoPlotUI()`](https://nichd-bspc.github.io/carnation/reference/volcanoplotmod.md)
+  [`volcanoPlotServer()`](https://nichd-bspc.github.io/carnation/reference/volcanoplotmod.md)
+  : Volcano plot module
 
 # Articles
 

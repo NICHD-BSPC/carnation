@@ -8,6 +8,9 @@
 - **Matthew Tyler Menold**. Contributor.
   [](https://orcid.org/0009-0007-4728-2470)
 
+- **Dale McCauley McCauley**. Contributor.
+  [](https://orcid.org/0009-0005-7550-6916)
+
 - **Ryan Dale**. Funder. [](https://orcid.org/0000-0003-2664-3744)
 
 ## Citation
@@ -16,10 +19,13 @@ Source:
 [`DESCRIPTION`](https://github.com/NICHD-BSPC/carnation/blob/devel/DESCRIPTION)
 
 Mitra A (2026). *carnation: Interactive Exploration & Management of
-RNA-Seq Analyses*. R package version 1.1.1,
+RNA-Seq Analyses*. R package version 1.1.2,
 <https://nichd-bspc.github.io/carnation/>.
 
-@Manual{, title = {carnation: Interactive Exploration & Management of
-RNA-Seq Analyses}, author = {Apratim Mitra}, year = {2026}, note = {R
-package version 1.1.1}, url = {https://nichd-bspc.github.io/carnation/},
+@Manual{,\
+  title = {carnation: Interactive Exploration & Management of RNA-Seq Analyses},\
+  author = {Apratim Mitra},\
+  year = {2026},\
+  note = {R package version 1.1.2},\
+  url = {https://nichd-bspc.github.io/carnation/},\
 }

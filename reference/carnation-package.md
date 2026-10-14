@@ -40,5 +40,8 @@ Other contributors:
 - Matthew Tyler Menold <matthew.menold@gmail.com>
   ([ORCID](https://orcid.org/0009-0007-4728-2470)) \[contributor\]
 
+- Dale McCauley McCauley <dalelmccauley@gmail.com>
+  ([ORCID](https://orcid.org/0009-0005-7550-6916)) \[contributor\]
+
 - Ryan Dale <ryan.dale@nih.gov>
   ([ORCID](https://orcid.org/0000-0003-2664-3744)) \[funder\]
