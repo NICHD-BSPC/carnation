@@ -116,13 +116,7 @@ Then install the package with the `remotes` package. Here we set
 remain unchanged.
 
 \
-`remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation@r4.3'``, upgrade``=``'never'``)`
-
-Note:
-
-- Conda packages for R \>= 4.6.0 may not be available yet causing
-  installation using the default github branch to fail. To avoid this,
-  use branch `r4.3` which pins R to a lower version.
+`remotes``::`[`install_github`](https://remotes.r-lib.org/reference/install_github.html)`(``'NICHD-BSPC/carnation'``, upgrade``=``'never'``)`
 
 ## Getting Started
 
