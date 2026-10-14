@@ -142,6 +142,17 @@ pcaPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
+      fluidRow(
+        column(4, h5('Aspect ratio')),
+        column(
+          8,
+          selectInput(ns('aspect'),
+            label = NULL,
+            choices = c('wide', 'narrow')
+          )
+        )
+      ),
+
       bsCollapse(
         bsCollapsePanel('subset samples',
           fluidRow(
@@ -162,9 +173,7 @@ pcaPlotUI <- function(id, panel){
           actionButton(ns('reset_pca_cols'),'Reset',
                        class='btn-primary')
         ), # bsCollapsePanel
-      #), # bsCollapse
 
-      #bsCollapse(
         bsCollapsePanel('gene loadings',
           fluidRow(
             column(4, 'show loadings?'),
@@ -206,9 +215,11 @@ pcaPlotUI <- function(id, panel){
         ) # column
       ), # fluidRow
 
-      withSpinner(
-        plotlyOutput(ns('pcaplot'), height='500px')
-      ) # withSpinner
+      div(align='center',
+        withSpinner(
+          plotlyOutput(ns('pcaplot'), height='600px')
+        ) # withSpinner
+      )
     )
   }
 } # pcaPlotUI
@@ -511,6 +522,15 @@ pcaPlotServer <- function(id, obj, coldata, config){
                            samples=samples,
                            loadings=loadings,
                            loadings_ngenes=input$pca_loadings_ngenes)
+
+          # for narrow layout, manually set plotly dimensions
+          if(input$aspect == 'narrow'){
+            p <- plotly::plotly_build(p)
+            p$x$layout$width <- 900
+            p$x$layout$height <- 600
+            p$x$layout$autosize <- FALSE
+          }
+
         } else {
 
           validate(

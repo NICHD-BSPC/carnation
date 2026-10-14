@@ -1043,14 +1043,36 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
 
       assay_list <- alist
 
+      # get analysis info
+      assay_info <- lapply(assay_list, function(x){
+                      # get file attributes, rename columns
+                      info <- file.info(x)[c('size', 'mtime')] #, 'ctime')]
+                      colnames(info)[2] <- c('modified_at') #, 'created_at')
+
+                      # convert sizes to human readable GB/MB
+                      gb_idx <- info$size > 1024**3
+                      str_sizes <- rep('MB', nrow(info))
+                      str_sizes[ which(gb_idx) ] <- 'GB'
+
+                      info$size[ which(gb_idx) ] <- round(info$size[which(gb_idx)]/(1024**3))
+                      info$size[ which(!gb_idx) ] <- round(info$size[which(!gb_idx)]/(1024**2))
+
+                      info$size <- paste(info$size, str_sizes)
+
+                      # format modified time
+                      info[[ 'modified_at' ]] <- format(info[['modified_at']],
+                                                        '%y-%m-%d, %H:%M')
+
+                      info
+                    })
+
       # make df summarizing projects
       proj_names <- strsplit(names(alist), .Platform$file.sep, fixed=TRUE)
       group <- unlist(lapply(proj_names, function(x) x[1]))
       project <- unlist(lapply(proj_names, function(x) x[2]))
       proj_df <- data.frame(
                    group=group,
-                   project=project,
-                   num_datasets=unname(unlist(lapply(alist, length)))
+                   project=project
                  )
 
       # order by group, then project
@@ -1087,7 +1109,8 @@ settingsServer <- function(id, details, depth, end_offset, assay_fun, config){
            reload_parent=reload_parent$flag,
            is_admin=is_admin,
            project_descriptions=project_descriptions,
-           proj_df=proj_df)
+           proj_df=proj_df,
+           assay_info=assay_info)
     })
 
     helpButtonServer('settings_help', size='l')
