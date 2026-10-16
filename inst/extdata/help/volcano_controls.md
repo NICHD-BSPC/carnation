@@ -13,6 +13,7 @@ Changes in the main controls results in the plot being immediately redrawn.
 
 #### Plot settings
 
+- `x-axis`: choose what to plot on the y-axis. Options are raw (default) or adjusted p-values.
 - `Color by`: choose whether points are colored by significance or by average expression (base mean)
 - `Opacity`: control the transparency of points
   - Lower values help visualize overlapping points

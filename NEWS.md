@@ -1,5 +1,28 @@
 # carnation
 
+## 1.1.2
+
+- New volcano plot added
+- various plot updates
+  - MA plot
+    - added aspect ratio  and alpha controls
+    - new 'refresh' button for reduced reactivity
+  - Gene plot
+    - add option to show unnormalized counts. This is helpful when the data in the `dds` element is pre-normalized, e.g. in proteomics
+  - scatter plot
+    - raw p-values added as a plotting option
+    - plot/table selection panels now open upon selection
+  - aspect ratio control for PCA & scatter plots
+- analysis table
+  - updated to show all available datasets
+  - obtain file info (size, mtime) and show in the table
+  - improved selection behavior
+
+- misc fixes
+  - correctly reset gene scratchpad when loading data so previously added genes don't show up again.
+  - the gene plot function now sets the 'text' aesthetic to `factor()` to stop warnings about statistical transformation
+  - `fromList.with.names` now uses base R column indexing instead of `dplyr::relocate`.
+
 ## v0.99.10
 
 - add `edgeR`/`limma` support for input files and objects.

@@ -28,6 +28,7 @@ test_that("volcanoPlotServer processes data correctly", {
     # Simulate user inputs
     session$setInputs(
       comp_all = "test",
+      adjusted_toggle = "pvalue",
       volcano_xmin = -5,
       volcano_xmax = 5,
       volcano_ymin = 0,

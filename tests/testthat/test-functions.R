@@ -822,7 +822,7 @@ test_that("plotVolcano.label creates correct Volcano plot", {
   # Test with custom parameters
   p_custom <- plotVolcano.label(mock_res, fdr.thres = 0.05, fc.thres = 1,
                                 fc.lim = c(-4, 4),
-                                neg_log_padj.lim = c(0, 10),
+                                y.axis.lim = c(0, 10),
                                 color_by = "baseMean", colorscale = "magma",
                                 alpha = 0.4)
   expect_true(is_ggplot(p_custom))
@@ -851,14 +851,17 @@ test_that("plotVolcano.label handles edge cases correctly", {
     row.names = c("gene1", "gene2", "gene3")
   )
 
-  p <- plotVolcano.label(minimal_res)
+  p <- plotVolcano.label(minimal_res, pvalue_padj_switch = "padj")
   expect_true(is_ggplot(p))
 
   # Test with missing symbol column
   no_symbol_res <- minimal_res
   no_symbol_res$symbol <- NULL
 
-  p_no_symbol <- plotVolcano.label(no_symbol_res)
+  p_no_symbol <- plotVolcano.label(
+    no_symbol_res,
+    pvalue_padj_switch = "padj"
+  )
   expect_true(is_ggplot(p_no_symbol))
 
   # Test with NA and infinite -log10 adjusted p-values
@@ -867,7 +870,11 @@ test_that("plotVolcano.label handles edge cases correctly", {
   na_res$padj[2] <- NA
   na_res$padj[3] <- 0
 
-  p_na <- plotVolcano.label(na_res, neg_log_padj.lim = c(0, 10))
+  p_na <- plotVolcano.label(
+    na_res,
+    y.axis.lim = c(0, 10),
+    pvalue_padj_switch = "padj"
+  )
   expect_true(is_ggplot(p_na))
 })
 
@@ -925,7 +932,7 @@ test_that("plotVolcano.label_ly creates correct interactive Volcano plot", {
   # Test with custom parameters
   p_custom <- plotVolcano.label_ly(mock_res, fdr.thres = 0.05, fc.thres = 1,
                                    fc.lim = c(-4, 4),
-                                   neg_log_padj.lim = c(0, 10),
+                                   y.axis.lim = c(0, 10),
                                    color_by = "baseMean", colorscale = "magma",
                                    alpha = 0.4)
   expect_true(heatmaply::is.plotly(p_custom))
@@ -951,14 +958,17 @@ test_that("plotVolcano.label_ly handles edge cases correctly", {
     row.names = c("gene1", "gene2", "gene3")
   )
 
-  p <- plotVolcano.label_ly(minimal_res)
+  p <- plotVolcano.label_ly(minimal_res, pvalue_padj_switch = "padj")
   expect_true(heatmaply::is.plotly(p))
 
   # Test with missing symbol column
   no_symbol_res <- minimal_res
   no_symbol_res$symbol <- NULL
 
-  p_no_symbol <- plotVolcano.label_ly(no_symbol_res)
+  p_no_symbol <- plotVolcano.label_ly(
+    no_symbol_res,
+    pvalue_padj_switch = "padj"
+  )
   expect_true(heatmaply::is.plotly(p_no_symbol))
 
   # Test with NA and infinite -log10 adjusted p-values
@@ -967,7 +977,11 @@ test_that("plotVolcano.label_ly handles edge cases correctly", {
   na_res$padj[2] <- NA
   na_res$padj[3] <- 0
 
-  p_na <- plotVolcano.label_ly(na_res, neg_log_padj.lim = c(0, 10))
+  p_na <- plotVolcano.label_ly(
+    na_res,
+    y.axis.lim = c(0, 10),
+    pvalue_padj_switch = "padj"
+  )
   expect_true(heatmaply::is.plotly(p_na))
 })
 
@@ -1006,6 +1020,138 @@ test_that("plotVolcano.label_ly throws errors for invalid inputs", {
                "between 0 and 1")
 })
 
+test_that("Volcano plot functions display raw and adjusted p-values", {
+  test_res <- data.frame(
+    baseMean = c(100, 200, 300),
+    log2FoldChange = c(1, -1, 0),
+    pvalue = c(0.01, 0.1, 0.5),
+    padj = c(0.2, 0.01, 0.8),
+    symbol = c("GENE1", "GENE2", "GENE3"),
+    row.names = c("gene1", "gene2", "gene3")
+  )
+
+  raw_plot <- plotVolcano.label(
+    test_res,
+    y.axis.lim = c(0, 3),
+    pvalue_padj_switch = "pvalue"
+  )
+  adjusted_plot <- plotVolcano.label(
+    test_res,
+    y.axis.lim = c(0, 3),
+    pvalue_padj_switch = "padj"
+  )
+
+  expect_equal(raw_plot$data$neg_log_pvalue, -log10(test_res$pvalue))
+  expect_equal(adjusted_plot$data$neg_log_pvalue, -log10(test_res$padj))
+  expect_equal(raw_plot$labels$y, "-log10 p-value")
+  expect_equal(adjusted_plot$labels$y, "-log10 adjusted p-value")
+
+  raw_plotly <- plotly::plotly_build(plotVolcano.label_ly(
+    test_res,
+    y.axis.lim = c(0, 3),
+    pvalue_padj_switch = "pvalue"
+  ))
+  adjusted_plotly <- plotly::plotly_build(plotVolcano.label_ly(
+    test_res,
+    y.axis.lim = c(0, 3),
+    pvalue_padj_switch = "padj"
+  ))
+
+  raw_y_title <- raw_plotly$x$layout$yaxis$title
+  adjusted_y_title <- adjusted_plotly$x$layout$yaxis$title
+  if (is.list(raw_y_title)) raw_y_title <- raw_y_title$text
+  if (is.list(adjusted_y_title)) adjusted_y_title <- adjusted_y_title$text
+
+  expect_equal(as.numeric(raw_plotly$x$data[[1]]$y), -log10(test_res$pvalue))
+  expect_equal(
+    as.numeric(adjusted_plotly$x$data[[1]]$y),
+    -log10(test_res$padj)
+  )
+  expect_equal(raw_y_title, "-log10 p-value")
+  expect_equal(adjusted_y_title, "-log10 adjusted p-value")
+})
+
+test_that("Volcano significance remains based on adjusted p-values", {
+  test_res <- data.frame(
+    baseMean = c(100, 200),
+    log2FoldChange = c(1, 2),
+    pvalue = c(0.001, 0.5),
+    padj = c(0.2, 0.01),
+    row.names = c("gene1", "gene2")
+  )
+
+  raw_plot <- plotVolcano.label(
+    test_res,
+    fdr.thres = 0.05,
+    pvalue_padj_switch = "pvalue"
+  )
+  adjusted_plot <- plotVolcano.label(
+    test_res,
+    fdr.thres = 0.05,
+    pvalue_padj_switch = "padj"
+  )
+
+  expected <- c("no", "yes")
+  expect_equal(as.character(raw_plot$data$significant), expected)
+  expect_equal(as.character(adjusted_plot$data$significant), expected)
+
+  interactive_group_x <- function(value_type) {
+    built <- plotly::plotly_build(plotVolcano.label_ly(
+      test_res,
+      fdr.thres = 0.05,
+      color_by = "significance",
+      pvalue_padj_switch = value_type
+    ))
+
+    vapply(c("no", "yes"), function(group) {
+      values <- unlist(lapply(built$x$data, function(trace) {
+        if (identical(trace$name, group)) trace$x else NULL
+      }))
+      values <- as.numeric(values)
+      values[is.finite(values)][1]
+    }, numeric(1))
+  }
+
+  expected_group_x <- c(no = 1, yes = 2)
+  expect_equal(interactive_group_x("pvalue"), expected_group_x)
+  expect_equal(interactive_group_x("padj"), expected_group_x)
+})
+
+test_that("volcanoPlotServer switches between raw and adjusted p-values", {
+  obj <- reactiveValues(
+    res = list(test = create_mock_results())
+  )
+
+  testServer(volcanoPlotServer, args = list(
+    id = "test_volcano_toggle",
+    obj = obj,
+    plot_args = reactive(list(
+      fdr.thres = 0.05,
+      fc.thres = 1,
+      gene.to.plot = character()
+    )),
+    config = reactiveVal(get_config())
+  ), {
+    session$setInputs(
+      comp_all = "test",
+      adjusted_toggle = "pvalue",
+      volcano_xmin = -5,
+      volcano_xmax = 5,
+      volcano_ymin = 0,
+      volcano_ymax = 20,
+      color_by = "baseMean",
+      volcano_alpha = 0.6,
+      plot_do = 1
+    )
+    session$flushReact()
+    expect_equal(volcano_plot()$labels$y, "-log10 p-value")
+
+    session$setInputs(adjusted_toggle = "padj", plot_do = 2)
+    session$flushReact()
+    expect_equal(volcano_plot()$labels$y, "-log10 adjusted p-value")
+  })
+})
+
 # Test Volcano plot data processing logic
 test_that("Volcano plot functions process data correctly", {
   # Create test data with known values
@@ -1018,19 +1164,41 @@ test_that("Volcano plot functions process data correctly", {
   )
 
   # Test that extreme values are handled (should be clipped to plot limits)
-  p_ggplot <- plotVolcano.label(test_res, fdr.thres = 0.01, fc.thres = 0,
-                                fc.lim = c(-5, 5), neg_log_padj.lim = c(0, 5))
+  p_ggplot <- plotVolcano.label(
+    test_res,
+    fdr.thres = 0.01,
+    fc.thres = 0,
+    fc.lim = c(-5, 5),
+    y.axis.lim = c(0, 5),
+    pvalue_padj_switch = "padj"
+  )
   expect_true(is_ggplot(p_ggplot))
 
-  p_plotly <- plotVolcano.label_ly(test_res, fdr.thres = 0.01, fc.thres = 0,
-                                   fc.lim = c(-5, 5), neg_log_padj.lim = c(0, 5))
+  p_plotly <- plotVolcano.label_ly(
+    test_res,
+    fdr.thres = 0.01,
+    fc.thres = 0,
+    fc.lim = c(-5, 5),
+    y.axis.lim = c(0, 5),
+    pvalue_padj_switch = "padj"
+  )
   expect_true(heatmaply::is.plotly(p_plotly))
 
   # Test with different significance thresholds
-  p_strict <- plotVolcano.label(test_res, fdr.thres = 0.0001, fc.thres = 1)
+  p_strict <- plotVolcano.label(
+    test_res,
+    fdr.thres = 0.0001,
+    fc.thres = 1,
+    pvalue_padj_switch = "padj"
+  )
   expect_true(is_ggplot(p_strict))
 
-  p_lenient <- plotVolcano.label(test_res, fdr.thres = 0.1, fc.thres = 0)
+  p_lenient <- plotVolcano.label(
+    test_res,
+    fdr.thres = 0.1,
+    fc.thres = 0,
+    pvalue_padj_switch = "padj"
+  )
   expect_true(is_ggplot(p_lenient))
 })
 
@@ -1045,10 +1213,10 @@ test_that("Volcano plot functions handle symbol columns correctly", {
     row.names = c("gene1", "gene2")
   )
 
-  p1 <- plotVolcano.label(res_symbol)
+  p1 <- plotVolcano.label(res_symbol, pvalue_padj_switch = "padj")
   expect_true(is_ggplot(p1))
 
-  p1_ly <- plotVolcano.label_ly(res_symbol)
+  p1_ly <- plotVolcano.label_ly(res_symbol, pvalue_padj_switch = "padj")
   expect_true(heatmaply::is.plotly(p1_ly))
 
   # Test with ALIAS column
@@ -1060,10 +1228,10 @@ test_that("Volcano plot functions handle symbol columns correctly", {
     row.names = c("gene1", "gene2")
   )
 
-  p2 <- plotVolcano.label(res_alias)
+  p2 <- plotVolcano.label(res_alias, pvalue_padj_switch = "padj")
   expect_true(is_ggplot(p2))
 
-  p2_ly <- plotVolcano.label_ly(res_alias)
+  p2_ly <- plotVolcano.label_ly(res_alias, pvalue_padj_switch = "padj")
   expect_true(heatmaply::is.plotly(p2_ly))
 
   # Test with NA symbols
@@ -1075,10 +1243,10 @@ test_that("Volcano plot functions handle symbol columns correctly", {
     row.names = c("gene1", "gene2")
   )
 
-  p3 <- plotVolcano.label(res_na_symbol)
+  p3 <- plotVolcano.label(res_na_symbol, pvalue_padj_switch = "padj")
   expect_true(is_ggplot(p3))
 
-  p3_ly <- plotVolcano.label_ly(res_na_symbol)
+  p3_ly <- plotVolcano.label_ly(res_na_symbol, pvalue_padj_switch = "padj")
   expect_true(heatmaply::is.plotly(p3_ly))
 })
 

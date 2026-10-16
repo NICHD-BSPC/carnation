@@ -103,7 +103,7 @@ ui:
         min: -5
         max: 5
       colorscale: Viridis
-      neg_log_padj_limits:
+      y_axis_limits:
         min: 0
         max: 20
 
