@@ -495,12 +495,6 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
                         data.intro='Finally, click this button to load the selected project and analysis into carnation.'
                       ),
 
-                      br(),
-
-                      introBox(
-                        savedBookmarksUI('bookmarking')
-                      ),
-
                       br(), br(),
                       uiOutput('current_obj')
 
