@@ -472,3 +472,230 @@ bookmarkingServer <- function(
     }
   )
 }
+
+
+######## UI #######################
+
+#' @rdname bookmarkingmod
+#' @export
+bookmarkButtonUI <- function(id) {
+  ns <- NS(id)
+
+  actionButton(
+    ns('bookmark'),
+    label = 'Bookmark',
+    class = 'btn-primary'
+  )
+}
+
+#' @rdname bookmarkingmod
+#' @export
+savedBookmarksUI <- function(id) {
+  ns <- NS(id)
+
+  conditionalPanel(
+    'output.has_bookmarks', ns = ns,
+    selectInput(ns('bookmark_dropdown'), 'Saved Bookmarks', choices = NULL),
+    fluidRow(style='margin-bottom: 10px',
+      column(6, align='left',
+        actionButton(ns('go_bookmark'), 'Load', class = 'btn-primary')
+      ), # column
+      column(6, align='right',
+        conditionalPanel(
+          'output.is_admin', ns = ns,
+          actionButton(ns('delete_bookmark'), 'Delete', class = 'btn-primary')
+        )
+      ) # column
+    ) # fluidRow
+  )
+}
+
+#' @rdname bookmarkingmod
+#' @export
+bookmarksDescriptionUI <- function(id) {
+  ns <- NS(id)
+
+  DTOutput(ns('bookmarks_desc'))
+}
+
+
+##### Saved Bookmarks Table and Dropdown #####
+
+# Builds the bookmark description table displayed in the saved-bookmarks UI.
+bookmark_description_table <- function(bookmarks_df) {
+  hidden_columns <- match(
+    c('id', 'comp', 'mode'),
+    names(bookmarks_df)
+  ) - 1
+
+  datatable(
+    bookmarks_df,
+    rownames = FALSE,
+    selection = 'single',
+    caption = tags$caption(
+      style = 'font-weight: bold; font-size: 15px;',
+      'Available bookmarks'
+    ),
+    options = list(
+      # Moves the search bar to the bottom of the table.
+      dom = 'tlfip',
+      columnDefs = list(
+        list(
+          visible = FALSE,
+          targets = hidden_columns
+        )
+      )
+    )
+  )
+}
+
+# Registers the reactive outputs and observers used to keep the saved-bookmark
+# table and dropdown synchronized.
+setup_saved_bookmarks_ui <- function(
+  input,
+  output,
+  session,
+  bookmarks,
+  is_admin,
+  loaded_id = function() NULL
+) {
+  output$bookmarks_desc <- renderDT({
+    bookmark_description_table(bookmarks())
+  })
+
+  bookmarks_desc_proxy <- dataTableProxy(
+    'bookmarks_desc',
+    session = session
+  )
+
+  table_bookmark_selected <- eventReactive(
+    input$bookmarks_desc_rows_selected,
+    {
+      bookmarks_df <- bookmarks()
+      selection <- input$bookmarks_desc_rows_selected
+
+      selected_bookmark <- bookmarks_df[selection, ]
+      selected_bookmark$id
+    }
+  )
+
+  observeEvent(table_bookmark_selected(), {
+    selection <- input$bookmarks_desc_rows_selected
+    req(length(selection) == 1)
+    updateSelectizeInput(
+      session,
+      inputId = 'bookmark_dropdown',
+      selected = table_bookmark_selected()
+    )
+  })
+
+  # Updates the bookmark table selection based on dropdown selection.
+  observeEvent(
+    list(input$bookmark_dropdown, input$bookmarks_desc_rows_all),
+    {
+      bookmarks_df <- bookmarks()
+      row_idx <- match(input$bookmark_dropdown, bookmarks_df$id)
+
+      req(!is.na(row_idx))
+
+      displayed_position <- match(
+        row_idx,
+        input$bookmarks_desc_rows_all
+      )
+
+      if (is.na(displayed_position)) {
+        bookmarks_desc_proxy %>% selectRows(NULL)
+        return()
+      }
+
+      page_length <- input$bookmarks_desc_state$length
+      if (
+        is.null(page_length) ||
+          !is.numeric(page_length) ||
+          page_length < 1
+      ) {
+        page_length <- 10
+      }
+      page_idx <- floor((displayed_position - 1) / page_length) + 1
+
+      bookmarks_desc_proxy %>%
+        selectRows(NULL) %>%
+        selectRows(row_idx) %>%
+        selectPage(page_idx)
+    }
+  )
+
+  output$has_bookmarks <- reactive(nrow(bookmarks()) > 0)
+  output$is_admin <- is_admin
+  outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
+  outputOptions(output, 'is_admin', suspendWhenHidden = FALSE)
+
+  observe({
+    bookmarks_df <- bookmarks()
+    sel <- loaded_id()
+    updateSelectInput(
+      session,
+      'bookmark_dropdown',
+      choices = setNames(bookmarks_df$id, bookmarks_df$label),
+      selected = if (length(sel) == 1 && sel %in% bookmarks_df$id) sel else NULL
+    )
+  })
+
+  invisible(NULL)
+}
+
+
+##### Modals #####
+
+bookmark_name_modal <- function(ns) {
+  modalDialog(
+    title = 'Make a bookmark of the current view',
+    textInput(
+      ns('bookmark_name'),
+      'Bookmark name',
+      placeholder = 'Enter a descriptive name'
+    ),
+    footer = tagList(
+      modalButton('Cancel'),
+      actionButton(
+        ns('confirm_bookmark'),
+        'Save Bookmark',
+        class = 'btn-primary'
+      )
+    ),
+    easyClose = TRUE
+  )
+}
+
+bookmark_loading_modal <- function() {
+  modalDialog(
+    icon('spinner', class = 'fa-spin'),
+    'Loading bookmark, please wait',
+    footer = NULL,
+    easyClose = FALSE
+  )
+}
+
+bookmark_access_denied_modal <- function() {
+  modalDialog(
+    title = 'You do not have access to this data area.',
+    easyClose = FALSE
+  )
+}
+
+bookmark_delete_modal <- function(ns) {
+  modalDialog(
+    title = 'Delete bookmark',
+    'Are you sure you want to delete this bookmark?',
+    footer = tagList(
+      modalButton('Cancel'),
+      actionButton(
+        ns('delete_bookmark_do'),
+        'Delete Bookmark',
+        class = 'btn-danger'
+      )
+    ),
+    easyClose = TRUE
+  )
+}
+
