@@ -140,6 +140,19 @@ read_bookmark_metadata <- function(dir) {
   )
 }
 
+#' Lists the saved bookmarks for one analysis, gathering metadata
+#' intended for display. Only looks at immediate folders and checks
+#' that the project and analysis match the bookmark data. If a
+#' bookmark without a label is found it displays the time it
+#' was made.
+#'
+#' @param bookmarks_dir The assay's bookmark folder
+#' @param project The lab or project name such as current$proj
+#' @param analysis The analysis name such as current$analysis
+#'
+#' @return A data frame with the character columns id, label, saved_at
+#' comp, and mode. One row per matching bookmark.
+#'
 list_saved_bookmarks <- function(bookmarks_dir, project, analysis) {
   empty_bookmarks <- data.frame(
     id = character(),
