@@ -8,7 +8,13 @@
 \usage{
 maPlotUI(id, panel)
 
-maPlotServer(id, obj, plot_args, config)
+maPlotServer(
+  id,
+  obj,
+  plot_args,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -21,6 +27,8 @@ maPlotServer(id, obj, plot_args, config)
 & 'gene.to.plot' (genes selected in scratchpad)}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with MA plot UI.
