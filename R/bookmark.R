@@ -392,11 +392,36 @@ bookmarkingServer <- function(
       output$is_admin <- is_admin
       outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
 
+      # bookmark description table displayed in the saved-bookmarks UI.
       output$bookmarks_desc <- renderDT({
         bookmarks_df <- selected_assay_bookmarks()
-        bookmark_description_table(
+
+        hidden_columns <- match(
+          c('id', 'comp', 'mode'),
+          names(bookmarks_df)
+        ) - 1
+
+        selected = which(bookmarks_df$id %in% loaded_bookmark()$id)
+
+        datatable(
           bookmarks_df,
-          selected = which(bookmarks_df$id %in% loaded_bookmark()$id)
+          rownames = FALSE,
+          selection = list(mode = 'single', selected = selected),
+          caption = tags$caption(
+            style = 'font-weight: bold; font-size: 15px;',
+            'Available bookmarks'
+          ),
+          options = list(
+            # Moves the search bar to the bottom of the table.
+            dom = 'tlfip',
+            columnDefs = list(
+              list(
+                visible = FALSE,
+                targets = hidden_columns
+              )
+            ),
+            displayStart = if (length(selected)) (selected - 1) %/% 10 * 10 else 0
+          )
         )
       })
 
@@ -515,40 +540,6 @@ bookmarksDescriptionUI <- function(id) {
     ) # conditionalPanel
   ) # tagList
 }
-
-
-###### Saved Bookmarks Table ######
-
-# Builds the bookmark description table displayed in the saved-bookmarks UI.
-bookmark_description_table <- function(bookmarks_df, selected = NULL) {
-  hidden_columns <- match(
-    c('id', 'comp', 'mode'),
-    names(bookmarks_df)
-  ) - 1
-
-  datatable(
-    bookmarks_df,
-    rownames = FALSE,
-    selection = list(mode = 'single', selected = selected),
-    caption = tags$caption(
-      style = 'font-weight: bold; font-size: 15px;',
-      'Available bookmarks'
-    ),
-    options = list(
-      # Moves the search bar to the bottom of the table.
-      dom = 'tlfip',
-      columnDefs = list(
-        list(
-          visible = FALSE,
-          targets = hidden_columns
-        )
-      ),
-      displayStart = if (length(selected)) (selected - 1) %/% 10 * 10 else 0
-    )
-  )
-}
-
-
 
 ##### Modals #####
 
