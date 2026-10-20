@@ -221,7 +221,7 @@ bookmarkingServer <- function(
           removeModal()
 
           # Excludes all inputs from Shiny's input.rds; onBookmark stores them
-          # in values.rds instead. This module's own inputs (dropdown, table
+          # in values.rds instead. This module's own inputs (such as table
           # selection) are left out so a restore doesn't overwrite the
           # loaded-bookmark selection with stale values.
           all_inputs <- reactiveValuesToList(root_input, all.names = TRUE)
@@ -386,9 +386,11 @@ bookmarkingServer <- function(
         ignoreInit = TRUE
       )
 
-      ##### Saved Bookmarks UI and Actions #####
+      ##### Save/Delete Actions #####
 
       is_admin <- reactive(isTRUE(settings()$is_admin))
+      output$is_admin <- is_admin
+      outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
 
       output$bookmarks_desc <- renderDT({
         bookmarks_df <- selected_assay_bookmarks()
@@ -399,17 +401,14 @@ bookmarkingServer <- function(
       })
 
       output$has_bookmarks <- reactive(nrow(selected_assay_bookmarks()) > 0)
-      output$is_admin <- is_admin
-      outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
       outputOptions(output, 'is_admin', suspendWhenHidden = FALSE)
 
 
       selected_bookmark_id <- reactive({
         row <- input$bookmarks_desc_rows_selected
         ids <- selected_assay_bookmarks()$id
-        if (length(row) == 1) ids[[row]] else NULL
+        ids[row]
       })
-
 
 
       # Loads a bookmark picked from the UI. Restores in-session when the
@@ -518,7 +517,7 @@ bookmarksDescriptionUI <- function(id) {
 }
 
 
-##### Saved Bookmarks Table and Dropdown #####
+###### Saved Bookmarks Table ######
 
 # Builds the bookmark description table displayed in the saved-bookmarks UI.
 bookmark_description_table <- function(bookmarks_df, selected = NULL) {
