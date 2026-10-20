@@ -388,9 +388,15 @@ bookmarkingServer <- function(
 
       ##### Save/Delete Actions #####
 
+      # reactive and output with info about admin user
       is_admin <- reactive(isTRUE(settings()$is_admin))
       output$is_admin <- is_admin
+      outputOptions(output, 'is_admin', suspendWhenHidden = FALSE)
+
+      # output flag used to toggle bookmark table if bookmarks present
+      output$has_bookmarks <- reactive(nrow(selected_assay_bookmarks()) > 0)
       outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
+
 
       # bookmark description table displayed in the saved-bookmarks UI.
       output$bookmarks_desc <- renderDT({
@@ -409,11 +415,11 @@ bookmarkingServer <- function(
           selection = list(mode = 'single', selected = selected),
           caption = tags$caption(
             style = 'font-weight: bold; font-size: 15px;',
-            'Available bookmarks'
+            'Available bookmarks for selected analysis'
           ),
           options = list(
             # Moves the search bar to the bottom of the table.
-            dom = 'tlfip',
+            dom = 'tp',
             columnDefs = list(
               list(
                 visible = FALSE,
@@ -424,10 +430,6 @@ bookmarkingServer <- function(
           )
         )
       })
-
-      output$has_bookmarks <- reactive(nrow(selected_assay_bookmarks()) > 0)
-      outputOptions(output, 'is_admin', suspendWhenHidden = FALSE)
-
 
       selected_bookmark_id <- reactive({
         row <- input$bookmarks_desc_rows_selected
@@ -527,15 +529,16 @@ bookmarksDescriptionUI <- function(id) {
     br(),
     conditionalPanel('output.has_bookmarks', ns = ns,
       fluidRow(style='margin-bottom: 10px',
-            column(6, align='left',
+            column(1,
               actionButton(ns('go_bookmark'), 'Load', class = 'btn-primary')
-            ), # column
-            column(6, align='right',
+            ),
+            column(1,
               conditionalPanel(
                 'output.is_admin', ns = ns,
                 actionButton(ns('delete_bookmark'), 'Delete', class = 'btn-primary')
               )
-            ) # column
+            ), # column
+            column(10, span())
       ) # fluidRow
     ) # conditionalPanel
   ) # tagList
