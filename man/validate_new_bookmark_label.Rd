@@ -4,7 +4,13 @@
 \alias{validate_new_bookmark_label}
 \title{Validates a label for a new bookmark}
 \usage{
-validate_new_bookmark_label(label, project, analysis, bookmarks_root)
+validate_new_bookmark_label(
+  label,
+  project,
+  analysis,
+  bookmarks_root,
+  overwrite = FALSE
+)
 }
 \arguments{
 \item{label}{The proposed bookmark label.}

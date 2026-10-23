@@ -2,16 +2,11 @@
 #' @importFrom colorspace rainbow_hcl qualitative_hcl
 #' @importFrom ComplexUpset upset upset_modify_themes intersection_size upset_query
 #' @importFrom dendextend as.ggdend get_branches_heights
-#' @importFrom DESeq2 normalizationFactors sizeFactors design counts DESeqDataSetFromMatrix
-#' estimateSizeFactors plotPCA varianceStabilizingTransformation makeExampleDESeqDataSet DESeq results
-#' @importFrom dplyr mutate relocate select filter any_of "%>%" rename inner_join case_when all_of
-#' arrange everything
-#' @importFrom DT renderDT DTOutput datatable formatStyle formatSignif dataTableProxy selectRows selectCells
-#' selectPage
+#' @importFrom DESeq2 normalizationFactors sizeFactors design counts DESeqDataSetFromMatrix estimateSizeFactors plotPCA varianceStabilizingTransformation makeExampleDESeqDataSet DESeq results
+#' @importFrom dplyr mutate relocate select filter any_of "%>%" rename inner_join case_when all_of arrange everything
+#' @importFrom DT renderDT DTOutput datatable formatStyle formatSignif dataTableProxy selectRows selectCells selectPage
 #' @importFrom enrichplot cnetplot
-#' @importFrom GeneTonic cluster_markov distill_enrichment gs_horizon
-#' gs_summary_overview gs_summary_overview_pair enrichment_map gs_dendro
-#' gs_alluvial gs_fuzzyclustering shake_enrichResult get_aggrscores shake_gsenrichResult
+#' @importFrom GeneTonic cluster_markov distill_enrichment gs_horizon gs_summary_overview gs_summary_overview_pair enrichment_map gs_dendro gs_alluvial gs_fuzzyclustering shake_enrichResult get_aggrscores shake_gsenrichResult
 #' @import ggplot2
 #' @importFrom ggrepel geom_label_repel
 #' @importFrom graphics par
@@ -41,4 +36,5 @@
 #' @importFrom viridisLite viridis
 #' @importFrom visNetwork renderVisNetwork visNetworkOutput visIgraph visOptions visNodes
 #' @importFrom yaml read_yaml write_yaml
+#' @importFrom shinyjs useShinyjs reset
 NULL

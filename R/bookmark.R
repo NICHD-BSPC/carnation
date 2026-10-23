@@ -207,7 +207,8 @@ bookmarkingServer <- function(
             input$bookmark_name,
             current$proj,
             current$analysis,
-            bookmarks_root
+            bookmarks_root,
+            overwrite=as.logical(input$overwrite)
           )
 
           if (!label_validation$valid) {
@@ -216,7 +217,12 @@ bookmarkingServer <- function(
               type = 'error'
             )
             return()
+          } else {
+              showNotification(
+                label_validation$message,
+              )
           }
+
 
           removeModal()
 
@@ -228,7 +234,8 @@ bookmarkingServer <- function(
           own_inputs <- startsWith(names(all_inputs), session$ns(''))
           pending_save(list(
             label = label_validation$label,
-            inputs = all_inputs[!own_inputs]
+            inputs = all_inputs[!own_inputs],
+            overwrite_id = label_validation$overwrite_id
           ))
           setBookmarkExclude(
             names(all_inputs),
@@ -265,11 +272,19 @@ bookmarkingServer <- function(
             project = isolate(current$proj),
             analysis = isolate(current$analysis)
           ))
-          saved_list_tick(isolate(saved_list_tick()) + 1L)
           showNotification(
             paste0('Bookmark "', saved_label, '" saved.'),
             type = 'message'
           )
+
+          analysis_bookmark_dir <- get_bookmarks_path(isolate(current$proj),
+            isolate(current$analysis), bookmarks_root)
+          old_id <- pending_save()$overwrite_id
+          if (!is.null(old_id) && !delete_saved_bookmark(old_id, analysis_bookmark_dir)) {
+            showNotification('Saved, but could not remove the old bookmark.', type = 'warning')
+          }
+          delete_saved_bookmark(old_id, analysis_bookmark_dir)
+          saved_list_tick(isolate(saved_list_tick()) + 1L)
           pending_save(NULL)
         },
         session = root_session
@@ -548,11 +563,16 @@ bookmarksDescriptionUI <- function(id) {
 
 bookmark_name_modal <- function(ns) {
   modalDialog(
-    title = 'Make a bookmark of the current view',
+    title = 'Save current view',
     textInput(
       ns('bookmark_name'),
       'Bookmark name',
       placeholder = 'Enter a descriptive name'
+    ),
+    selectInput(
+      ns('overwrite'),
+      label='Force overwrite?',
+      choices=c(FALSE, TRUE)
     ),
     footer = tagList(
       modalButton('Cancel'),

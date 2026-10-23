@@ -238,7 +238,8 @@ validate_new_bookmark_label <- function(
   label,
   project,
   analysis,
-  bookmarks_root
+  bookmarks_root,
+  overwrite=FALSE
 ) {
   # Trim and collapse whitespace; case is kept for display
   label <- gsub('[[:space:]]+', ' ', trimws(label %||% ''))
@@ -272,15 +273,28 @@ validate_new_bookmark_label <- function(
   )
 
   # Duplicate check ignores case
-  if (tolower(label) %in% tolower(existing_bookmarks$label)) {
-    return(list(
-      valid = FALSE,
-      label = label,
-      message = paste(
-        'A bookmark with that name already exists',
-        'for this assay.'
-      )
-    ))
+  dup_row <- tolower(existing_bookmarks$label) == tolower(label)
+  if (any(dup_row)) {
+    if(!overwrite){
+      return(list(
+        valid = FALSE,
+        label = label,
+        message = paste(
+          'Bookmark with that name already exists',
+          'for this analysis! To overwrite set "Force overwrite?" to TRUE'
+        )
+      ))
+    } else {
+      id_to_overwrite <- existing_bookmarks$id[dup_row][1]
+      return(list(
+        valid = TRUE,
+        label = label,
+        message = paste0(
+          'Overwriting bookmark "', label, '"'
+        ),
+        overwrite_id = existing_bookmarks$id[dup_row]
+      ))
+    }
   }
 
   list(
@@ -368,6 +382,12 @@ apply_restored_inputs <- function(saved_inputs, session) {
   }
 }
 
+# Resets all inputs in the session
+reset_inputs <- function(session) {
+    session$sendCustomMessage('prune_resettables', list())
+    shinyjs::reset()
+}
+
 #' @rdname bookmarkingmod
 #' @export
 bookmarkRestoreScript <- function(id) {
@@ -391,6 +411,15 @@ bookmarkRestoreScript <- function(id) {
               });
             }
           );
+          Shiny.addCustomMessageHandler(
+            'prune_resettables', function(message) {
+              $('.shinyjs-resettable').filter(function() {
+                var value = $(this).attr('data-shinyjs-resettable-value');
+                return $(this).attr('data-shinyjs-resettable-type') === 'Select' &&
+                  (value === '\"\"' || value === '[]');
+              }).removeClass('shinyjs-resettable');
+            }
+          )
         "
       )
     )

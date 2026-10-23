@@ -67,6 +67,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       theme=shinytheme('united'),
 
       introjsUI(),
+      useShinyjs(),
 
       # custom CSS styles
       tags$head(
@@ -93,29 +94,25 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
             align='center',
             style='font-family: Helvetica; font-size: 40px;'
           ), # column
-          column(2,
+          column(1,
             actionButton('intro', label='Take a tour!',
                          icon=icon('info'))
           ), # column
-          column(2,
-            fluidRow(
-              column(6, align='right',
-                introBox(
-                  saveUI('save_object'),
-                  data.step=11,
-                  data.intro='Use this button at any point to save the modified object'
-                )
-              ), # column
-              column(6, align='left',
-                introBox(
-                  bookmarkButtonUI('bookmarking'),
-                  data.step=12,
-                  data.intro='Save the current settings for your plots to share with others'
-                )
-              ) # column
-            ) # fluidRow
-          )
 
+          column(1,
+            introBox(
+              saveUI('save_object'),
+              data.step=11,
+              data.intro='Use this button at any point to save the modified object'
+            )
+          ), # column
+          column(1,
+            introBox(
+              bookmarkButtonUI('bookmarking'),
+              data.step=12,
+              data.intro='Save the current settings for your plots to share with others'
+            )
+          )
         ), # fluidRow
         windowTitle='Carnation'
       ), # titlePanel
@@ -1212,6 +1209,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       }
 
       reset_data()
+      reset_inputs(session)
+      if (reset_tabs) {
+        updateQueryString(isolate(session$clientData$url_pathname))
+      }
 
       # get file size for message
       fs <- file.size(assay_path)
@@ -1373,6 +1374,10 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
     is_restoring <- bookmark_handlers$is_restoring
     bookmark_restore_tick <- bookmark_handlers$bookmark_restore_tick
     loaded_bookmark_label <- bookmark_handlers$loaded_bookmark_label
+
+    observeEvent(input$reset_inputs_do, {
+      reset_inputs(session)
+    })
 
     ##############################################
     observeEvent(input$assay_do, {
