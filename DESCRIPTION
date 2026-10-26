@@ -53,6 +53,7 @@ Imports:
     shiny,
     shinyBS,
     shinycssloaders,
+	shinyjs,
     shinymanager,
     shinythemes,
     shinyWidgets,

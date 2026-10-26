@@ -84,7 +84,6 @@ list_bookmark_dirs <- function(root, recursive = FALSE) {
 #' @return Gives the path to the requested bookmark directory, or `NULL`
 #' when the id is invalid or no single matching bookmark is found.
 #'
-#' @export
 find_bookmark_dir <- function(id, root) {
   if (length(id) != 1 || is.na(id) || !grepl('^[A-Za-z0-9]+$', id)) {
     return(NULL)
