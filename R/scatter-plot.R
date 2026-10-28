@@ -10,6 +10,7 @@
 #' @param gene_scratchpad reactive containing gene scratchpad genes
 #' @param reset_genes reactive to reset gene scratchpad selection
 #' @param config reactive list with config settings passed to server
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with scatter plot UI.
@@ -317,7 +318,9 @@ scatterPlotUI <- function(id, panel){
 
 #' @rdname scattermod
 #' @export
-scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
+scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes,
+                              config,
+                              bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -472,7 +475,7 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
 
       # --------- Generate universal scatter data frame ---------- #
- 
+
       observeEvent({
         list(input$compare,
              input$x_axis_comp,
@@ -615,8 +618,15 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
                         'Both - opposite LFC sign', 'Both - same LFC sign')
         df$significance <- factor(df$significance, levels = sig_levels)
 
-        # Store the dataframe in the df_react reactiveVal
-        updateSelectizeInput(session, 'filter_tbl', choices=sig_levels, selected=sig_levels)
+        # Preserve a valid existing selection when refreshing the choices
+        selected_filters <- isolate(input$filter_tbl)
+        if(is.null(selected_filters)){
+          selected_filters <- sig_levels
+        } else {
+          selected_filters <- intersect(selected_filters, sig_levels)
+        }
+        updateSelectizeInput(session, 'filter_tbl', choices=sig_levels,
+                             selected=selected_filters)
 
         df_react(df)
         df_full(df_full)
@@ -964,7 +974,8 @@ scatterPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, 
 
       # -------------------- renerDataTable  ------------------ #
       scatter_dt <- eventReactive(c(df_react(), input$x_axis_comp, input$y_axis_comp,
-                                    input$filter_tbl_do, filter_tbl_by_sel_genes()), {
+                                    input$filter_tbl_do, filter_tbl_by_sel_genes(),
+                                    bookmark_restore_tick()), {
         validate(
           need(!is.null(df_full()), '')
         )

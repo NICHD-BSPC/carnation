@@ -10,6 +10,7 @@
 #' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad
 #' @param reset_genes reactive to reset gene scratchpad selection
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with upset plot UI.
@@ -248,7 +249,8 @@ upsetPlotUI <- function(id, panel){
 
 #' @rdname upsetmod
 #' @export
-upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, config){
+upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes,
+                            config, bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -268,6 +270,8 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
       upset_choices <- reactiveValues(current=NULL, all=NULL, staged=NULL, tbl=NULL, names=NULL, dir_list=list())
 
       custom_refresh <- reactiveValues(flag=0)
+      bookmark_refresh_pending <- reactiveVal(FALSE)
+      bookmark_plot_refresh <- reactiveVal(0L)
 
       # reactive values to hold current upset table
       upset_table <- reactiveValues(tbl=NULL,
@@ -375,6 +379,11 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
       observeEvent(input$updt_do, {
         upset_choices$current <- upset_choices$staged
       })
+
+      observeEvent(bookmark_restore_tick(), {
+        bookmark_refresh_pending(TRUE)
+        upset_choices$current <- upset_choices$staged
+      }, priority=10)
 
       observeEvent(upset_choices$current, {
         choices <- upset_choices$current
@@ -531,7 +540,8 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
                                         custom_refresh$flag,
                                         upset_choices$tbl,
                                         input$plot_do,
-                                        input$updt_do), {
+                                        input$updt_do,
+                                        bookmark_restore_tick()), {
 
         validate(
           need(!is.null(app_object()$res), 'Waiting for selection')
@@ -696,6 +706,13 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
                              selected=selected,
                              server=TRUE
         )
+
+        if(isTRUE(bookmark_refresh_pending())){
+          bookmark_refresh_pending(FALSE)
+          bookmark_plot_refresh(
+            isolate(bookmark_plot_refresh()) + 1L
+          )
+        }
 
       }) # observeEvent
 
@@ -907,7 +924,8 @@ upsetPlotServer <- function(id, obj, plot_args, gene_scratchpad, reset_genes, co
                                    app_object()$res,
                                    input$custom_do,
                                    input$updt_do,
-                                   input$plot_do), {
+                                   input$plot_do,
+                                   bookmark_plot_refresh()), {
 
         validate(
           need(!is.null(app_object()$res), 'Waiting for selection')

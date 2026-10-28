@@ -8,7 +8,15 @@
 \usage{
 heatmapUI(id, panel)
 
-heatmapServer(id, obj, coldata, plot_args, gene_scratchpad, config)
+heatmapServer(
+  id,
+  obj,
+  coldata,
+  plot_args,
+  gene_scratchpad,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -26,6 +34,8 @@ heatmapServer(id, obj, coldata, plot_args, gene_scratchpad, config)
 be labeled}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with heatmap UI.

@@ -8,7 +8,15 @@
 \usage{
 enrichUI(id, panel, tab = "none")
 
-enrichServer(id, obj, upset_table, gene_scratchpad, reset_genes, config)
+enrichServer(
+  id,
+  obj,
+  upset_table,
+  gene_scratchpad,
+  reset_genes,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{ID string used to match the ID used to call the module UI function}
@@ -27,6 +35,8 @@ if 'compare_results', show comparison settings.}
 \item{reset_genes}{reactive to reset genes in scratchpad}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with plot UI

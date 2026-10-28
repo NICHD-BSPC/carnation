@@ -10,6 +10,7 @@
 #' @param plot_args reactive list with 3 elements: 'gene.id' (all gene IDs) & 'gene_scratchpad'
 #' (genes selected in scratchpad) & 'comp_all' (selected comparison)
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with gene plot UI.
@@ -352,7 +353,8 @@ genePlotUI <- function(id, panel){
 genePlotServer <- function(id, obj,
                            coldata,
                            plot_args,
-                           config){
+                           config,
+                           bookmark_restore_tick = function() NULL){
   moduleServer(
     id,
 
@@ -802,7 +804,8 @@ genePlotServer <- function(id, obj,
           gene_plot_data$all,
           plot_args(),
           data_loaded(),
-          input$plot_do
+          input$plot_do,
+          bookmark_restore_tick()
         )
       })
 

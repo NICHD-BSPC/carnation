@@ -8,7 +8,14 @@
 \usage{
 genePlotUI(id, panel)
 
-genePlotServer(id, obj, coldata, plot_args, config)
+genePlotServer(
+  id,
+  obj,
+  coldata,
+  plot_args,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -23,6 +30,8 @@ genePlotServer(id, obj, coldata, plot_args, config)
 (genes selected in scratchpad) & 'comp_all' (selected comparison)}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with gene plot UI.

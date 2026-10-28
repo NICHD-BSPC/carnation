@@ -8,7 +8,13 @@
 \usage{
 alluvialUI(id, panel)
 
-alluvialServer(id, obj, res_obj, config)
+alluvialServer(
+  id,
+  obj,
+  res_obj,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -20,6 +26,8 @@ alluvialServer(id, obj, res_obj, config)
 \item{res_obj}{reactive, dataframe containing enrichment results}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with plot UI
