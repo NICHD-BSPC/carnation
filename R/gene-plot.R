@@ -528,7 +528,7 @@ genePlotServer <- function(id, obj,
         facet.cols <- colnames(gene_coldata())[!colnames(gene_coldata()) %in% c(input$xvar, cols.to.drop())]
         facet.cols <- c(facet.extra, facet.cols)
         if(length(facet.cols) > 0){
-            if(is.null(input$facet) || !(input$facet %in% facet.cols)){
+            if(all(is.null(input$facet)) || !any(input$facet %in% facet.cols)){
                 updateSelectizeInput(session, 'facet',
                                      choices=facet.cols,
                                      selected=''

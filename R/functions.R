@@ -2600,8 +2600,13 @@ fromList.with.names <- function(lst){
   # NOTE: here we use the unique column as rownames
   if(sum(duplicated(element_names$id)) == 0)
     rownames(data) <- element_names$id
-  else
+  else if(sum(duplicated(element_names$symbol)) == 0)
     rownames(data) <- element_names$symbol
+  else {
+    # otherwise, make symbol column unique and set rownames
+    element_names$symbol <- make.unique(element_names$symbol)
+    rownames(element_names) <- element_names$symbol
+  }
 
   data <- data[which(rowSums(data) != 0), ]
   colnames(data) <- names(lst)
