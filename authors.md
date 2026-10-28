@@ -19,13 +19,13 @@ Source:
 [`DESCRIPTION`](https://github.com/NICHD-BSPC/carnation/blob/devel/DESCRIPTION)
 
 Mitra A (2026). *carnation: Interactive Exploration & Management of
-RNA-Seq Analyses*. R package version 1.1.2,
+RNA-Seq Analyses*. R package version 1.1.3,
 <https://nichd-bspc.github.io/carnation/>.
 
 @Manual{,\
   title = {carnation: Interactive Exploration & Management of RNA-Seq Analyses},\
   author = {Apratim Mitra},\
   year = {2026},\
-  note = {R package version 1.1.2},\
+  note = {R package version 1.1.3},\
   url = {https://nichd-bspc.github.io/carnation/},\
 }

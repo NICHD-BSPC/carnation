@@ -863,7 +863,7 @@ analysis methods, e.g.
 `#> [135] dbplyr_2.6.0                fastmap_1.2.0              `\
 `#> [137] rlang_1.3.0                 GlobalOptions_0.1.4        `\
 `#> [139] htmlwidgets_1.6.4           UCSC.utils_1.2.0           `\
-`#> [141] shiny_1.14.0                shinymanager_1.1.0         `\
+`#> [141] shiny_1.14.0                shinymanager_1.2.0         `\
 `#> [143] farver_2.1.2                jquerylib_0.1.4            `\
 `#> [145] jsonlite_2.0.0              BiocParallel_1.40.0        `\
 `#> [147] GOSemSim_2.32.0             R.oo_1.27.1                `\
