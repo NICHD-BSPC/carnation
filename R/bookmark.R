@@ -360,7 +360,15 @@ bookmarkingServer <- function(
         req(restore_context()$stage == 'applying_inputs')
         context <- restore_context()
 
-        apply_restored_inputs(context, isolate(gene_choices()), root_session)
+        updateSelectizeInput(
+          root_session,
+          'gene.to.plot',
+          choices = gene_choices(),
+          selected = context$inputs$gene.to.plot,
+          server = TRUE
+        )
+
+        apply_restored_inputs(context, root_session)
         context$stage <- 'stabilizing'
         context$round <- 1L
         restore_context(context)
@@ -394,7 +402,7 @@ bookmarkingServer <- function(
           # Re-apply so inputs whose choices depend on earlier inputs can take
           # their saved values.
           if (context$round %% rounds_per_apply == 0) {
-            apply_restored_inputs(context, isolate(gene_choices()), root_session)
+            apply_restored_inputs(context, root_session)
           }
 
           context$round <- context$round + 1L

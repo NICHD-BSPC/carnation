@@ -355,19 +355,11 @@ is_assay_already_loaded <- function(current, project, analysis) {
 }
 
 # Sends each saved input value to the browser.
-apply_restored_inputs <- function(context, gene_choices, session) {
+apply_restored_inputs <- function(context, session) {
   saved_inputs <- context$inputs
   if (is.null(saved_inputs) || length(saved_inputs) == 0) {
     return()
   }
-
-  updateSelectizeInput(
-    session,
-    'gene.to.plot',
-    choices = gene_choices,
-    selected = saved_inputs$gene.to.plot,
-    server = TRUE
-  )
 
   for (id in names(saved_inputs)) {
     if (is.null(saved_inputs[[id]]) ||

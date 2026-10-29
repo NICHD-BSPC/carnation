@@ -1490,6 +1490,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       validate(
         need(!is.null(gene.id$gene), 'Waiting for selection')
       )
+      if (isolate(is_restoring())) return()
+
       # update gene selector with genes in object
       updateSelectizeInput(session, 'gene.to.plot',
                            choices=gene.id$gene,
