@@ -21,6 +21,8 @@
 #' `get_bookmarks_root_path()`
 #' @param settings reactive list with user settings; 'is_admin' allows deleting
 #' bookmarks
+#' @param gene_choices reactive containing the list of genes that are availble for
+#' the gene scratchpad to choose from
 #' @param input_applies number of times saved inputs are applied during a restore
 #' @param rounds_per_apply number of browser round trips after each apply
 #'
@@ -88,6 +90,7 @@ bookmarkingServer <- function(
   current,
   bookmarks_root,
   settings,
+  gene_choices,
   input_applies = 3L,
   rounds_per_apply = 2L
 ) {
@@ -357,7 +360,7 @@ bookmarkingServer <- function(
         req(restore_context()$stage == 'applying_inputs')
         context <- restore_context()
 
-        apply_restored_inputs(context$inputs, root_session)
+        apply_restored_inputs(context, isolate(gene_choices()), root_session)
         context$stage <- 'stabilizing'
         context$round <- 1L
         restore_context(context)
@@ -391,7 +394,7 @@ bookmarkingServer <- function(
           # Re-apply so inputs whose choices depend on earlier inputs can take
           # their saved values.
           if (context$round %% rounds_per_apply == 0) {
-            apply_restored_inputs(context$inputs, root_session)
+            apply_restored_inputs(context, isolate(gene_choices()), root_session)
           }
 
           context$round <- context$round + 1L
@@ -409,7 +412,11 @@ bookmarkingServer <- function(
       outputOptions(output, 'is_admin', suspendWhenHidden = FALSE)
 
       # output flag used to toggle bookmark table if bookmarks present
-      output$has_bookmarks <- reactive(nrow(selected_assay_bookmarks()) > 0)
+      output$has_bookmarks <- reactive({
+        req(root_input$dds, root_input$assay, assay.list$l)
+        bookmarks <- selected_assay_bookmarks()
+        nrow(bookmarks) > 0
+      })
       outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
 
 

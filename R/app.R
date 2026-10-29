@@ -1368,7 +1368,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       load_assay = load_assay,
       current = current,
       bookmarks_root = bookmarks_root,
-      settings = settings
+      settings = settings,
+      gene_choices = reactive(gene.id$gene)
     )
 
     is_restoring <- bookmark_handlers$is_restoring
