@@ -198,7 +198,7 @@ bookmarkingServer <- function(
           if (!is.null(restore_context())) {
             return()
           }
-          showModal(bookmark_name_modal(session$ns))
+          showModal(bookmark_name_modal(session$ns, loaded_bookmark))
         },
         ignoreInit = TRUE
       )
@@ -579,12 +579,13 @@ bookmarksDescriptionUI <- function(id) {
 
 ##### Modals #####
 
-bookmark_name_modal <- function(ns) {
+bookmark_name_modal <- function(ns, loaded_bookmark) {
   modalDialog(
     title = 'Save current view',
     textInput(
       ns('bookmark_name'),
       'Bookmark name',
+      value = (loaded_bookmark()$label %||% ''),
       placeholder = 'Enter a descriptive name'
     ),
     selectInput(
