@@ -23,6 +23,7 @@
 #' bookmarks
 #' @param gene_choices reactive containing the list of genes that are availble for
 #' the gene scratchpad to choose from
+#' @param username string containing the session username
 #' @param input_applies number of times saved inputs are applied during a restore
 #' @param rounds_per_apply number of browser round trips after each apply
 #'
@@ -91,6 +92,7 @@ bookmarkingServer <- function(
   bookmarks_root,
   settings,
   gene_choices,
+  username,
   input_applies = 3L,
   rounds_per_apply = 2L
 ) {
@@ -259,6 +261,7 @@ bookmarkingServer <- function(
           state$values$comp <- paste(root_input$comp_all, collapse = ', ')
           state$values$saved_at <- format(Sys.time(), '%y-%m-%d, %H:%M')
           state$values$inputs <- pending_save()$inputs
+          state$values$user <- username
         },
         session = root_session
       )

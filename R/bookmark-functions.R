@@ -135,6 +135,7 @@ read_bookmark_metadata <- function(dir) {
     mode = values$mode %||% NA_character_,
     comp = values$comp %||% '',
     saved_at = values$saved_at %||% '',
+    made_by = values$user %||% '',
     stringsAsFactors = FALSE
   )
 }
@@ -158,7 +159,8 @@ list_saved_bookmarks <- function(bookmarks_dir, project, analysis) {
     label = character(),
     saved_at = character(),
     comp = character(),
-    mode = character()
+    mode = character(),
+    made_by = character()
   )
 
   bookmark_dirs <- list_bookmark_dirs(bookmarks_dir)
@@ -190,7 +192,7 @@ list_saved_bookmarks <- function(bookmarks_dir, project, analysis) {
   bookmarks_df$label[missing_label] <- bookmarks_df$saved_at[missing_label]
 
   bookmarks_df <- bookmarks_df[,
-    c('id', 'label', 'saved_at', 'comp', 'mode'),
+    c('id', 'label', 'saved_at', 'made_by', 'comp', 'mode'),
     drop = FALSE
   ]
   bookmarks_df <- bookmarks_df[

@@ -18,6 +18,8 @@ bookmarkingServer(
   current,
   bookmarks_root,
   settings,
+  gene_choices,
+  username,
   input_applies = 3L,
   rounds_per_apply = 2L
 )
@@ -46,6 +48,11 @@ of the loaded assay}
 
 \item{settings}{reactive list with user settings; 'is_admin' allows deleting
 bookmarks}
+
+\item{gene_choices}{reactive containing the list of genes that are availble for
+the gene scratchpad to choose from}
+
+\item{username}{string containing the session username}
 
 \item{input_applies}{number of times saved inputs are applied during a restore}
 
