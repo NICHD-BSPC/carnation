@@ -286,14 +286,13 @@ validate_new_bookmark_label <- function(
         )
       ))
     } else {
-      id_to_overwrite <- existing_bookmarks$id[dup_row][1]
       return(list(
         valid = TRUE,
         label = label,
         message = paste0(
           'Overwriting bookmark "', label, '"'
         ),
-        overwrite_id = existing_bookmarks$id[dup_row]
+        overwrite_id = existing_bookmarks$id[dup_row][1]
       ))
     }
   }

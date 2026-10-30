@@ -198,7 +198,10 @@ bookmarkingServer <- function(
           if (!is.null(restore_context())) {
             return()
           }
-          showModal(bookmark_name_modal(session$ns, loaded_bookmark))
+          showModal(bookmark_name_modal(
+            session,
+            loaded_bookmark()$label %||% ''
+          ))
         },
         ignoreInit = TRUE
       )
@@ -447,6 +450,56 @@ bookmarkingServer <- function(
       outputOptions(output, 'has_bookmarks', suspendWhenHidden = FALSE)
 
 
+      # Save Bookmark Modal Machinery
+      observeEvent(input$save_bookmarks_desc_rows_selected, {
+        row <- input$save_bookmarks_desc_rows_selected
+        updateTextInput(session, 'bookmark_name',
+          value = current_assay_bookmarks()$label[row])
+      })
+
+      # Show bookmarks for what is currently loaded. As opposed
+      # to selected_assay_bookmarks which shows bookmarks for what is
+      # selected in the bookmarks description table.
+      current_assay_bookmarks <- reactive({
+        saved_list_tick()
+        list_saved_bookmarks(
+          get_bookmarks_path(current$proj, current$analysis, bookmarks_root),
+          current$proj,
+          current$analysis)
+      })
+
+      output$save_bookmarks_desc <- renderDT({
+        bookmarks_df <- current_assay_bookmarks()
+
+        hidden_columns <- match(
+          c('id', 'comp', 'mode'),
+          names(bookmarks_df)
+        ) - 1
+
+        selected <- which(bookmarks_df$id %in% loaded_bookmark()$id)
+
+        datatable(
+          bookmarks_df,
+          rownames = FALSE,
+          selection = list(mode = 'single', selected = selected),
+          caption = tags$caption(
+            style = 'font-weight: bold; font-size 15px;',
+              'Existing bookmarks for loaded analysis'
+          ),
+          options = list(
+            dom = 'tp',
+            columnDefs = list(
+              list(
+                visible = FALSE,
+                targets = hidden_columns
+              )
+            ),
+            displayStart = if (length(selected)) (selected - 1) %/% 10 * 10 else 0
+          )
+        )
+      })
+
+
       # bookmark description table displayed in the saved-bookmarks UI.
       output$bookmarks_desc <- renderDT({
         bookmarks_df <- selected_assay_bookmarks()
@@ -456,7 +509,7 @@ bookmarkingServer <- function(
           names(bookmarks_df)
         ) - 1
 
-        selected = which(bookmarks_df$id %in% loaded_bookmark()$id)
+        selected <- which(bookmarks_df$id %in% loaded_bookmark()$id)
 
         datatable(
           bookmarks_df,
@@ -464,10 +517,9 @@ bookmarkingServer <- function(
           selection = list(mode = 'single', selected = selected),
           caption = tags$caption(
             style = 'font-weight: bold; font-size: 15px;',
-            'Available bookmarks for selected analysis'
+            'Bookmarks for selected analysis'
           ),
           options = list(
-            # Moves the search bar to the bottom of the table.
             dom = 'tp',
             columnDefs = list(
               list(
@@ -595,29 +647,32 @@ bookmarksDescriptionUI <- function(id) {
 
 ##### Modals #####
 
-bookmark_name_modal <- function(ns, loaded_bookmark) {
+bookmark_name_modal <- function(session, loaded_bookmark) {
   modalDialog(
     title = 'Save current view',
     textInput(
-      ns('bookmark_name'),
-      'Bookmark name',
-      value = (loaded_bookmark()$label %||% ''),
-      placeholder = 'Enter a descriptive name'
+        session$ns('bookmark_name'),
+        'Bookmark name',
+        value = loaded_bookmark,
+        placeholder = 'Enter a descriptive name',
+        width = '100%'
     ),
+    DTOutput(session$ns('save_bookmarks_desc')),
     selectInput(
-      ns('overwrite'),
+      session$ns('overwrite'),
       label='Force overwrite?',
       choices=c(FALSE, TRUE)
     ),
     footer = tagList(
       modalButton('Cancel'),
       actionButton(
-        ns('confirm_bookmark'),
+        session$ns('confirm_bookmark'),
         'Save Bookmark',
         class = 'btn-primary'
       )
     ),
-    easyClose = TRUE
+    easyClose = TRUE,
+    size = 'l'
   )
 }
 
