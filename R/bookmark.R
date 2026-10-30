@@ -285,22 +285,7 @@ bookmarkingServer <- function(
             paste0('Bookmark "', saved_label, '" saved.'),
             type = 'message'
           )
-
-          showModal(
-            modalDialog(
-              fluidRow(
-                column(12,
-                  paste0("Share with: "),
-                  br(),
-                  strong(url),
-                  br(),
-                  em("The link will only load for people who have access to the data.")
-                ) # column
-              ), # fluidRow
-              title = "Bookmark Created",
-              easyClose = TRUE
-            )
-          )
+          showModal(bookmark_saved_modal()
 
           analysis_bookmark_dir <- get_bookmarks_path(isolate(current$proj),
             isolate(current$analysis), bookmarks_root)
@@ -708,3 +693,18 @@ bookmark_delete_modal <- function(ns) {
   )
 }
 
+bookmark_saved_modal <- function() {
+  modalDialog(
+    fluidRow(
+      column(12,
+        paste0("Share with: "),
+        br(),
+        strong(url),
+        br(),
+        em("The link will only load for people who have access to the data.")
+      ) # column
+    ), # fluidRow
+    title = "Bookmark Created",
+    easyClose = TRUE
+  )
+}
