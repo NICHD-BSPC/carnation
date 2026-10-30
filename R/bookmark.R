@@ -283,6 +283,22 @@ bookmarkingServer <- function(
             type = 'message'
           )
 
+          showModal(
+            modalDialog(
+              fluidRow(
+                column(12,
+                  paste0("Share with: "),
+                  br(),
+                  strong(url),
+                  br(),
+                  em("The link will only load for people who have access to the data.")
+                ) # column
+              ), # fluidRow
+              title = "Bookmark Created",
+              easyClose = TRUE
+            )
+          )
+
           analysis_bookmark_dir <- get_bookmarks_path(isolate(current$proj),
             isolate(current$analysis), bookmarks_root)
           old_id <- pending_save()$overwrite_id
