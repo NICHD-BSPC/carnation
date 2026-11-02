@@ -285,7 +285,7 @@ bookmarkingServer <- function(
             paste0('Bookmark "', saved_label, '" saved.'),
             type = 'message'
           )
-          showModal(bookmark_saved_modal()
+          showModal(show_bookmark_url_modal(url))
 
           analysis_bookmark_dir <- get_bookmarks_path(isolate(current$proj),
             isolate(current$analysis), bookmarks_root)
@@ -517,18 +517,33 @@ bookmarkingServer <- function(
         )
       })
 
-      selected_bookmark_id <- reactive({
+      selected_bookmark <- reactive({
         row <- input$bookmarks_desc_rows_selected
-        ids <- selected_assay_bookmarks()$id
-        ids[row]
+        bookmarks <- selected_assay_bookmarks()
+        if (length(row) != 1 || row > nrow(bookmarks)) return(NULL)
+        bookmarks[row, , drop = FALSE]
       })
 
+      observeEvent(input$show_bookmark_url, {
+        id <- selected_bookmark()$id
+
+        if (is.null(id)) {
+          showNotification('Please select a bookmark first.')
+          return()
+        }
+        client_data <- session$clientData
+        url <- paste0(client_data$url_protocol, '//', client_data$url_hostname,
+          if (nzchar(client_data$url_port)) paste0(':', client_data$url_port),
+          client_data$url_pathname, '?_state_id_=', id
+        )
+        showModal(show_bookmark_url_modal(url))
+      })
 
       # Loads a bookmark picked from the UI. Restores in-session when the
       # bookmarked assay is already loaded, otherwise reloads via the URL path.
       # No access checks here: both paths go through start_bookmark_restore().
       observeEvent(input$go_bookmark, {
-        id <- selected_bookmark_id()
+        id <- selected_bookmark()$id
         req(id, is.null(restore_context()))
 
         values <- read_bookmark_values(
@@ -546,14 +561,14 @@ bookmarkingServer <- function(
       })
 
       observeEvent(input$delete_bookmark, {
-        req(selected_bookmark_id())
+        req(selected_bookmark()$id)
         showModal(bookmark_delete_modal(session$ns))
       })
 
       # Deleting is a separate rule from restoring: admin only, and limited to
       # the selected assay's bookmark folder.
       observeEvent(input$delete_bookmark_do, {
-        id <- selected_bookmark_id()
+        id <- selected_bookmark()$id
         req(id, is_admin())
 
 
@@ -624,7 +639,10 @@ bookmarksDescriptionUI <- function(id) {
                 actionButton(ns('delete_bookmark'), 'Delete', class = 'btn-primary')
               )
             ), # column
-            column(10, span())
+            column(7, span()),
+            column(1,
+              actionButton(ns('show_bookmark_url'), 'Show URL', class = 'btn-primary'),
+            )
       ) # fluidRow
     ) # conditionalPanel
   ) # tagList
@@ -693,7 +711,7 @@ bookmark_delete_modal <- function(ns) {
   )
 }
 
-bookmark_saved_modal <- function() {
+show_bookmark_url_modal <- function(url) {
   modalDialog(
     fluidRow(
       column(12,
@@ -701,10 +719,10 @@ bookmark_saved_modal <- function() {
         br(),
         strong(url),
         br(),
-        em("The link will only load for people who have access to the data.")
+        em('The link will only load for people who have access to the data.')
       ) # column
     ), # fluidRow
-    title = "Bookmark Created",
+    title = 'Bookmark Link',
     easyClose = TRUE
   )
 }
