@@ -593,6 +593,8 @@ bookmarkingServer <- function(
             identical(bookmark$analysis, current$analysis)) bookmark$label else NULL
       })
 
+      helpButtonServer('bookmarking_help')
+
       ##### Returned Values #####
 
       # Reactives used by other parts of the dashboard.
@@ -642,7 +644,10 @@ bookmarksDescriptionUI <- function(id) {
             column(7, span()),
             column(1,
               actionButton(ns('show_bookmark_url'), 'Show URL', class = 'btn-primary'),
-            )
+            ),
+            column(1, offset = 1,
+              helpButtonUI(ns('bookmarking_help'))
+            ), # column
       ) # fluidRow
     ) # conditionalPanel
   ) # tagList
