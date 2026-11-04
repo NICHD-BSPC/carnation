@@ -264,7 +264,7 @@ validate_new_bookmark_label <- function(
     return(list(
       valid = FALSE,
       label = label,
-      message = 'Enter a bookmark name.'
+      message = 'Enter a bookmark label.'
     ))
   }
 
@@ -297,7 +297,7 @@ validate_new_bookmark_label <- function(
         valid = FALSE,
         label = label,
         message = paste(
-          'Bookmark with that name already exists',
+          'Bookmark with that label already exists',
           'for this analysis! To overwrite set "Force overwrite?" to TRUE'
         )
       ))

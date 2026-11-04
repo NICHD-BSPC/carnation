@@ -667,9 +667,9 @@ bookmark_name_modal <- function(session, loaded_bookmark) {
     title = 'Save current view',
     textInput(
         session$ns('bookmark_name'),
-        'Bookmark name',
+        'Bookmark label',
         value = loaded_bookmark,
-        placeholder = 'Enter a descriptive name',
+        placeholder = 'Enter a descriptive label',
         width = '100%'
     ),
     DTOutput(session$ns('save_bookmarks_desc')),
