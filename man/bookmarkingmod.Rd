@@ -47,12 +47,12 @@ of the loaded assay}
 \code{get_bookmarks_root_path()}}
 
 \item{settings}{reactive list with user settings; 'is_admin' allows deleting
-bookmarks}
+or overwriting any users bookmarks}
 
 \item{gene_choices}{reactive containing the list of genes that are availble for
 the gene scratchpad to choose from}
 
-\item{username}{string containing the session username}
+\item{username}{string containing the session username, allows for user specific control}
 
 \item{input_applies}{number of times saved inputs are applied during a restore}
 

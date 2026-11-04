@@ -1370,7 +1370,7 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       bookmarks_root = bookmarks_root,
       settings = settings,
       gene_choices = reactive(gene.id$gene),
-      user_details$username
+      username = reactive({ user_details$username })
     )
 
     is_restoring <- bookmark_handlers$is_restoring

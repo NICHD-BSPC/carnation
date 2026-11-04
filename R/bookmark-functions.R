@@ -166,7 +166,14 @@ list_saved_bookmarks <- function(bookmarks_dir, project, analysis) {
   bookmark_dirs <- list_bookmark_dirs(bookmarks_dir)
   records <- Filter(
     Negate(is.null),
-    lapply(bookmark_dirs, read_bookmark_metadata)
+    lapply(bookmark_dirs, function(dir) {
+      tryCatch(
+        read_bookmark_metadata(dir),
+        error = function(e) {
+          warning('Skipping unreadable bookmark: ', basename(dir), call. = FALSE )
+          NULL
+        })
+    })
   )
 
   if (length(records) == 0) {
@@ -222,6 +229,12 @@ delete_saved_bookmark <- function(id, bookmarks_dir) {
   unlink(dir, recursive = TRUE) == 0
 }
 
+can_modify_bookmark <- function(bookmark, username, is_admin) {
+  if (isTRUE(is_admin)) return(TRUE)
+  if (is.null(bookmark) || nrow(bookmark) != 1) return(FALSE)
+  is.character(username) && nzchar(username) && isTRUE(bookmark$made_by == username)
+}
+
 
 ##### Labels #####
 
@@ -240,6 +253,8 @@ validate_new_bookmark_label <- function(
   project,
   analysis,
   bookmarks_root,
+  username,
+  is_admin,
   overwrite=FALSE
 ) {
   # Trim and collapse whitespace; case is kept for display
@@ -276,6 +291,7 @@ validate_new_bookmark_label <- function(
   # Duplicate check ignores case
   dup_row <- tolower(existing_bookmarks$label) == tolower(label)
   if (any(dup_row)) {
+    existing <- existing_bookmarks[which(dup_row)[1], , drop = FALSE]
     if(!overwrite){
       return(list(
         valid = FALSE,
@@ -285,22 +301,33 @@ validate_new_bookmark_label <- function(
           'for this analysis! To overwrite set "Force overwrite?" to TRUE'
         )
       ))
-    } else {
-      return(list(
-        valid = TRUE,
-        label = label,
-        message = paste0(
-          'Overwriting bookmark "', label, '"'
-        ),
-        overwrite_id = existing_bookmarks$id[dup_row][1]
-      ))
     }
+    if (!can_modify_bookmark(existing, username, is_admin)) {
+      return(list(
+        valid = FALSE, label = label,
+        message = paste0('Bookmark: ',
+          label,
+          ' was made by: ',
+          existing$made_by,
+          '. Only they or an admin can overwrite it.')
+        )
+      )
+    }
+    return(list(
+      valid = TRUE,
+      label = label,
+      message = paste0(
+        'Overwriting bookmark "', label, '"'
+      ),
+      overwrite_id = existing_bookmarks$id[dup_row][1]
+    ))
+
   }
 
   list(
     valid = TRUE,
     label = label,
-    message = NULL
+    message = 'Bookmark label is valid...'
   )
 }
 

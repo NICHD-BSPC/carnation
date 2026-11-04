@@ -9,6 +9,8 @@ validate_new_bookmark_label(
   project,
   analysis,
   bookmarks_root,
+  username,
+  is_admin,
   overwrite = FALSE
 )
 }

@@ -20,10 +20,10 @@
 #' @param bookmarks_root root folder for bookmark storage, usually from
 #' `get_bookmarks_root_path()`
 #' @param settings reactive list with user settings; 'is_admin' allows deleting
-#' bookmarks
+#' or overwriting any users bookmarks
 #' @param gene_choices reactive containing the list of genes that are availble for
 #' the gene scratchpad to choose from
-#' @param username string containing the session username
+#' @param username string containing the session username, allows for user specific control
 #' @param input_applies number of times saved inputs are applied during a restore
 #' @param rounds_per_apply number of browser round trips after each apply
 #'
@@ -211,11 +211,14 @@ bookmarkingServer <- function(
         {
           req(current$proj, current$analysis)
 
+          # Checks for unique label, and if the user is allowed to overwrite.
           label_validation <- validate_new_bookmark_label(
             input$bookmark_name,
             current$proj,
             current$analysis,
             bookmarks_root,
+            username(),
+            is_admin(),
             overwrite=as.logical(input$overwrite)
           )
 
@@ -264,7 +267,7 @@ bookmarkingServer <- function(
           state$values$comp <- paste(root_input$comp_all, collapse = ', ')
           state$values$saved_at <- format(Sys.time(), '%y-%m-%d, %H:%M')
           state$values$inputs <- pending_save()$inputs
-          state$values$user <- username
+          state$values$user <- username()
         },
         session = root_session
       )
@@ -293,7 +296,6 @@ bookmarkingServer <- function(
           if (!is.null(old_id) && !delete_saved_bookmark(old_id, analysis_bookmark_dir)) {
             showNotification('Saved, but could not remove the old bookmark.', type = 'warning')
           }
-          delete_saved_bookmark(old_id, analysis_bookmark_dir)
           saved_list_tick(isolate(saved_list_tick()) + 1L)
           pending_save(NULL)
         },
@@ -421,10 +423,14 @@ bookmarkingServer <- function(
 
       ##### Save/Delete Actions #####
 
+      can_modify_selected <- reactive(
+        can_modify_bookmark(selected_bookmark(), username(), is_admin())
+      )
+
       # reactive and output with info about admin user
       is_admin <- reactive(isTRUE(settings()$is_admin))
-      output$is_admin <- is_admin
-      outputOptions(output, 'is_admin', suspendWhenHidden = FALSE)
+      output$can_modify_selected <- can_modify_selected
+      outputOptions(output, 'can_modify_selected', suspendWhenHidden = FALSE)
 
       # output flag used to toggle bookmark table if bookmarks present
       output$has_bookmarks <- reactive({
@@ -569,7 +575,7 @@ bookmarkingServer <- function(
       # the selected assay's bookmark folder.
       observeEvent(input$delete_bookmark_do, {
         id <- selected_bookmark()$id
-        req(id, is_admin())
+        req(id, can_modify_selected())
 
 
         removeModal()
@@ -637,7 +643,7 @@ bookmarksDescriptionUI <- function(id) {
             ),
             column(1,
               conditionalPanel(
-                'output.is_admin', ns = ns,
+                'output.can_modify_selected', ns = ns,
                 actionButton(ns('delete_bookmark'), 'Delete', class = 'btn-primary')
               )
             ), # column
