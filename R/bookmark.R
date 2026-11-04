@@ -452,6 +452,7 @@ bookmarkingServer <- function(
       # to selected_assay_bookmarks which shows bookmarks for what is
       # selected in the bookmarks description table.
       current_assay_bookmarks <- reactive({
+        req(current$proj, current$analysis)
         saved_list_tick()
         list_saved_bookmarks(
           get_bookmarks_path(current$proj, current$analysis, bookmarks_root),
