@@ -200,7 +200,7 @@ bookmarkingServer <- function(
           }
           showModal(bookmark_name_modal(
             session,
-            loaded_bookmark()$label %||% ''
+            loaded_bookmark_label() %||% ''
           ))
         },
         ignoreInit = TRUE
