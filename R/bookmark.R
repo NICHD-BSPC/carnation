@@ -507,10 +507,6 @@ bookmarkingServer <- function(
           bookmarks_df,
           rownames = FALSE,
           selection = list(mode = 'single', selected = selected),
-          caption = tags$caption(
-            style = 'font-weight: bold; font-size: 15px;',
-            'Bookmarks for selected analysis'
-          ),
           options = list(
             dom = 'tp',
             columnDefs = list(
@@ -635,9 +631,21 @@ bookmarkButtonUI <- function(id) {
 bookmarksDescriptionUI <- function(id) {
   ns <- NS(id)
   tagList(
-    DTOutput(ns('bookmarks_desc')),
-    br(),
     conditionalPanel('output.has_bookmarks', ns = ns,
+      hr(),
+      fluidRow(
+        column(11,
+          span(
+            "Bookmarks for selected analysis",
+            style = "display: block; font-weight: bold; color: #AEA79F; font-size: 15px;"
+          )
+        ), # column
+        column(1,
+          helpButtonUI(ns('bookmarking_help'))
+        ) # column
+      ), # fluidRow
+      DTOutput(ns('bookmarks_desc')),
+      br(),
       fluidRow(style='margin-bottom: 10px',
             column(1,
               actionButton(ns('go_bookmark'), 'Load', class = 'btn-primary')
