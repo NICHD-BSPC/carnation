@@ -596,7 +596,7 @@ bookmarkingServer <- function(
             identical(bookmark$analysis, current$analysis)) bookmark$label else NULL
       })
 
-      helpButtonServer('bookmarking_help')
+      helpButtonServer('bookmarking_help', size='l')
 
       ##### Returned Values #####
 
