@@ -475,7 +475,7 @@ bookmarkingServer <- function(
           rownames = FALSE,
           selection = list(mode = 'single', selected = selected),
           caption = tags$caption(
-            style = 'font-weight: bold; font-size 15px;',
+            style = 'font-weight: bold; font-size: 15px;',
               'Existing bookmarks for loaded analysis'
           ),
           options = list(
