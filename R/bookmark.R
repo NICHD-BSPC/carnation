@@ -656,13 +656,10 @@ bookmarksDescriptionUI <- function(id) {
                 actionButton(ns('delete_bookmark'), 'Delete', class = 'btn-primary')
               )
             ), # column
-            column(7, span()),
+            column(8, span()),
             column(1,
-              actionButton(ns('show_bookmark_url'), 'Show URL', class = 'btn-primary'),
-            ),
-            column(1, offset = 1,
-              helpButtonUI(ns('bookmarking_help'))
-            ), # column
+              actionButton(ns('show_bookmark_url'), 'Show URL'),
+            )
       ) # fluidRow
     ) # conditionalPanel
   ) # tagList
@@ -735,14 +732,14 @@ show_bookmark_url_modal <- function(url) {
   modalDialog(
     fluidRow(
       column(12,
-        paste0("Share with: "),
-        br(),
+        paste0("You can share this session using this URL: "),
+        br(), br(),
         strong(url),
-        br(),
-        em('The link will only load for people who have access to the data.')
+        br(), br(),
+        em('Note: This link will only work for users with access to the data.')
       ) # column
     ), # fluidRow
-    title = 'Bookmark Link',
+    title = 'Bookmark URL',
     easyClose = TRUE
   )
 }
