@@ -22,6 +22,12 @@ validate_new_bookmark_label(
 \item{analysis}{The assay analysis name.}
 
 \item{bookmarks_root}{The root bookmark storage directory.}
+
+\item{username}{username of whoe wants to modify a bookmark.}
+
+\item{is_admin}{boolean is the user an admin?}
+
+\item{overwrite}{boolean overwrite existing bookmark?}
 }
 \value{
 A list containing the validation result, cleaned label, and

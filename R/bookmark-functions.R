@@ -252,6 +252,9 @@ can_modify_bookmark <- function(bookmark, username, is_admin) {
 #' @param project The project containing the assay.
 #' @param analysis The assay analysis name.
 #' @param bookmarks_root The root bookmark storage directory.
+#' @param username username of whoe wants to modify a bookmark.
+#' @param is_admin boolean is the user an admin?
+#' @param overwrite boolean overwrite existing bookmark?
 #'
 #' @return A list containing the validation result, cleaned label, and
 #' an error message when validation fails.
