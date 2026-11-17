@@ -229,6 +229,14 @@ delete_saved_bookmark <- function(id, bookmarks_dir) {
   unlink(dir, recursive = TRUE) == 0
 }
 
+#' Can user modify a bookmark?
+#'
+#' @param bookmark unique ID of the bookmark to delete.
+#' @param username username of who wants to modify a bookmark
+#' @param is_admin boolean is the user admin?
+#'
+#' @return `TRUE` when the bookmark was deleted, otherwise `FALSE`.
+#'
 can_modify_bookmark <- function(bookmark, username, is_admin) {
   if (isTRUE(is_admin)) return(TRUE)
   if (is.null(bookmark) || nrow(bookmark) != 1) return(FALSE)
