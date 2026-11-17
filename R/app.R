@@ -1027,10 +1027,8 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
       # reorder assay list
       assay.list$l[[ input$dds ]] <- assay.choices
 
-      # if more than one assay found & autoload_first_analysis not set
-      if(length(assay.choices) > 1 & !config()$server$autoload_first_analysis){
-        assay.choices <- c('Choose one', assay.choices)
-      }
+      # add 'Choose one' to prevent autoselecting first assay choice
+      assay.choices <- c('Choose one', assay.choices)
 
       updateSelectizeInput(session, 'assay',
                            choices=assay.choices,
