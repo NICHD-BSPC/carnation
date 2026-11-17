@@ -134,8 +134,8 @@ read_bookmark_metadata <- function(dir) {
     label = values$label %||% NA_character_,
     mode = values$mode %||% NA_character_,
     comp = values$comp %||% '',
-    saved_at = values$saved_at %||% '',
-    made_by = values$user %||% '',
+    modified_at = values$modified_at %||% '',
+    created_by = values$user %||% '',
     stringsAsFactors = FALSE
   )
 }
@@ -150,17 +150,17 @@ read_bookmark_metadata <- function(dir) {
 #' @param project The lab or project name such as current$proj
 #' @param analysis The analysis name such as current$analysis
 #'
-#' @return A data frame with the character columns id, label, saved_at
+#' @return A data frame with the character columns id, label, modified_at
 #' comp, and mode. One row per matching bookmark.
 #'
 list_saved_bookmarks <- function(bookmarks_dir, project, analysis) {
   empty_bookmarks <- data.frame(
     id = character(),
     label = character(),
-    saved_at = character(),
+    modified_at = character(),
     comp = character(),
     mode = character(),
-    made_by = character()
+    created_by = character()
   )
 
   bookmark_dirs <- list_bookmark_dirs(bookmarks_dir)
@@ -196,14 +196,14 @@ list_saved_bookmarks <- function(bookmarks_dir, project, analysis) {
 
   missing_label <- is.na(bookmarks_df$label) |
     trimws(bookmarks_df$label) == ''
-  bookmarks_df$label[missing_label] <- bookmarks_df$saved_at[missing_label]
+  bookmarks_df$label[missing_label] <- bookmarks_df$modified_at[missing_label]
 
   bookmarks_df <- bookmarks_df[,
-    c('id', 'label', 'saved_at', 'made_by', 'comp', 'mode'),
+    c('id', 'label', 'modified_at', 'created_by', 'comp', 'mode'),
     drop = FALSE
   ]
   bookmarks_df <- bookmarks_df[
-    order(bookmarks_df$saved_at, decreasing = TRUE),
+    order(bookmarks_df$modified_at, decreasing = TRUE),
     ,
     drop = FALSE
   ]
@@ -240,7 +240,7 @@ delete_saved_bookmark <- function(id, bookmarks_dir) {
 can_modify_bookmark <- function(bookmark, username, is_admin) {
   if (isTRUE(is_admin)) return(TRUE)
   if (is.null(bookmark) || nrow(bookmark) != 1) return(FALSE)
-  is.character(username) && nzchar(username) && isTRUE(bookmark$made_by == username)
+  is.character(username) && nzchar(username) && isTRUE(bookmark$created_by == username)
 }
 
 
@@ -316,7 +316,7 @@ validate_new_bookmark_label <- function(
         message = paste0('Bookmark: ',
           label,
           ' was made by: ',
-          existing$made_by,
+          existing$created_by,
           '. Only they or an admin can overwrite it.')
         )
       )

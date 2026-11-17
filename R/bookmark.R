@@ -265,7 +265,7 @@ bookmarkingServer <- function(
           state$values$label <- pending_save()$label
           state$values$mode <- root_input$mode
           state$values$comp <- paste(root_input$comp_all, collapse = ', ')
-          state$values$saved_at <- format(Sys.time(), '%y-%m-%d, %H:%M')
+          state$values$modified_at <- format(Sys.time(), '%y-%m-%d, %H:%M')
           state$values$inputs <- pending_save()$inputs
           state$values$user <- username()
         },

@@ -18,7 +18,7 @@ list_saved_bookmarks(bookmarks_dir, project, analysis)
 \item{analysis}{The analysis name such as current$analysis}
 }
 \value{
-A data frame with the character columns id, label, saved_at
+A data frame with the character columns id, label, modified_at
 comp, and mode. One row per matching bookmark.
 }
 \description{
