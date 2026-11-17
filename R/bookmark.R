@@ -699,11 +699,19 @@ bookmark_name_modal <- function(session, loaded_bookmark) {
         width = '100%'
     ),
     DTOutput(session$ns('save_bookmarks_desc')),
-    selectInput(
-      session$ns('overwrite'),
-      label='Force overwrite?',
-      choices=c(FALSE, TRUE)
-    ),
+    fluidRow(
+      column(3,
+        strong('Force overwrite?'),
+        style='margin-top: 5px;'
+      ), # column
+      column(3,
+        selectInput(
+          session$ns('overwrite'),
+          label=NULL,
+          choices=c(FALSE, TRUE)
+        ) # selectInput
+      ) # column
+    ), # fluidRow
     footer = tagList(
       modalButton('Cancel'),
       actionButton(
