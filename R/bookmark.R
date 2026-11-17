@@ -769,6 +769,7 @@ show_bookmark_url_modal <- function(url) {
       ) # column
     ), # fluidRow
     title = 'Bookmark URL',
-    easyClose = TRUE
+    easyClose = TRUE,
+    size='l'
   )
 }
