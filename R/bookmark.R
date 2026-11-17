@@ -574,15 +574,7 @@ bookmarkingServer <- function(
       })
 
       observeEvent(input$delete_bookmark, {
-        req(selected_bookmark()$id)
-        showModal(bookmark_delete_modal(session$ns))
-      })
-
-      # Deleting is a separate rule from restoring: admin only, and limited to
-      # the selected assay's bookmark folder.
-      observeEvent(input$delete_bookmark_do, {
         id <- selected_bookmark()$id
-
         # show notification if nothing selected
         # - this is mostly to not confuse users if only 1 bookmark exists
         if(is.null(id)){
@@ -592,7 +584,15 @@ bookmarkingServer <- function(
             type='warning'
           )
         }
+        req(id)
 
+        showModal(bookmark_delete_modal(session$ns))
+      })
+
+      # Deleting is a separate rule from restoring: admin only, and limited to
+      # the selected assay's bookmark folder.
+      observeEvent(input$delete_bookmark_do, {
+        id <- selected_bookmark()$id
         req(id, can_modify_selected())
 
 
