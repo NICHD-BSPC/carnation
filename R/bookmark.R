@@ -547,6 +547,16 @@ bookmarkingServer <- function(
       # No access checks here: both paths go through start_bookmark_restore().
       observeEvent(input$go_bookmark, {
         id <- selected_bookmark()$id
+
+        # show notification if nothing selected
+        # - this is mostly to not confuse users if only 1 bookmark exists
+        if(is.null(id)){
+          showNotification(
+            paste('No bookmark selected! To choose bookmark to load, click on bookmark table',
+                  'and then click "Load"'),
+            type='warning'
+          )
+        }
         req(id, is.null(restore_context()))
 
         values <- read_bookmark_values(
@@ -572,6 +582,17 @@ bookmarkingServer <- function(
       # the selected assay's bookmark folder.
       observeEvent(input$delete_bookmark_do, {
         id <- selected_bookmark()$id
+
+        # show notification if nothing selected
+        # - this is mostly to not confuse users if only 1 bookmark exists
+        if(is.null(id)){
+          showNotification(
+            paste('No bookmark selected! To choose bookmark to delete, click on bookmark table',
+                  'and then click "Delete"'),
+            type='warning'
+          )
+        }
+
         req(id, can_modify_selected())
 
 
