@@ -195,6 +195,14 @@ bookmarkingServer <- function(
       observeEvent(
         input$bookmark,
         {
+          if(is.null(current$proj)){
+            showNotification(
+              'No data loaded, nothing to bookmark!',
+              type='warning'
+            )
+          }
+          req(current$proj)
+
           if (!is.null(restore_context())) {
             return()
           }
