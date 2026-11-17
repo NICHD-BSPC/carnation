@@ -1089,9 +1089,26 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         df <- df[, c('analysis_name', cnames)]
       }
 
+      # check for bookmarks
+      bookmark_num <- lapply(rownames(df), function(x){
+        # get number of bookmarks (if any) for selected project
+        nrow(
+          list_saved_bookmarks(
+            get_bookmarks_path(input$dds, x, bookmarks_root),
+            input$dds,
+            x
+          )
+        )
+      })
+
+      # add check mark ('\u2713') if bookmarks found
+      df$bookmarks <- NA
+      if(any(unlist(bookmark_num) > 0)){
+        df$bookmarks[ which(unlist(bookmark_num) > 0) ] <- '\u2713'
+      }
+
       # cache state
       analysis_desc_df(df)
-
 
       datatable(df,
                 rownames=FALSE,
