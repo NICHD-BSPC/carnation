@@ -1092,9 +1092,9 @@ run_carnation <- function(credentials=NULL, passphrase=NULL, enable_admin=TRUE,
         # get number of bookmarks (if any) for selected project
         nrow(
           list_saved_bookmarks(
-            get_bookmarks_path(input$dds, x, bookmarks_root),
+            get_bookmarks_path(input$dds, basename(x), bookmarks_root),
             input$dds,
-            x
+            basename(x)
           )
         )
       })
