@@ -131,6 +131,10 @@ bookmarkingServer <- function(
       # id, label, project and analysis of the bookmark last saved or restored.
       loaded_bookmark <- reactiveVal(NULL)
 
+      # Extracts the base file name from the analysis. This allows bookmarks made
+      # for staged analyses to carry over to the deployed version as well.
+      current_analysis_key <- reactive(basename(current$analysis))
+
       ##### Selected Assay #####
 
       # The assay picked in the load-data dropdowns (not necessarily the one
@@ -142,7 +146,7 @@ bookmarkingServer <- function(
         idx <- match(root_input$assay, unname(project_assays))
         req(!is.na(idx))
 
-        list(project = root_input$dds, analysis = names(project_assays)[idx])
+        list(project = root_input$dds, analysis = basename(names(project_assays)[idx]))
       })
 
       # Bookmark folder for the selected assay
@@ -175,10 +179,10 @@ bookmarkingServer <- function(
 
       # Updates the current bookmark save directory whenever a new dataset is loaded.
       observeEvent(list(current$proj, current$analysis), {
-        req(current$proj, current$analysis)
+        req(current$proj, current_analysis_key())
         current_bookmarks_dir <- get_bookmarks_path(
           current$proj,
-          current$analysis,
+          current_analysis_key(),
           bookmarks_root
         )
         req(current_bookmarks_dir)
@@ -223,7 +227,7 @@ bookmarkingServer <- function(
           label_validation <- validate_new_bookmark_label(
             input$bookmark_name,
             current$proj,
-            current$analysis,
+            current_analysis_key(),
             bookmarks_root,
             username(),
             is_admin(),
@@ -269,7 +273,7 @@ bookmarkingServer <- function(
       onBookmark(
         function(state) {
           state$values$project <- current$proj
-          state$values$assay_analysis <- current$analysis
+          state$values$assay_analysis <- current_analysis_key()
           state$values$label <- pending_save()$label
           state$values$mode <- root_input$mode
           state$values$comp <- paste(root_input$comp_all, collapse = ', ')
@@ -299,7 +303,7 @@ bookmarkingServer <- function(
           showModal(show_bookmark_url_modal(url))
 
           analysis_bookmark_dir <- get_bookmarks_path(isolate(current$proj),
-            isolate(current$analysis), bookmarks_root)
+            isolate(current_analysis_key()), bookmarks_root)
           old_id <- pending_save()$overwrite_id
           if (!is.null(old_id) && !delete_saved_bookmark(old_id, analysis_bookmark_dir)) {
             showNotification('Saved, but could not remove the old bookmark.', type = 'warning')
@@ -460,12 +464,12 @@ bookmarkingServer <- function(
       # to selected_assay_bookmarks which shows bookmarks for what is
       # selected in the bookmarks description table.
       current_assay_bookmarks <- reactive({
-        req(current$proj, current$analysis)
+        req(current$proj, current_analysis_key())
         saved_list_tick()
         list_saved_bookmarks(
-          get_bookmarks_path(current$proj, current$analysis, bookmarks_root),
+          get_bookmarks_path(current$proj, current_analysis_key(), bookmarks_root),
           current$proj,
-          current$analysis)
+          current_analysis_key())
       })
 
       output$save_bookmarks_desc <- renderDT({

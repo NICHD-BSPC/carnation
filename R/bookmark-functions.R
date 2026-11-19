@@ -366,7 +366,7 @@ check_bookmark_access <- function(values, assay_list) {
   # The bookmark's assay must be in the user's assay list. The path to load
   # comes from that list, never from values.rds.
   project_assays <- assay_list[[values$project]]
-  matches <- which(names(project_assays) == values$assay_analysis)
+  matches <- which(basename(names(project_assays)) == values$assay_analysis)
   if (length(matches) != 1) {
     return(list(status = 'denied'))
   }
@@ -376,7 +376,7 @@ check_bookmark_access <- function(values, assay_list) {
     label = values$label,
     bookmark = list(
       project = values$project,
-      analysis = values$assay_analysis,
+      analysis = names(project_assays)[matches],
       allowed_path = unname(project_assays[matches]),
       inputs = values$inputs
     )
@@ -390,7 +390,7 @@ check_bookmark_access <- function(values, assay_list) {
 # currently loaded, so bookmark restoration can skip reloading it.
 is_assay_already_loaded <- function(current, project, analysis) {
   isTRUE(identical(isolate(current$proj), project)) &&
-    isTRUE(identical(isolate(current$analysis), analysis))
+    isTRUE(identical(isolate(basename(current$analysis)), basename(analysis)))
 }
 
 # Sends each saved input value to the browser.
