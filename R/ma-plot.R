@@ -9,6 +9,7 @@
 #' @param plot_args reactive containing 'fdr.thres' (padj threshold), 'fc.thres' (log2FC threshold)
 #' & 'gene.to.plot' (genes selected in scratchpad)
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with MA plot UI.
@@ -186,7 +187,8 @@ maPlotUI <- function(id, panel){
 
 #' @rdname maplotmod
 #' @export
-maPlotServer <- function(id, obj, plot_args, config){
+maPlotServer <- function(id, obj, plot_args, config,
+                         bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -238,7 +240,7 @@ maPlotServer <- function(id, obj, plot_args, config){
       # NOTE: this is used only for the downloaded plot
       maplot <- eventReactive(c(input$comp_all, plot_args()$gene.to.plot,
                                 curr_thres$fdr.thres, curr_thres$fc.thres,
-                                input$plot_do), {
+                                input$plot_do, bookmark_restore_tick()), {
         validate(
           need(!is.null(app_object()$res) & !is.null(input$comp_all) & input$comp_all != '',
                'Waiting for selection')
@@ -290,7 +292,7 @@ maPlotServer <- function(id, obj, plot_args, config){
       # this is the interactive plot_ly version
       maplot_ly <- eventReactive(c(app_object()$res, input$comp_all, plot_args()$gene.to.plot,
                                 curr_thres$fdr.thres, curr_thres$fc.thres,
-                                input$plot_do), {
+                                input$plot_do, bookmark_restore_tick()), {
         validate(
           need(!is.null(app_object()$res) & !is.null(input$comp_all) & input$comp_all != '',
                'Waiting for selection')

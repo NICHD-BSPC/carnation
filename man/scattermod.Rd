@@ -8,7 +8,15 @@
 \usage{
 scatterPlotUI(id, panel)
 
-scatterPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes, config)
+scatterPlotServer(
+  id,
+  obj,
+  plot_args,
+  gene_scratchpad,
+  reset_genes,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -24,6 +32,8 @@ scatterPlotServer(id, obj, plot_args, gene_scratchpad, reset_genes, config)
 \item{reset_genes}{reactive to reset gene scratchpad selection}
 
 \item{config}{reactive list with config settings passed to server}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with scatter plot UI.

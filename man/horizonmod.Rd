@@ -8,7 +8,7 @@
 \usage{
 horizonUI(id, panel)
 
-horizonServer(id, obj, config)
+horizonServer(id, obj, config, bookmark_restore_tick = function() NULL)
 }
 \arguments{
 \item{id}{Module id}
@@ -18,6 +18,8 @@ horizonServer(id, obj, config)
 \item{obj}{reactiveValues object containing two GeneTonic objects}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with plot UI

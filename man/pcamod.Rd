@@ -8,7 +8,13 @@
 \usage{
 pcaPlotUI(id, panel)
 
-pcaPlotServer(id, obj, coldata, config)
+pcaPlotServer(
+  id,
+  obj,
+  coldata,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -20,6 +26,8 @@ pcaPlotServer(id, obj, coldata, config)
 \item{coldata}{reactiveValues object containing object metadata}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with PCA plot UI.

@@ -8,7 +8,13 @@
 \usage{
 distillPlotUI(id, panel)
 
-distillPlotServer(id, obj, args, config)
+distillPlotServer(
+  id,
+  obj,
+  args,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -20,6 +26,8 @@ distillPlotServer(id, obj, args, config)
 \item{args}{reactive, list with plot arguments, 'numcat' (number of categories to plot)}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with plot UI

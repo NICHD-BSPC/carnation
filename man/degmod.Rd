@@ -8,7 +8,15 @@
 \usage{
 patternPlotUI(id, panel, tab)
 
-patternPlotServer(id, obj, coldata, gene_scratchpad, upset_data, config)
+patternPlotServer(
+  id,
+  obj,
+  coldata,
+  gene_scratchpad,
+  upset_data,
+  config,
+  bookmark_restore_tick = function() NULL
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -27,6 +35,8 @@ if 'both', show settings for both.}
 \item{upset_data}{reactive containing list with data from upset plot module}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with module UI

@@ -8,7 +8,7 @@
 \usage{
 cnetPlotUI(id, panel)
 
-cnetPlotServer(id, obj, config)
+cnetPlotServer(id, obj, config, bookmark_restore_tick = function() NULL)
 }
 \arguments{
 \item{id}{Module id}
@@ -18,6 +18,8 @@ cnetPlotServer(id, obj, config)
 \item{obj}{reactive, dataframe containing enrichment results}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with plot UI

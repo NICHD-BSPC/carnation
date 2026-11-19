@@ -8,7 +8,13 @@
 \usage{
 radarUI(id, panel, type = "")
 
-radarServer(id, obj, config, type = "")
+radarServer(
+  id,
+  obj,
+  config,
+  bookmark_restore_tick = function() NULL,
+  type = ""
+)
 }
 \arguments{
 \item{id}{Module id}
@@ -20,6 +26,8 @@ radarServer(id, obj, config, type = "")
 \item{obj}{reactiveValues object containing GeneTonic object}
 
 \item{config}{reactive list with config settings}
+
+\item{bookmark_restore_tick}{optional reactive counter incremented after bookmark inputs are restored}
 }
 \value{
 UI returns tagList with plot UI

@@ -12,6 +12,7 @@
 #' @param gene_scratchpad reactiveValues object containing genes selected in scratchpad which will
 #' be labeled
 #' @param config reactive list with config settings
+#' @param bookmark_restore_tick optional reactive counter incremented after bookmark inputs are restored
 #'
 #' @returns
 #' UI returns tagList with heatmap UI.
@@ -286,7 +287,8 @@ heatmapServer <- function(id, obj,
                           coldata,
                           plot_args,
                           gene_scratchpad,
-                          config){
+                          config,
+                          bookmark_restore_tick = function() NULL){
 
   moduleServer(
     id,
@@ -625,7 +627,8 @@ heatmapServer <- function(id, obj,
       make_heatmap <- eventReactive(c(replot(),
                                       data_loaded$flag,
                                       gene_scratchpad$genes,
-                                      input$plot_do), {
+                                      input$plot_do,
+                                      bookmark_restore_tick()), {
 
         validate(
           need(!is.null(app_object()$res), 'Waiting for selection')
