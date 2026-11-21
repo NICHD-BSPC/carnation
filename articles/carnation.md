@@ -763,7 +763,7 @@ analysis methods, e.g.
 [`sessionInfo`](https://rdrr.io/r/utils/sessionInfo.html)`(``)`\
 `#> R version 4.4.3 (2025-02-28)`\
 `#> Platform: x86_64-conda-linux-gnu`\
-`#> Running under: Ubuntu 24.04.5 LTS`\
+`#> Running under: Ubuntu 26.04.1 LTS`\
 `#> `\
 `#> Matrix products: default`\
 `#> BLAS/LAPACK: /home/runner/work/carnation/env/lib/libopenblasp-r0.3.34.so;  LAPACK version 3.12.0`\
@@ -804,12 +804,12 @@ analysis methods, e.g.
 `#>  [17] withr_3.0.3                 prettyunits_1.2.0          `\
 `#>  [19] gridExtra_2.3.1             cli_3.6.6                  `\
 `#>  [21] textshaping_1.0.5           logging_0.10-111           `\
-`#>  [23] TSP_1.2.7                   sass_0.4.10                `\
+`#>  [23] TSP_1.3.0                   sass_0.5.0                 `\
 `#>  [25] topGO_2.58.0                bs4Dash_2.3.5              `\
-`#>  [27] S7_0.2.2                    askpass_1.2.1              `\
+`#>  [27] S7_1.0.0                    askpass_1.2.1              `\
 `#>  [29] ggridges_0.5.7              goseq_1.58.0               `\
 `#>  [31] pkgdown_2.2.1               Rsamtools_2.22.0           `\
-`#>  [33] systemfonts_1.3.2           yulab.utils_0.2.5          `\
+`#>  [33] systemfonts_1.3.3           yulab.utils_0.2.6          `\
 `#>  [35] gson_0.2.2                  txdbmaker_1.2.0            `\
 `#>  [37] DOSE_4.0.0                  R.utils_2.13.0             `\
 `#>  [39] limma_3.62.1                RSQLite_3.53.3             `\
@@ -884,13 +884,13 @@ analysis methods, e.g.
 `#> [177] evaluate_1.0.5              BiocManager_1.30.27        `\
 `#> [179] foreach_1.5.2               tweenr_2.0.3               `\
 `#> [181] httpuv_1.6.17               backbone_2.1.5             `\
-`#> [183] openssl_2.4.2               tidyr_1.3.2                `\
+`#> [183] openssl_2.6.0               tidyr_1.3.2                `\
 `#> [185] purrr_1.2.2                 polyclip_1.10-7            `\
 `#> [187] reshape_0.8.10              heatmaply_1.6.0            `\
 `#> [189] clue_0.3-68                 ggplot2_3.5.2              `\
 `#> [191] ggforce_0.5.0               broom_1.0.13               `\
 `#> [193] xtable_1.8-8                restfulr_0.0.16            `\
-`#> [195] tidytree_0.4.8              later_1.4.8                `\
+`#> [195] tidytree_0.4.9              later_1.4.8                `\
 `#> [197] viridisLite_0.4.3           ragg_1.5.2                 `\
 `#> [199] tibble_3.3.1                clusterProfiler_4.14.0     `\
 `#> [201] aplot_0.3.2                 registry_0.5-1             `\
