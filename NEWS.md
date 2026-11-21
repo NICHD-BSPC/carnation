@@ -1,5 +1,20 @@
 # carnation
 
+## Bioconductor 3.24
+
+Updates for this release include the following:
+
+- a new volcano plot module
+- various plot updates:
+
+  - aspect ratio controls for MA, PCA and scatter plots.
+  - MA plot has additional alpha control and 'Refresh' button
+    for reduced reacitivity.
+  - Updated landing page
+
+    - Analysis table shows all available datasets
+    - More info (file size, mtime), improved selection behavior
+
 ## 1.1.2
 
 - New volcano plot added
