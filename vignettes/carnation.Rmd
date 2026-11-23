@@ -387,11 +387,12 @@ pattern analysis results included with carnation.
 data(degpatterns_dex, package='carnation')
 ```
 
-Next, we extract the `normalized` slot from this object and save as a list.
+The `degpatterns_dex` object contains the `normalized` slot of the degPatterns object
+which we save as a list.
 
 ```{r deg_extract}
-# extract normalized slot and add symbol column
-p_norm <- degpatterns_dex$normalized
+# add symbol column
+p_norm <- degpatterns_dex
 p_norm[[ 'SYMBOL' ]] <- anno_df[p_norm[['genes']], 'SYMBOL']
 
 # save pattern analysis results
