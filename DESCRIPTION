@@ -31,7 +31,6 @@ Imports:
     BiocParallel,
     colorspace,
     ComplexUpset,
-    DEGreport,
     dendextend,
     DESeq2,
     dplyr,
@@ -66,6 +65,7 @@ Imports:
 Suggests:
     airway,
     BiocStyle,
+    DEGreport,
     GenomicFeatures,
     goseq,
     knitr,
