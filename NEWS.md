@@ -1,8 +1,8 @@
 # carnation
 
-## Bioconductor 3.24
+## 1.1.5
 
-Updates for this release include the following:
+Updates for Bioconductor 3.24 release include the following:
 
 - a new volcano plot module
 - various plot updates:
