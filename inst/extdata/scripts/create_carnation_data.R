@@ -105,6 +105,6 @@ degpatterns_dex <- DEGreport::degPatterns(
                      plot=FALSE
                    )
 
-# save degPatterns object
-save(degpatterns_dex, file = paste0("data/degpatterns_dex.RData"), compress="xz")
+# save normalized slot of degPatterns object
+save(degpatterns_dex$normalized, file = paste0("data/degpatterns_dex.RData"), compress="xz")
 
