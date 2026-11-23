@@ -87,9 +87,10 @@ ggplot handle
 data(degpatterns_dex, package = 'carnation')
 
 # get pattern plot
-all_clusters <- unique(degpatterns_dex$normalized$cluster)
+all_clusters <- unique(degpatterns_dex$cluster)
 
 dp <- get_degplot(degpatterns_dex, time='dex',
                   cluster_to_show=all_clusters,
                   x_order=c('untrt','trt'))
+#> Error in data.frame(cluster = as.integer(names(counts)), title = paste0(prefix_title,     names(counts), " (n = ", counts, ")"), stringsAsFactors = FALSE): arguments imply differing number of rows: 0, 1
 ```

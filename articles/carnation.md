@@ -434,12 +434,12 @@ pattern analysis results included with carnation.
 `# We use the pre-computed results here instead`\
 [`data`](https://rdrr.io/r/utils/data.html)`(``degpatterns_dex``, package``=``'carnation'``)`
 
-Next, we extract the `normalized` slot from this object and save as a
-list.
+The `degpatterns_dex` object contains the `normalized` slot of the
+degPatterns object which we save as a list.
 
 \
-`# extract normalized slot and add symbol column`\
-`p_norm`` ``<-`` ``degpatterns_dex``$``normalized`\
+`# add symbol column`\
+`p_norm`` ``<-`` ``degpatterns_dex`\
 `p_norm``[[`` ``'SYMBOL'`` ``]``]`` ``<-`` ``anno_df``[``p_norm``[[``'genes'``]``]``, ``'SYMBOL'``]`\
 \
 `# save pattern analysis results`\
@@ -803,13 +803,13 @@ analysis methods, e.g.
 `#>  [15] mgcv_1.9-4                  GetoptLong_1.1.1           `\
 `#>  [17] withr_3.0.3                 prettyunits_1.2.0          `\
 `#>  [19] gridExtra_2.3.1             cli_3.6.6                  `\
-`#>  [21] textshaping_1.0.5           logging_0.10-111           `\
+`#>  [21] textshaping_1.1.0           logging_0.10-111           `\
 `#>  [23] TSP_1.3.0                   sass_0.5.0                 `\
 `#>  [25] topGO_2.58.0                bs4Dash_2.3.5              `\
 `#>  [27] S7_1.0.0                    askpass_1.2.1              `\
 `#>  [29] ggridges_0.5.7              goseq_1.58.0               `\
 `#>  [31] pkgdown_2.2.1               Rsamtools_2.22.0           `\
-`#>  [33] systemfonts_1.3.3           yulab.utils_0.2.6          `\
+`#>  [33] systemfonts_1.3.4           yulab.utils_0.2.6          `\
 `#>  [35] gson_0.2.2                  txdbmaker_1.2.0            `\
 `#>  [37] DOSE_4.0.0                  R.utils_2.13.0             `\
 `#>  [39] limma_3.62.1                RSQLite_3.53.3             `\

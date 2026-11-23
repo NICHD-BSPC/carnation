@@ -19,7 +19,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">carnation</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.4</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.5</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@
                         <h4 data-toc-skip class="author">Apratim
 Mitra</h4>
             
-            <h4 data-toc-skip class="date">11/21/2026</h4>
+            <h4 data-toc-skip class="date">11/23/2026</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/NICHD-BSPC/carnation/blob/devel/vignettes/carnation.Rmd" class="external-link"><code>vignettes/carnation.Rmd</code></a></small>
       <div class="d-none name"><code>carnation.Rmd</code></div>
@@ -471,11 +471,12 @@ pre-computed pattern analysis results included with carnation.</p>
 <span></span>
 <span><span class="co"># We use the pre-computed results here instead</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">degpatterns_dex</span>, package<span class="op">=</span><span class="st">'carnation'</span><span class="op">)</span></span></code></pre></div>
-<p>Next, we extract the <code>normalized</code> slot from this object
-and save as a list.</p>
+<p>The <code>degpatterns_dex</code> object contains the
+<code>normalized</code> slot of the degPatterns object which we save as
+a list.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># extract normalized slot and add symbol column</span></span>
-<span><span class="va">p_norm</span> <span class="op">&lt;-</span> <span class="va">degpatterns_dex</span><span class="op">$</span><span class="va">normalized</span></span>
+<code class="sourceCode R"><span><span class="co"># add symbol column</span></span>
+<span><span class="va">p_norm</span> <span class="op">&lt;-</span> <span class="va">degpatterns_dex</span></span>
 <span><span class="va">p_norm</span><span class="op">[[</span> <span class="st">'SYMBOL'</span> <span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">anno_df</span><span class="op">[</span><span class="va">p_norm</span><span class="op">[[</span><span class="st">'genes'</span><span class="op">]</span><span class="op">]</span>, <span class="st">'SYMBOL'</span><span class="op">]</span></span>
 <span></span>
 <span><span class="co"># save pattern analysis results</span></span>
@@ -823,13 +824,13 @@ coexpression analysis methods, e.g. <em><a href="https://CRAN.R-project.org/pack
 <span><span class="co">#&gt;  [15] mgcv_1.9-4                  GetoptLong_1.1.1           </span></span>
 <span><span class="co">#&gt;  [17] withr_3.0.3                 prettyunits_1.2.0          </span></span>
 <span><span class="co">#&gt;  [19] gridExtra_2.3.1             cli_3.6.6                  </span></span>
-<span><span class="co">#&gt;  [21] textshaping_1.0.5           logging_0.10-111           </span></span>
+<span><span class="co">#&gt;  [21] textshaping_1.1.0           logging_0.10-111           </span></span>
 <span><span class="co">#&gt;  [23] TSP_1.3.0                   sass_0.5.0                 </span></span>
 <span><span class="co">#&gt;  [25] topGO_2.58.0                bs4Dash_2.3.5              </span></span>
 <span><span class="co">#&gt;  [27] S7_1.0.0                    askpass_1.2.1              </span></span>
 <span><span class="co">#&gt;  [29] ggridges_0.5.7              goseq_1.58.0               </span></span>
 <span><span class="co">#&gt;  [31] pkgdown_2.2.1               Rsamtools_2.22.0           </span></span>
-<span><span class="co">#&gt;  [33] systemfonts_1.3.3           yulab.utils_0.2.6          </span></span>
+<span><span class="co">#&gt;  [33] systemfonts_1.3.4           yulab.utils_0.2.6          </span></span>
 <span><span class="co">#&gt;  [35] gson_0.2.2                  txdbmaker_1.2.0            </span></span>
 <span><span class="co">#&gt;  [37] DOSE_4.0.0                  R.utils_2.13.0             </span></span>
 <span><span class="co">#&gt;  [39] limma_3.62.1                RSQLite_3.53.3             </span></span>

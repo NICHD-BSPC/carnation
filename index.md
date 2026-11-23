@@ -47,6 +47,8 @@ for more details.
     comparisons
   - **MA Plot**: Identify differentially expressed genes with
     statistical significance
+  - **Volcano Plot**: Identify differentially expressed genes with large
+    changes
   - **Gene Plot**: Create customizable expression visualizations for
     genes of interest
   - **UpSet Plot**: Discover overlapping gene sets across multiple
