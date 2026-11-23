@@ -40,6 +40,7 @@ for more details.
   - **PCA Plot**: Visualize sample relationships with gene loadings overlay
   - **Scatter Plot**: Compare fold-changes for genes between different comparisons
   - **MA Plot**: Identify differentially expressed genes with statistical significance
+  - **Volcano Plot**: Identify differentially expressed genes with large changes
   - **Gene Plot**: Create customizable expression visualizations for genes of interest
   - **UpSet Plot**: Discover overlapping gene sets across multiple comparisons
   - **Heatmap**: Examine expression patterns across samples and conditions

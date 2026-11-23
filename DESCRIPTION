@@ -1,13 +1,13 @@
 Package: carnation
 Title: Interactive Exploration & Management of RNA-Seq Analyses
-Version: 1.1.4
+Version: 1.1.5
 Authors@R:
     c(
         person("Apratim", "Mitra", , "apratim.mitra@gmail.com",
                role = c("aut", "cre"), comment = c(ORCID = "0000-0003-3279-0054")),
         person(c("Matthew", "Tyler"), "Menold", , "matthew.menold@gmail.com",
                role = c("ctb"), comment = c(ORCID = "0009-0007-4728-2470")),
-        person(c("Dale", "McCauley"), "McCauley", , "dalelmccauley@gmail.com",
+        person("Dale", "McCauley", , "dalelmccauley@gmail.com",
                role = c("ctb"), comment = c(ORCID = "0009-0005-7550-6916")),
         person("Ryan", "Dale", , "ryan.dale@nih.gov",
                role = c("fnd"), comment = c(ORCID = "0000-0003-2664-3744"))
@@ -31,7 +31,6 @@ Imports:
     BiocParallel,
     colorspace,
     ComplexUpset,
-    DEGreport,
     dendextend,
     DESeq2,
     dplyr,
@@ -66,6 +65,7 @@ Imports:
 Suggests:
     airway,
     BiocStyle,
+    DEGreport,
     GenomicFeatures,
     goseq,
     knitr,
