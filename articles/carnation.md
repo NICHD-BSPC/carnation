@@ -846,7 +846,7 @@ analysis methods, e.g.
 `#> [101] colorspace_2.1-3            DBI_1.3.0                  `\
 `#> [103] mnormt_2.1.1                tidyselect_1.2.1           `\
 `#> [105] bit_4.6.0                   compiler_4.4.3             `\
-`#> [107] curl_8.0.0                  httr2_1.3.0                `\
+`#> [107] curl_8.2.0                  httr2_1.3.0                `\
 `#> [109] graph_1.84.0                BiasedUrn_2.0.12           `\
 `#> [111] SparseM_1.84-2              expm_1.0-0                 `\
 `#> [113] xml2_1.6.0                  ggdendro_0.2.0             `\
